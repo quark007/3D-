@@ -1,0 +1,14 @@
+{
+  "id": 3,
+  "name": "遵义会议会址",
+  "lat": 27.6915428,
+  "lon": 106.916122,
+  "matched_name": "遵义会议会址, 会址路, 老城街道, 红花岗区, 遵义市, 贵州省, 中国",
+  "type": "building",
+  "osm_type": "way",
+  "osm_id": 670711049,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E9%81%B5%E4%B9%89%E4%BC%9A%E8%AE%AE%E4%BC%9A%E5%9D%80&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

@@ -1,0 +1,81 @@
+{
+  "when": "2026-10-28T18:44:01.799Z",
+  "results": [
+    {
+      "name": "预览页加载与清单（12场景）",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "12章依次挂载 + snapshot 章节一致",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "键盘移动（ArrowDown → y 增大）",
+      "pass": true,
+      "note": "16.0 → 21.9"
+    },
+    {
+      "name": "碰撞：北山阻挡区不可穿入",
+      "pass": true,
+      "note": "y=15.5（阻挡带 y<5.5）"
+    },
+    {
+      "name": "点击地面寻路移动",
+      "pass": true,
+      "note": "位移 16.8 单位"
+    },
+    {
+      "name": "pause(dialogue) 冻结移动",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "仍有其他暂停原因时不恢复",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "全部原因解除后恢复移动",
+      "pass": true,
+      "note": "位移 4.1"
+    },
+    {
+      "name": "接近 NPC 按 E 派发 czmarch:interact",
+      "pass": true,
+      "note": "chapter-2/anchor-dialogue-02-01-he_wen"
+    },
+    {
+      "name": "暂停期间按 E 不触发",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "applyState 禁用后隐藏 / 恢复后 exit 常驻",
+      "pass": true,
+      "note": "off=0 on=2"
+    },
+    {
+      "name": "遮挡验证截图（角色在近景树北侧，应被树冠部分遮蔽）",
+      "pass": true,
+      "note": "ch02-occlusion.png"
+    },
+    {
+      "name": "destroy 幂等 ×2 + 销毁后 snapshot 抛错",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "竖屏 390×844 取景（3 场景截图）",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "全程无 pageerror",
+      "pass": true,
+      "note": ""
+    }
+  ],
+  "errors": []
+}

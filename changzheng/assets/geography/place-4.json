@@ -1,0 +1,14 @@
+{
+  "id": 4,
+  "name": "土城镇 习水县",
+  "lat": 28.2764088,
+  "lon": 106.002597,
+  "matched_name": "习水县土城镇政府, S302, 习水县, 遵义市, 贵州省, 中国",
+  "type": "government",
+  "osm_type": "way",
+  "osm_id": 356064488,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E5%9C%9F%E5%9F%8E%E9%95%87+%E4%B9%A0%E6%B0%B4%E5%8E%BF+%E8%B4%B5%E5%B7%9E+%E4%B8%AD%E5%9B%BD&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

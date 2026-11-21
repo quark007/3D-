@@ -1,0 +1,14 @@
+{
+  "id": 7,
+  "name": "泸定桥",
+  "lat": 29.9144973,
+  "lon": 102.2302051,
+  "matched_name": "泸定桥, 灯盏窝, 泸定县, 甘孜藏族自治州, 四川省, 626100, 中国",
+  "type": "footway",
+  "osm_type": "way",
+  "osm_id": 877739922,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E6%B3%B8%E5%AE%9A%E6%A1%A5&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

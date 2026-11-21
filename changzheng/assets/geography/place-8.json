@@ -1,0 +1,14 @@
+{
+  "id": 8,
+  "name": "夹金山垭口",
+  "lat": 30.860528,
+  "lon": 102.6828601,
+  "matched_name": "夹金山垭口, 硗碛藏族乡, 宝兴县, 雅安市, 四川省, 中国",
+  "type": "yes",
+  "osm_type": "node",
+  "osm_id": 2277373710,
+  "source": "https://nominatim.openstreetmap.org/lookup?osm_ids=N12145426346%2CW953710528%2CN2277373710%2CN11252230928%2CN10289025386&format=jsonv2&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "OSM mapped modern feature; no surveyed 1935 boundary claim",
+  "fetched": "2026-10-17"
+}

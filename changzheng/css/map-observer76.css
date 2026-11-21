@@ -1,0 +1,26 @@
+/* Full viewport in an accessible native dialog, including mobile Safari. */
+dialog.map76-dialog{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#18251f!important;color:#f0dfbd!important;overflow:hidden!important;box-sizing:border-box!important}
+dialog.map76-dialog[open]{display:flex!important;flex-direction:column!important}
+.map76-dialog::backdrop{background:#101913}
+.map76-close{flex:none;align-self:flex-end;min-height:44px!important;margin: max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 8px 12px!important;padding:8px 18px!important;border:1px solid #b59a66!important;border-radius:6px!important;background:#2b4031!important;color:#f1dfbb!important;font:15px/1.4 system-ui!important;cursor:pointer}
+.map76-body{position:relative;flex:1;min-height:0;min-width:0;overflow:hidden}
+.map76-body>.world3d-frame.map76-expanded{position:absolute!important;inset:0!important;display:flex!important;flex-direction:column!important;margin:0!important;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;visibility:visible!important}
+.map76-body>.world3d-frame>.world3d-view{flex:1!important;height:0!important;min-height:80px!important;max-height:none!important;touch-action:none}
+.map76-body>.map-view.map76-expanded{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important}
+.map76-body>.map-container.map76-expanded{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important}
+.map76-body>.map-container.map76-expanded>.chapter-banner,.map76-body>.map-container.map76-expanded>.map-collapse{display:none!important}
+.map76-body>.map-container.map76-expanded>.map-view{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+.world3d-tools{max-height:35dvh;overflow:auto;flex-shrink:0}
+.world3d-tools :is(button,.map76-open),.map-tools .map76-open{min-width:44px!important;min-height:44px!important;background:#2b4031!important;color:#f1dfbb!important;border:1px solid #b59a6680!important;border-radius:4px!important;line-height:1.3!important;white-space:normal!important}
+.world3d-tools .map76-open{padding:8px 12px!important;font-size:13px!important}
+#mapContainer .map-tools .map76-open{width:46px!important;font-size:11px!important;padding:3px!important;letter-spacing:0!important}
+.map76-dialog :focus-visible{outline:3px solid #edd69a!important;outline-offset:-3px}
+@media(max-width:700px){.map76-body .world3d-caption{padding:6px 12px!important}.map76-body .world3d-caption small{font-size:10px!important}.map76-body .world3d-navigation-hint{display:none!important}.world3d-tools .world3d-navigation{gap:3px}#mapContainer .map-tools .map76-open{width:auto!important;padding:4px 9px!important}.map76-body .map-tools{top:60px!important}.map76-body .map-search{top:10px!important}}
+
+/* The toolbar entry replaces the overlapping legacy corner expand control. */
+.world3d-frame>.immersive-expand{display:none!important}
+
+.map76-expanded .map76-open{display:none!important}
+html[lang=en] #mapContainer .map-tools button{font-size:12px!important;letter-spacing:0!important;overflow-wrap:anywhere;min-height:44px!important}
+@media(min-width:701px){html[lang=en] #mapContainer .map-tools button{width:78px!important}}
+@media(max-width:700px){.map76-body #mapContainer .map-tools{display:grid!important;grid-template-columns:repeat(3,minmax(54px,1fr));gap:4px!important;width:min(320px,calc(100% - 20px));max-width:calc(100% - 20px);right:10px!important}.map76-body #mapContainer .map-tools button,html[lang=en] #mapContainer .map-tools button{width:auto!important;min-height:44px!important;padding:4px 8px!important}.map76-body #mapContainer .map-tools button{border:1px solid #b59a6680!important}}

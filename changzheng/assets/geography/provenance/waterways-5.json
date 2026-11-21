@@ -1,0 +1,20 @@
+{
+  "id": 5,
+  "name": "金沙江·皎平渡",
+  "bounds": {
+    "north": 26.55,
+    "south": 26.05,
+    "east": 102.62,
+    "west": 102.02
+  },
+  "endpoint": "https://overpass.private.coffee/api/interpreter",
+  "query": "[out:json][timeout:90];way[\"waterway\"~\"^(river|stream)$\"](26.05,102.02,26.55,102.62);out geom;",
+  "fetched_utc": "2026-10-21T09:30:43.802498+00:00",
+  "osm_base_timestamp": "2026-07-24T11:04:51Z",
+  "ways": 178,
+  "features": 180,
+  "bytes": 57547,
+  "tolerance_degrees": 0.0005,
+  "sha256": "d4753ac5a66789574efafebe230c4aa047d91d5c1bedeb7819d96b1cc43670b0",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; modern waterways, not a 1935 reconstruction"
+}

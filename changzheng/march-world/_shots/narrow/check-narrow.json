@@ -1,0 +1,136 @@
+{
+  "when": "2026-10-31T05:35:22.877Z",
+  "url": "http://127.0.0.1:8080/index.html",
+  "results": [
+    {
+      "name": "390x844 开始页无横向滚动",
+      "pass": true,
+      "note": "scrollW=390 inner=390 · 越界元素 div.title-light-sweep 超出 465px"
+    },
+    {
+      "name": "390x844 主按钮可见可点",
+      "pass": true,
+      "note": "rect={\"x\":22,\"y\":391,\"w\":346,\"h\":65,\"bottom\":456}"
+    },
+    {
+      "name": "390x844 主按钮高度 ≥44px",
+      "pass": true,
+      "note": "h=65"
+    },
+    {
+      "name": "390x844 顶栏元素不挡住主按钮",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "390x844 协作入口可见可点",
+      "pass": true,
+      "note": "rect={\"x\":22,\"y\":466,\"w\":118,\"h\":42,\"bottom\":508}"
+    },
+    {
+      "name": "390x844 协作弹层主按钮可点",
+      "pass": true,
+      "note": "h=52"
+    },
+    {
+      "name": "390x844 协作弹层按钮 ≥44px",
+      "pass": true,
+      "note": "h=52"
+    },
+    {
+      "name": "390x844 协作给养页底部提交按钮可点",
+      "pass": true,
+      "note": "btnBottom=809 vh=844 h=52"
+    },
+    {
+      "name": "390x844 协作房间码高度 ≥44px",
+      "pass": true,
+      "note": "h=76 w=332"
+    },
+    {
+      "name": "390x844 评委决策页无横向滚动",
+      "pass": true,
+      "note": "scrollW=390"
+    },
+    {
+      "name": "390x844 评委决策主操作可见可点",
+      "pass": true,
+      "note": "[{\"sel\":\"#awardDemoOverlay .award-demo-actions .primary\",\"h\":77,\"bottom\":756,\"hittable\":true,\"text\":\"进入 AI 决策驾驶舱\"},{\"sel\":\"#awardDemoOverlay .award-demo-back\",\"h\":43,\"bottom\":61,\"hittable\":true,\"text\":\"← 返回主菜单\"}]"
+    },
+    {
+      "name": "390x844 连点键在拇指区（距底 24–200px）且 ≥44px",
+      "pass": true,
+      "note": "bottom=776 vh=844 h=76"
+    },
+    {
+      "name": "390x844 连点键不挡进度 HUD",
+      "pass": true,
+      "note": "climbTop=700 hudBottom=159"
+    },
+    {
+      "name": "360x740 开始页无横向滚动",
+      "pass": true,
+      "note": "scrollW=360 inner=360 · 越界元素 div.title-light-sweep 超出 416px"
+    },
+    {
+      "name": "360x740 主按钮可见可点",
+      "pass": true,
+      "note": "rect={\"x\":22,\"y\":385,\"w\":316,\"h\":56,\"bottom\":441}"
+    },
+    {
+      "name": "360x740 主按钮高度 ≥44px",
+      "pass": true,
+      "note": "h=56"
+    },
+    {
+      "name": "360x740 顶栏元素不挡住主按钮",
+      "pass": true,
+      "note": ""
+    },
+    {
+      "name": "360x740 协作入口可见可点",
+      "pass": true,
+      "note": "rect={\"x\":22,\"y\":451,\"w\":118,\"h\":42,\"bottom\":493}"
+    },
+    {
+      "name": "360x740 协作弹层主按钮可点",
+      "pass": true,
+      "note": "h=52"
+    },
+    {
+      "name": "360x740 协作弹层按钮 ≥44px",
+      "pass": true,
+      "note": "h=52"
+    },
+    {
+      "name": "360x740 协作给养页底部提交按钮可点",
+      "pass": true,
+      "note": "btnBottom=705 vh=740 h=52"
+    },
+    {
+      "name": "360x740 协作房间码高度 ≥44px",
+      "pass": true,
+      "note": "h=76 w=302"
+    },
+    {
+      "name": "360x740 评委决策页无横向滚动",
+      "pass": true,
+      "note": "scrollW=360"
+    },
+    {
+      "name": "360x740 评委决策主操作可见可点",
+      "pass": true,
+      "note": "[{\"sel\":\"#awardDemoOverlay .award-demo-actions .primary\",\"h\":77,\"bottom\":652,\"hittable\":true,\"text\":\"进入 AI 决策驾驶舱\"},{\"sel\":\"#awardDemoOverlay .award-demo-back\",\"h\":43,\"bottom\":61,\"hittable\":true,\"text\":\"← 返回主菜单\"}]"
+    },
+    {
+      "name": "360x740 连点键在拇指区（距底 24–200px）且 ≥44px",
+      "pass": true,
+      "note": "bottom=681 vh=740 h=76"
+    },
+    {
+      "name": "360x740 连点键不挡进度 HUD",
+      "pass": true,
+      "note": "climbTop=605 hudBottom=159"
+    }
+  ]
+}

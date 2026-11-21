@@ -1,0 +1,14 @@
+{
+  "id": 9,
+  "name": "若尔盖草地",
+  "lat": 33.6910838,
+  "lon": 102.8566026,
+  "matched_name": "若尔盖县, 阿坝藏族羌族自治州, 四川省, 624500, 中国",
+  "type": "administrative",
+  "osm_type": "relation",
+  "osm_id": 2785350,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E8%8B%A5%E5%B0%94%E7%9B%96%E5%8E%BF+%E5%9B%9B%E5%B7%9D+%E4%B8%AD%E5%9B%BD&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

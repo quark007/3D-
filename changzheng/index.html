@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://api.czstar.cc.cd" crossorigin>
+<link rel="dns-prefetch" href="https://api.czstar.cc.cd">
+<title>长征·星火 — 沉浸式历史互动剧场</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23121713'/%3E%3Cpath d='M16 4.6l3.05 8.4h8.95l-7.25 5.25 2.77 8.5L16 21.5l-7.52 5.25 2.77-8.5L4 13h8.95z' fill='%23b8392f'/%3E%3C/svg%3E">
+<script async src="js/boot-status.js?v=244bd82a832cff86"></script>
+<link rel="stylesheet" href="css/game-ui.css?v=0ad493d3346156cd">
+<link rel="stylesheet" href="css/coop-room.css?v=59bde526fb68daa5">
+<link rel="stylesheet" href="css/sandbox.css?v=03d90c94c2bd56d5">
+<link rel="stylesheet" href="css/world3d.css?v=99c38ccd0fb40a70">
+<link rel="stylesheet" href="css/ui-refinement.css?v=3d95818bf8c6d3c2">
+<link rel="stylesheet" href="css/journey.css?v=5824f9441b1bf030">
+<link rel="stylesheet" href="css/experience.css?v=c89caef0e57be200">
+<link rel="stylesheet" href="css/map-footer.css?v=bbe3095387b81d71">
+<link rel="stylesheet" href="css/ux-r6.css?v=c84abdfd3273103e">
+<link rel="stylesheet" href="css/npc-story.css?v=f1251345db718f02">
+<link rel="stylesheet" href="css/hud-help.css?v=492b74875cb769c6">
+<link rel="stylesheet" href="css/readability.css?v=06badfe3fc2fa7ce">
+<link rel="stylesheet" href="css/decision-cinema.css?v=f04fe5f868155bc9">
+<link rel="stylesheet" href="css/cinema-ui.css?v=c5ba9103a3d7dd80"><link rel="stylesheet" href="css/expedition.css?v=de6796babc57d99a">
+<link rel="stylesheet" href="css/field-editorial.css?v=82a5ca82da307ea4">
+<link rel="stylesheet" href="css/game-shell.css?v=1e8b8c1efc631e76">
+<link rel="stylesheet" href="css/story-consequences.css?v=17f077e084fa04bd">
+<link rel="stylesheet" href="css/chapter-presentation.css?v=3abbfbe00810adbc">
+<link rel="stylesheet" href="css/npc-faces.css?v=71dbb5c154274683">
+<link rel="stylesheet" href="css/chapter-layout.css?v=08aef4c5233f9af2">
+<link rel="stylesheet" href="css/field-cinema.css?v=6d04bbf7fb8dfbc9">
+<link rel="stylesheet" href="css/field-cinema-refinement.css?v=24f33abd2ee37f00">
+<link rel="stylesheet" href="css/immersive-ui.css?v=4e68976a59b05a57">
+<link rel="stylesheet" href="css/readability-layout.css?v=7b8ecee98948d364">
+<link rel="stylesheet" href="css/field-command.css?v=1fd83a26b690a08d"><link rel="stylesheet" href="css/title-motion.css?v=3edca9cf4ab75498"><link rel="stylesheet" href="css/title-epic.css?v=1e67ac682e2792cf"><link rel="stylesheet" href="css/viewport-repair.css?v=c5409b3b0f56c996"><link rel="stylesheet" href="css/morse-academy.css?v=f58415a35791e988"><link rel="stylesheet" href="css/models-v03.css?v=43c6ec4a0e0b8625"><link rel="stylesheet" href="css/task-guide.css?v=4334fd062362a0db"><link rel="stylesheet" href="css/ui-polish32.css?v=0e91f585d186171e">  <script defer src="js/offline-shell.js?v=ee0b53cf498a6c1a"></script>
+<link rel="stylesheet" href="css/mission40.css?v=cf0781c756b0ac8a">
+<script type="importmap">{"imports": {"three": "./assets/webgpu40/vendor/three/build/three.module.js", "three/webgpu": "./assets/webgpu40/vendor/three/build/three.webgpu.js", "three/tsl": "./assets/webgpu40/vendor/three/build/three.tsl.js", "three/addons/": "./assets/webgpu40/vendor/three/jsm/", "onnxruntime-web/webgpu": "./assets/edge-ai/vendor/ort.webgpu.bundle.min.mjs", "onnxruntime-common": "./assets/edge-ai/vendor/onnxruntime-common/index.js"}}</script>
+<script defer src="js/edge-bridge42.js?v=e5779133063f45ad"></script>
+<link rel="stylesheet" href="css/education43.css?v=e01e1fdc818c75b4">
+<link rel="stylesheet" href="css/victory49.css?v=f753202a77a302b9">
+<link rel="stylesheet" href="css/delivery53.css?v=5103d66a0a588c06">
+<link rel="stylesheet" href="css/campaign55.css?v=164867a9a7783496">
+<link rel="stylesheet" href="css/map-repair56.css?v=003dd4f4cbc3f088">
+<link rel="stylesheet" href="css/map-controls50.css?v=2483361afccd5246">
+<link rel="stylesheet" href="css/snow-prologue63.css?v=0d0ca269912b1424">
+<link rel="stylesheet" href="css/witness65.css?v=4366b16ca2faaf0b">
+<link rel="stylesheet" href="css/coop66.css?v=4a9ed64a83c74aae">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121713">
+<link rel="stylesheet" href="css/starfire73.css?v=8c0aa33110d8805b">
+<link rel="stylesheet" href="css/archive-ui74.css?v=cdc2870e565c2afd">
+<link rel="stylesheet" href="css/entry-i18n75.css?v=d641597efaf5b463">
+<link rel="stylesheet" href="css/map-observer76.css?v=d3d4831c97a50578">
+<link rel="stylesheet" href="march-world/world.css?v=bf40a4ae769c4b7e">
+<link rel="stylesheet" href="march-story/story.css?v=cbe548c1bab3cc18">
+<link rel="stylesheet" href="css/documentary92.css?v=25c2de3f47913f2e">
+<link rel="stylesheet" href="css/readability93.css?v=db864e3d300f0c9a">
+<link rel="stylesheet" href="css/character-art94.css?v=c220664079bf138d">
+<link rel="stylesheet" href="css/chishui-board.css?v=c63d605c023e980a">
+<link rel="stylesheet" href="css/chishui-field.css?v=8a6be9949847b1fb">
+<link rel="stylesheet" href="css/chishui3d-entry.css?v=20261113">
+</head>
+<body class="at-title">
+<section class="title-screen" id="titleScreen" aria-label="长征星火开始界面">
+  <div class="title-landscape" aria-hidden="true"></div>
+  <div class="title-copy"><p class="title-eyebrow">1934 — 1936　／　循迹山河</p><span class="title-star" aria-hidden="true">★</span>
+    <h1>长征<span>星火</span></h1><p class="title-line">前路艰难，仍要作出选择。<br>把有限的补给，留给同行的人。</p>
+    <p class="title-scope">12 站主线 · 多岗位协作 · 固定剧情可离线体验</p>
+    <div class="title-actions"><button id="titleStart"><span class="title-start-label">开始游戏</span><span class="title-start-arrow" aria-hidden="true">→</span></button></div>
+    <details class="title-extras"><summary>设置与更多体验 <span aria-hidden="true">＋</span></summary><div class="title-extras-panel">
+      <button id="titleDemo">先走一段</button>
+      <button id="titleHighlights">听一段电报</button>
+      <button type="button" id="titleMorse" class="morse-feature-entry">⋅ −　摩斯学堂 · 零基础入门 <span>听音 · 译报 · 发报 →</span></button>
+      <nav class="title-links" aria-label="体验与试听"><a href="voice-room.html">配音试听</a><a href="video-review.html">战地放映室</a><a href="films/long-march/">长征 · 滚动影像</a><a href="player-study.html">首次体验记录</a><a href="minigames/index.html">解谜档案室（独立练习）</a></nav>
+      <button id="titleRestart" hidden>重新开始一段征程</button>
+      <button type="button" id="titleChishui3D" data-chishui3d="1">四渡赤水 · 3D 沙盘推演</button>
+      <div class="title-connection"><button id="titleBff">检查可选云服务</button><p id="titleBffStatus" role="status">可先体验固定剧情，云服务连接后启用 AI推演与私有视频。</p></div>
+    </div></details>
+    <p class="title-foot"><small>原创研学剧情 · 非历史影像</small></p>
+  </div>
+</section>
+
+<!-- ========== 全局氛围层 ========== -->
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="screen-alert" id="screenAlert"></div>
+
+<!-- ========== 顶部HUD ========== -->
+<header class="hud-top">
+  <div class="hud-left">
+    <button class="hud-exit-btn" id="hudExitBtn" title="返回路线地图" style="display:none">◀</button>
+    <div class="hud-logo">
+      <span class="star-icon">★</span>
+      <span class="logo-text">长征·星火</span>
+    </div>
+  </div>
+  <div class="hud-center">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+      <div class="progress-label" id="progressLabel">征程 0 / 12</div>
+    </div>
+  </div>
+  <div class="hud-right">
+    <div class="hud-stat" id="hudTroops">
+      <svg class="stat-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 13.5 Q4 6.5 12 6.5 Q20 6.5 20 13.5 L21.5 14.5 Q21.5 16.5 19 16.5 L5 16.5 Q2.5 16.5 2.5 14.5 Z"/>
+        <circle cx="9.5" cy="11.5" r="1" fill="#A32020" stroke="none"/>
+      </svg>
+      <span class="stat-val" id="statTroops">100</span>
+      <span class="stat-float" id="floatTroops"></span>
+    </div>
+    <div class="hud-stat" id="hudAmmo">
+      <svg class="stat-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3.5" y="9.5" width="17" height="10" rx="1"/>
+        <path d="M8 9.5 L8 5.5 L10 5.5 L10 9.5 M14 9.5 L14 5.5 L16 5.5 L16 9.5"/>
+        <path d="M6 13.5 L18 13.5" opacity="0.5"/>
+      </svg>
+      <span class="stat-val" id="statAmmo">100</span>
+      <span class="stat-float" id="floatAmmo"></span>
+    </div>
+    <div class="hud-stat" id="hudFood">
+      <svg class="stat-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3 Q14 8 16 11 Q18.5 14 17 18 Q15.5 21 12 21 Q8.5 21 7 18 Q5.5 14 8 11 Q10 8 12 3 Z"/>
+        <path d="M12 12.5 Q13.5 15.5 12.6 17.6 Q12 19 11 18.2 Q9.6 16.2 11 14.4 Z" fill="currentColor" opacity="0.55" stroke="none"/>
+      </svg>
+      <span class="stat-val" id="statFood">100</span>
+      <span class="stat-float" id="floatFood"></span>
+    </div>
+    <div class="hud-stat" id="hudMorale">
+      <svg class="stat-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 12 L6 9 L9 12 L12 9 L15 12 L18 9 L21 12" stroke="currentColor" stroke-width="2" fill="none"/>
+        <path d="M3 16 L6 13 L9 16 L12 13 L15 16 L18 13 L21 16" stroke="currentColor" stroke-width="2" fill="none" opacity="0.6"/>
+      </svg>
+      <span class="stat-val" id="statMorale">100</span>
+      <span class="stat-float" id="floatMorale"></span>
+    </div>
+  </div>
+</header>
+
+<!-- ========== 主地图区域（静态底图 + 手动微调沙盘） ========== -->
+<main class="map-container" id="mapContainer">
+  <div class="map-view">
+    <div class="map-world" id="mapWorld">
+      <!-- 网页底图：assets/map-web.webp；原始底图归档于source-assets/maps，审图号GS(2023)2767号 -->
+      <div class="map-base" id="mapBase"></div>
+
+      <!-- SVG连线层（直线） -->
+      <svg class="route-lines" id="routeLines" viewBox="0 0 1000 750" preserveAspectRatio="none">
+        <defs>
+          <filter id="glow-red">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glow-gold">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g id="linesLayer"></g>
+        <g id="completedLinesLayer"></g>
+      </svg>
+
+      <!-- HTML节点层（div + position:absolute 百分比定位） -->
+      <div class="nodes-layer" id="nodesLayer"></div>
+    </div>
+  </div>
+
+  <!-- 站点切换导航 -->
+  <div class="node-nav">
+    <button class="node-nav-btn" id="btnPrevNode">◀ 上一站</button>
+    <span class="node-nav-pos" id="nodeNavPos">第 1 站 · 中央苏区·出发</span>
+    <button class="node-nav-btn" id="btnNextNode">下一站 ▶</button>
+    <div class="node-nav-hint" id="nodeNavHint">点击节点或下一站开始剧情</div>
+  </div>
+
+
+  <!-- 地图覆盖层：图例 -->
+  <div class="map-legend">
+    <div class="legend-title">图例</div>
+    <div class="legend-item"><span class="legend-dot dot-start"></span>出发地</div>
+    <div class="legend-item"><span class="legend-dot dot-battle"></span>战役副本</div>
+    <div class="legend-item"><span class="legend-dot dot-meeting"></span>会议副本</div>
+    <div class="legend-item"><span class="legend-dot dot-nature"></span>自然险阻</div>
+    <div class="legend-item"><span class="legend-dot dot-end"></span>终点</div>
+  </div>
+
+  <!-- 地图覆盖层：当前章节提示 -->
+  <div class="chapter-banner" id="chapterBanner">
+    <div class="chapter-label">长征行记</div>
+    <div class="chapter-name" id="chapterName">中央苏区·出发</div>
+  </div>
+
+  <!-- 合规提示框（机密档案盖章） -->
+  <div class="compliance-stamp">
+    <div class="compliance-text">本内容仅供历史教育使用<br>体验数值不代表历史统计</div>
+  </div>
+</main>
+
+<!-- ========== 副本详情面板 ========== -->
+<aside class="dungeon-panel" id="dungeonPanel">
+  <div class="panel-header">
+    <div class="panel-title-row">
+      <button class="panel-back" id="panelBack">◀ 返回</button>
+      <div class="panel-node-type" id="panelNodeType">战役</div>
+      <h2 class="panel-title" id="panelTitle">飞夺泸定桥</h2>
+      <button class="panel-close" id="panelClose">✕</button>
+    </div>
+    <div class="panel-subtitle" id="panelSubtitle">1935年5月29日 · 四川泸定</div>
+  </div>
+
+  <div class="panel-body">
+    <div id="panelCinema"></div>
+    <div class="panel-section">
+      <div class="section-label">历史背景</div>
+      <p class="section-text" id="panelHistory"></p>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">本章学习</div>
+      <div class="challenge-list" id="panelChallenges"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">行路纪念</div>
+      <div class="reward-list" id="panelRewards"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">长征精神</div>
+      <div class="spirit-quote" id="panelSpirit"></div>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    <button class="btn-enter" id="btnEnter">走进这一程</button>
+    <button class="btn-skip" id="btnSkip">稍后学习</button>
+    <button class="btn-exit" id="btnExit">退出</button>
+  </div>
+</aside>
+
+<!-- ========== 底部导航（复古战地指挥部） ========== -->
+<nav class="nav-bottom">
+  <button class="nav-btn active" data-nav="map">
+    <svg class="nav-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 6.5 L9 4.5 L15 6.5 L21 4.5 L21 17.5 L15 19.5 L9 17.5 L3 19.5 Z"/>
+      <path d="M9 4.5 L9 17.5 M15 6.5 L15 19.5" opacity="0.6"/>
+    </svg>
+    <span class="nav-text">长征之路</span>
+  </button>
+  <button class="nav-btn" data-nav="journal">
+    <svg class="nav-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="14" rx="1"/>
+      <path d="M8 9.5 L16 9.5 M8 12.5 L16 12.5 M8 15.5 L13 15.5"/>
+    </svg>
+    <span class="nav-text">征途档案</span>
+  </button>
+  <button class="nav-btn" data-nav="characters">
+    <svg class="nav-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="9" cy="8.5" r="3"/>
+      <path d="M3.5 19 Q3.5 13.5 9 13.5 Q14.5 13.5 14.5 19"/>
+      <circle cx="16.5" cy="9.5" r="2.4"/>
+      <path d="M15.5 13.8 Q20.5 14.2 20.5 19"/>
+    </svg>
+    <span class="nav-text">人物</span>
+  </button>
+  <button class="nav-btn" data-nav="settings">
+    <svg class="nav-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="3.2"/>
+      <path d="M12 4.5 L12 7 M12 17 L12 19.5 M4.5 12 L7 12 M17 12 L19.5 12 M6.7 6.7 L8.5 8.5 M15.5 15.5 L17.3 17.3 M17.3 6.7 L15.5 8.5 M8.5 15.5 L6.7 17.3"/>
+    </svg>
+    <span class="nav-text">设置</span>
+  </button>
+</nav>
+
+<!-- ========== 战报日志面板（一级Tab页面，无关闭按钮） ========== -->
+<section class="journal-panel" id="journalPanel">
+  <div class="journal-header">
+    <h2>征途行记</h2>
+  </div>
+  <!-- 勋章墙 -->
+  <div class="medal-wall" id="medalWall">
+    <div class="medal-wall-title">学习足迹</div>
+    <div class="medal-wall-grid" id="medalWallGrid">
+      <div class="medal-wall-empty">通关副本后获得勋章</div>
+    </div>
+  </div>
+  <!-- 战报列表 -->
+  <div class="journal-list" id="journalList">
+    <div class="journal-empty">从第一程出发，记录学习与感悟</div>
+  </div>
+  <!-- 通关奖励入口（通关后显示） -->
+  <div class="reward-entries" id="rewardEntries" style="display:none">
+    <button class="reward-entry-btn" id="btnHistoryCards">党史图鉴</button>
+    <button class="reward-entry-btn" id="btnTimeMailbox">时空信箱</button>
+  </div>
+</section>
+
+<!-- ========== 人物面板（一级Tab页面，无关闭按钮） ========== -->
+<section class="characters-panel" id="charactersPanel">
+  <div class="characters-header">
+    <h2>长征人物</h2>
+  </div>
+  <div class="characters-grid" id="charactersGrid"></div>
+</section>
+
+<!-- ========== 设置面板（一级Tab页面，无关闭按钮） ========== -->
+<section class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <h2>设置</h2>
+  </div>
+  <div class="settings-list"><div class="setting-item"><a class="cinema-library-link" href="minigames/index.html">解谜档案室 · 独立练习，不影响主线</a></div>
+    <div class="setting-item">
+      <span class="setting-name">音效 <small>开 = 播放旁白、提示音与音效</small></span>
+      <div class="setting-control"><label class="switch"><input type="checkbox" checked data-key="sound"><span class="slider"></span></label><span class="switch-state" aria-hidden="true">开</span></div>
+    </div>
+    <div class="setting-item">
+      <span class="setting-name">背景音乐 <small>开 = 播放氛围配乐</small></span>
+      <div class="setting-control"><label class="switch"><input type="checkbox" checked data-key="music"><span class="slider"></span></label><span class="switch-state" aria-hidden="true">开</span></div>
+    </div>
+    <div class="setting-item">
+      <span class="setting-name">画面震动 <small>开 = 命中与受击时屏幕震动</small></span>
+      <div class="setting-control"><label class="switch"><input type="checkbox" checked data-key="vibration"><span class="slider"></span></label><span class="switch-state" aria-hidden="true">开</span></div>
+    </div>
+    <div class="setting-item">
+      <span class="setting-name">历史注释 <small>开 = 显示史料出处与注释</small></span>
+      <div class="setting-control"><label class="switch"><input type="checkbox" checked data-key="notes"><span class="slider"></span></label><span class="switch-state" aria-hidden="true">开</span></div>
+    </div>
+    <div class="setting-item setting-item-linkcheck">
+      <div class="bff-connect-copy"><b>比赛核心体验</b><span>随时重演因果决策与 AI敌方记忆</span></div>
+      <button class="link-check-btn bff-connect-btn" id="awardDemoSettingsBtn">60秒 AI 决策挑战</button>
+    </div>
+    <details class="settings-advanced">
+      <summary><span>高级与诊断</span><small>AI 服务 / 视频 / 链路 · 不影响主线</small></summary>
+      <div class="settings-advanced-body">
+        <p class="settings-advanced-lead">以下为服务连接与演示素材调试，玩家可忽略。</p>
+    <div class="setting-item setting-item-linkcheck bff-settings-card" role="region" aria-label="AI 推演服务">
+      <div class="bff-connect-copy"><b>AI 推演服务</b><span id="bffConnectStatus" role="status" aria-live="polite">未连接 · 可先体验固定剧情</span></div>
+      <div class="bff-settings-controls" id="bffSettingsControls"><button type="button" class="link-check-btn bff-connect-btn" id="bffConnectBtn">连接 / 检测服务</button></div>
+    </div>
+    <div class="setting-item"><a class="cinema-library-link" href="world3d-gallery.html" target="_blank" rel="noopener">十二章实时3D场景 · 旋转查看 ↗</a></div>
+    <div class="setting-item"><a class="cinema-library-link" href="svg-cinema-gallery.html" target="_blank" rel="noopener">200条SVG分镜 · 预览与剧情映射 ↗</a></div>
+    <div class="setting-item obs-setting-item">
+      <div class="obs-setting-copy"><b>决策短片（可选）</b><span id="decisionVideoStatus">未检测 · 不影响主线剧情</span></div>
+      <div class="obs-setting-controls"><button class="link-check-btn" id="decisionVideoCheck">测试播放</button><a href="video-decision-preview.html" target="_blank" rel="noopener">测试不同决策的视频 ↗</a></div>
+      <small>输入行动方案后，按当前章节与行动内容匹配已上传短片；不改变真实历史。</small>
+    </div>
+    <div class="setting-item obs-setting-item">
+      <div class="obs-setting-copy"><b>动态背景短片（可选）</b><span id="obsVideoStatus">未配置 · 使用手绘动画背景</span></div>
+      <div class="obs-setting-controls">
+        <input id="obsBaseUrl" type="url" inputmode="url" placeholder="可选：已有背景短片的 HTTPS 地址">
+        <button class="link-check-btn" id="obsSaveBtn">保存并测试</button>
+        <button class="obs-clear-btn" id="obsClearBtn">恢复动画背景</button>
+      </div>
+      <small>文件命名：video-001.mp4 至 video-200.mp4。只加载当前剧情需要的短片。</small>
+    </div>
+    <div class="setting-item setting-item-linkcheck">
+      <button class="link-check-btn" id="linkCheckBtn">服务链路自检（评审用）</button>
+    </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ========== 链路自检弹窗 ========== -->
+<div class="linkcheck-overlay" id="linkcheckOverlay">
+  <div class="linkcheck-content">
+    <div class="linkcheck-header">
+      <h3>AI 链路仪表盘</h3>
+      <button class="linkcheck-close" id="linkcheckClose">✕</button>
+    </div>
+    <div class="linkcheck-body" id="linkcheckBody">
+      <div class="linkcheck-running">正在检测...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 开场动画 ========== -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-content">
+    <div class="intro-kicker">铭记来路 · 坚定信念 · 薪火相传</div>
+    <div class="intro-star">★</div>
+    <h1 class="intro-title">长征·星火</h1>
+    <p class="intro-subtitle">循着先辈足迹，走近伟大长征</p>
+    <p class="intro-quote">"红军不怕远征难，万水千山只等闲"</p>
+    <div class="intro-actions">
+      <button class="intro-btn" id="introBtn">循迹 · 重温长征</button>
+      <button class="intro-demo-btn" id="awardDemoBtn"><small>评委极速体验</small><b>60秒 AI 决策挑战</b></button>
+    </div>
+    <p class="intro-techline">AI 对抗推演 · 五维后果计算 · 真实历史对照</p>
+    <p class="experience-note">角色与任务为教学虚构，资源为体验指数。<br>互动结果不改写历史，生成内容不作为史料。</p>
+  </div>
+</div>
+
+<!-- ========== 角色选择界面 ========== -->
+<div class="char-select-overlay" id="charSelectOverlay">
+  <div class="char-select-content">
+    <div class="char-select-header">
+      <button type="button" id="charSelectBack" class="char-select-back">← 返回主菜单</button>
+      <div class="char-select-star">★</div>
+      <h2 class="char-select-title">选择你的角色</h2>
+      <p class="char-select-desc">选择虚构岗位，体验不同职责；每个岗位均不自带部队，队伍资源统一管理</p>
+      <p class="char-select-hint" id="charSelectHint">第1步：点选下方岗位卡片，再点“踏上征程”。不同岗位都能从第一章开始。</p>
+    </div>
+    <div class="char-cards-grid" id="charCardsGrid"></div>
+    <button class="char-select-start" id="charSelectStart" disabled>
+      <span class="char-select-start-text">踏上征程</span>
+      <span class="char-select-start-hint">请先点选上方任一岗位</span>
+    </button>
+  </div>
+</div>
+
+<!-- ========== 战前抉择弹窗 ========== -->
+<div class="prebattle-overlay" id="prebattleOverlay">
+  <div class="prebattle-content">
+    <div class="prebattle-header">
+      <div class="prebattle-stamp">急电</div>
+      <h3 class="prebattle-title" id="prebattleTitle">战前抉择</h3>
+      <p class="prebattle-subtitle" id="prebattleSubtitle">前方即将开始剧情，请做出抉择</p>
+    </div>
+    <div class="prebattle-options">
+      <button type="button" class="prebattle-option" id="prebattleRest">
+        <div class="prebattle-option-icon" aria-hidden="true">01</div>
+        <div class="prebattle-option-name">就地休整</div>
+        <div class="prebattle-option-desc">粮食 -15 · 士气 +20 · 体力恢复满</div>
+        <div class="prebattle-option-tag">稳妥</div>
+      </button>
+      <button type="button" class="prebattle-option" id="prebattleMarch">
+        <div class="prebattle-option-icon" aria-hidden="true">02</div>
+        <div class="prebattle-option-name">急行军</div>
+        <div class="prebattle-option-desc">体力 -30 · 粮食 -5 · 士气 -5</div>
+        <div class="prebattle-option-tag">激进</div>
+      </button>
+    </div>
+    <div class="prebattle-hint" id="prebattleHint">兵力不足30时建议休整恢复</div>
+  </div>
+</div>
+
+<!-- ========== 体验与史实结算界面 ========== -->
+<div class="settlement-overlay" id="settlementOverlay">
+  <div class="settlement-content">
+    <div class="settlement-header">
+      <div class="settlement-stamp">体验与史实</div>
+      <h3 class="settlement-title" id="settlementTitle">战后复盘</h3>
+      <p class="settlement-subtitle" id="settlementSubtitle">虚构任务体验 · 历史事实独立呈现</p>
+    </div>
+
+    <!-- Tab切换：复盘 / 数据看板 -->
+    <div class="settlement-tabs">
+      <button class="settlement-tab active" id="settlementTabReview">战后复盘</button>
+      <button class="settlement-tab" id="settlementTabDashboard">数据看板</button>
+    </div>
+
+    <!-- Tab内容：战后复盘 -->
+    <div class="settlement-tab-panel active" id="settlementPanelReview">
+      <div class="settlement-body">
+      <div id="settlementCinema" class="cinema-review"></div>
+        <!-- 左右双栏：决策线 vs 历史线 -->
+        <div class="settlement-timeline">
+          <div class="settlement-col settlement-col-player">
+            <div class="settlement-col-header">本次体验记录</div>
+            <div class="settlement-col-body" id="settlementPlayerLine"></div>
+          </div>
+          <div class="settlement-col-divider"></div>
+          <div class="settlement-col settlement-col-history">
+            <div class="settlement-col-header">历史学习资料</div>
+            <div class="settlement-col-body" id="settlementHistoryLine"></div>
+          </div>
+        </div>
+
+        <!-- 逐维度对比表 -->
+        <div class="settlement-compare-table" id="settlementCompareTable"></div>
+
+        <!-- 结论区 -->
+        <div class="settlement-conclusion">
+          <div class="settlement-conclusion-text" id="settlementConclusion"></div>
+          <button class="settlement-voice-btn" id="settlementVoiceBtn">语音播报</button>
+        </div>
+
+        <!-- AI专属历史评价（内容与奖励升级） -->
+        <div class="settlement-evaluation" id="settlementEvaluation">
+          <div class="settlement-evaluation-label">
+            <span class="settlement-evaluation-badge">体验建议</span>
+            <span class="settlement-evaluation-title" id="settlementEvaluationTitle"></span>
+          </div>
+          <div class="settlement-evaluation-text" id="settlementEvaluationText"></div>
+        </div>
+
+        <!-- 评分区 -->
+        <div class="settlement-score" id="settlementScore">
+          <div class="settlement-score-rating" id="settlementScoreRating"></div>
+          <div class="settlement-score-value" id="settlementScoreValue"></div>
+        </div>
+
+        <!-- 分享区：生成专属勋章分享图 -->
+        <div class="settlement-share">
+          <button class="settlement-share-btn" id="settlementShareBtn">
+            <span class="settlement-share-icon">🏅</span>
+            <span>生成长征勋章 · 保存分享图</span>
+          </button>
+          <div class="settlement-share-hint">战后复盘 + 勋章 + 评分，一键存图分享</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab内容：数据看板 -->
+    <div class="settlement-tab-panel" id="settlementPanelDashboard">
+      <div class="dashboard-body">
+        <!-- 图表区域 -->
+        <div class="dashboard-charts">
+          <div class="dashboard-chart-item">
+            <div class="dashboard-chart-title">兵力随节点变化</div>
+            <canvas id="chartTroops" width="640" height="200"></canvas>
+          </div>
+          <div class="dashboard-chart-item">
+            <div class="dashboard-chart-title">士气波动</div>
+            <canvas id="chartMorale" width="640" height="200"></canvas>
+          </div>
+          <div class="dashboard-chart-item">
+            <div class="dashboard-chart-title">资源热力图（12节点 × 4资源）</div>
+            <canvas id="chartHeatmap" width="640" height="240"></canvas>
+          </div>
+          <div class="dashboard-chart-item">
+            <div class="dashboard-chart-title">每节点伤亡 / 缴获对比</div>
+            <canvas id="chartCasualty" width="640" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- AI数据解读 -->
+        <div class="dashboard-insight">
+          <div class="dashboard-insight-label">AI 数据解读</div>
+          <div class="dashboard-insight-text" id="dashboardInsightText"></div>
+          <div class="dashboard-insight-degraded" id="dashboardInsightDegraded" style="display:none">本地模板生成</div>
+        </div>
+
+        <!-- 导出按钮 -->
+        <div class="dashboard-export">
+          <button class="dashboard-export-btn" id="dashboardExportBtn">导出看板 PNG</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settlement-footer">
+      <button class="settlement-continue-btn" id="settlementContinueBtn">继续</button>
+    </div>
+
+    <div class="settlement-degraded-badge" id="settlementDegradedBadge" style="display:none">本地数据</div>
+  </div>
+</div>
+
+<!-- ========== 历史档案解锁卡 ========== -->
+<div class="archive-overlay" id="archiveOverlay">
+  <div class="archive-content">
+    <div class="archive-stamp">历史档案</div>
+    <h3 class="archive-title" id="archiveTitle"></h3>
+    <div class="archive-spirit-badge" id="archiveSpiritBadge"></div>
+    <div class="archive-body" id="archiveBody"></div>
+    <button class="archive-close-btn" id="archiveCloseBtn">归档</button>
+  </div>
+</div>
+
+<!-- ========== 情报破译解密小游戏 ========== -->
+<div class="decrypt-overlay" id="decryptOverlay">
+  <div class="decrypt-content">
+    <div class="decrypt-header">
+      <div class="decrypt-lamp" id="decryptLamp">🪔</div>
+      <h3 class="decrypt-title">情报破译</h3>
+      <div class="decrypt-timer-bar"><div class="decrypt-timer-fill" id="decryptTimerFill"></div></div>
+      <div class="decrypt-timer-text" id="decryptTimerText">90</div>
+    </div>
+
+    <!-- 玩法选择Tab -->
+    <div class="decrypt-tabs">
+      <button class="decrypt-tab active" id="decryptTabMorse">摩斯电码</button>
+      <button class="decrypt-tab" id="decryptTabCipher">替换字谜</button>
+    </div>
+
+    <!-- 玩法一：摩斯电码 -->
+    <div class="decrypt-panel-morse" id="decryptPanelMorse">
+      <div class="morse-display" id="morseDisplay"></div>
+      <div class="morse-progress" id="morseProgress"></div>
+      <div class="morse-alphabet" id="morseAlphabet"></div>
+      <div class="morse-result" id="morseResult"></div>
+    </div>
+
+    <!-- 玩法二：替换字谜 -->
+    <div class="decrypt-panel-cipher" id="decryptPanelCipher" style="display:none">
+      <div class="cipher-rule" id="cipherRule"></div>
+      <div class="cipher-text" id="cipherText"></div>
+      <div class="cipher-slots" id="cipherSlots"></div>
+      <div class="cipher-blocks" id="cipherBlocks"></div>
+    </div>
+
+    <div class="decrypt-footer">
+      <button class="decrypt-submit-btn" id="decryptSubmitBtn">提交破译</button>
+      <button class="decrypt-skip-btn" id="decryptSkipBtn">跳过</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 情报buff卡 ========== -->
+<div class="intel-buff-overlay" id="intelBuffOverlay">
+  <div class="intel-buff-content">
+    <div class="intel-buff-stamp">情报</div>
+    <h3 class="intel-buff-title" id="intelBuffTitle">敌军动向</h3>
+    <div class="intel-buff-text" id="intelBuffText"></div>
+    <div class="intel-buff-effect" id="intelBuffEffect"></div>
+    <button class="intel-buff-close-btn" id="intelBuffCloseBtn">收报</button>
+  </div>
+</div>
+
+<!-- ========== 物资分配拖拽小游戏 ========== -->
+<div class="ration-overlay" id="rationOverlay">
+  <div class="ration-content">
+    <div class="ration-header">
+      <div class="ration-stamp">急令</div>
+      <h3 class="ration-title">穿越草地 · 分粮</h3>
+      <p class="ration-subtitle">青稞面有限，决定如何分配给五名战士</p>
+    </div>
+    <div class="ration-body">
+      <!-- 青稞面总量显示 -->
+      <div class="ration-total-area">
+        <div class="ration-total-label">青稞面总量</div>
+        <div class="ration-total-value" id="rationTotalValue">60</div>
+        <div class="ration-total-unit">份</div>
+        <div class="ration-remaining">
+          剩余: <span id="rationRemaining">60</span> 份
+        </div>
+      </div>
+
+      <!-- 5个战士卡片 -->
+      <div class="ration-soldiers" id="rationSoldiers"></div>
+
+      <!-- 分粮提示 -->
+      <div class="ration-hint" id="rationHint">拖动滑块为每名战士分配青稞面（0-20份）</div>
+    </div>
+    <div class="ration-footer">
+      <button class="ration-submit-btn" id="rationSubmitBtn">确认分配</button>
+      <button class="ration-skip-btn" id="rationSkipBtn">跳过</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 分粮结算弹窗 ========== -->
+<div class="ration-result-overlay" id="rationResultOverlay">
+  <div class="ration-result-content">
+    <div class="ration-result-stamp" id="rationResultStamp">分粮结果</div>
+    <h3 class="ration-result-title" id="rationResultTitle"></h3>
+    <div class="ration-result-narrative" id="rationResultNarrative"></div>
+    <div class="ration-result-effects" id="rationResultEffects"></div>
+    <div class="ration-result-achievement" id="rationResultAchievement" style="display:none"></div>
+    <button class="ration-result-close-btn" id="rationResultCloseBtn">继续行军</button>
+  </div>
+</div>
+
+<!-- ========== AI战友对话 ========== -->
+<div class="npc-overlay" id="npcOverlay">
+  <div class="npc-content">
+
+    <div class="npc-header">
+      <button class="npc-close" id="npcCloseBtn">✕</button>
+      <div class="npc-name" id="npcName">老班长王贵</div>
+      <div class="npc-role-label" id="npcRoleLabel">行军途中 · 战友谈话</div>
+    </div>
+    <div class="npc-body">
+      <div class="npc-portrait" id="npcPortrait"></div>
+      <div class="npc-chat-area">
+        <div class="npc-chat-flow" id="npcChatFlow"></div>
+        <div class="npc-suggest-actions" id="npcSuggestActions"></div>
+        <div class="npc-input-area">
+          <input type="text" class="npc-input" id="npcInput" maxlength="200" placeholder="对战友说点什么...">
+          <button class="npc-send-btn" id="npcSendBtn">发送</button>
+        </div>
+      </div>
+    </div>
+    <div class="npc-degraded-badge" id="npcDegradedBadge" style="display:none">离线模式</div>
+  </div>
+</div>
+
+<!-- ========== AI指挥所面板 ========== -->
+<div class="command-overlay" id="commandOverlay">
+
+  <div class="command-content">
+    <div class="command-loading" id="commandLoading">
+      <div class="command-loading-icon">⚔️</div>
+      <div class="command-loading-text">AI 推演中…</div>
+      <div class="loading-dots"><i></i><i></i><i></i></div>
+    </div>
+    <div class="command-header">
+      <div class="command-stamp">指挥所</div>
+      <h3 class="command-title" id="commandTitle">飞夺泸定桥 · 指挥所</h3>
+      <p class="command-subtitle" id="commandSubtitle">输入你的战术指令，AI将解析为行动方案</p>
+    </div>
+    <div class="command-body">
+      <!-- 当前指令显示区 -->
+      <div class="command-current-area">
+        <div class="command-current-label">当前指令</div>
+        <div class="command-current-display" id="commandCurrentDisplay">
+          <span class="command-current-empty">未选择指令 — 点击下方战术磁贴或输入自定义指令</span>
+        </div>
+      </div>
+
+      <!-- 战术磁贴区（客观战略导向，非历史人物派遣） -->
+      <div class="command-tiles-label">战略选择（可多选组合）</div>
+      <div class="command-tiles">
+        <button type="button" class="command-tile" data-tile="集中兵力冲锋" aria-pressed="false">集中兵力突击</button>
+        <button type="button" class="command-tile" data-tile="迂回穿插包抄" aria-pressed="false">迂回穿插</button>
+        <button type="button" class="command-tile" data-tile="化整为零" aria-pressed="false">化整为零</button>
+        <button type="button" class="command-tile" data-tile="拔点攻坚" aria-pressed="false">拔点攻坚</button>
+        <button type="button" class="command-tile" data-tile="俘敌瓦解" aria-pressed="false">俘敌瓦解</button>
+        <button type="button" class="command-tile" data-tile="声东击西佯攻" aria-pressed="false">声东击西</button>
+        <button type="button" class="command-tile" data-tile="火力压制" aria-pressed="false">火力压制</button>
+        <button type="button" class="command-tile" data-tile="侦察敌情" aria-pressed="false">侦察待机</button>
+      </div>
+
+      <!-- 自定义输入区 -->
+      <div class="command-input-area">
+        <div class="command-input-label">自定义战略意图（与战略磁贴互斥）</div>
+        <textarea class="command-input" id="commandInput" aria-label="自定义战略意图" maxlength="200" placeholder="输入你的战略意图，如：集中兵力拔掉前方据点，以一部迂回敌侧后"></textarea>
+        <div class="command-input-counter" id="commandInputCounter">0/200</div>
+      </div>
+
+      <button class="command-submit" id="commandSubmit">下达指令</button>
+      <div class="command-intel-buff" id="commandIntelBuff"></div>
+      <div class="command-narrative-hint" id="commandNarrativeHint"></div>
+
+      <!-- 决策三任务结果：AI评级 / 优化建议 / 史实复盘 -->
+      <div class="command-decision-result" id="commandDecisionResult" style="display:none">
+        <div class="decision-grade-row">
+          <span class="decision-grade-label">AI 决策评级</span>
+          <span class="decision-grade-badge grade-unknown" id="decisionGradeBadge">—</span>
+        </div>
+        <div class="decision-block">
+          <div class="decision-block-title">⚑ 优化建议</div>
+          <div class="decision-block-text" id="decisionSuggestion"></div>
+        </div>
+        <div class="decision-block decision-block-history">
+          <div class="decision-block-title">📜 史实复盘 · 历史上我军如何决策</div>
+          <div class="decision-block-text" id="decisionHistoryReview"></div>
+        </div>
+      </div>
+
+      <div class="command-actions-area" id="commandActionsArea"></div>
+      <button class="command-confirm" id="commandConfirm" style="display:none">确认行动 · 进入战斗</button>
+    </div>
+    <div class="command-degraded-badge" id="commandDegradedBadge" style="display:none">简化模式</div>
+  </div>
+</div>
+
+<!-- ========== 党史图鉴卡牌收集界面 ========== -->
+<div class="history-cards-overlay" id="historyCardsOverlay">
+  <div class="history-cards-content">
+    <div class="history-cards-header">
+      <button class="history-cards-close" id="historyCardsCloseBtn">✕</button>
+      <h3 class="history-cards-title">党史图鉴</h3>
+      <p class="history-cards-subtitle">通关长征 · 解锁历史卡牌</p>
+    </div>
+    <div class="history-cards-grid" id="historyCardsGrid"></div>
+  </div>
+</div>
+
+<!-- ========== 党史图鉴卡牌详情（含问 AI按钮） ========== -->
+<div class="card-detail-overlay" id="cardDetailOverlay">
+  <div class="card-detail-content">
+    <button class="card-detail-close" id="cardDetailCloseBtn">✕</button>
+    <div class="card-detail-icon" id="cardDetailIcon"></div>
+    <h3 class="card-detail-title" id="cardDetailTitle"></h3>
+    <p class="card-detail-subtitle" id="cardDetailSubtitle"></p>
+    <div class="card-detail-body" id="cardDetailBody"></div>
+    <div class="card-detail-source" id="cardDetailSource"></div>
+
+    <!-- AI全景语音解说 -->
+    <div class="card-narration" id="cardNarration" style="display:none">
+      <div class="card-narration-header">
+        <span class="card-narration-label">🎧 AI 全景解说</span>
+        <button class="card-narration-play" id="cardNarrationPlayBtn">▶ 播放</button>
+      </div>
+      <div class="card-narration-text" id="cardNarrationText"></div>
+      <div class="card-narration-source" id="cardNarrationSource"></div>
+    </div>
+
+    <div class="card-detail-actions">
+      <button class="card-detail-narrate-btn" id="cardDetailNarrateBtn">AI 全景解说</button>
+      <button class="card-detail-ask-btn" id="cardDetailAskBtn">问 AI</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== AI历史问答盲盒（复用NPC对话界面风格） ========== -->
+<div class="history-qa-overlay" id="historyQaOverlay">
+  <div class="history-qa-content">
+    <div class="history-qa-header">
+      <button class="history-qa-close" id="historyQaCloseBtn">✕</button>
+      <div class="history-qa-name">指导员何文 · 历史问答</div>
+      <div class="history-qa-label">史实转述者 · 有出处才回答</div>
+    </div>
+    <div class="history-qa-body">
+      <div class="history-qa-portrait" id="historyQaPortrait"></div>
+      <div class="history-qa-chat-area">
+        <div class="history-qa-chat-flow" id="historyQaChatFlow"></div>
+        <div class="history-qa-input-area">
+          <input type="text" class="history-qa-input" id="historyQaInput" maxlength="200" placeholder="问一个关于这段历史的问题...">
+          <button class="history-qa-send-btn" id="historyQaSendBtn">提问</button>
+        </div>
+      </div>
+    </div>
+    <div class="history-qa-degraded-badge" id="historyQaDegradedBadge" style="display:none">离线模式</div>
+  </div>
+</div>
+
+<!-- ========== 时空信箱（终极彩蛋） ========== -->
+<div class="mailbox-overlay" id="mailboxOverlay">
+  <div class="mailbox-content">
+    <div class="mailbox-header">
+      <button class="mailbox-close" id="mailboxCloseBtn">✕</button>
+      <h3 class="mailbox-title">时空信箱</h3>
+      <p class="mailbox-subtitle">写一段话给当年的红军</p>
+    </div>
+    <div class="mailbox-body">
+      <!-- 玩家写信区 -->
+      <div class="mailbox-write-area">
+        <div class="mailbox-write-label">你的信</div>
+        <textarea class="mailbox-textarea" id="mailboxTextarea" maxlength="500" placeholder="写下你想对红军说的话..."></textarea>
+        <div class="mailbox-hint">提示：提到"斯诺"、"美国记者"等关键词，可能触发特殊回信</div>
+        <button class="mailbox-send-btn" id="mailboxSendBtn">寄出信件</button>
+      </div>
+      <!-- AI回信区 -->
+      <div class="mailbox-reply-area" id="mailboxReplyArea" style="display:none">
+        <div class="mailbox-reply-label">回信</div>
+        <div class="mailbox-reply-text" id="mailboxReplyText"></div>
+        <div class="mailbox-reply-source" id="mailboxReplySource"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Toast提示 ========== -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ========== 电报机战报弹窗 ========== -->
+<div class="telegram-overlay" id="telegramOverlay">
+  <div class="telegram-paper">
+    <div class="telegram-header">中央红军电报局</div>
+    <div class="telegram-stamp-mini">急电</div>
+    <div class="telegram-body" id="telegramText"></div>
+    <div class="telegram-footer" id="telegramFooter">中央红军电报局</div>
+    <button class="telegram-close" id="telegramClose">收报完毕</button>
+  </div>
+</div>
+
+<!-- ========== QTE 第一视角微操 ========== -->
+<div class="qte-overlay" id="qteOverlay">
+  <button type="button" class="qte-exit54" id="qteExit54">退出本关</button>
+  <div class="qte-scene" id="qteScene"></div>
+  <!-- 2D士兵剪影（CSS动画状态机：Idle/Climb/Climb_Fast/Slip） -->
+  <div class="qte-soldier anim-idle" id="qteSoldier" data-anim-state="idle">
+    <div class="soldier-head"></div>
+    <div class="soldier-body"></div>
+    <div class="soldier-arm arm-left"></div>
+    <div class="soldier-arm arm-right"></div>
+    <div class="soldier-leg leg-left"></div>
+    <div class="soldier-leg leg-right"></div>
+  </div>
+  <div class="qte-blood" id="qteBlood"></div>
+  <div class="qte-hud">
+    <div class="qte-title" id="qteTitle">飞夺泸定桥</div>
+    <div class="qte-subtitle" id="qteSubtitle">第一视角 · 攀越铁索</div>
+    <div class="qte-progress-track"><div class="qte-progress-fill" id="qteProgress"></div></div>
+  </div>
+  <div class="qte-result" id="qteResult"></div>
+  <button class="qte-climb" id="qteClimbBtn">向上爬</button>
+  <div class="qte-hint" id="qteHint">疯狂连点按钮向上攀爬 · 停手将滑落</div>
+</div>
+
+<!-- ========== 2D战况动画层（预留接口，当前CSS/Canvas，无清晰人脸） ========== -->
+<div class="battle-anim-layer" id="battleAnimLayer"></div>
+
+<script defer src="js/mobile-compat.js?v=f321202ffa2b340f"></script>
+<script defer src="js/player-profiles40.js?v=b520aa4888542d0d"></script>
+<script defer src="js/demo-session.js?v=5f460d77ef8b330d"></script>
+<script defer src="js/zh-filter.js?v=05100572ccda1636"></script>
+<script defer src="js/game-data.js?v=481df988d7923d31"></script>
+<script defer src="js/game-history-data.js?v=46a3888a43709667"></script>
+<script defer src="js/game-state.js?v=abb8faa496be4513"></script>
+<script defer src="js/bff-config.js?v=7a9e2cd5e6f5b6c9"></script>
+<script defer src="js/runtime-config.js?v=8afbb0b4e0b49921"></script>
+    <script defer src="js/game-api.js?v=7a97df52bd52ed4d"></script>
+<script defer src="js/bff-connection.js?v=c129b79255d2871a"></script>
+<script defer src="js/coop-room.js?v=7a605f7fb08bb595"></script>
+<script defer src="js/game-map.js?v=9068015aab48ef4f"></script>
+<script defer src="js/cinema-manifest.js?v=23c90f01f6aafb9e"></script>
+<script defer src="js/game-cinema.js?v=35828adaa46dac5e"></script>
+<script defer src="js/scene-library.js?v=cbf2a330b5a2eba2"></script>
+<script defer src="js/input-feedback.js?v=3378ec6c5a36859f"></script>
+<script defer src="js/scene-metrics.js?v=051b0a87b2cc6c7b"></script><script defer src="js/render-budget.js?v=f55c3a0c13bfdcfd"></script>
+<script defer src="js/scene-mount-queue.js?v=8055c368dd998f1c"></script>
+<script defer src="js/game-scenes.js?v=2b59423118b10cc5"></script>
+<script defer src="js/game-journey.js?v=1b55670f3a1938c7"></script>
+<script defer src="js/game-sandbox.js?v=3fc192c71bd2f29d"></script>
+<script defer src="js/chishui-tactics.js?v=d011e54b720eaa41"></script>
+<script defer src="js/chishui-maneuver.js?v=8f3d48ea28bd9cf5"></script>
+<script defer src="js/chishui-field.js?v=b59e00c9ab16406b"></script>
+<script defer src="js/chishui-board.js?v=c96368eb9331e637"></script>
+<script defer src="js/npc-faces.js?v=0fc7661eb7f2b308"></script>
+<script defer src="js/game-ui-battle54.js?v=9be2363097f6eac6"></script>
+<script defer src="js/voice-bank84.js?v=a07970cbdd541c50"></script>
+<script defer src="js/game-ui-audio54.js?v=44009569d0bc97e6"></script>
+<script defer src="js/game-ui-services54.js?v=cc541043f49b7516"></script>
+<script defer src="js/game-ui-reports54.js?v=388d037a9e2a2df2"></script>
+<script defer src="js/chapter-tasks54.js?v=898989acae57154a"></script>
+<script defer src="js/campaign-core55.js?v=ffc912ab0b42aeb9"></script>
+<script defer src="js/campaign55.js?v=2304e845ba0f462c"></script>
+<script defer src="js/game-ui.js?v=7bc14cbef9545f44"></script>
+<script defer src="js/voice-runtime84.js?v=7da099a8ce9fc8e2"></script>
+<script defer src="js/experience-core.js?v=8e80311d17ee6839"></script><script defer src="js/experience-system.js?v=6d21cdf3c1fc336a"></script>
+<script defer src="js/map-footer.js?v=702080d064be920d"></script><script defer src="js/dock-r6.js?v=e79991a360e171d9"></script><script defer src="js/task-card-r6.js?v=99ccbccf091756de"></script>
+<script defer src="js/npc-scripts-bundled.js?v=20a14ad65ddfd2b6"></script>
+<script defer src="js/npc-story-core.js?v=516d02e1a765f317"></script><script defer src="js/npc-dialogue-flow.js?v=329d667d6f194e37"></script><script defer src="js/npc-story.js?v=f4374fe17d5e8bdd"></script>
+<script defer src="js/hud-help.js?v=79000451ac1c1859"></script>
+<script defer src="js/decision-cinema-core.js?v=3876eb69bc8c476f"></script><script defer src="js/decision-cinema.js?v=cc26b5630e50cb9c"></script>
+<script defer src="js/pressure-core.js?v=1fee2da4c0ad5004"></script><script defer src="js/companion-board.js?v=de50bbe7266e86a6"></script><script defer src="js/pressure-challenge.js?v=5b24979abbd7d188"></script>
+<script defer src="js/ui-polish.js?v=9453f04381bb07a9"></script>
+<script defer src="js/field-editorial.js?v=f2ef604d453ec6fb"></script>
+<script defer src="js/morse-training.js?v=d0d821538a2c272b"></script>
+<script defer src="js/morse-academy.js?v=11a81f1b263f54a1"></script>
+<script defer src="js/player-settings.js?v=bf88fa3520da36eb"></script>
+<script defer src="js/game-shell.js?v=1f6f6dc1bab46bf5"></script>
+<script defer src="js/title-motion.js?v=085992e938f4f120"></script>
+<script defer src="js/story-consequences.js?v=b0106bf69c555cf0"></script>
+<script defer src="js/user-video-reel.js?v=565d302819a8ded7"></script>
+<script defer src="js/chapter-presentation.js?v=1e1ee5c06158c69c"></script>
+<script defer src="js/player-onboarding.js?v=999d65856c8fd67e"></script>
+<script defer src="js/chapter-direction.js?v=cfb69e9a234761f9"></script>
+<script defer src="js/desktop-settings.js?v=01da781ead1cfdd6"></script>
+<script defer src="js/immersive-view.js?v=fe3e6ecc07ca4b3e"></script>
+<script defer src="js/mission40.js?v=ea923b4c2508d31d"></script>
+<script defer src="js/education43.js?v=09bb24c8c7eec86c"></script>
+<script defer src="js/victory49.js?v=f77b2522742a4aa6"></script>
+<script defer src="js/chapter-motion53.js?v=855eb6ca47c59ab5"></script>
+<script defer src="js/chapter-victory56.js?v=e34a5c4a3a9d3283"></script>
+<script defer src="js/npc-model56.js?v=043969fdad56fe32"></script>
+<script defer src="js/chapter-replays56.js?v=7b3f971fd15b45ce"></script>
+<script defer src="js/i18n-snow65.js?v=a66f70372df8a984"></script>
+<script defer src="js/snow-prologue63.js?v=aa838a42ae8f374e"></script>
+<script defer src="js/silent-radio65.js?v=b0a22c47cd42be31"></script>
+<script defer src="js/witness-report65.js?v=3a1dc0e4681b53c2"></script>
+<script defer src="js/newsroom65.js?v=16d912701865efbc"></script>
+<!-- 旧版 BGM 已由《雪山魂塑》bgm-manager 接管（2026-10-25），如需回滚取消注释 -->
+<!-- <script defer src="js/bgm65.js?v=4a565a65ad24b3b7"></script> -->
+<script defer src="js/bgm-manager.js?v=b715e067e4a7a614"></script>
+<script defer src="js/demo-mode.js?v=d195b54c1e1c9bb0"></script>
+<script defer src="js/stamp-codes64.js?v=358d6421cdd96fc6"></script>
+<script defer src="js/memorial-dates64.js?v=cd80c92e71f52227"></script>
+<script defer src="js/mortar-game.js?v=6a2868ff3380be86"></script>
+<script defer src="js/coop-hotseat66.js?v=c05789250e24bc12"></script>
+<script defer src="js/save-transfer66.js?v=e73d184bca60a3a3"></script>
+<script defer src="js/student-input66.js?v=b9a9ae318c07248f"></script>
+<script defer src="js/sidu-bluff67.js?v=b6acb957d900cf40"></script>
+<script defer src="js/xiangjiang-guard67.js?v=4b884f70ae8eaab6"></script>
+<script defer src="js/huishi-drum67.js?v=259eb045a6fa1158"></script>
+<script defer src="js/scout67.js?v=fb1eba5ae46b9fd3"></script>
+<script defer src="js/grassland-collect.module.js?v=b8ec2fd07a0390b5"></script>
+<script defer src="js/sniper-1937.module.js?v=2e03d9e611d8aad8"></script>
+<script defer src="js/lazikou68.js?v=01f013ac98a1352f"></script>
+<script defer src="js/campfire68.js?v=4b60b3005cf0cfb8"></script>
+<script defer src="js/snowrun68.js?v=cd5ff77cf2603f13"></script>
+<script defer src="js/wuqi68.js?v=b680b49bfa307fd8"></script>
+<script defer src="js/daily68.js?v=6fe868de86a36635"></script>
+<script defer src="js/stretcher71.js?v=4db5cd5cc71b0f00"></script>
+<script defer src="js/radio-circuit71.js?v=f7f11f86120987f7"></script>
+<script defer src="js/supply-sokoban71.js?v=70643705963ad573"></script>
+<script defer src="js/rope-untangle71.js?v=9ed523bc069cb880"></script>
+<script defer src="js/archive-restore71.js?v=ff4a85a3255787b7"></script>
+<script defer src="js/bridge-workshop71.js?v=be4bb7e48e407f62"></script>
+<script defer src="js/optional-lab71.js?v=4b0a9e6d50aa2930"></script>
+<script defer src="js/run69.js?v=789e8f4e460c9c6b"></script>
+<script defer src="js/correspondent69.js?v=74b2a505241f8096"></script>
+<script defer src="js/grassland30.js?v=07fd46cf85f569b3"></script>
+<script defer src="js/spark69.js?v=1c2597b9aced1502"></script>
+<script defer src="js/zhiluo70.js?v=65644d2c70c9d844"></script>
+<script defer src="js/blanket72.js?v=ff4e1051584fb866"></script>
+<script defer src="js/zunyi72.js?v=e0f6a93d713c9d40"></script>
+<script defer src="js/lantern72.js?v=9e815c764263dd8b"></script>
+<script defer src="js/fishhook72.js?v=42b7abe1b28e344f"></script>
+<script defer src="js/wildveg72.js?v=5724779f6b433eef"></script>
+<script defer src="js/bridge72.js?v=99650c0d5a7c555f"></script>
+<script defer src="js/medal72.js?v=14dedd1e939475fc"></script>
+<script defer src="js/starfire-scenes73.js?v=c239a0e544a97dc1"></script>
+<script defer src="js/starfire73.js?v=8fd71d59e596e6c0"></script>
+<script defer src="js/archive-ui74.js?v=51be630069dc9045"></script>
+<script defer src="js/entry-i18n75.js?v=601e6a42069458b6"></script>
+<script defer src="js/map-observer76.js?v=fadb2c8b862555b3"></script>
+<script defer src="js/s01-gouba72.js?v=2797d0f76430781d"></script>
+<script defer src="js/s02-poem72.js?v=6090f6349271f614"></script>
+<script defer src="js/s03-press72.js?v=c57f2cb2222b601a"></script>
+<script defer src="js/a01-night72.js?v=bc43d54e7d75138c"></script>
+<script defer src="js/a02-yihai72.js?v=269df807dd768b56"></script>
+<script defer src="js/b02-ferry72.js?v=3917620aba5764f8"></script>
+<script defer src="js/b01-wujiang72.js?v=4851f656ea2f9e3b"></script>
+<script defer src="js/batch3-wiring77.js?v=f79c0d4d2009fdee"></script>
+<script defer src="js/enhancement78.js?v=4b5b2b82a95a87b9"></script>
+<script defer src="march-world/engine/projection.js?v=06ffdb9a80555542"></script>
+<script defer src="march-world/engine/painter.js?v=3d70e56d7eb8442f"></script>
+<script defer src="march-world/engine/pathfind.js?v=53a5e5fc53bffc89"></script>
+<script defer src="march-world/engine/input.js?v=603d8ede4de44a70"></script>
+<script defer src="march-world/engine/controls86.js?v=9c164e587ffdd0ef"></script>
+<script defer src="march-world/engine/player.js?v=1aa15f835a1de7c4"></script>
+<script defer src="march-world/engine/anchors.js?v=2adb7442accd875b"></script>
+<script defer src="march-world/engine/ambient.js?v=a149a96f29944e42"></script>
+<script defer src="march-world/engine/renderer.js?v=86aef184159a7746"></script>
+<script defer src="march-world/engine/actors3d.js?v=75360249c7f55818"></script>
+<script defer src="march-world/engine/assets3d.js?v=acfc8da5ae81799b"></script>
+<script defer src="march-world/engine/renderer3d.js?v=6f3a0c9a70a0a5df"></script>
+<script defer src="march-world/engine/view3d.js?v=a4b72930ae2bca7f"></script>
+<script defer src="march-world/scenes/kit.js?v=a3b82433ed3dfd60"></script>
+<script defer src="march-world/scenes/visual3d.js?v=8be0a34ba599747a"></script>
+<script defer src="march-world/scenes/chapter-01.js?v=f8a8c32754aab60d"></script>
+<script defer src="march-world/scenes/chapter-02.js?v=bcf3ac8132beef32"></script>
+<script defer src="march-world/scenes/chapter-03.js?v=edf646798eb0799b"></script>
+<script defer src="march-world/scenes/chapter-04.js?v=37933ecde8f838ee"></script>
+<script defer src="march-world/scenes/chapter-05.js?v=284517967f14feb3"></script>
+<script defer src="march-world/scenes/chapter-06.js?v=9ea66e2008e0a0ba"></script>
+<script defer src="march-world/scenes/chapter-07.js?v=93a9e68d2122ec7b"></script>
+<script defer src="march-world/scenes/chapter-08.js?v=c072ccdaef506c6b"></script>
+<script defer src="march-world/scenes/chapter-09.js?v=9fd069b87f443879"></script>
+<script defer src="march-world/scenes/chapter-10.js?v=a3b1f3d1bf347cf7"></script>
+<script defer src="march-world/scenes/chapter-11.js?v=3e4f4852ae2d8f14"></script>
+<script defer src="march-world/scenes/chapter-12.js?v=e8746a4e7b8501bf"></script>
+<script defer src="march-world/world.js?v=5d957a0a083ad1e3"></script>
+<script defer src="march-story/world-bindings.js?v=a3ecac865462b932"></script>
+<script defer src="march-story/env.js?v=ea59e1d6227b46db"></script>
+<script defer src="march-story/source-map.js?v=8b8af7b8141990e4"></script>
+<script defer src="march-story/state.js?v=64d39b4b27969f26"></script>
+<script defer src="march-story/frame.js?v=15262c6da3a70173"></script>
+<script defer src="march-story/registry.js?v=1b04aa403eb334b8"></script>
+<script defer src="march-story/decision-plans.js?v=fff1a21621ffb806"></script>
+<script defer src="march-story/decision.js?v=0049d8660a00dfd4"></script><script defer src="march-story/ui.js?v=206a993789621c4d"></script>
+<script defer src="march-story/voice.js?v=97ba61f565e2773b"></script>
+<script defer src="march-story/cooperation.js?v=d4581bd18ba0e2c9"></script>
+<script defer src="march-story/ration.js?v=ab3d56660412d82e"></script>
+<script defer src="march-story/scene3d.js?v=ea39662034c125ac"></script>
+<script defer src="march-story/adapters.js?v=1e32b8292f33e282"></script>
+<script defer src="march-story/story.js?v=20513ef9db57256d"></script>
+<script defer src="march-story/entry.js?v=aef1867c92113dd0"></script>
+<script defer src="march-story/chrome90.js?v=ab7cc011e63be3fd"></script>
+<script defer src="js/readability93.js?v=afa71378c135529b"></script>
+<script defer src="js/documentary92.js?v=3d9d71a0ebd3665f"></script>
+<script defer src="js/chishui3d-entry.js?v=20261113"></script>
+</body>
+</html>

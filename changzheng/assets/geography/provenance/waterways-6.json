@@ -1,0 +1,20 @@
+{
+  "id": 6,
+  "name": "大渡河·安顺场",
+  "bounds": {
+    "north": 29.3,
+    "south": 28.8,
+    "east": 102.48,
+    "west": 101.88
+  },
+  "endpoint": "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+  "query": "[out:json][timeout:90];way[\"waterway\"~\"^(river|stream)$\"](28.8,101.88,29.3,102.48);out geom;",
+  "fetched_utc": "2026-10-21T09:38:19.832189+00:00",
+  "osm_base_timestamp": "2026-10-21T09:37:34Z",
+  "ways": 128,
+  "features": 128,
+  "bytes": 37411,
+  "tolerance_degrees": 0.0005,
+  "sha256": "5d7dc3d6f3ef1a6d2ec1c176ce6d29019790e309f97dd2a4f494c23d151b4ef3",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; modern waterways, not a 1935 reconstruction"
+}

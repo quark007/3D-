@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>何文 · 独立人物制作样板</title>
+<link rel="icon" href="data:,">
+<script type="importmap">{"imports":{"three":"../assets/webgpu40/vendor/three/build/three.module.js","three/addons/":"../assets/webgpu40/vendor/three/jsm/"}}</script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#202523;color:#e9e5d9;font:14px/1.55 system-ui,sans-serif;height:100dvh;display:grid;grid-template-rows:auto 1fr auto}header{padding:15px 22px;border-bottom:1px solid #495149;display:flex;align-items:center;gap:14px;flex-wrap:wrap}h1{font-size:18px;margin:0}header span{color:#d8b77f;font-size:12px}header a{margin-left:auto;color:#c8d6c8}main{min-height:0;position:relative}canvas{display:block;width:100%;height:100%;touch-action:none}#status{position:absolute;top:16px;left:20px;right:20px;pointer-events:none;color:#cbd2c7;font-size:12px}footer{background:#29302b;border-top:1px solid #495149;padding:12px 20px}.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}button,select{background:#39433b;color:#f4eee1;border:1px solid #64715e;border-radius:5px;padding:8px 12px;font:inherit;min-height:40px;cursor:pointer}button:disabled,select:disabled,input:disabled{opacity:.45;cursor:wait}button[aria-pressed="true"]{background:#a78f61;color:#171b17}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #e2c58e;outline-offset:3px}label{display:flex;align-items:center;gap:5px;margin-left:6px}input{width:100px}p{margin:8px 0 0;color:#b9c1b6;font-size:12px}@media(max-width:600px){header{padding:10px 12px;gap:5px}h1{font-size:15px}header a{font-size:12px}footer{padding:9px 10px}.controls{gap:5px}button,select{font-size:12px;padding:6px 9px}label{font-size:12px}input{width:65px}p{font-size:11px}}
+</style>
+</head>
+<body>
+<header><h1>何文 · 独立人物制作样板</h1><span>约27岁 / 虚构指导员 / 尚未视觉验收</span><a href="preview.html?3d=1&amp;chapter=chapter-1%2Fscene-ruijin">返回第一章场景</a></header>
+<main><canvas id="portrait" aria-label="可拖动旋转的何文三维模型"></canvas><div id="status" role="status">正在加载真实三维模型与贴图……</div></main>
+<footer>
+<div class="controls">
+<button data-view="front" disabled>正面</button><button data-view="quarter" disabled>四分之三</button><button data-view="profile" disabled>侧面</button><button data-view="body" disabled>全身</button>
+<select id="animation" aria-label="人物动作" disabled><option value="">静止检查</option></select>
+<button id="clay" aria-pressed="false" disabled>素模检查</button>
+<label>闭眼<input id="blink" type="range" min="0" max="1" step="0.01" value="0" disabled></label>
+<label>开口<input id="jaw" type="range" min="0" max="0.5" step="0.01" value="0" disabled></label>
+</div>
+<p>拖动旋转，滚轮或双指缩放。此页不写游戏存档，不代表最终写实质量；皮肤微法线为程序绘制，非真人扫描。服装版型和动画仍需完善。</p>
+</footer>
+<script type="module" src="engine/character-preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "id": 6,
+  "name": "安顺场",
+  "lat": 29.2735783,
+  "lon": 102.2832942,
+  "matched_name": "安顺场, 石棉 - 得荣, 先锋, 安顺场镇, 石棉县, 雅安市, 四川省, 中国",
+  "type": "attraction",
+  "osm_type": "node",
+  "osm_id": 6248870772,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E5%AE%89%E9%A1%BA%E5%9C%BA&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

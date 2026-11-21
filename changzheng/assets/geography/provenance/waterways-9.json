@@ -1,0 +1,20 @@
+{
+  "id": 9,
+  "name": "松潘草地",
+  "bounds": {
+    "north": 33.3,
+    "south": 32.8,
+    "east": 103.25,
+    "west": 102.65
+  },
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:90];way[\"waterway\"~\"^(river|stream)$\"](32.8,102.65,33.3,103.25);out geom;",
+  "fetched_utc": "2026-10-21T09:42:10.316058+00:00",
+  "osm_base_timestamp": "2026-10-21T09:40:36Z",
+  "ways": 58,
+  "features": 58,
+  "bytes": 46518,
+  "tolerance_degrees": 0.0005,
+  "sha256": "aa7864196504a0f12703a4b32cad6df3eba3d0ac5f34aca41f65fd12fe7fea95",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; modern waterways, not a 1935 reconstruction"
+}

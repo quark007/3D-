@@ -1,0 +1,20 @@
+{
+  "id": 7,
+  "name": "泸定桥",
+  "bounds": {
+    "north": 30.16,
+    "south": 29.66,
+    "east": 102.53,
+    "west": 101.93
+  },
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:90];way[\"waterway\"~\"^(river|stream)$\"](29.66,101.93,30.16,102.53);out geom;",
+  "fetched_utc": "2026-10-21T09:38:55.376625+00:00",
+  "osm_base_timestamp": "2026-10-21T09:37:34Z",
+  "ways": 198,
+  "features": 200,
+  "bytes": 56099,
+  "tolerance_degrees": 0.0005,
+  "sha256": "75711c238e02c4d9d8b2b30b06009ebb67141603336d51f99bf23baf8bf0c605",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; modern waterways, not a 1935 reconstruction"
+}

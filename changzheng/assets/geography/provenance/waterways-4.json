@@ -1,0 +1,20 @@
+{
+  "id": 4,
+  "name": "赤水·土城",
+  "bounds": {
+    "north": 28.57,
+    "south": 28.07,
+    "east": 106.17,
+    "west": 105.57
+  },
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:90];way[\"waterway\"~\"^(river|stream)$\"](28.07,105.57,28.57,106.17);out geom;",
+  "fetched_utc": "2026-10-21T09:25:03.018819+00:00",
+  "osm_base_timestamp": "2026-10-21T09:23:21Z",
+  "ways": 134,
+  "features": 138,
+  "bytes": 53302,
+  "tolerance_degrees": 0.0005,
+  "sha256": "c073679f77756236e5dcd36945805658d03a1d46d54b30905e9c8e71aa37ae76",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; modern waterways, not a 1935 reconstruction"
+}

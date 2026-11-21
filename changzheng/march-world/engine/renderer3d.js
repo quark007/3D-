@@ -1,0 +1,1473 @@
+(() => {
+  'use strict';
+  const M = window.CZMarchWorld._;
+
+  async function create(container, logicalScene, options = {}) {
+    const T = await import('three');
+    if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const environment = M.visual3d.environment(logicalScene);
+    const snowy = environment.terrain === 'snow';
+    const staging = M.visual3d.staging(logicalScene);
+    const assets = await M.assets3d.load(T, options.signal);
+    let renderer = null, worldRoot = null, disposeView = null;
+    const materials = new Map();
+    function releaseResources() {
+      const geometries = new Set(), mats = new Set(), textures = new Set(), images = new Set();
+      assets?.collect(geometries, mats, textures);
+      for (const mat of materials.values()) mats.add(mat);
+      worldRoot?.traverse(object => {
+        if (object.isInstancedMesh) object.dispose();
+        if (object.geometry) geometries.add(object.geometry);
+        for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
+          if (!mat) continue;
+          mats.add(mat);
+          for (const value of Object.values(mat)) if (value?.isTexture) textures.add(value);
+        }
+      });
+      for (const geometry of geometries) geometry.dispose();
+      for (const mat of mats) mat.dispose();
+      for (const texture of textures) { texture.dispose(); if (texture.image?.close) images.add(texture.image); }
+      for (const image of images) image.close();
+    }
+    try {
+    options.signal?.throwIfAborted();
+    renderer = new T.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    const canvas = renderer.domElement;
+    canvas.className = 'czmw-canvas czmw-canvas3d';
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', logicalScene.title + ' · 实时三维可行走场景');
+    container.append(canvas);
+    renderer.outputColorSpace = T.SRGBColorSpace;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = staging.exposure;
+    const mobile = navigator.maxTouchPoints > 0 || innerWidth < 760;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFShadowMap;
+
+    const scene = new T.Scene();
+    scene.background = new T.Color(staging.sky);
+    scene.fog = new T.Fog(staging.fog, environment.fogNear, environment.fogFar);
+    const camera = new T.PerspectiveCamera(52, 1, 0.1, 650);
+    worldRoot = new T.Group();
+    scene.add(worldRoot);
+    const cam = { viewW: 0, viewH: 0, zoom: 12.5 };
+    const stats = { frames: 0, renderMs: 0, dpr: 1, adaptive: false, backend: 'three', artReady: false, propsReady: false, unsupportedProps: [], environment: environment.terrain };
+    const world = logicalScene.world;
+    const toWorld = (x, y, height = 0) => new T.Vector3(x - world.w / 2, height, y - world.h / 2);
+    const props = logicalScene.props.map(alignedProp);
+    const terrain = M.visual3d.terrain(logicalScene, props);
+    const surfaceHeight = terrain.support;
+    const onSurface = (x, y, offset = 0) => toWorld(x, y, surfaceHeight(x, y) + offset);
+    const pickSurfaces = [];
+    stats.landform = staging.name;
+    stats.terrainVertices = terrain.heights.length;
+    stats.terrainMin = Math.min(...terrain.heights);
+    stats.terrainMax = Math.max(...terrain.heights);
+    const markers = new Map();
+    const waters = [], flags = [], smokeColumns = [], fires = [];
+    const guideLine = new T.Line(new T.BufferGeometry(), new T.LineDashedMaterial({ color: '#f4db98', dashSize: .7, gapSize: .4, toneMapped: false }));
+    guideLine.name = 'march-guide-route';
+    guideLine.visible = false;
+    guideLine.frustumCulled = false;
+    worldRoot.add(guideLine);
+    let guideRoute = null;
+    let actors = null;
+    let dead = false;
+    let raf = 0;
+    let last = 0;
+    let slow = 0;
+    let dprCap = mobile ? 1.15 : 1.6;
+    let focus = null;
+    let intro = null;
+    let introOverlay = null;
+    let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, 1.05);
+    let graphicsLost = false;
+
+    function material(color, roughness = 0.9, metalness = 0) {
+      const key = `${color}:${roughness}:${metalness}`;
+      if (!materials.has(key)) materials.set(key, new T.MeshStandardMaterial({ color, roughness, metalness }));
+      return materials.get(key);
+    }
+
+    function surface(key, tint = '#ffffff', meters = 2, strength = .7) {
+      if (!assets) return material(tint);
+      const cacheKey = `pbr:${key}:${tint}:${meters}:${strength}`;
+      if (!materials.has(cacheKey)) {
+        const maps = assets.textures[key];
+        const mat = new T.MeshStandardMaterial({ color: tint, map: maps.diffuse, normalMap: maps.normal, roughnessMap: maps.roughness, roughness: 1, normalScale: new T.Vector2(strength, strength) });
+        mat.userData.meters = meters;
+        materials.set(cacheKey, mat);
+      }
+      return materials.get(cacheKey);
+    }
+
+    function snowSurface() {
+      if (!materials.has('snow')) {
+        const mat = new T.MeshStandardMaterial({ color: environment.groundTint, normalMap: assets.textures.earth.normal, normalScale: new T.Vector2(.16, .16), roughness: .94 });
+        mat.userData.meters = 2;
+        materials.set('snow', mat);
+      }
+      return materials.get('snow');
+    }
+
+    function mesh(geometry, mat, x = 0, y = 0, z = 0, parent = worldRoot) {
+      if (mat.userData.meters && geometry.attributes.normal) {
+        const positions = geometry.attributes.position, normals = geometry.attributes.normal;
+        const uv = new Float32Array(positions.count * 2), scale = mat.userData.meters;
+        for (let i = 0; i < positions.count; i++) {
+          const nx = Math.abs(normals.getX(i)), ny = Math.abs(normals.getY(i)), nz = Math.abs(normals.getZ(i));
+          uv[i * 2] = (nx > nz && nx > ny ? positions.getZ(i) : positions.getX(i)) / scale;
+          uv[i * 2 + 1] = (ny > nx && ny > nz ? positions.getZ(i) : positions.getY(i)) / scale;
+        }
+        geometry.setAttribute('uv', new T.BufferAttribute(uv, 2));
+      }
+      const object = new T.Mesh(geometry, mat);
+      object.position.set(x, y, z);
+      object.castShadow = true;
+      object.receiveShadow = true;
+      parent.add(object);
+      return object;
+    }
+
+    function groundTexture() {
+      const cv = document.createElement('canvas');
+      cv.width = 1536;
+      cv.height = Math.max(512, Math.round(cv.width * world.h / world.w));
+      const ctx = cv.getContext('2d');
+      const sx = cv.width / world.w;
+      const sy = cv.height / world.h;
+      ctx.fillStyle = logicalScene.palette.ground;
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      let seed = logicalScene.seed || 1;
+      const random = () => {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      for (let i = 0; i < 22000; i++) {
+        const light = random() > 0.48;
+        ctx.fillStyle = light ? 'rgba(244,234,194,.055)' : 'rgba(33,40,26,.045)';
+        const size = 0.5 + random() * 2.2;
+        ctx.fillRect(random() * cv.width, random() * cv.height, size, size);
+      }
+      for (const patch of logicalScene.terrain?.patches || []) {
+        ctx.save();
+        ctx.globalAlpha = patch.alpha ?? 0.5;
+        ctx.fillStyle = patch.color;
+        ctx.beginPath();
+        ctx.ellipse(patch.x * sx, patch.y * sy, patch.rx * sx, patch.ry * sy, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      for (const road of logicalScene.terrain?.roads || []) {
+        for (const [color, extra] of [[logicalScene.palette.roadEdge, 1.1], [logicalScene.palette.road, 0]]) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = (road.w + extra) * sx;
+          ctx.beginPath();
+          road.pts.forEach(([x, y], index) => index ? ctx.lineTo(x * sx, y * sy) : ctx.moveTo(x * sx, y * sy));
+          ctx.stroke();
+        }
+      }
+      for (const water of [...(logicalScene.terrain?.waters || []), ...terrain.crossings.map(b => ({ pts: [[b.x - b.w / 2, b.min], [b.x + b.w / 2, b.min], [b.x + b.w / 2, b.max], [b.x - b.w / 2, b.max]] }))]) {
+        ctx.fillStyle = logicalScene.palette.waterDeep;
+        ctx.beginPath();
+        water.pts.forEach(([x, y], index) => index ? ctx.lineTo(x * sx, y * sy) : ctx.moveTo(x * sx, y * sy));
+        ctx.closePath();
+        ctx.fill();
+      }
+      const texture = new T.CanvasTexture(cv);
+      texture.colorSpace = T.SRGBColorSpace;
+      texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      return texture;
+    }
+
+    if (assets) for (const maps of Object.values(assets.textures)) for (const texture of Object.values(maps)) texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    function terrainPatch(width, depth, x, y, cols, rows, offset = 0) {
+      const positions = [], uv = [], indices = [];
+      for (let row = 0; row <= rows; row++) for (let col = 0; col <= cols; col++) {
+        const px = x - width / 2 + col * width / cols, py = y - depth / 2 + row * depth / rows;
+        positions.push(px - world.w / 2, terrain.height(px, py) + offset, py - world.h / 2);
+        uv.push(col / cols, 1 - row / rows);
+      }
+      for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
+        const a = row * (cols + 1) + col, c = a + cols + 1;
+        indices.push(a, c, a + 1, a + 1, c, c + 1);
+      }
+      const geometry = new T.BufferGeometry();
+      geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+      geometry.setIndex(indices); geometry.computeVertexNormals();
+      return geometry;
+    }
+    const ground = mesh(
+      terrainPatch(world.w, world.h, world.w / 2, world.h / 2, terrain.cols, terrain.rows),
+      snowy ? snowSurface() : assets ? surface('earth', environment.groundTint, 3, .8) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
+    );
+    ground.name = 'march-pbr-ground';
+    ground.castShadow = false;
+    pickSurfaces.push(ground);
+    if (assets) {
+      const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2, Math.ceil(terrain.cols / 3) * 3, Math.ceil(terrain.rows / 3) * 3);
+      const positions = geometry.attributes.position, indices = [];
+      for (let i = 0; i < geometry.index.count; i += 3) {
+        const triangle = [geometry.index.getX(i), geometry.index.getX(i + 1), geometry.index.getX(i + 2)];
+        const x = triangle.reduce((sum, vertex) => sum + positions.getX(vertex), 0) / 3;
+        const z = triangle.reduce((sum, vertex) => sum + positions.getZ(vertex), 0) / 3;
+        if (Math.abs(x) > world.w / 2 || Math.abs(z) > world.h / 2) indices.push(...triangle);
+      }
+      geometry.setIndex(indices);
+      const outskirts = mesh(geometry, ground.material);
+      outskirts.name = 'march-terrain-outskirts';
+      outskirts.castShadow = false;
+    }
+
+    const featherCanvas = document.createElement('canvas');
+    featherCanvas.width = featherCanvas.height = 128;
+    const featherContext = featherCanvas.getContext('2d');
+    const gradient = featherContext.createRadialGradient(64, 64, 8, 64, 64, 64);
+    gradient.addColorStop(0, '#ffffff'); gradient.addColorStop(.65, '#bbbbbb'); gradient.addColorStop(1, '#000000');
+    featherContext.fillStyle = gradient;
+    featherContext.fillRect(0, 0, 128, 128);
+    const feather = new T.CanvasTexture(featherCanvas);
+    feather.channel = 1;
+    for (const patch of logicalScene.terrain?.patches || []) {
+      const left = Math.max(0, Math.floor((patch.x - patch.rx) / terrain.dx)), right = Math.min(terrain.cols, Math.ceil((patch.x + patch.rx) / terrain.dx));
+      const top = Math.max(0, Math.floor((patch.y - patch.ry) / terrain.dy)), bottom = Math.min(terrain.rows, Math.ceil((patch.y + patch.ry) / terrain.dy));
+      const geometry = terrainPatch((right - left) * terrain.dx, (bottom - top) * terrain.dy, (left + right) * terrain.dx / 2, (top + bottom) * terrain.dy / 2, right - left, bottom - top, .018);
+      geometry.setAttribute('uv1', geometry.attributes.uv.clone());
+      const mat = (snowy ? snowSurface() : surface('earth', patch.color, 2.8, .45)).clone();
+      if (snowy) mat.color.set('#c7d3da');
+      mat.alphaMap = feather; mat.transparent = true; mat.depthWrite = false;
+      mat.opacity = snowy ? .32 : patch.alpha ?? .5;
+      const object = mesh(geometry, mat);
+      object.name = 'march-ground-patch';
+      object.castShadow = false;
+    }
+
+    function polygonObject(points, mat, height) {
+      const contour = points.map(([x, y]) => new T.Vector2(x - world.w / 2, y - world.h / 2));
+      const triangles = T.ShapeUtils.triangulateShape(contour, []);
+      const positions = [];
+      for (const point of contour) positions.push(point.x, height, point.y);
+      const geometry = new T.BufferGeometry();
+      geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+      geometry.setIndex(triangles.flat());
+      geometry.computeVertexNormals();
+      return mesh(geometry, mat);
+    }
+
+    for (const water of [...(logicalScene.terrain?.waters || []), ...terrain.crossings.map(b => ({ pts: [[b.x - b.w / 2, b.min], [b.x + b.w / 2, b.min], [b.x + b.w / 2, b.max], [b.x - b.w / 2, b.max]] }))]) {
+      const mat = new T.MeshPhysicalMaterial({
+        color: logicalScene.palette.water,
+        roughness: 0.2,
+        metalness: 0.05,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.16,
+        transparent: true,
+        opacity: 0.92,
+        side: T.DoubleSide
+      });
+      const flow = { value: 0 };
+      mat.userData.flow = flow;
+      mat.onBeforeCompile = shader => {
+        shader.uniforms.marchFlow = flow;
+        shader.vertexShader = 'varying vec2 vMarchWater;\n' + shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvMarchWater = position.xz;');
+        shader.fragmentShader = 'varying vec2 vMarchWater;\nuniform float marchFlow;\n' + shader.fragmentShader.replace('#include <normal_fragment_begin>', `#include <normal_fragment_begin>
+          vec2 p = vMarchWater;
+          vec3 ripple = vec3(.10 * sin(p.x * 2.1 + p.y * .7 - marchFlow * 1.9) + .035 * sin(p.y * 6.1 - marchFlow * 3.0), 0.0, .08 * cos(p.y * 2.7 - p.x * .5 - marchFlow * 1.4));
+          normal = normalize(normal + mat3(viewMatrix) * ripple);`);
+      };
+      const object = polygonObject(water.pts, mat, terrain.waterLevel);
+      object.name = 'march-river-water';
+      object.castShadow = false;
+      waters.push(object);
+    }
+
+    const roadEdge = assets ? (() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64; canvas.height = 256;
+      const ctx = canvas.getContext('2d'), image = ctx.createImageData(64, 256);
+      for (let y = 0; y < 256; y++) for (let x = 0; x < 64; x++) {
+        const noise = Math.sin(y * .13) * 1.7 + Math.cos(y * .31 + x * .27) * 1.4;
+        const shade = Math.max(0, Math.min(1, (Math.min(x, 63 - x) - 2 - noise) / 9));
+        const offset = (y * 64 + x) * 4;
+        image.data[offset] = image.data[offset + 1] = image.data[offset + 2] = shade * 255;
+        image.data[offset + 3] = 255;
+      }
+      ctx.putImageData(image, 0, 0);
+      const texture = new T.CanvasTexture(canvas);
+      texture.wrapT = T.RepeatWrapping;
+      texture.channel = 1;
+      return texture;
+    })() : null;
+
+    function roadRibbon(road) {
+      const geometry = ground.geometry.clone(), positions = geometry.attributes.position;
+      const edgeUV = [], distances = [], indices = [];
+      for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i) + world.w / 2, y = positions.getZ(i) + world.h / 2;
+        let nearest = Infinity, along = 0, signed = 0, travelled = 0;
+        for (let j = 1; j < road.pts.length; j++) {
+          const a = road.pts[j - 1], b = road.pts[j], dx = b[0] - a[0], dy = b[1] - a[1], length = Math.hypot(dx, dy);
+          const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / (length * length)));
+          const px = x - a[0] - dx * t, py = y - a[1] - dy * t, distance = Math.hypot(px, py);
+          if (distance < nearest) { nearest = distance; along = travelled + length * t; signed = distance * (dx * py - dy * px < 0 ? -1 : 1); }
+          travelled += length;
+        }
+        distances.push(nearest);
+        edgeUV.push(Math.max(0, Math.min(1, .5 + signed / road.w)), along / 6);
+        positions.setY(i, positions.getY(i) + .03);
+      }
+      for (let i = 0; i < ground.geometry.index.count; i += 3) {
+        const a = ground.geometry.index.getX(i), b = ground.geometry.index.getX(i + 1), c = ground.geometry.index.getX(i + 2);
+        if (Math.min(distances[a], distances[b], distances[c]) <= road.w * .6) indices.push(a, b, c);
+      }
+      geometry.setIndex(indices);
+      const roadMaterial = snowy ? snowSurface().clone() : assets ? surface('earth', '#c1b49a', 2.3, .22) : new T.MeshStandardMaterial({ color: logicalScene.palette.road, roughness: 1 });
+      if (snowy) roadMaterial.color.set('#b4c4cc');
+      roadMaterial.side = T.DoubleSide;
+      if (roadEdge) {
+        geometry.setAttribute('uv1', new T.Float32BufferAttribute(edgeUV, 2));
+        roadMaterial.alphaMap = roadEdge;
+        roadMaterial.transparent = true;
+        roadMaterial.depthWrite = false;
+      }
+      const object = mesh(geometry, roadMaterial);
+      object.castShadow = false;
+    }
+    for (const road of logicalScene.terrain?.roads || []) roadRibbon(road);
+
+    function groupAt(prop, height = 0) {
+      const group = new T.Group();
+      group.name = `march-prop-${prop.type || 'decoration'}-${prop.seed || 1}`;
+      group.position.copy(toWorld(prop.x, prop.y, terrain.height(prop.x, prop.y) + height));
+      worldRoot.add(group);
+      return group;
+    }
+
+    function house(prop, wooden = false) {
+      const group = groupAt(prop);
+      const width = prop.w || 10, depth = prop.depth || width * .68;
+      const chapter = Number(logicalScene.chapterId), seed = prop.seed || 1;
+      const meeting = chapter === 3 && wooden && seed === 4;
+      const barracks = chapter === 7 && prop.x < (logicalScene.ironBridge?.x0 ?? 62);
+      const loess = chapter === 11 || chapter === 12;
+      const wall = surface('plaster', loess ? '#b7a080' : '#c3bcaa', 2.5, .6);
+      const earth = surface('earth', loess ? '#ae9067' : '#9b8564', 2, .55);
+      const roof = surface('roof', loess ? '#8c8270' : '#777c7c', 2.6, .85);
+      const wood = surface('wood', '#76614d', 1.8);
+      const boards = surface('wood', '#aa9272', 1.8, .65);
+      const stone = surface('rock', '#8a8375', 1.6, .65);
+      const dark = material('#262a26');
+      const parts = new Map(), cube = new T.BoxGeometry(1, 1, 1);
+      const transform = new T.Object3D(), point = new T.Vector3();
+      const vertices = mat => {
+        if (!parts.has(mat)) parts.set(mat, []);
+        return parts.get(mat);
+      };
+      function triangle(mat, a, b, c) { vertices(mat).push(...a, ...b, ...c); }
+      function quad(mat, a, b, c, d) { triangle(mat, a, b, c); triangle(mat, a, c, d); }
+      function solid(w, h, d, mat, x = 0, y = h / 2, z = 0, tilt = 0) {
+        transform.position.set(x, y, z); transform.rotation.set(tilt, 0, 0); transform.scale.set(w, h, d); transform.updateMatrix();
+        const out = vertices(mat);
+        for (const index of cube.index.array) {
+          point.fromBufferAttribute(cube.attributes.position, index).applyMatrix4(transform.matrix);
+          out.push(point.x, point.y, point.z);
+        }
+      }
+      function room(x, z, w, d, bottom, top, mat = wall) {
+        solid(w, top - bottom, d, mat, x, (bottom + top) / 2, z);
+      }
+      function pitched(x, z, w, d, height, rise, overhang = .18, wear = 0, gable = wall) {
+        const count = wear ? Math.ceil(w / 1.1) : 1, half = d / 2;
+        const down = p => [p[0], p[1] - .12, p[2]];
+        const section = i => {
+          const px = x - w / 2 - overhang + (w + 2 * overhang) * i / count;
+          return [-half - overhang, -half, 0, half, half + overhang].map((pz, j) => {
+            const edge = j === 0 || j === 4;
+            const uneven = edge ? wear * Math.sin(seed * 2.3 + i * 1.7 + j) : 0;
+            const py = j === 2 ? rise : edge ? -overhang * rise / half * .55 + uneven : 0;
+            return [px, height + .12 + py, z + pz + (edge ? uneven * .5 : 0)];
+          });
+        };
+        for (let i = 0; i < count; i++) {
+          const a = section(i), b = section(i + 1);
+          for (let j = 0; j < 4; j++) {
+            quad(roof, a[j], a[j + 1], b[j + 1], b[j]);
+            quad(wood, down(b[j]), down(b[j + 1]), down(a[j + 1]), down(a[j]));
+            if (!i) quad(roof, a[j], down(a[j]), down(a[j + 1]), a[j + 1]);
+            if (i === count - 1) quad(roof, b[j], b[j + 1], down(b[j + 1]), down(b[j]));
+          }
+          quad(roof, b[0], down(b[0]), down(a[0]), a[0]);
+          quad(roof, a[4], down(a[4]), down(b[4]), b[4]);
+        }
+        for (const side of [-1, 1]) {
+          const gx = x + side * w / 2;
+          triangle(gable, [gx, height, z - side * half], [gx, height + rise, z], [gx, height, z + side * half]);
+        }
+        solid(w + overhang * 2, .16, .22, roof, x, height + rise + .17, z);
+      }
+      function canopy(x, w, back, front, high, low) {
+        solid(w, .13, Math.hypot(front - back, high - low), roof, x, (high + low) / 2, (front + back) / 2, Math.atan2(high - low, front - back));
+      }
+      function door(x, bottom, z, w = 1.4, h = 2.05) {
+        solid(w + .22, h + .18, .1, wood, x, bottom + h / 2, z + .055);
+        solid(w, h, .035, dark, x, bottom + h / 2, z + .115);
+        for (const side of [-1, 1]) {
+          solid(w / 2 - .035, h - .06, .055, boards, x + side * w / 4, bottom + h / 2, z + .145);
+          for (const y of [.24, h - .28]) solid(w / 2 - .1, .09, .04, wood, x + side * w / 4, bottom + y, z + .18);
+        }
+      }
+      function windowBay(x, y, z, w = 1.1, h = 1, lattice = false, facing = 1) {
+        solid(w + .16, h + .16, .09, wood, x, y, z + facing * .05);
+        solid(w, h, .035, dark, x, y, z + facing * .11);
+        if (lattice) {
+          for (const dx of [-.3, 0, .3]) solid(.065, h, .045, wood, x + dx * w, y, z + facing * .145);
+          solid(w, .065, .045, wood, x, y, z + facing * .145);
+        } else {
+          for (const side of [-1, 1]) solid(w / 2 - .035, h - .05, .045, boards, x + side * w / 4, y, z + facing * .145);
+          for (const dy of [-.28, .28]) solid(w, .075, .035, wood, x, y + dy * h, z + facing * .18);
+        }
+      }
+      function frame(x, z, w, bottom, top, bays = 3) {
+        for (let i = 0; i <= bays; i++) solid(.16, top - bottom, .15, wood, x - w / 2 + .1 + (w - .2) * i / bays, (bottom + top) / 2, z);
+        for (const y of [bottom + .12, top - .12]) solid(w, .17, .16, wood, x, y, z);
+      }
+      function steps(x, z, w, height, count = 2, run = .5) {
+        for (let i = 0; i < count; i++) {
+          const h = height * (count - i) / count;
+          solid(w, h, run / count, stone, x, h / 2, z + (i + .5) * run / count);
+        }
+      }
+
+      if ((chapter === 3 && seed === 3) || (chapter === 12 && prop.y > 80)) group.rotation.y = Math.PI;
+      if (meeting) {
+        const gallery = Math.min(1.15, depth * .14), bodyW = width - 2 * gallery, bodyD = depth - 2 * gallery;
+        const floor = 3.08, eave = 5.95, px = width / 2 - .18, pz = depth / 2 - .18;
+        solid(width, .34, depth, stone);
+        room(0, 0, bodyW, bodyD, .34, eave);
+        solid(width - .12, .2, depth - .12, wood, 0, floor, 0);
+        for (const side of [-1, 1]) {
+          frame(0, side * pz, width - .2, .34, eave, 5);
+          for (let i = 0; i <= 5; i++) solid(.32, .2, .32, stone, -px + 2 * px * i / 5, .44, side * pz);
+          for (const y of [floor + .27, floor + .94]) solid(width - .3, .1, .12, wood, 0, y, side * pz);
+          for (let i = 0; i <= 28; i++) solid(.065, .65, .065, wood, -px + 2 * px * i / 28, floor + .59, side * pz);
+          for (const y of [floor + .27, floor + .94, eave - .12]) solid(.12, .1, depth - .3, wood, side * px, y, 0);
+          for (let i = 1; i < 18; i++) solid(.065, .65, .065, wood, side * px, floor + .59, -pz + 2 * pz * i / 18);
+          for (const z of [-depth * .17, depth * .17]) solid(.17, eave - .34, .17, wood, side * px, (eave + .34) / 2, z);
+          for (let i = -2; i <= 2; i++) {
+            const x = i * bodyW / 5;
+            windowBay(x, floor + 1.4, side * bodyD / 2, 1.35, 1.7, true, side);
+            if (i) windowBay(x, 1.85, side * bodyD / 2, 1.3, 1.45, true, side);
+          }
+          beam([side * px, eave - .66, pz], [side * (px - .6), eave - .15, pz], .065, wood, group);
+        }
+        door(0, .34, bodyD / 2, 1.7, 2.3);
+        steps(0, bodyD / 2 + .22, 2.25, .34, 2, gallery - .28);
+        pitched(0, 0, width - .12, depth - .12, eave, 1.42, .22, 0, wall);
+      } else if (loess) {
+        const archive = chapter === 11 && wooden, side = seed % 2 ? -1 : 1;
+        const base = .22, eave = archive ? 2.8 : 2.42 + (seed % 3) * .1;
+        const rearD = depth * .57, rearZ = -depth / 2 + rearD / 2 + .06, front = rearZ + rearD / 2;
+        solid(width, .16, depth, earth);
+        room(0, rearZ, width - .14, rearD, base, eave);
+        solid(width - .14, .22, rearD, stone, 0, .11, rearZ);
+        pitched(0, rearZ, width - .14, rearD, eave, .64 + (seed % 2) * .13, .13);
+        const wingW = width * .25, wingD = depth - rearD - .28, wingX = side * (width / 2 - wingW / 2 - .07);
+        const wingZ = front + wingD / 2, wingTop = eave - .4;
+        room(wingX, wingZ, wingW, wingD, base, wingTop);
+        canopy(wingX, wingW + .12, front - .06, front + wingD + .08, wingTop + .48, wingTop + .08);
+        solid(wingW, .4, .1, wall, wingX, wingTop + .2, front);
+        for (const s of [-1, 1]) {
+          const x = wingX + s * wingW / 2;
+          triangle(wall, [x, wingTop, wingZ - s * wingD / 2], [x, wingTop + .4, front], [x, wingTop, wingZ + s * wingD / 2]);
+        }
+        door(0, base, front, archive ? 1.55 : 1.25, 1.95);
+        windowBay(-side * width * .29, base + 1.4, front, archive ? 1.45 : .85, .95, archive || wooden);
+        if (archive) frame(0, front + .11, width - .2, base, eave, 4);
+        const gateX = -side * width * .1, gateW = 1.55, fenceZ = depth / 2 - .16;
+        const left = gateX - gateW / 2 - .12, right = gateX + gateW / 2 + .12;
+        solid(left + width / 2, 1.18, .28, wall, (left - width / 2) / 2, .59, fenceZ);
+        solid(width / 2 - right, 1.18, .28, wall, (right + width / 2) / 2, .59, fenceZ);
+        solid(.24, 1.18, depth - rearD - .12, wall, -side * (width / 2 - .12), .59, front + (depth - rearD - .12) / 2);
+        for (const s of [-1, 1]) solid(.24, 2.04, .4, wall, gateX + s * (gateW / 2 + .12), 1.02, depth / 2 - .22);
+        door(gateX, .12, depth / 2 - .42, gateW, 1.8);
+        solid(gateW + .52, .14, .52, roof, gateX, 2.05, depth / 2 - .28);
+      } else if (chapter === 4) {
+        const floor = wooden ? 1.02 + (seed % 2) * .25 : .66;
+        const eave = floor + (wooden ? 2.95 : 2.65), bodyD = depth - 1.18, bodyZ = -.51, front = bodyZ + bodyD / 2;
+        solid(width, .13, depth, stone);
+        solid(width - .1, .42, depth * .38, stone, 0, .21, -depth * .3);
+        solid(width - .12, .2, depth - .12, boards, 0, floor, 0);
+        room(0, bodyZ, width - .24, bodyD, floor + .1, eave, boards);
+        frame(0, front + .07, width - .24, .13, eave, 4);
+        for (const side of [-1, 1]) {
+          const x = side * (width / 2 - .26), z = depth / 2 - .22;
+          solid(.32, .22, .34, stone, x, .24, z);
+          solid(.2, eave - .95, .2, wood, x, (eave - .95) / 2, z);
+          beam([x, .23, z], [x - side * 1.15, floor - .1, z], .09, wood, group);
+          solid(.13, .12, depth - .35, wood, x, floor + .92, 0);
+          const railW = width / 2 - 1.08;
+          solid(railW, .12, .13, wood, side * (1 + railW / 2), floor + .9, z);
+          for (let i = 0; i < 6; i++) solid(.075, .7, .075, wood, side * (1.08 + railW * i / 6), floor + .52, z);
+          windowBay(side * width * .27, floor + 1.65, front, 1.25, 1.25, true);
+        }
+        door(0, floor + .1, front, 1.5, 2.15);
+        steps(0, front + .23, 1.65, floor + .1, 4, depth / 2 - front - .28);
+        pitched(0, bodyZ, width - .24, bodyD, eave, 1.25, .22, .02, boards);
+        canopy(0, width - .06, front - .22, depth / 2 + .14, eave - .48, eave - 1.05);
+      } else if (chapter === 1) {
+        const warehouse = seed === 3, publicHall = seed === 2, archive = seed === 5;
+        const base = .38 + (seed % 2) * .06, front = depth / 2 - (warehouse || publicHall || wooden ? 1 : .64), back = -depth / 2 + .08;
+        const bodyD = front - back, bodyZ = (front + back) / 2;
+        const eave = warehouse ? 3.65 : publicHall ? 3.4 : archive ? 3.25 : 2.78 + (seed % 3) * .18;
+        solid(width, base, depth, earth);
+        const annexW = warehouse || publicHall || archive || wooden ? 0 : width * .25, side = seed % 2 ? 1 : -1;
+        const mainW = width - annexW - .14, mainX = -side * annexW / 2;
+        room(mainX, bodyZ, mainW, bodyD, base, eave, wooden ? boards : wall);
+        pitched(mainX, bodyZ, mainW, bodyD, eave, warehouse ? 1.5 : 1.18 + (seed % 2) * .18, .22, .055, wooden ? boards : wall);
+        if (annexW) {
+          const x = side * (width - annexW) / 2, d = bodyD * .83, z = back + d / 2;
+          room(x, z, annexW - .14, d, base, eave - .52);
+          pitched(x, z, annexW - .14, d, eave - .52, .72, .16, .04);
+          windowBay(x, base + 1.3, z + d / 2, .72, .82);
+        }
+        door(mainX, base, front, warehouse ? 2.45 : publicHall ? 1.8 : 1.35, warehouse ? 2.6 : 2.08);
+        for (const s of [-1, 1]) windowBay(mainX + s * mainW * .31, warehouse ? 2.94 : base + 1.5, front, warehouse ? 1.15 : .95, warehouse ? .52 : 1.05, archive || publicHall || wooden);
+        steps(mainX, front + .23, warehouse ? 2.7 : 1.75, base, 2, depth / 2 - front - .3);
+        if (warehouse || publicHall || wooden) {
+          const z = depth / 2 - .18;
+          canopy(0, width - .1, front - .14, depth / 2 + .13, eave - .26, eave - .67);
+          for (const s of [-1, 1]) solid(.18, eave - .61 - base, .18, wood, s * width * .36, (eave - .61 + base) / 2, z);
+          if (wooden) frame(0, front + .08, width - .2, base, eave, 4);
+        }
+      } else if (chapter === 6) {
+        const base = .4, eave = 2.96 + ((prop.h || 7) - 6.6) * .2, front = depth / 2 - 1.02;
+        const bodyD = depth - 1.14, bodyZ = -.45, postZ = depth / 2 - .18;
+        solid(width, base, depth, stone);
+        room(0, bodyZ, width - .24, bodyD, base, eave, boards);
+        frame(0, front + .07, width - .24, base, eave, 4);
+        for (const s of [-1, 1]) {
+          const x = s * (width / 2 - .24);
+          solid(.19, eave - base, .19, wood, x, (eave + base) / 2, postZ);
+          solid(.14, .16, depth - .3, wood, x, 1.12, -.03);
+          beam([x, eave - .62, postZ], [x - s * .6, eave - .14, postZ], .07, wood, group);
+          windowBay(s * width * .27, 1.9, front, 1.3, 1.18);
+        }
+        solid(width - .3, .19, .18, wood, 0, eave - .14, postZ);
+        door(0, base, front, 1.6, 2.08);
+        steps(0, front + .23, 1.9, base, 2, .65);
+        pitched(0, 0, width - .16, depth - .16, eave, 1.38 + (seed % 2) * .16, .2, 0, boards);
+      } else if (barracks) {
+        const base = .28, eave = 2.46 + (seed % 2) * .12, front = depth / 2 - .52;
+        solid(width, base, depth, stone);
+        room(0, -.22, width - .16, depth - .6, base, eave);
+        pitched(0, 0, width - .16, depth - .14, eave, .78, .14, 0, boards);
+        for (const s of [-1, 1]) {
+          door(s * width * .22, base, front, 1.08, 1.98);
+          windowBay(s * width * .39, 1.92, front, .55, .48);
+          steps(s * width * .22, front + .22, 1.3, base, 1, .25);
+        }
+        solid(width - .2, .17, .15, wood, 0, eave - .12, front + .07);
+      } else if (chapter === 7 && wooden) {
+        const base = .35, floor = 2.86, eave = 5.12, front = depth / 2 - .6;
+        solid(width, base, depth, stone);
+        room(0, -.34, width - .54, depth - .94, base, floor, boards);
+        room(0, -.2, width - .2, depth - .6, floor, eave);
+        solid(width - .16, .2, depth - .42, wood, 0, floor, -.16);
+        frame(0, front - .14, width - .6, base, floor, 3);
+        door(0, base, front - .21, 1.7, 2.18);
+        for (const s of [-1, 1]) {
+          windowBay(s * width * .29, 1.7, front - .21, 1.65, 1.45);
+          windowBay(s * width * .3, 4.05, depth / 2 - .5, 1.35, 1.35, true);
+        }
+        windowBay(0, 4.05, depth / 2 - .5, 1.35, 1.35, true);
+        frame(0, depth / 2 - .43, width - .22, floor, eave, 3);
+        canopy(0, width - .14, front - .26, depth / 2 + .13, floor - .04, floor - .43);
+        pitched(0, -.14, width - .16, depth - .32, eave, 1.18, .18, 0, boards);
+        steps(0, front + .02, 1.95, base, 2, .48);
+      } else {
+        const shop = chapter === 3 && wooden;
+        const base = .32, eave = shop ? 3.2 + (seed % 2) * .18 : 2.84 + Math.max(0, (prop.h || 7) - 6.6) * .23;
+        const recess = shop ? .88 : .52, front = depth / 2 - recess;
+        const bodyD = depth - recess - .08, bodyZ = (.08 - recess) / 2;
+        solid(width, base, depth, stone);
+        room(0, bodyZ, width - .16, bodyD, base, eave, shop || wooden ? boards : wall);
+        pitched(0, 0, width - .16, depth - .16, eave, shop ? 1.38 : 1.05, .18, 0, shop || wooden ? boards : wall);
+        door(shop ? -width * .26 : 0, base, front, shop ? 1.55 : 1.3, 2.08);
+        if (shop) {
+          frame(0, front + .08, width - .2, base, eave, 3);
+          for (const x of [0, width * .28]) windowBay(x, base + 1.14, front, width * .22, 1.95);
+          for (const s of [-1, 1]) solid(.17, eave - base, .17, wood, s * (width / 2 - .2), (eave + base) / 2, depth / 2 - .16);
+        } else {
+          for (const s of [-1, 1]) windowBay(s * width * .29, base + 1.45, front, 1.05, 1.04, chapter === 3 || chapter === 7);
+        }
+        steps(shop ? -width * .26 : 0, front + .23, 1.7, base, 2, recess - .29);
+      }
+      cube.dispose();
+      for (const [mat, positions] of parts) {
+        const geometry = new T.BufferGeometry();
+        geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+        geometry.computeVertexNormals();
+        mesh(geometry, mat, 0, 0, 0, group);
+      }
+    }
+
+    function scannedProp(key, prop, height) {
+      const model = assets.models[key].clone(true);
+      const bounds = new T.Box3().setFromObject(model);
+      const size = bounds.getSize(new T.Vector3()), center = bounds.getCenter(new T.Vector3());
+      const scale = height / size.y;
+      model.scale.setScalar(scale);
+      model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+      const group = groupAt(prop);
+      model.name = 'march-scan-' + key;
+      group.add(model);
+      group.rotation.y = (prop.seed || 1) * 2.39996;
+      model.traverse(object => {
+        if (!object.isMesh) return;
+        object.castShadow = true; object.receiveShadow = true;
+      });
+      if (key === 'rock' && snowy) {
+        const cap = mesh(new T.SphereGeometry(1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), snowSurface(), 0, height * .7, 0, group);
+        cap.scale.set(size.x * scale * .37, height * .31, size.z * scale * .37);
+      }
+      return group;
+    }
+
+    function tree(prop, pine = false) {
+      if (!pine) return snowy ? deadTree(prop, true) : scannedProp('tree', prop, (prop.h || 9) * .85);
+      const group = groupAt(prop), height = prop.h || 9, width = prop.w || 7;
+      const wood = surface('wood', '#7b6b58', 1.2);
+      mesh(new T.CylinderGeometry(.045, width * .047, height, 12), wood, 0, height / 2, 0, group);
+      const branches = new T.InstancedMesh(new T.CylinderGeometry(.018, .07, 1, 6), wood, 48);
+      const needles = new T.BufferGeometry(), vertices = [];
+      for (let i = 0; i < 12; i++) {
+        const angle = i * 2.39996, x = Math.cos(angle), z = Math.sin(angle), y = i * .055;
+        vertices.push(0, y, 0, x * .7, y + .13, z * .7, x * .24 - z * .075, y + .055, z * .24 + x * .075);
+      }
+      needles.setAttribute('position', new T.Float32BufferAttribute(vertices, 3)); needles.computeVertexNormals();
+      const leaf = material(logicalScene.palette.pine); leaf.side = T.DoubleSide;
+      const tufts = new T.InstancedMesh(needles, leaf, 48 * 9);
+      const caps = snowy ? new T.InstancedMesh(new T.SphereGeometry(1, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), snowSurface(), 48) : null;
+      const dummy = new T.Object3D(), up = new T.Vector3(0, 1, 0);
+      for (let i = 0; i < 48; i++) {
+        const level = Math.floor(i / 6), angle = i * 2.39996 + (prop.seed || 1);
+        const reach = width * .45 * (1 - level / 9);
+        const start = new T.Vector3(0, height * (.25 + level * .09), 0);
+        const end = new T.Vector3(Math.cos(angle) * reach, start.y + .2, Math.sin(angle) * reach);
+        const direction = end.clone().sub(start);
+        dummy.position.copy(start).addScaledVector(direction, .5);
+        dummy.quaternion.setFromUnitVectors(up, direction.clone().normalize()); dummy.scale.set(1, direction.length(), 1); dummy.updateMatrix(); branches.setMatrixAt(i, dummy.matrix);
+        for (let j = 0; j < 9; j++) {
+          dummy.position.copy(start).addScaledVector(direction, (j + 1) / 10);
+          dummy.rotation.set(0, angle + j * 1.7, .15); dummy.scale.setScalar(.55 + (1 - j / 9) * .55); dummy.updateMatrix(); tufts.setMatrixAt(i * 9 + j, dummy.matrix);
+        }
+        if (caps) {
+          dummy.position.copy(start).addScaledVector(direction, .62); dummy.position.y += .11;
+          dummy.rotation.set(0, -angle, 0); dummy.scale.set(reach * .42, .13, .28); dummy.updateMatrix(); caps.setMatrixAt(i, dummy.matrix);
+        }
+      }
+      for (const object of [branches, tufts, caps].filter(Boolean)) { object.castShadow = true; object.receiveShadow = true; group.add(object); }
+    }
+
+    function gate(prop) {
+      const group = groupAt(prop);
+      const width = prop.w || 7;
+      const height = Math.max(3.6, (prop.h || 7) * .65);
+      const wood = assets ? surface('wood', '#847468', 1.4) : material('#5c402a');
+      for (const side of [-1, 1]) mesh(new T.CylinderGeometry(0.18, 0.24, height, 8), wood, side * width / 2, height / 2, 0, group);
+      mesh(new T.BoxGeometry(width + 1, 0.35, 0.4), wood, 0, height - 0.3, 0, group);
+      const flag = mesh(new T.PlaneGeometry(width * 0.55, height * 0.25, 8, 2), new T.MeshStandardMaterial({ color: logicalScene.palette.flag, roughness: 0.82, side: T.DoubleSide }), 0, height * 0.73, 0.06, group);
+      flags.push(flag);
+    }
+
+    function boat(prop) {
+      const group = groupAt(prop);
+      group.position.y = terrain.waterLevel + .12;
+      const width = prop.w || 6;
+      const hull = mesh(new T.SphereGeometry(1, 16, 8), material('#4d3625'), 0, 0, 0, group);
+      hull.scale.set(width * 0.48, 0.42, 1.15);
+      mesh(new T.BoxGeometry(width * 0.78, 0.14, 1.55), material('#806142'), 0, 0.26, 0, group);
+    }
+
+    function bridgeDepth(prop) {
+      const gaps = props.filter(other => other.type === 'bridge' && other.x === prop.x && other.y !== prop.y).map(other => Math.abs(other.y - prop.y));
+      const gap = Math.min(...gaps);
+      return Number.isFinite(gap) && gap <= (prop.h || 4) * 2 ? gap + .02 : prop.h || 4;
+    }
+
+    function bridge(prop) {
+      const group = groupAt(prop), width = prop.w || 12, depth = bridgeDepth(prop);
+      group.position.y = .145;
+      const count = Math.ceil(depth / .55), wood = surface('wood', '#a29780', 2);
+      const deck = new T.InstancedMesh(new T.BoxGeometry(width, .16, depth / count), wood, count);
+      deck.name = 'march-wood-bridge-deck';
+      const dummy = new T.Object3D();
+      for (let i = 0; i < count; i++) { dummy.position.set(0, 0, -depth / 2 + (i + .5) * depth / count); dummy.updateMatrix(); deck.setMatrixAt(i, dummy.matrix); }
+      deck.castShadow = true; deck.receiveShadow = true; group.add(deck); pickSurfaces.push(deck);
+      for (const side of [-1, 1]) {
+        beam([side * width / 2, .8, -depth / 2], [side * width / 2, .8, depth / 2], .045, wood, group);
+        for (const end of [-1, 1]) beam([side * width / 2, 0, end * depth / 2], [side * width / 2, 1, end * depth / 2], .065, wood, group);
+      }
+    }
+
+    function beam(a, b, radius, mat, parent) {
+      const start = new T.Vector3(...a), end = new T.Vector3(...b), direction = end.sub(start);
+      const object = mesh(new T.CylinderGeometry(radius * .8, radius, direction.length(), 8), mat, 0, 0, 0, parent);
+      object.position.copy(start).addScaledVector(direction, .5);
+      object.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), direction.normalize());
+      return object;
+    }
+
+    function cable(parent, width, height, z, sag) {
+      const count = Math.ceil(width / .3), iron = material('#55564f', .48, .75);
+      const links = new T.InstancedMesh(new T.TorusGeometry(.12, .025, 5, 12), iron, count);
+      const dummy = new T.Object3D();
+      for (let i = 0; i < count; i++) {
+        const t = i / (count - 1);
+        dummy.position.set((t - .5) * width, height - sag * 4 * t * (1 - t), z);
+        dummy.rotation.set(i % 2 ? Math.PI / 2 : 0, 0, Math.atan2(-sag * 4 * (1 - 2 * t), width));
+        dummy.scale.set(1.7, 1, 1); dummy.updateMatrix(); links.setMatrixAt(i, dummy.matrix);
+      }
+      links.castShadow = true; links.receiveShadow = true; parent.add(links);
+    }
+
+    function chainBridge(prop) {
+      const group = groupAt(prop), width = prop.w || 12;
+      if (logicalScene.ironBridge) { group.position.y = 0; group.position.z = logicalScene.ironBridge.y + (prop.seed % 2 ? -3 : 3) - world.h / 2; }
+      for (const level of [.65, 1.45]) cable(group, width, level, 0, .22);
+      for (const side of [-1, 1]) beam([side * width / 2, 0, 0], [side * width / 2, 1.65, 0], .1, surface('wood', '#837264'), group);
+    }
+
+    if (logicalScene.ironBridge) {
+      const bridge = logicalScene.ironBridge, width = bridge.x1 - bridge.x0;
+      const group = groupAt({ type: 'ironBridge', x: (bridge.x0 + bridge.x1) / 2, y: bridge.y });
+      group.position.y = 0;
+      const count = Math.ceil(width / .65), plankWidth = width / count;
+      const deck = new T.InstancedMesh(new T.BoxGeometry(plankWidth, .16, 6), surface('wood', '#a29780', 2), count);
+      deck.name = 'march-iron-bridge-deck';
+      const dummy = new T.Object3D();
+      for (let i = 0; i < count; i++) {
+        dummy.position.set(-width / 2 + (i + .5) * plankWidth, -.055, 0); dummy.updateMatrix(); deck.setMatrixAt(i, dummy.matrix);
+      }
+      deck.castShadow = true; deck.receiveShadow = true; group.add(deck); pickSurfaces.push(deck);
+      for (let i = 0; i < bridge.deckChains; i++) cable(group, width, -.15, (i / (bridge.deckChains - 1) - .5) * bridge.width, .08);
+    }
+
+    function archedWall(group, width, height, depth, opening, mat) {
+      const spring = height * .4, radius = opening / 2;
+      const shape = new T.Shape();
+      shape.moveTo(-width / 2, 0); shape.lineTo(-width / 2, height); shape.lineTo(width / 2, height); shape.lineTo(width / 2, 0);
+      shape.lineTo(radius, 0); shape.lineTo(radius, spring); shape.absarc(0, spring, radius, 0, Math.PI, false); shape.lineTo(-radius, 0); shape.closePath();
+      return mesh(new T.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelSize: .035, bevelThickness: .035, bevelSegments: 2, curveSegments: 24, steps: 1 }), mat, 0, 0, -depth / 2, group);
+    }
+
+    function archGate(prop) {
+      const group = groupAt(prop), width = prop.w || 12, height = (prop.h || 9) * .7, depth = prop.depth || 4;
+      const stone = surface('rock', environment.rockTint, 2.3);
+      const opening = Math.min(width * .4, 8);
+      archedWall(group, width, height, depth, opening, stone);
+      const door = mesh(new T.BoxGeometry(opening, height * .4 + opening / 2, .25), surface('wood', '#75654f', 2), 0, (height * .4 + opening / 2) / 2, depth / 2 - .18, group);
+      door.name = 'march-arch-closed-door';
+      for (const y of [height * .18, height * .42]) mesh(new T.BoxGeometry(opening, .16, .08), material('#4e4c42', .65, .65), 0, y, depth / 2, group);
+      mesh(new T.BoxGeometry(width + .45, .4, depth + .5), stone, 0, height, 0, group);
+      for (let i = 0; i < Math.ceil(width / 1.5); i++) {
+        const x = -width / 2 + (i + .5) * width / Math.ceil(width / 1.5);
+        for (const side of [-1, 1]) mesh(new T.BoxGeometry(.75, .75, .55), stone, x, height + .53, side * depth * .46, group);
+      }
+      const roof = mesh(new T.ConeGeometry(width * .32, 1.8, 4), surface('roof', '#8a8b80'), 0, height + 1.65, 0, group);
+      roof.rotation.y = Math.PI / 4; roof.scale.z = .6;
+      mesh(new T.BoxGeometry(width * .38, 1.25, depth * .68), surface('wood', '#ad9780'), 0, height + .68, 0, group);
+    }
+
+    function yaodong(prop) {
+      const group = groupAt(prop), width = prop.w || 9, depth = prop.depth || 6, height = (prop.h || 7) * .62;
+      const loess = surface('rock', logicalScene.palette.loess || '#b99a67', 3, .45);
+      const mound = mesh(new T.SphereGeometry(1, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2), loess, 0, height * .73, -depth * .06, group);
+      mound.scale.set(width * .5, height * .65, depth * .44);
+      const mass = mesh(new T.BoxGeometry(width, height * .8, depth * .82), loess, 0, height * .4, -depth * .09, group);
+      mass.name = 'march-yaodong-earth-mass';
+      const front = depth / 2 - .325;
+      const facade = new T.Group(); facade.position.z = front; group.add(facade);
+      archedWall(facade, width, height, .65, Math.min(2.3, width * .32), loess);
+      mesh(new T.BoxGeometry(width, height * .9, .4), material('#302a20'), 0, height * .4, depth * .3, group);
+      const wood = surface('wood', '#93836a');
+      for (const side of [-1, 1]) {
+        const x = side * width * .32;
+        mesh(new T.BoxGeometry(width * .18, 1.3, .2), material('#27291e'), x, height * .5, front + .37, group);
+        for (let i = -2; i <= 2; i++) beam([x + i * width * .033, height * .5 - .65, front + .5], [x + i * width * .033, height * .5 + .65, front + .5], .025, wood, group);
+        for (const y of [-.35, .35]) beam([x - width * .09, height * .5 + y, front + .5], [x + width * .09, height * .5 + y, front + .5], .025, wood, group);
+      }
+    }
+
+    function tent(prop) {
+      const group = groupAt(prop), width = prop.w || 7, depth = prop.depth || width * .7, height = Math.min(3.4, (prop.h || 5) * .62);
+      const cloth = material(logicalScene.palette.tent || '#91836b', .98); cloth.side = T.DoubleSide;
+      const geometry = new T.BufferGeometry();
+      geometry.setAttribute('position', new T.Float32BufferAttribute([-width / 2, 0, -depth / 2, -width / 2, 0, depth / 2, 0, height, -depth / 2, 0, height, depth / 2, width / 2, 0, -depth / 2, width / 2, 0, depth / 2], 3));
+      geometry.setIndex([0, 1, 2, 1, 3, 2, 2, 3, 4, 3, 5, 4, 0, 2, 4]); geometry.computeVertexNormals(); mesh(geometry, cloth, 0, 0, 0, group);
+      const wood = surface('wood', '#8d7a62');
+      for (const side of [-1, 1]) beam([0, 0, side * depth / 2], [0, height + .12, side * depth / 2], .06, wood, group);
+      for (const side of [-1, 1]) {
+        const flap = new T.BufferGeometry(); flap.setAttribute('position', new T.Float32BufferAttribute([side * width / 2, 0, depth / 2, 0, height, depth / 2, side * width * .1, 0, depth / 2 + .3], 3)); flap.computeVertexNormals(); mesh(flap, cloth, 0, 0, 0, group);
+        for (const z of [-1, 1]) beam([side * width / 2, .3, z * depth * .35], [side * (width / 2 + .8), .02, z * depth * .55], .017, material('#bca880'), group);
+      }
+    }
+
+    function stoneWall(prop) {
+      const group = groupAt(prop), width = prop.w || 8, height = Math.min(3.2, prop.h || 3), depth = prop.depth || 1.1;
+      const stone = surface('rock', environment.rockTint, 1.6), cols = Math.ceil(width / 1.4), rows = Math.ceil(height / .55);
+      const blocks = new T.InstancedMesh(new T.BoxGeometry(width / cols - .035, height / rows - .035, depth), stone, cols * rows);
+      const dummy = new T.Object3D();
+      for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
+        dummy.position.set(-width / 2 + (col + .5) * width / cols, (row + .5) * height / rows, Math.sin(row * 8 + col) * .025); dummy.updateMatrix(); blocks.setMatrixAt(row * cols + col, dummy.matrix);
+      }
+      blocks.castShadow = true; blocks.receiveShadow = true; group.add(blocks);
+      if (snowy) mesh(new T.BoxGeometry(width + .08, .14, depth + .1), snowSurface(), 0, height + .05, 0, group);
+    }
+
+    function flagPole(prop, prayer = false) {
+      const group = groupAt(prop), height = (prop.h || 6) * .85, width = prop.w || 3;
+      const wood = surface('wood', '#776c5a'), colors = ['#c8a13a', '#b4503a', '#3f6d8e', '#dad3c0', '#4a7a52'];
+      if (prayer) {
+        for (const side of [-1, 1]) beam([side * width / 2, 0, 0], [side * width / 2, height, 0], .06, wood, group);
+        const points = Array.from({ length: 25 }, (_, i) => new T.Vector3((i / 24 - .5) * width, height - .7 * Math.sin(i / 24 * Math.PI), 0));
+        mesh(new T.TubeGeometry(new T.CatmullRomCurve3(points), 48, .02, 5, false), wood, 0, 0, 0, group);
+        for (let i = 0; i < 10; i++) {
+          const t = (i + .5) / 10, mat = material(colors[i % colors.length]); mat.side = T.DoubleSide;
+          const flag = mesh(new T.PlaneGeometry(width * .055, .65, 6, 4), mat, (t - .5) * width, height - .7 * Math.sin(t * Math.PI) - .32, 0, group); flags.push(flag);
+        }
+      } else {
+        beam([0, 0, 0], [0, height, 0], .065, wood, group);
+        mesh(new T.CylinderGeometry(.35, .5, .3, 12), surface('rock', environment.rockTint), 0, .15, 0, group);
+        const mat = material(logicalScene.palette.flag, .9); mat.side = T.DoubleSide;
+        const flag = mesh(new T.PlaneGeometry(width * .85, height * .23, 12, 4), mat, width * .425, height * .82, 0, group); flags.push(flag);
+      }
+    }
+
+    function deadTree(prop, snow = false) {
+      const group = groupAt(prop), height = prop.h || 6, width = prop.w || 4, wood = surface('wood', '#7b7364');
+      beam([0, 0, 0], [.15, height, 0], width * .045, wood, group);
+      for (let i = 0; i < 7; i++) {
+        const angle = i * 2.4, y = height * (.32 + i * .07), reach = width * (.5 - i * .035);
+        const end = [Math.cos(angle) * reach, y + height * .13, Math.sin(angle) * reach];
+        beam([.05, y, 0], end, width * .023, wood, group);
+        beam(end, [end[0] * 1.15, end[1] + height * .13, end[2] * 1.15], width * .012, wood, group);
+        if (snow) beam([.05, y + .06, 0], [end[0], end[1] + .06, end[2]], width * .018, snowSurface(), group);
+      }
+    }
+
+    function tower(prop) {
+      const group = groupAt(prop), width = prop.w || 5, height = (prop.h || 9) * .8, wood = surface('wood', '#9b8770');
+      for (const x of [-1, 1]) for (const z of [-1, 1]) beam([x * width * .45, 0, z * width * .35], [x * width * .36, height, z * width * .28], .13, wood, group);
+      for (const z of [-1, 1]) {
+        beam([-width * .43, .3, z * width * .32], [width * .36, height * .7, z * width * .28], .08, wood, group);
+        beam([width * .43, .3, z * width * .32], [-width * .36, height * .7, z * width * .28], .08, wood, group);
+      }
+      mesh(new T.BoxGeometry(width, .25, width * .8), wood, 0, height * .72, 0, group);
+      const roof = mesh(new T.ConeGeometry(width * .8, height * .24, 4), surface('roof', '#92918a'), 0, height, 0, group); roof.rotation.y = Math.PI / 4;
+      for (let i = 0; i < 12; i++) beam([-.4, i * height * .06, width * .38], [.4, i * height * .06, width * .38], .05, wood, group);
+    }
+
+    function simpleProp(prop) {
+      if (assets && prop.type === 'crate') return scannedProp('crate', prop, 1.15);
+      if (assets && ['cliff', 'rock'].includes(prop.type)) return scannedProp('rock', prop, prop.h || 4);
+      const group = groupAt(prop);
+      const width = prop.w || 3;
+      const height = prop.h || 3;
+      if (prop.type === 'cliff') {
+        const rock = mesh(new T.DodecahedronGeometry(1, 1), material(logicalScene.palette.rock), 0, height * 0.35, 0, group);
+        rock.scale.set(width * 0.55, height * 0.55, width * 0.3);
+      } else if (prop.type === 'crate') {
+        mesh(new T.BoxGeometry(width, height * 0.65, width * 0.75), material('#765638'), 0, height * 0.32, 0, group);
+      } else if (prop.type === 'grain') {
+        for (let i = 0; i < 4; i++) {
+          const sack = mesh(new T.SphereGeometry(0.65, 10, 7), material('#a28a5d'), (i % 2 - .5) * width * .38, 0.65 + Math.floor(i / 2) * 0.75, 0, group);
+          sack.scale.set(1, 1.2, .8);
+        }
+      } else if (prop.type === 'campfire') {
+        const radius = width * .23, flameHeight = height * .55;
+        const stone = surface('rock', '#aaa395', .6), charred = surface('wood', '#403128', .7);
+        for (let i = 0; i < 11; i++) {
+          const angle = i * Math.PI * 2 / 11;
+          const rock = mesh(new T.DodecahedronGeometry(.22, 1), stone, Math.cos(angle) * radius, .13, Math.sin(angle) * radius, group);
+          rock.scale.set(1.3, .7, 1); rock.rotation.set(i * .31, angle, i * .17);
+        }
+        for (let i = 0; i < 5; i++) {
+          const angle = i * Math.PI / 5, x = Math.cos(angle) * radius * .85, z = Math.sin(angle) * radius * .85;
+          beam([-x, .14, -z], [x, .24, z], .11, charred, group);
+        }
+        const flameMaterial = new T.ShaderMaterial({
+          uniforms: { time: { value: 0 }, phase: { value: prop.seed || 1 } },
+          vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+          fragmentShader: `
+            uniform float time;
+            uniform float phase;
+            varying vec2 vUv;
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+            float noise(vec2 p) {
+              vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+              return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0)), f.x), f.y);
+            }
+            void main() {
+              float y = vUv.y, t = time * 1.8 + phase;
+              vec2 p = vec2(vUv.x * 5.0, y * 5.0 - t);
+              float n = noise(p) * .6 + noise(p * 2.1) * .28 + noise(p * 4.2) * .12;
+              float bend = (noise(vec2(y * 4.0, t * .6)) - .5) * y * .32;
+              float x = abs(vUv.x - .5 + bend);
+              float edge = (1.0 - y) * .38 + (n - .5) * .22;
+              float alpha = (1.0 - smoothstep(edge - .09, edge + .025, x)) * smoothstep(0.0, .1, y) * (1.0 - smoothstep(.65, 1.0, y)) * .48;
+              if (alpha < .008) discard;
+              vec3 color = mix(vec3(1.0, .12, .012), vec3(1.0, .68, .16), clamp((1.0 - y) * .7 + n * .45 - x, 0.0, 1.0));
+              gl_FragColor = vec4(color, alpha);
+              #include <colorspace_fragment>
+            }`,
+          transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.AdditiveBlending, toneMapped: false
+        });
+        for (let i = 0; i < 3; i++) {
+          const flame = mesh(new T.PlaneGeometry(radius * 2, flameHeight), flameMaterial, 0, .14 + flameHeight / 2, 0, group);
+          flame.rotation.y = i * Math.PI / 3; flame.castShadow = false; flame.receiveShadow = false; flame.name = 'march-fire-flame';
+        }
+        const light = new T.PointLight('#ff993f', 5, 5, 2); light.position.y = .7; group.add(light);
+        fires.push({ material: flameMaterial, light });
+      } else if (prop.type === 'lantern') {
+        const poleHeight = assets ? 2.7 : height;
+        const wood = assets ? surface('wood', '#817265', 1) : material('#4b3928');
+        mesh(new T.CylinderGeometry(.06, .085, poleHeight, 12), wood, 0, poleHeight / 2, 0, group);
+        mesh(new T.BoxGeometry(.65, .07, .08), wood, .23, poleHeight - .1, 0, group);
+        mesh(new T.BoxGeometry(.34, .5, .34), new T.MeshStandardMaterial({ color: '#c7ad7d', roughness: .95, emissive: '#cf812e', emissiveIntensity: .35 }), .47, poleHeight - .53, 0, group);
+        for (const x of [-1, 1]) for (const z of [-1, 1]) mesh(new T.BoxGeometry(.028, .54, .028), wood, .47 + x * .18, poleHeight - .53, z * .18, group);
+        for (const offset of [-.27, .27]) mesh(new T.BoxGeometry(.39, .035, .39), wood, .47, poleHeight - .53 + offset, 0, group);
+        if ([1, 9].includes(logicalScene.chapterId)) {
+          const light = new T.PointLight('#ffb36b', 18, 12, 2);
+          light.position.set(.47, poleHeight - .53, .25); group.add(light);
+        }
+      } else if (prop.type === 'well') {
+        const radius = assets ? 1.1 : width * .42;
+        const stone = assets ? surface('rock', '#929080', 1.5) : material('#777264');
+        const ring = mesh(new T.TorusGeometry(radius, .22, 10, 32), stone, 0, .85, 0, group);
+        ring.rotation.x = Math.PI / 2;
+        mesh(new T.CylinderGeometry(radius + .08, radius + .12, .75, 32, 1, true), stone, 0, .42, 0, group);
+        const interior = mesh(new T.CircleGeometry(radius, 32), material('#182623'), 0, .12, 0, group);
+        interior.rotation.x = -Math.PI / 2;
+      } else if (prop.type === 'cart') {
+        mesh(new T.BoxGeometry(width * .7, .35, width * .45), material('#6e4f33'), 0, .85, 0, group);
+        for (const side of [-1, 1]) {
+          const wheel = mesh(new T.TorusGeometry(width * .22, .1, 7, 16), material('#443225'), side * width * .37, .65, 0, group);
+          wheel.rotation.y = Math.PI / 2;
+        }
+      } else if (prop.type === 'table') {
+        mesh(new T.BoxGeometry(width, .18, width * .55), material('#62472f'), 0, height * .55, 0, group);
+        for (const x of [-1, 1]) for (const z of [-1, 1]) mesh(new T.BoxGeometry(.16, height * .55, .16), material('#4c3828'), x * width * .38, height * .27, z * width * .2, group);
+      } else if (prop.type === 'stele') {
+        mesh(new T.BoxGeometry(width * .55, height, .45), material('#79766b'), 0, height / 2, 0, group);
+      } else if (prop.type === 'sandbag') {
+        const sack = material('#a39572', .98);
+        for (let row = 0; row < 3; row++) for (let col = 0; col < 4; col++) {
+          const bag = mesh(new T.SphereGeometry(1, 16, 10), sack, (col - 1.5) * width / 4 + (row % 2) * .12, .2 + row * .35, 0, group);
+          bag.scale.set(width / 8 + .04, .21, .45); bag.rotation.y = Math.sin(row * 8 + col) * .08;
+        }
+      } else if (prop.type === 'stairs') {
+        for (let i = 0; i < 8; i++) pickSurfaces.push(mesh(new T.BoxGeometry(width, .08 * (i + 1), height / 8), surface('rock', environment.rockTint, 1.5), 0, .04 * (i + 1), height * (.5 - (i + .5) / 8), group));
+      } else {
+        stats.unsupportedProps.push(prop.type);
+      }
+    }
+
+    function alignedProp(original) {
+      const prop = { ...original };
+      if (['house', 'houseWood', 'tent', 'stoneWall', 'archGate', 'yaodong'].includes(prop.type)) {
+        const rectangles = (logicalScene.blocked || []).map(b => b.rect).filter(Boolean);
+        const rect = rectangles.find(r => prop.x >= r[0] && prop.x <= r[0] + r[2] && prop.y >= r[1] && prop.y <= r[1] + r[3]);
+        if (rect) { prop.x = rect[0] + rect[2] / 2; prop.y = rect[1] + rect[3] / 2; prop.w = rect[2]; prop.depth = rect[3]; }
+        else if (prop.type === 'stoneWall') {
+          const distance = r => Math.hypot(prop.x - Math.max(r[0], Math.min(r[0] + r[2], prop.x)), prop.y - Math.max(r[1], Math.min(r[1] + r[3], prop.y)));
+          const boundary = rectangles.reduce((best, r) => !best || distance(r) < distance(best) ? r : best, null);
+          if (boundary) {
+            prop.w = Math.min(prop.w, boundary[2]); prop.depth = Math.min(1.1, boundary[3]);
+            prop.x = Math.max(boundary[0] + prop.w / 2, Math.min(boundary[0] + boundary[2] - prop.w / 2, prop.x));
+            prop.y = Math.max(boundary[1] + prop.depth / 2, Math.min(boundary[1] + boundary[3] - prop.depth / 2, prop.y));
+          }
+        }
+      }
+      if (prop.type === 'gate') {
+        const walls = (logicalScene.blocked || []).filter(b => b.rect && Math.abs(prop.y - b.rect[1]) < 5).map(b => b.rect);
+        for (const left of walls) for (const right of walls) {
+          const gap = right[0] - left[0] - left[2], center = right[0] - gap / 2;
+          if (Math.abs(left[1] - right[1]) < 1 && gap >= prop.w * .7 && gap <= prop.w * 1.5 && Math.abs(center - prop.x) < prop.w * .6) { prop.x = center; prop.y = (left[1] + right[1]) / 2; prop.w = gap; }
+        }
+      }
+      if (prop.type === 'bridge') prop.x += prop.w / 2;
+      return prop;
+    }
+
+    for (const prop of props) {
+      if (prop.type === 'house') house(prop);
+      else if (prop.type === 'houseWood') house(prop, true);
+      else if (prop.type === 'tree') tree(prop);
+      else if (prop.type === 'pine') tree(prop, true);
+      else if (prop.type === 'gate') gate(prop);
+      else if (prop.type === 'archGate') archGate(prop);
+      else if (prop.type === 'yaodong') yaodong(prop);
+      else if (prop.type === 'tent') tent(prop);
+      else if (prop.type === 'stoneWall') stoneWall(prop);
+      else if (prop.type === 'tower') tower(prop);
+      else if (prop.type === 'flagPole') flagPole(prop);
+      else if (prop.type === 'prayerFlags') flagPole(prop, true);
+      else if (prop.type === 'deadTree') deadTree(prop);
+      else if (prop.type === 'boat') boat(prop);
+      else if (prop.type === 'bridge') bridge(prop);
+      else if (prop.type === 'chainBridge') chainBridge(prop);
+      else simpleProp(prop);
+    }
+    stats.propsReady = stats.unsupportedProps.length === 0;
+
+    if (environment.vegetation) {
+      for (const prop of logicalScene.props.filter(p => p.type === 'tree')) {
+        for (let i = 0; i < 3; i++) {
+          const angle = i * 2.1 + prop.seed;
+          scannedProp('fern', { x: prop.x + Math.cos(angle) * 1.8, y: prop.y + Math.sin(angle) * 1.8, seed: prop.seed + i }, .5 + i * .13);
+        }
+      }
+    }
+
+    for (let side = 0; side < 3; side++) {
+      const span = (side ? world.h : world.w) * 2.5;
+      const hills = new T.PlaneGeometry(span, 150, 160, 64);
+      hills.rotateX(-Math.PI / 2);
+      const positions = hills.attributes.position;
+      for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i), depth = (75 - positions.getZ(i)) / 150, phase = logicalScene.seed * .01 + side * 2;
+        const ridge = .7 + .23 * Math.sin(x * .033 + phase) + .18 * Math.cos(x * .077 + depth * 5) + .065 * Math.sin(x * .29 + depth * 17);
+        const gullies = Math.abs(Math.sin(x * .1 + depth * 6)) * .12;
+        const edge = !side ? terrain.height(x + world.w / 2, 0) : terrain.height(side === 1 ? 0 : world.w, (side === 1 ? -x : x) + world.h / 2);
+        positions.setY(i, edge + Math.pow(depth, .8) * environment.relief * (ridge - gullies) + Math.sin(depth * Math.PI) * environment.relief * .18);
+      }
+      hills.computeVertexNormals();
+      const group = new T.Group(); group.name = 'march-mountains-' + side;
+      if (!side) group.position.set(0, -1, -world.h / 2 - 75);
+      else { group.rotation.y = side === 1 ? Math.PI / 2 : -Math.PI / 2; group.position.set((side === 1 ? -1 : 1) * (world.w / 2 + 75), -1, 0); }
+      worldRoot.add(group);
+      const mountain = mesh(hills, surface(environment.vegetation ? 'earth' : 'rock', environment.mountainTint, 6, .55), 0, 0, 0, group); mountain.castShadow = false;
+      if (snowy) {
+        const snowVertices = [], normals = hills.attributes.normal;
+        for (let i = 0; i < hills.index.count; i += 3) {
+          const indices = [hills.index.getX(i), hills.index.getX(i + 1), hills.index.getX(i + 2)];
+          if (indices.every(j => normals.getY(j) > .55 && positions.getY(j) > 12 + 4 * Math.sin(positions.getX(j) * .09))) {
+            for (const j of indices) snowVertices.push(positions.getX(j), positions.getY(j) + .045, positions.getZ(j));
+          }
+        }
+        const cap = new T.BufferGeometry(); cap.setAttribute('position', new T.Float32BufferAttribute(snowVertices, 3)); cap.computeVertexNormals();
+        mesh(cap, snowSurface(), 0, 0, 0, group).castShadow = false;
+      }
+    }
+
+    for (const [index, cliff] of (logicalScene.terrain?.cliffs || []).entries()) {
+      const curve = new T.CatmullRomCurve3(cliff.pts.map(([x, y]) => toWorld(x, y)), false, 'centripetal');
+      const length = curve.getLength(), steps = Math.ceil(length / .8), rows = 12;
+      const points = curve.getSpacedPoints(steps), vertices = [], indices = [];
+      for (let i = 0; i <= steps; i++) {
+        const point = points[i], tangent = points[Math.min(steps, i + 1)].clone().sub(points[Math.max(0, i - 1)]).normalize();
+        const outward = new T.Vector3(tangent.z, 0, -tangent.x);
+        if (outward.dot(point) < 0) outward.negate();
+        const endFalloff = Math.min(1, i / 3, (steps - i) / 3);
+        const ridge = Math.min(environment.relief * .22, 14) * (.88 + .08 * Math.sin(point.x * .13 + point.z * .09) + .04 * Math.sin(point.x * .43));
+        for (let row = 0; row <= rows; row++) {
+          const t = row / rows, envelope = Math.pow(Math.sin(t * Math.PI), .65);
+          const strata = Math.sin(t * 22 + point.x * .23 + point.z * .19) * .18 * envelope;
+          const distance = t * cliff.w * 2.4 + strata;
+          const x = point.x + outward.x * distance, z = point.z + outward.z * distance;
+          vertices.push(x, terrain.height(x + world.w / 2, z + world.h / 2) - .05 + Math.max(0, envelope * ridge * endFalloff + strata), z);
+        }
+      }
+      for (let i = 0; i < steps; i++) for (let row = 0; row < rows; row++) {
+        const a = i * (rows + 1) + row, b = a + rows + 1;
+        indices.push(a, b, a + 1, b, b + 1, a + 1);
+      }
+      const geometry = new T.BufferGeometry(); geometry.setAttribute('position', new T.Float32BufferAttribute(vertices, 3)); geometry.setIndex(indices); geometry.computeVertexNormals();
+      const normals = geometry.attributes.normal;
+      if (normals.getY(Math.floor(steps / 2) * (rows + 1) + rows / 2) < 0) {
+        for (let i = 0; i < indices.length; i += 3) [indices[i + 1], indices[i + 2]] = [indices[i + 2], indices[i + 1]];
+        geometry.setIndex(indices); geometry.computeVertexNormals();
+      }
+      const mat = surface('rock', environment.rockTint, 3, 1); mat.side = T.DoubleSide;
+      mesh(geometry, mat).name = 'march-cliff-line-' + index;
+      if (snowy) {
+        const capVertices = [], positions = geometry.attributes.position;
+        for (let i = 0; i < indices.length; i += 3) {
+          const triangle = indices.slice(i, i + 3);
+          if (triangle.every(j => normals.getY(j) > .42 && positions.getY(j) > 1)) for (const j of triangle) capVertices.push(positions.getX(j), positions.getY(j) + .035, positions.getZ(j));
+        }
+        const cap = new T.BufferGeometry(); cap.setAttribute('position', new T.Float32BufferAttribute(capVertices, 3)); cap.computeVertexNormals();
+        mesh(cap, snowSurface()).name = 'march-cliff-snow-' + index;
+      }
+    }
+
+    worldRoot.updateMatrixWorld(true);
+    const cameraObstacles = worldRoot.children.filter(object => object === ground || /^(march-prop-|march-cliff-line-)/.test(object.name)).map(object => ({ object, bounds: new T.Box3().setFromObject(object) }));
+    const cameraRay = new T.Raycaster(), cameraDirection = new T.Vector3(), rayOrigin = new T.Vector3(), cameraRight = new T.Vector3();
+    let cameraDistance = 0;
+
+    if (environment.terrain === 'wetland') {
+      const blade = new T.BufferGeometry();
+      blade.setAttribute('position', new T.Float32BufferAttribute([-.04, 0, 0, .04, 0, 0, .16, .8, .12, -.03, 0, -.06, .03, 0, .06, -.12, .64, .08], 3)); blade.computeVertexNormals();
+      const grassMaterial = material('#827e4c', .96); grassMaterial.side = T.DoubleSide;
+      const grass = new T.InstancedMesh(blade, grassMaterial, 5000), dummy = new T.Object3D();
+      const inside = (x, y, points) => {
+        let hit = false;
+        for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+          const a = points[i], b = points[j];
+          if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) hit = !hit;
+        }
+        return hit;
+      };
+      let count = 0, seed = logicalScene.seed;
+      const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+      for (let i = 0; i < 10000 && count < 5000; i++) {
+        const x = random() * world.w, y = random() * world.h;
+        if (logicalScene.terrain.waters.some(water => inside(x, y, water.pts))) continue;
+        const nearRoad = logicalScene.terrain.roads.some(road => road.pts.slice(1).some((b, index) => {
+          const a = road.pts[index], dx = b[0] - a[0], dy = b[1] - a[1], length = dx * dx + dy * dy;
+          const t = length ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / length)) : 0;
+          return Math.hypot(x - a[0] - t * dx, y - a[1] - t * dy) < road.w * .75;
+        }));
+        if (nearRoad) continue;
+        dummy.position.copy(onSurface(x, y)); dummy.rotation.y = random() * Math.PI * 2; dummy.scale.setScalar(.6 + random() * .9); dummy.updateMatrix(); grass.setMatrixAt(count++, dummy.matrix);
+      }
+      grass.count = count; grass.name = 'march-wetland-grass'; grass.castShadow = true; grass.receiveShadow = true; worldRoot.add(grass);
+    }
+
+    const hemi = new T.HemisphereLight(staging.fill, '#514b3f', staging.ambient);
+    scene.add(hemi);
+    const sun = new T.DirectionalLight(staging.key, staging.power);
+    sun.position.set(-45, 75, 35);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    const extent = assets ? 24 : 85;
+    Object.assign(sun.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, near: 1, far: 230 });
+    sun.shadow.bias = -.00015;
+    sun.shadow.normalBias = .025;
+    sun.shadow.radius = 2;
+    sun.shadow.camera.updateProjectionMatrix();
+    scene.add(sun, sun.target);
+
+    const ringGeometry = new T.RingGeometry(0.65, 0.85, 32);
+    const ringMaterial = new T.MeshBasicMaterial({ color: '#e8c87a', transparent: true, opacity: 0.72, side: T.DoubleSide, depthWrite: false });
+    for (const anchor of logicalScene.anchors) {
+      const ring = new T.Mesh(ringGeometry, ringMaterial);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.copy(onSurface(anchor.x, anchor.y, 0.07));
+      ring.visible = anchor.kind !== 'npc';
+      worldRoot.add(ring);
+      markers.set(anchor.anchorId, ring);
+    }
+
+    let particles = null;
+    if (logicalScene.ambient?.kind) {
+      const count = 420;
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        positions[i * 3] = (Math.random() - .5) * world.w;
+        positions[i * 3 + 2] = (Math.random() - .5) * world.h;
+        positions[i * 3 + 1] = terrain.height(positions[i * 3] + world.w / 2, positions[i * 3 + 2] + world.h / 2) + 2 + Math.random() * 25;
+      }
+      const geometry = new T.BufferGeometry();
+      geometry.setAttribute('position', new T.BufferAttribute(positions, 3));
+      const snow = logicalScene.ambient.kind === 'snow';
+      const mist = logicalScene.ambient.kind === 'mist';
+      const particleMap = feather.clone(); particleMap.channel = 0;
+      particles = new T.Points(geometry, new T.PointsMaterial({ color: snow ? '#f4f8ff' : mist ? '#d4dede' : '#d9c59b', size: snow ? .22 : mist ? 3 : .1, alphaMap: particleMap, transparent: true, opacity: snow ? .82 : mist ? .035 : .35, depthWrite: false }));
+      worldRoot.add(particles);
+    }
+
+    for (const source of logicalScene.ambient?.smokes || []) {
+      const geometry = new T.BufferGeometry(), positions = new Float32Array(24 * 3);
+      for (let i = 0; i < 24; i++) { positions[i * 3] = Math.sin(i * 2.4) * .22; positions[i * 3 + 1] = i * .2; positions[i * 3 + 2] = Math.cos(i * 2.4) * .22; }
+      geometry.setAttribute('position', new T.BufferAttribute(positions, 3));
+      const texture = feather.clone(); texture.channel = 0;
+      const smoke = new T.Points(geometry, new T.PointsMaterial({ color: '#aaa99e', alphaMap: texture, size: 1.8, transparent: true, opacity: .12, depthWrite: false }));
+      smoke.position.copy(onSurface(source.x, source.y, .8)); worldRoot.add(smoke); smokeColumns.push(smoke);
+    }
+
+    function resize() {
+      const rect = container.getBoundingClientRect();
+      if (rect.width < 2 || rect.height < 2) return;
+      cam.viewW = rect.width;
+      cam.viewH = rect.height;
+      const dpr = Math.min(devicePixelRatio || 1, dprCap);
+      stats.dpr = +dpr.toFixed(2);
+      renderer.setPixelRatio(dpr);
+      renderer.setSize(rect.width, rect.height, false);
+      camera.aspect = rect.width / rect.height;
+      camera.updateProjectionMatrix();
+    }
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(container);
+    resize();
+
+    function project(x, y, height = 0) {
+      const point = onSurface(x, y, height).project(camera);
+      return { x: (point.x * .5 + .5) * cam.viewW, y: (-point.y * .5 + .5) * cam.viewH, behind: point.z > 1 };
+    }
+
+    function unproject(sx, sy) {
+      const ndc = new T.Vector2(sx / cam.viewW * 2 - 1, -(sy / cam.viewH) * 2 + 1);
+      const ray = new T.Raycaster();
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(pickSurfaces, false)[0];
+      if (!hit) return null;
+      return { x: hit.point.x + world.w / 2, y: hit.point.z + world.h / 2 };
+    }
+
+    function drawGuide(player, route, visible) {
+      guideLine.visible = visible && route.length > 1;
+      if (!guideLine.visible) return;
+      if (guideRoute === route && guideLine.userData.origin && Math.hypot(player.x - guideLine.userData.origin.x, player.y - guideLine.userData.origin.y) < .1) return;
+      guideRoute = route;
+      guideLine.userData.origin = { x: player.x, y: player.y };
+      const points = [], line = [player, ...route.slice(1)];
+      for (let i = 1; i < line.length; i++) {
+        const a = line[i - 1], b = line[i], steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / .6));
+        for (let j = 0; j < steps; j++) points.push(onSurface(a.x + (b.x - a.x) * j / steps, a.y + (b.y - a.y) * j / steps, .12));
+      }
+      points.push(onSurface(line.at(-1).x, line.at(-1).y, .12));
+      guideLine.geometry.dispose();
+      guideLine.geometry = new T.BufferGeometry().setFromPoints(points);
+      guideLine.computeLineDistances();
+    }
+
+    function cameraPosition(target, scale = 1) {
+      return target.clone().add(new T.Vector3(...staging.offset).multiplyScalar(scale));
+    }
+
+    function placeCamera(target, scale, dt) {
+      const desired = cameraPosition(target, scale);
+      cameraDirection.copy(desired).sub(target);
+      const fullDistance = cameraDirection.length();
+      cameraDirection.normalize(); cameraRight.set(cameraDirection.z, 0, -cameraDirection.x).normalize();
+      let distance = fullDistance;
+      for (const offset of [-.28, 0, .28]) {
+        rayOrigin.copy(target).addScaledVector(cameraRight, offset);
+        cameraRay.set(rayOrigin, cameraDirection); cameraRay.far = fullDistance + .3;
+        for (const { object, bounds } of cameraObstacles) {
+          if (!cameraRay.ray.intersectsBox(bounds)) continue;
+          const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
+          if (hit) distance = Math.min(distance, Math.max(.35, hit.distance - .4));
+        }
+      }
+      cameraDistance = !cameraDistance || distance < cameraDistance ? distance : T.MathUtils.lerp(cameraDistance, distance, 1 - Math.exp(-dt * 6));
+      camera.position.copy(target).addScaledVector(cameraDirection, cameraDistance);
+      camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + .4);
+      camera.lookAt(target);
+      camera.updateMatrixWorld();
+      stats.cameraDistance = +cameraDistance.toFixed(3);
+      stats.cameraOccluded = distance < fullDistance - .01;
+    }
+
+    function follow(player, dt) {
+      if (intro || graphicsLost) return;
+      if (player.moving) focus = null;
+      const target = focus ? onSurface(focus.px, focus.py, 1).lerp(onSurface(focus.x, focus.y, 1), .5) : onSurface(player.x, player.y, 1.05);
+      const blend = 1 - Math.pow(.003, Math.min(dt, .1));
+      followTarget.lerp(target, blend);
+      placeCamera(followTarget, focus ? 1.35 : 1, dt);
+    }
+
+    function frameTarget(player, target) {
+      if (assets && Math.hypot(player.x - target.x, player.y - target.y) > 8) return;
+      focus = { px: player.x, py: player.y, x: target.x, y: target.y };
+    }
+
+    function finishIntro(result) {
+      if (!intro) return;
+      const resolve = intro.resolve;
+      followTarget.copy(onSurface(intro.player.x, intro.player.y, 1.05));
+      cameraDistance = 0;
+      intro = null;
+      introOverlay?.remove();
+      introOverlay = null;
+      resolve(result);
+    }
+
+    function updateIntro(dt) {
+      if (!intro) return;
+      intro.elapsed += dt;
+      const progress = Math.min(1, intro.elapsed / intro.duration);
+      const playerPoint = onSurface(intro.player.x, intro.player.y, 1.05);
+      const shot = data => ({ eye: onSurface(data[0], data[1], data[2]), look: onSurface(data[3], data[4], data[5]) });
+      const first = shot(staging.shots[0]), second = shot(staging.shots[1]);
+      const local = progress < .58 ? progress / .58 : (progress - .58) / .42, eased = local * local * (3 - 2 * local);
+      camera.position.copy(progress < .58 ? first.eye.lerp(second.eye, eased) : second.eye.lerp(cameraPosition(playerPoint), eased));
+      camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + 1.5);
+      camera.lookAt(progress < .58 ? first.look.lerp(second.look, eased) : second.look.lerp(playerPoint, eased));
+      if (progress >= 1) finishIntro('completed');
+    }
+
+    function playIntro(player) {
+      const cfg = M.visual3d.intro(logicalScene);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve('reduced-motion');
+      introOverlay = document.createElement('div');
+      introOverlay.className = 'czmw-cinema3d';
+      const copy = document.createElement('div');
+      copy.className = 'czmw-cinema-copy3d';
+      const eyebrow = document.createElement('small');
+      eyebrow.textContent = cfg.eyebrow;
+      const title = document.createElement('strong');
+      title.textContent = cfg.title;
+      const subtitle = document.createElement('span');
+      subtitle.textContent = cfg.subtitle;
+      copy.append(eyebrow, title, subtitle);
+      const skip = document.createElement('button');
+      skip.type = 'button';
+      skip.className = 'czmw-cinema-skip3d';
+      skip.textContent = '跳过开场';
+      skip.dataset.czmwUi = 'true';
+      skip.addEventListener('click', () => finishIntro('skipped'));
+      introOverlay.append(copy, skip);
+      container.append(introOverlay);
+      return new Promise(resolve => {
+        intro = { elapsed: 0, duration: cfg.duration, player, resolve };
+      });
+    }
+
+    const view = {
+      cam,
+      canvas,
+      stats,
+      project,
+      unproject,
+      follow,
+      frameTarget,
+      drawGuide,
+      playIntro,
+      headPoint(player) { return project(player.x, player.y, 2.15); },
+      surfaceHeight,
+      groundHeight: terrain.height,
+      resize,
+      onGraphicsLost: null,
+      dispose() {
+        if (dead) return;
+        dead = true;
+        finishIntro('destroyed');
+        cancelAnimationFrame(raf);
+        resizeObserver.disconnect();
+        options.signal?.removeEventListener('abort', abort);
+        canvas.removeEventListener('webglcontextlost', contextLost);
+        actors?.dispose();
+        releaseResources();
+        sun.shadow.dispose();
+        introOverlay?.remove();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        canvas.remove();
+      }
+    };
+
+    disposeView = () => view.dispose();
+
+    function contextLost(event) {
+      event.preventDefault();
+      if (dead || graphicsLost) return;
+      graphicsLost = true;
+      finishIntro('graphics-lost');
+      view.onGraphicsLost?.();
+    }
+    canvas.addEventListener('webglcontextlost', contextLost);
+    function abort() { view.dispose(); }
+    options.signal?.addEventListener('abort', abort, { once: true });
+
+    function frame(ts) {
+      if (dead) return;
+      raf = requestAnimationFrame(frame);
+      if (document.hidden || graphicsLost) { last = ts; return; }
+      if (logicalScene.pausedDim && !intro && ts - last < 1000 / 20) return;
+      const dt = Math.max(0, Math.min(.08, (ts - (last || ts - 16.7)) / 1000));
+      last = ts;
+      const started = performance.now();
+      updateIntro(dt);
+      camera.updateMatrixWorld();
+      logicalScene.tick?.(dt);
+      if (logicalScene.focusActor) {
+        actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight);
+        if (assets) {
+          const p = logicalScene.focusActor;
+          sun.target.position.copy(onSurface(p.x, p.y));
+          sun.position.copy(sun.target.position).add(new T.Vector3(...staging.sun));
+          sun.target.updateMatrixWorld();
+        }
+      }
+      const time = ts * .001;
+      for (const fire of fires) {
+        fire.material.uniforms.time.value = time;
+        fire.light.intensity = 4.5 + Math.sin(time * 9 + fire.material.uniforms.phase.value) * .55 + Math.sin(time * 17) * .3;
+      }
+      for (const water of waters) {
+        water.position.y = Math.sin(time * .8) * (logicalScene.ironBridge ? .005 : .018);
+        water.material.userData.flow.value = time * ([6, 7, 10].includes(Number(logicalScene.chapterId)) ? 2.4 : environment.terrain === 'wetland' ? .2 : .85);
+      }
+      for (const flag of flags) {
+        const positions = flag.geometry.attributes.position;
+        for (let i = 0; i < positions.count; i++) positions.setZ(i, Math.sin(positions.getX(i) * 2.1 + time * 2.2) * .055);
+        positions.needsUpdate = true; flag.geometry.computeVertexNormals();
+      }
+      for (const smoke of smokeColumns) {
+        const positions = smoke.geometry.attributes.position;
+        for (let i = 0; i < positions.count; i++) { const height = (i * .2 + time * .42) % 4.8; positions.setXYZ(i, Math.sin(i * 2.4 + time * .25) * .15 + height * .16, height, Math.cos(i * 2.4) * .22); }
+        positions.needsUpdate = true;
+      }
+      for (const [id, marker] of markers) {
+        const anchor = logicalScene.anchorEntities?.find(item => item.anchorId === id);
+        if (anchor?.kind === 'npc') marker.visible = !!anchor.near;
+        else marker.visible = anchor ? anchor.enabled : true;
+        if (marker.visible) marker.rotation.z = time * .35;
+      }
+      if (particles) {
+        const positions = particles.geometry.attributes.position, kind = logicalScene.ambient.kind;
+        for (let i = 0; i < positions.count; i++) {
+          const x = positions.getX(i), z = positions.getZ(i);
+          const base = Math.max(terrain.waterLevel, terrain.height(x + world.w / 2, z + world.h / 2));
+          const lift = kind === 'snow' ? 25 - (i * 2.37 + time * 1.4) % 25 : kind === 'mist' ? .6 + (i % 6) * .45 : 1 + (i * 2.37 + time * .2) % 10;
+          positions.setY(i, base + lift);
+        }
+        positions.needsUpdate = true;
+      }
+      renderer.render(scene, camera);
+      stats.frames++;
+      stats.drawCalls = renderer.info.render.calls;
+      stats.triangles = renderer.info.render.triangles;
+      stats.renderMs = +(performance.now() - started).toFixed(2);
+      if (stats.renderMs > 24) slow++; else slow = Math.max(0, slow - 1);
+      if (slow >= 45 && dprCap > .76) {
+        dprCap = Math.max(.75, dprCap * .8);
+        stats.adaptive = true;
+        slow = 0;
+        resize();
+      }
+    }
+
+    actors = await M.actors3d.create(T, logicalScene, scene, options.signal, options.roleId);
+    if (options.signal?.aborted || graphicsLost) {
+      actors.dispose();
+      throw new DOMException('3D initialization interrupted', 'AbortError');
+    }
+    camera.position.copy(cameraPosition(followTarget));
+    camera.lookAt(followTarget);
+    camera.updateMatrixWorld();
+    raf = requestAnimationFrame(frame);
+    return view;
+    } catch (error) {
+      if (disposeView) disposeView();
+      else {
+        releaseResources();
+        renderer?.dispose();
+        renderer?.forceContextLoss();
+        renderer?.domElement.remove();
+      }
+      throw error;
+    }
+  }
+
+  M.renderer3d = { create };
+})();

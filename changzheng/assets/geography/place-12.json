@@ -1,0 +1,14 @@
+{
+  "id": 12,
+  "name": "会宁会师旧址",
+  "lat": 35.6912079,
+  "lon": 105.0490563,
+  "matched_name": "会宁红军会师旧址, 北大街, 会师镇, 会宁县, 白银市, 甘肃省, 730400, 中国",
+  "type": "memorial",
+  "osm_type": "way",
+  "osm_id": 461678540,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E4%BC%9A%E5%AE%81%E4%BC%9A%E5%B8%88%E6%97%A7%E5%9D%80&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

@@ -1,0 +1,14 @@
+{
+  "id": 10,
+  "name": "腊子口",
+  "lat": 34.1095483,
+  "lon": 103.8942044,
+  "matched_name": "腊子口, 腊子口镇, 迭部县, 甘南藏族自治州, 甘肃省, 中国",
+  "type": "yes",
+  "osm_type": "node",
+  "osm_id": 2304889808,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E8%85%8A%E5%AD%90%E5%8F%A3&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

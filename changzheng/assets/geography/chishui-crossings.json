@@ -1,0 +1,39 @@
+[
+  {
+    "name": "太平渡渡口",
+    "lat": 28.1411965,
+    "lon": 106.0400647,
+    "osm_id": 11252230928,
+    "source": "https://nominatim.openstreetmap.org/lookup?osm_ids=N12145426346%2CW953710528%2CN2277373710%2CN11252230928%2CN10289025386&format=jsonv2&accept-language=zh-CN"
+  },
+  {
+    "name": "茅台渡口",
+    "lat": 27.8603856,
+    "lon": 106.373817,
+    "osm_id": 10289025386,
+    "source": "https://nominatim.openstreetmap.org/lookup?osm_ids=N12145426346%2CW953710528%2CN2277373710%2CN11252230928%2CN10289025386&format=jsonv2&accept-language=zh-CN"
+  },
+  {
+    "name": "二郎滩渡口现址",
+    "lat": 28.1561895,
+    "lon": 106.1647948,
+    "osm_id": 1214453746,
+    "osm_type": "way",
+    "source": "https://nominatim.openstreetmap.org/search?q=%E4%BA%8C%E9%83%8E%E6%BB%A9%E6%B8%A1%E5%8F%A3&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+    "precision": "OSM mapped modern feature, not surveyed historical boundary"
+  },
+  {
+    "id": 4,
+    "name": "土城镇政府现址（区域锚点）",
+    "lat": 28.2764088,
+    "lon": 106.002597,
+    "matched_name": "习水县土城镇政府, S302, 习水县, 遵义市, 贵州省, 中国",
+    "type": "government",
+    "osm_type": "way",
+    "osm_id": 356064488,
+    "source": "https://nominatim.openstreetmap.org/search?q=%E5%9C%9F%E5%9F%8E%E9%95%87+%E4%B9%A0%E6%B0%B4%E5%8E%BF+%E8%B4%B5%E5%B7%9E+%E4%B8%AD%E5%9B%BD&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+    "license": "OpenStreetMap contributors, ODbL",
+    "precision": "geocoder feature centroid; not a surveyed historic crossing",
+    "fetched": "2026-10-17"
+  }
+]

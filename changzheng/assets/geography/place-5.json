@@ -1,0 +1,14 @@
+{
+  "id": 5,
+  "name": "皎平渡",
+  "lat": 26.1271,
+  "lon": 102.449,
+  "matched_name": "皎平渡镇, 昆明市, 云南省, 中国",
+  "type": "town",
+  "osm_type": "node",
+  "osm_id": 3945436074,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E7%9A%8E%E5%B9%B3%E6%B8%A1&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

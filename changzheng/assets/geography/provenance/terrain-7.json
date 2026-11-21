@@ -1,0 +1,69 @@
+{
+  "id": 7,
+  "name": "泸定桥",
+  "source": "NASA SRTM GL1 v3 / OpenTopography public bulk (1 arc-second)",
+  "source_url": "https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm/",
+  "bounds": {
+    "north": 30.16,
+    "south": 29.66,
+    "east": 102.53,
+    "west": 101.93
+  },
+  "source_resolution": "1 arc-second (~30m at equator)",
+  "sampling_m_ns": 218.02941176470588,
+  "sampling_m_ew": 226.7880194921886,
+  "min": 1038.6,
+  "max": 5903.5,
+  "bytes": 458932,
+  "filled_output_samples": 0,
+  "tiles": [
+    {
+      "file": "N29E101.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N29E102.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N30E101.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N30E102.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    }
+  ],
+  "sha256": "e6495b54c3180581c2cbce2541ed2fa723a584871a307de89950932186df464d",
+  "utc": "2026-10-21T09:27:24.610520+00:00",
+  "seconds": 0.2,
+  "fallback_errors": []
+}

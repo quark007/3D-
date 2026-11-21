@@ -1,0 +1,122 @@
+{
+  "rock": {
+    "asset": "rock_face",
+    "page": "https://polyhaven.com/a/rock_face",
+    "license": "CC0",
+    "maps": {
+      "diffuse": {
+        "path": "assets/pbr/rock-diffuse.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_face/rock_face_diff_1k.jpg",
+        "sha256": "cce4b50517161264bdef196f5e247e328ca3739083cd6044ad3cc54d88cb82e2",
+        "webPath": "assets/pbr/rock-diffuse-web.webp",
+        "webSha256": "ca98cc3fca92adce01e6685738ec2fccc0c743967bfe4b73261f9e3282cd960a"
+      },
+      "normal": {
+        "path": "assets/pbr/rock-normal.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_face/rock_face_nor_gl_1k.jpg",
+        "sha256": "e2682e1286c8b6aca7e01ba7b8fe1726cb6606042b9ee70d097aa67470d410ef"
+      },
+      "roughness": {
+        "path": "assets/pbr/rock-roughness.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_face/rock_face_rough_1k.jpg",
+        "sha256": "70ddfc5d7f292909d18ad56dbb1ff7c3a65809dc031854356c7a6978cb446219"
+      }
+    }
+  },
+  "earth": {
+    "asset": "forest_ground_04",
+    "page": "https://polyhaven.com/a/forest_ground_04",
+    "license": "CC0",
+    "maps": {
+      "diffuse": {
+        "path": "assets/pbr/earth-diffuse.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_diff_1k.jpg",
+        "sha256": "50a4dda30875020c64385261aa7e00e2155b592302fa6794165f58fae73cbd2c",
+        "webPath": "assets/pbr/earth-diffuse-web.webp",
+        "webSha256": "df42650a5c07979888f049c0029b9d84ba1790756949d74f6c2e9b962909133b"
+      },
+      "normal": {
+        "path": "assets/pbr/earth-normal.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_nor_gl_1k.jpg",
+        "sha256": "9c3a0200e02ce40edffbbf9f5f623ef08ea9b1b7812b556182ec978f88887151"
+      },
+      "roughness": {
+        "path": "assets/pbr/earth-roughness.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_rough_1k.jpg",
+        "sha256": "89d4d50395eb92824a64132c4bc8a5a09009071e0b325ab66dc3104c7a3090ed"
+      }
+    }
+  },
+  "wood": {
+    "asset": "weathered_brown_planks",
+    "page": "https://polyhaven.com/a/weathered_brown_planks",
+    "license": "CC0",
+    "maps": {
+      "diffuse": {
+        "path": "assets/pbr/wood-diffuse.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_diff_1k.jpg",
+        "sha256": "94833feda44e025a9139f7b5723ea84e4f0258d3b54939a79e1013c133085e29",
+        "webPath": "assets/pbr/wood-diffuse-web.webp",
+        "webSha256": "be025bd4aaa6251d4b46b4ff15520b1e947a0c3c0710b6ec33c8dc6e844bd0ab"
+      },
+      "normal": {
+        "path": "assets/pbr/wood-normal.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_nor_gl_1k.jpg",
+        "sha256": "8d38f02f121c0e58eaedc19cd668faea21381ae3ff4d5332cd90de75e6683393"
+      },
+      "roughness": {
+        "path": "assets/pbr/wood-roughness.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_rough_1k.jpg",
+        "sha256": "b80c45969d8299ca5f21de969f0269138a5e3e78e51fc911af809683d99c5bc9"
+      }
+    }
+  },
+  "plaster": {
+    "asset": "plastered_wall",
+    "page": "https://polyhaven.com/a/plastered_wall",
+    "license": "CC0",
+    "maps": {
+      "diffuse": {
+        "path": "assets/pbr/plaster-diffuse.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_wall/plastered_wall_diff_1k.jpg",
+        "sha256": "73312ebb6eabc8e0a55addd8a82a8924bcd1e717b9488a887cc77f14b6ea554e",
+        "webPath": "assets/pbr/plaster-diffuse-web.webp",
+        "webSha256": "c590e72e8d35d2859bc1629d2f057f7a746dce8d88020a05af16c5be11e2ca06"
+      },
+      "normal": {
+        "path": "assets/pbr/plaster-normal.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_wall/plastered_wall_nor_gl_1k.jpg",
+        "sha256": "504e1f7baf4b68714c64b6670e7954bebe99efe31c49f7ce5a2089e4b76023b5"
+      },
+      "roughness": {
+        "path": "assets/pbr/plaster-roughness.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_wall/plastered_wall_rough_1k.jpg",
+        "sha256": "844aaa32fda1130262ad8a50084aec7bd5ebce272c8af5e6ba076734beedcd66"
+      }
+    }
+  },
+  "roof": {
+    "asset": "grey_roof_tiles",
+    "page": "https://polyhaven.com/a/grey_roof_tiles",
+    "license": "CC0",
+    "maps": {
+      "diffuse": {
+        "path": "assets/pbr/roof-diffuse.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles/grey_roof_tiles_diff_1k.jpg",
+        "sha256": "f61107b70cf56074c9db09384a332620c94c678ed2baabfae78029a8242e49a3",
+        "webPath": "assets/pbr/roof-diffuse-web.webp",
+        "webSha256": "f42472f37fb99268dc6f4173f003a89086b4bb7212ac7d3c5f3466793e0687ee"
+      },
+      "normal": {
+        "path": "assets/pbr/roof-normal.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles/grey_roof_tiles_nor_gl_1k.jpg",
+        "sha256": "99546fdc2978d0950a2c61fe94dbd4230bb7825944bb4e4e7ad586839fdc721d"
+      },
+      "roughness": {
+        "path": "assets/pbr/roof-roughness.jpg",
+        "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles/grey_roof_tiles_rough_1k.jpg",
+        "sha256": "edc3185b560a71b2b5f5f568710b8674da41becb39ca374f5e8efeca15b5794f"
+      }
+    }
+  }
+}

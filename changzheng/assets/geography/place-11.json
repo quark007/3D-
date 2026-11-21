@@ -1,0 +1,14 @@
+{
+  "id": 11,
+  "name": "吴起镇",
+  "lat": 36.9825,
+  "lon": 108.159444,
+  "matched_name": "吴起县, 延安市, 陕西省, 中国",
+  "type": "administrative",
+  "osm_type": "relation",
+  "osm_id": 3019995,
+  "source": "https://nominatim.openstreetmap.org/search?q=%E5%90%B4%E8%B5%B7%E5%8E%BF+%E9%99%95%E8%A5%BF+%E4%B8%AD%E5%9B%BD&format=jsonv2&limit=1&countrycodes=cn&accept-language=zh-CN",
+  "license": "OpenStreetMap contributors, ODbL",
+  "precision": "geocoder feature centroid; not a surveyed historic crossing",
+  "fetched": "2026-10-17"
+}

@@ -1,0 +1,69 @@
+{
+  "id": 11,
+  "name": "吴起镇",
+  "source": "NASA SRTM GL1 v3 / OpenTopography public bulk (1 arc-second)",
+  "source_url": "https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm/",
+  "bounds": {
+    "north": 37.18,
+    "south": 36.68,
+    "east": 108.52,
+    "west": 107.92
+  },
+  "source_resolution": "1 arc-second (~30m at equator)",
+  "sampling_m_ns": 218.02941176470588,
+  "sampling_m_ew": 209.14344942892004,
+  "min": 1193.6,
+  "max": 1771.9,
+  "bytes": 458932,
+  "filled_output_samples": 0,
+  "tiles": [
+    {
+      "file": "N36E107.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N36E108.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N37E107.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N37E108.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    }
+  ],
+  "sha256": "1c2de46f2de99fff95cf8f17590a948ab13d914274cdd12a4feb85cb7995eee0",
+  "utc": "2026-10-21T09:27:24.778127+00:00",
+  "seconds": 0.19,
+  "fallback_errors": []
+}

@@ -1,0 +1,47 @@
+{
+  "id": 12,
+  "name": "会宁",
+  "source": "NASA SRTM GL1 v3 / OpenTopography public bulk (1 arc-second)",
+  "source_url": "https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm/",
+  "bounds": {
+    "north": 35.93,
+    "south": 35.43,
+    "east": 105.36,
+    "west": 104.76
+  },
+  "source_resolution": "1 arc-second (~30m at equator)",
+  "sampling_m_ns": 218.02941176470588,
+  "sampling_m_ew": 212.52299308144828,
+  "min": 1614.5,
+  "max": 2363.8,
+  "bytes": 458941,
+  "filled_output_samples": 0,
+  "tiles": [
+    {
+      "file": "N35E104.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N35E105.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    }
+  ],
+  "sha256": "6c5589089fd74a2253f47926a31ff47f8f73f2d336c03610378d1ea42417eb3a",
+  "utc": "2026-10-21T09:27:24.747509+00:00",
+  "seconds": 0.13,
+  "fallback_errors": []
+}

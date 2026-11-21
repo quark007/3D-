@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "name": "于都·出发",
+  "bounds": {
+    "north": 26.21,
+    "south": 25.71,
+    "east": 115.72,
+    "west": 115.12
+  },
+  "endpoint": "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+  "query": "[out:json][timeout:90];way[\"waterway\"~\"^(river|stream)$\"](25.71,115.12,26.21,115.72);out geom;",
+  "fetched_utc": "2026-10-21T09:21:27.639613+00:00",
+  "osm_base_timestamp": "2026-10-21T09:20:21Z",
+  "ways": 112,
+  "features": 116,
+  "bytes": 43084,
+  "tolerance_degrees": 0.0005,
+  "sha256": "84147fc591c0a7b53cf05586b627d2db12406f29941011a0fa950f18cf0dcb7a",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0; modern waterways, not a 1935 reconstruction"
+}

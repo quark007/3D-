@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>四渡赤水 · 3D 沙盘原型 | 长征星火</title>
+<style>
+  :root{
+    --bg:#efe7d5; --panel:#fbf6ea; --ink:#33291d; --sub:#7c6a51;
+    --line:#d8c9a9; --red:#a83226; --red-soft:#c75b43; --gold:#b8892f;
+    --blue:#3e5f78; --green:#4f6b45; --chip:#f0e6cf;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font:14px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  #app{display:flex;height:100dvh;overflow:hidden}
+  #stage{position:relative;flex:1;min-width:0;background:linear-gradient(180deg,#e9dfc6,#dcd0b2)}
+  canvas{display:block;width:100%;height:100%;cursor:grab}
+  canvas:active{cursor:grabbing}
+  #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .lab{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;pointer-events:auto;cursor:pointer;
+       padding:2px 7px;border:1px solid var(--line);border-radius:4px;background:#fbf6eadd;
+       font-size:12px;color:var(--ink);box-shadow:0 1px 3px #4a3a2022}
+  .lab small{color:var(--sub);font-size:10px;margin-left:4px}
+  .lab.cross{border-color:#b8892f66;background:#fff5dcF2}
+  .lab.sel{border-color:var(--red);background:#fff0e8;color:var(--red);font-weight:700}
+  .lab.dim{opacity:.5}
+  #hint{position:absolute;left:16px;bottom:14px;color:#5b4b33;font-size:12px;background:#fbf6eab8;padding:6px 10px;border-radius:5px}
+  #compass{position:absolute;right:18px;top:16px;width:56px;height:56px;border-radius:50%;border:1px solid #9d8a67;
+    background:#fbf6eacc;display:grid;place-items:center;font:600 13px/1 SimSun,serif;color:#7a3b2b;overflow:hidden}
+  #narrow{display:block;font:700 21px/1 system-ui;color:#a83226;transform-origin:center}
+  #compass small{position:absolute;bottom:5px;font-size:10px}
+  #legend{position:absolute;left:16px;top:16px;background:#fbf6eae0;border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:12px;color:var(--sub)}
+  #legend i{display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:6px}
+  aside{width:352px;flex:none;background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:18px 18px 30px}
+  h1{font:600 21px/1.3 SimSun,serif;letter-spacing:2px;margin:0 0 2px}
+  .sub{font-size:11px;color:var(--sub);margin-bottom:14px}
+  .sect{font-size:11px;letter-spacing:2px;color:var(--sub);border-bottom:1px solid var(--line);padding-bottom:4px;margin:16px 0 8px}
+  .card{background:var(--chip);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:5px;padding:10px 12px;margin-bottom:10px}
+  .card .t{font-weight:700;font-size:14px;margin-bottom:4px}
+  .card .d{font-size:11px;color:var(--sub);margin-bottom:7px}
+  .card p{margin:3px 0;font-size:12px}
+  .card b{color:var(--red)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  button{font:13px inherit;cursor:pointer;border:1px solid var(--line);background:#fffdf6;color:var(--ink);border-radius:5px;padding:7px 10px}
+  button:hover{border-color:var(--gold)}
+  button.on{background:var(--red);border-color:var(--red);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .act{display:block;width:100%;text-align:left;margin-bottom:6px;padding:8px 10px;line-height:1.45}
+  .act small{display:block;color:var(--sub);font-size:11px;margin-top:2px}
+  .act.on small{color:#ffe4d8}
+  .act .cav{color:#a35a1c}
+  .bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+  .bar span:first-child{width:112px;flex:none;color:var(--sub)}
+  .track{flex:1;height:8px;background:#e7dcc3;border-radius:4px;overflow:hidden}
+  .fill{height:100%;background:var(--blue);border-radius:4px;transition:width .6s ease}
+  .bar em{width:34px;text-align:right;font-style:normal;font-variant-numeric:tabular-nums}
+  .force{display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12px}
+  .force b{width:72px;flex:none;color:var(--blue)}
+  .force span{color:var(--sub)}
+  .row{display:flex;gap:8px;margin-top:14px}
+  .row button{flex:1}
+  #commit{background:var(--red);border-color:var(--red);color:#fff;font-weight:700;padding:11px}
+  #commit:hover{background:#8f2a20}
+  #result{position:absolute;inset:0;display:none;place-items:center;background:#2b231a99;backdrop-filter:blur(3px)}
+  #result.show{display:grid}
+  .rbox{width:min(560px,88vw);max-height:82vh;overflow:auto;background:var(--panel);border:1px solid var(--gold);border-radius:9px;padding:22px 26px;box-shadow:0 18px 60px #0005}
+  .rbox h2{font:600 22px SimSun,serif;margin:0 0 6px;letter-spacing:2px}
+  .rbox .big{font-size:15px;color:var(--red);font-weight:700;margin:10px 0}
+  .rbox ol{padding-left:20px;font-size:13px}
+  .rbox li{margin:5px 0}
+  .rbox .note{font-size:11px;color:var(--sub);border-top:1px solid var(--line);margin-top:14px;padding-top:10px}
+  .err{padding:40px;color:#8f2a20;font-size:16px}
+  @media(max-width:880px){#app{flex-direction:column}aside{width:100%;height:48dvh;border-left:0;border-top:1px solid var(--line)}#stage{height:52dvh;flex:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="labels"></div>
+    <div id="legend"><i style="background:#a83226"></i>你的路线　<i style="background:#b8892f"></i>史实路线<br><i style="background:#3e5f78"></i>敌军判断方向　◇ 可点选渡口</div>
+    <div id="compass"><span id="narrow">↑</span><small>北</small></div>
+    <div id="hint">拖动旋转 · 滚轮缩放 · 点击渡口标签选主力渡口 · 沙盘为教学示意，非测绘地图</div>
+  </div>
+  <aside>
+    <h1>四渡赤水 · 3D 沙盘</h1>
+    <div class="sub">原型演示 · 真实经纬度铺底 · 接《长征星火》第 4 章</div>
+    <div id="roundCard"></div>
+    <div class="sect">① 选主力渡口</div>
+    <div class="chips" id="crossings"></div>
+    <div class="sect">② 释放欺骗信号（可多选，敌方 2—3 天后才反应）</div>
+    <div id="actions"></div>
+    <div class="sect">③ 敌方判断（观测 → 误判 → 延迟调兵）</div>
+    <div id="belief"></div>
+    <div class="sect">敌军势力卡 · 各有防区与企图</div>
+    <div id="forces"></div>
+    <div class="row"><button id="commit">执行本回合 →</button></div>
+    <div class="row"><button id="replay">重播史实路线</button><button id="reset">重新开始</button></div>
+    <div class="sub" style="margin-top:16px">4 个渡口/锚点坐标来自 <b>assets/geography/chishui-crossings.json</b>（OSM, ODbL）；其余地点为示意定位。地形、河道、兵力均为教学示意，不作为史实测绘或兵力结论。假电令属回忆线索，非确证史实。</div>
+  </aside>
+  <div id="result"><div class="rbox" id="rbox"></div></div>
+</div>
+
+<script src="js/vendor/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const stage=document.getElementById('stage');
+if(typeof THREE==='undefined'){stage.innerHTML='<div class="err">three.min.js 未加载：请把本页放在 changzheng/ 目录下，通过本地 HTTP 服务打开。</div>';return;}
+const T=THREE;
+
+/* ---------- 真实经纬度 → 沙盘坐标（等距圆柱近似，1 单位 ≈ 2.6 km） ---------- */
+const ORIGIN={lat:27.45,lon:106.0}, K=111.32/2.6, COS=Math.cos(ORIGIN.lat*Math.PI/180);
+function P(lat,lon){return {x:(lon-ORIGIN.lon)*K*COS,z:-(lat-ORIGIN.lat)*K};}
+
+const PLACES=[
+ {id:'tucheng',name:'土城',lat:28.2764,lon:106.0026,type:'anchor',note:'1935-01-28 土城战斗 · 情报误判'},
+ {id:'taiping',name:'太平渡',lat:28.1412,lon:106.0401,type:'cross',note:'一渡 / 二渡 / 四渡'},
+ {id:'erlang', name:'二郎滩',lat:28.1562,lon:106.1648,type:'cross',note:'二渡 / 四渡'},
+ {id:'maotai', name:'茅台',  lat:27.8604,lon:106.3738,type:'cross',note:'三渡 · 白天公开架桥'},
+ {id:'zhaxi',  name:'扎西',  lat:27.846, lon:105.05,  type:'town',note:'一渡后集结'},
+ {id:'gulin',  name:'古蔺',  lat:28.05,  lon:105.61,  type:'town',note:'佯攻方向'},
+ {id:'zunyi',  name:'遵义',  lat:27.7257,lon:106.928, type:'city',note:'二渡后重占'},
+ {id:'loushan',name:'娄山关',lat:27.99,  lon:106.86,  type:'pass',note:'二渡后攻克'},
+ {id:'guiyang',name:'贵阳',  lat:26.647, lon:106.6302,type:'city',note:'佯攻目标 · 调滇军'},
+ {id:'wujiang',name:'乌江',  lat:27.02,  lon:106.75,  type:'river',note:'四渡后南渡'}
+];
+const BY={};PLACES.forEach(p=>{p.pos=P(p.lat,p.lon);BY[p.id]=p;});
+
+const RIVER=[[27.70,106.44],[27.80,106.40],[27.8604,106.3738],[27.94,106.32],[28.02,106.26],
+ [28.10,106.21],[28.1562,106.1648],[28.16,106.10],[28.1412,106.0401],[28.20,106.00],
+ [28.2764,106.0026],[28.34,105.97],[28.43,105.93]].map(a=>P(a[0],a[1]));
+const WUJIANG=[[27.16,106.18],[27.11,106.42],[27.06,106.68],[27.02,106.90],[26.99,107.16]].map(a=>P(a[0],a[1]));
+
+/* ---------- 关卡数据：三段式叙事 + 欺骗动作 + 敌军势力 ---------- */
+const ROUNDS=[
+ {n:1,date:'1935-01-29',title:'一渡 · 土城受挫后西渡',
+  enemy:'土城因「T团」建制误判，以为川军 4 个团，实为 8 个团 2 万余人，速决战打不成。',
+  action:'土城、猿猴场一渡赤水，向扎西集结',react:'蒋判断红军欲北渡长江，川军沿江死守',
+  hist:['tucheng','taiping','zhaxi'],correct:'taiping'},
+ {n:2,date:'1935-02-18—21',title:'二渡 · 回师黔北',
+  enemy:'敌主力被吸引在川滇边，黔北只剩王家烈部，守备空虚。',
+  action:'二渡赤水，取娄山关、再占遵义',react:'命令 2—3 天才到前线，中央军东援时红军已进城',
+  hist:['zhaxi','taiping','erlang','loushan','zunyi'],correct:'erlang'},
+ {n:3,date:'1935-03-16—17',title:'三渡 · 白天示形',
+  enemy:'苟坝会议后确立机动方针，需要让敌人「亲眼看见」一个假方向。',
+  action:'茅台白天公开架桥三渡，一团带总部电台佯攻古蔺',react:'侦察机与电台信号都指向川南，各军奉命西调',
+  hist:['zunyi','maotai','gulin'],correct:'maotai'},
+ {n:4,date:'1935-03-21—22',title:'四渡 · 从缝隙南下',
+  enemy:'敌军主力西调，黔北与贵阳之间出现空隙；胜负关键已不是「渡过去」。',
+  action:'四渡后南渡乌江、佯攻贵阳，西取金沙江',react:'蒋急调滇军入黔 → 云南空虚，皎平渡防线被打开',
+  hist:['gulin','taiping','erlang','wujiang','guiyang'],correct:'taiping'}
+];
+
+const ACTIONS=[
+ {id:'bridge',name:'茅台白天公开架桥',signal:'侦察机看到浮桥 → 判主力欲西渡入川',w:{west:.34,stay:-.06}},
+ {id:'radio', name:'全军关闭电台潜伏',signal:'二局失去电台信号 → 敌判断失据',w:{stay:.20,west:-.06}},
+ {id:'gulin', name:'一团带总部电台佯攻古蔺',signal:'总部呼号出现在古蔺 → 判主力西进',w:{west:.40,stay:-.10}},
+ {id:'ninth', name:'红九军团伪装主力',signal:'多地红旗与番号 → 判主力仍在原地',w:{stay:.28,east:-.08}},
+ {id:'fake',  name:'二局假电令',signal:'伪造调度令 → 敌西调',w:{west:.28,south:.10},cav:'教学示意 · 回忆线索非铁史'},
+ {id:'bridge2',name:'清水江再架浮桥',signal:'判红军将东渡 / 南渡',w:{east:.22,south:.16}},
+ {id:'guiyang',name:'佯攻贵阳',signal:'蒋急调滇军入黔 → 滇军出滇',w:{south:.55,west:-.18},key:true}
+];
+
+const FORCES=[
+ {id:'chuan',name:'川军',intent:'死守四川，防红军北渡长江',zone:'川南 · 赤水西岸',home:'gulin',eager:.95},
+ {id:'dian', name:'滇军',intent:'防蒋甚于防共，不肯离滇',zone:'滇东北 · 扎西',home:'zhaxi',eager:.45},
+ {id:'qian', name:'黔军',intent:'想抢回遵义，只守黔北',zone:'遵义 · 黔北',home:'zunyi',eager:.70},
+ {id:'xue',  name:'中央军·薛岳',intent:'一石二鸟，追红军并收西南',zone:'贵阳以东',home:'guiyang',eager:.80},
+ {id:'zhou', name:'中央军·周浑元',intent:'听令围堵，命令延迟 2—3 天',zone:'仁怀—遵义间',home:'maotai',eager:.75},
+ {id:'xiang',name:'湘军',intent:'只修碉堡，出省消极',zone:'湘黔边',home:'wujiang',eager:.30},
+ {id:'gui',  name:'桂军',intent:'防境为主，离境便装样子',zone:'桂北',home:'guiyang',eager:.35}
+];
+
+const BELIEFS=[
+ {id:'west', name:'北渡长江／入川',target:'gulin'},
+ {id:'east', name:'回师遵义／黔北',target:'zunyi'},
+ {id:'south',name:'南下贵阳',       target:'guiyang'},
+ {id:'stay', name:'仍在川滇边徘徊', target:'zhaxi'}
+];
+
+/* ---------- 场景 ---------- */
+const canvas=document.getElementById('c');
+const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+if('outputColorSpace' in renderer&&T.SRGBColorSpace)renderer.outputColorSpace=T.SRGBColorSpace;
+else if('outputEncoding' in renderer&&T.sRGBEncoding)renderer.outputEncoding=T.sRGBEncoding;
+const scene=new T.Scene();scene.background=new T.Color(0xe9dfc6);scene.fog=new T.Fog(0xe9dfc6,190,330);
+const camera=new T.PerspectiveCamera(44,1,.5,600);
+let theta=.92,phi=.66,radius=178;
+const target=new T.Vector3(0,0,-6);
+function placeCamera(){camera.position.set(target.x+radius*Math.sin(phi)*Math.sin(theta),target.y+radius*Math.cos(phi),target.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(target);}
+placeCamera();
+
+scene.add(new T.HemisphereLight(0xfff4dd,0x8c7a58,1.5));
+const sun=new T.DirectionalLight(0xffedc8,1.65);sun.position.set(-70,120,60);sun.castShadow=false;scene.add(sun);
+
+function distSeg(px,pz,a,b){const dx=b.x-a.x,dz=b.z-a.z,L=dx*dx+dz*dz;let t=L?((px-a.x)*dx+(pz-a.z)*dz)/L:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px-(a.x+t*dx),pz-(a.z+t*dz));}
+function distRiver(x,z,poly){let d=1e9;for(let i=0;i<poly.length-1;i++)d=Math.min(d,distSeg(x,z,poly[i],poly[i+1]));return d;}
+function height(x,z){
+  const hills=1.5*Math.sin(x*.055)*Math.cos(z*.062)+1.05*Math.sin(x*.105+z*.07)+.7*Math.cos(z*.13-x*.045);
+  const base=2.0+hills*1.15;
+  const carve=Math.exp(-Math.pow(distRiver(x,z,RIVER)/5.2,2));
+  const carve2=Math.exp(-Math.pow(distRiver(x,z,WUJIANG)/4.0,2))*.55;
+  const f=Math.min(1,carve+carve2);
+  return base*(1-f)-1.25*f;
+}
+
+const geo=new T.PlaneGeometry(210,190,120,110);geo.rotateX(-Math.PI/2);
+const pos=geo.attributes.position,colors=[];
+const cLow=new T.Color(0xc7b98d),cMid=new T.Color(0xd0bb8d),cHigh=new T.Color(0xaf9267),cVal=new T.Color(0xb09a72);
+for(let i=0;i<pos.count;i++){
+  const x=pos.getX(i),z=pos.getZ(i),h=height(x,z);pos.setY(i,h);
+  let c;
+  if(h<.2)c=cVal.clone();
+  else if(h<2.1)c=cLow.clone().lerp(cMid,(h+.2)/2.3);
+  else c=cMid.clone().lerp(cHigh,Math.min(1,(h-2.1)/3.2));
+  const n=.92+Math.sin(x*.9+z*.4)*.05;c.multiplyScalar(n);
+  colors.push(c.r,c.g,c.b);
+}
+geo.setAttribute('color',new T.Float32BufferAttribute(colors,3));geo.computeVertexNormals();
+const terrain=new T.Mesh(geo,new T.MeshStandardMaterial({vertexColors:true,roughness:1,metalness:0,flatShading:false}));
+scene.add(terrain);
+
+function ribbon(poly,width,y,color,opacity){
+  const verts=[],idx=[];
+  for(let i=0;i<poly.length;i++){
+    const a=poly[Math.max(0,i-1)],b=poly[Math.min(poly.length-1,i+1)];
+    let dx=b.x-a.x,dz=b.z-a.z;const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
+    const nx=-dz*width/2,nz=dx*width/2,p=poly[i];
+    verts.push(p.x+nx,y,p.z+nz,p.x-nx,y,p.z-nz);
+    if(i<poly.length-1){const k=i*2;idx.push(k,k+1,k+2,k+1,k+3,k+2);}
+  }
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.setIndex(idx);g.computeVertexNormals();
+  const m=new T.MeshStandardMaterial({color,transparent:true,opacity,roughness:.28,metalness:.05,side:T.DoubleSide,depthWrite:false});
+  const mesh=new T.Mesh(g,m);mesh.renderOrder=2;scene.add(mesh);return mesh;
+}
+ribbon(RIVER,5.4,-.2,0x2f86ac,1);
+ribbon(WUJIANG,3.0,-.24,0x4f92a6,.9);
+// 河岸线
+function edgeLine(poly,color,y){const pts=poly.map(p=>new T.Vector3(p.x,y,p.z));scene.add(new T.Line(new T.BufferGeometry().setFromPoints(pts),new T.LineBasicMaterial({color,transparent:true,opacity:.55,depthTest:false})));}
+edgeLine(RIVER,0x2f6072,-.2);edgeLine(WUJIANG,0x4b7d8e,-.18);
+// 河道主槽：用管状带保证在任何俯角下都能看清走向（示意，非测绘）
+function riverTube(poly,y,radius,color){
+  const curve=new T.CatmullRomCurve3(poly.map(p=>new T.Vector3(p.x,y,p.z)),false,'catmullrom',.08);
+  const g=new T.TubeGeometry(curve,poly.length*8,radius,6,false);
+  const m=new T.MeshBasicMaterial({color,depthTest:false,transparent:true,opacity:.86});
+  const mesh=new T.Mesh(g,m);mesh.renderOrder=6;scene.add(mesh);
+}
+riverTube(RIVER,1.0,1.35,0x2f86ac);
+riverTube(WUJIANG,.9,.7,0x4f92a6);
+
+/* ---------- 地点标记 ---------- */
+const markerMeshes=[];
+const GCOL={cross:0xb8892f,city:0x6b6a63,town:0x8a7a5e,pass:0x7a6a50,anchor:0xa83226,river:0x4c8296};
+PLACES.forEach(p=>{
+  const g=new T.Group();g.position.set(p.pos.x,height(p.pos.x,p.pos.z),p.pos.z);
+  const base=new T.Mesh(new T.CylinderGeometry(1.5,1.8,.3,12),new T.MeshStandardMaterial({color:0xe8dcc0,roughness:1}));base.position.y=.15;g.add(base);
+  let body;
+  if(p.type==='cross'){
+    body=new T.Mesh(new T.BoxGeometry(3.4,.35,1.3),new T.MeshStandardMaterial({color:GCOL.cross,roughness:.7}));body.position.y=1.05;
+    const m1=new T.Mesh(new T.BoxGeometry(.18,2.1,.18),new T.MeshStandardMaterial({color:0x6b5533}));m1.position.set(-1.4,1.7,0);g.add(m1);
+    const m2=m1.clone();m2.position.x=1.4;g.add(m2);
+  }else if(p.type==='city'){
+    body=new T.Mesh(new T.BoxGeometry(3.2,2.4,3.0),new T.MeshStandardMaterial({color:GCOL.city,roughness:.9}));body.position.y=1.5;
+  }else if(p.type==='pass'){
+    body=new T.Mesh(new T.ConeGeometry(1.7,2.8,5),new T.MeshStandardMaterial({color:GCOL.pass,roughness:1}));body.position.y=1.7;
+  }else{
+    body=new T.Mesh(new T.CylinderGeometry(.28,.28,2.6,8),new T.MeshStandardMaterial({color:GCOL[p.type]||0x8a7a5e,roughness:.8}));body.position.y=1.5;
+  }
+  const flag=new T.Mesh(new T.SphereGeometry(.5,12,8),new T.MeshStandardMaterial({color:p.type==='cross'?0xc0392b:GCOL[p.type]||0x8a7a5e,emissive:p.type==='cross'?0x3a0a05:0x000000}));
+  flag.position.y=3.1;flag.userData.placeId=p.id;
+  body.userData.placeId=p.id;flag.userData.placeId=p.id;
+  g.add(body);g.add(flag);
+  body.userData.baseY=body.position.y;
+  markerMeshes.push(body,flag);
+  scene.add(g);
+  const lab=document.createElement('div');
+  lab.className='lab'+(p.type==='cross'?' cross':' dim');lab.dataset.id=p.id;
+  lab.innerHTML=p.name+(p.type==='cross'?'<small>◇ 可点选</small>':'');
+  lab.title=p.note||'';
+  lab.addEventListener('click',()=>{if(p.type==='cross')selectCrossing(p.id);});
+  document.getElementById('labels').append(lab);p.label=lab;
+  p.labelPos=new T.Vector3(p.pos.x,height(p.pos.x,p.pos.z)+4.2,p.pos.z);
+});
+
+/* ---------- 敌军箭头 ---------- */
+const forceArrows=FORCES.map((f,i)=>{
+  const g=new T.Group();
+  const col=new T.Color().setHSL(.58,.28,.30+f.eager*.18);
+  const mat=new T.MeshStandardMaterial({color:0x365a72,roughness:.65,transparent:true,opacity:.95,depthTest:false});
+  const shaft=new T.Mesh(new T.CylinderGeometry(.48,.48,5.5,8),mat);shaft.rotation.x=Math.PI/2;shaft.position.z=2.75;shaft.renderOrder=8;g.add(shaft);
+  const head=new T.Mesh(new T.ConeGeometry(1.6,3.2,8),mat);head.rotation.x=Math.PI/2;head.position.z=7.1;head.renderOrder=8;g.add(head);
+  const ang=(i/FORCES.length)*Math.PI*2;
+  const home=BY[f.home].pos;
+  g.position.set(home.x+Math.cos(ang)*4.5,height(home.x,home.z)+4.5,home.z+Math.sin(ang)*4.5);
+  g.userData={from:g.position.clone(),to:g.position.clone(),t:1};
+  scene.add(g);return g;
+});
+
+/* ---------- 路线 ---------- */
+function pathPoints(ids,lift){
+  const pts=[];
+  ids.forEach(id=>{
+    const p=BY[id].pos;
+    const end=new T.Vector3(p.x,height(p.x,p.z)+lift,p.z);
+    if(!pts.length){pts.push(end.clone());return;}
+    const start=pts[pts.length-1].clone();
+    const n=14;for(let i=1;i<=n;i++){
+      const t=i/n,v=start.clone().lerp(end,t);
+      v.y=height(v.x,v.z)+lift+Math.sin(t*Math.PI)*1.0;
+      pts.push(v);
+    }
+  });
+  return pts;
+}
+let playerLine=null,histLine=null,playerPts=[],histPts=[],animLine=null,animT=0,animFrom=0;
+const redDot=new T.Mesh(new T.SphereGeometry(1.05,16,12),new T.MeshStandardMaterial({color:0xa83226,emissive:0x3d0b05,roughness:.35}));
+redDot.visible=false;scene.add(redDot);
+
+function makeLine(pts,color,dashed){
+  if(!pts.length)return null;
+  const g=new T.BufferGeometry().setFromPoints(pts);
+  const m=dashed
+    ?new T.LineDashedMaterial({color,dashSize:3.2,gapSize:1.8,depthTest:false,transparent:true,opacity:.95})
+    :new T.LineBasicMaterial({color,depthTest:false,transparent:true,opacity:.95});
+  const l=new T.Line(g,m);if(dashed)l.computeLineDistances();l.renderOrder=9;scene.add(l);
+  const dots=new T.Points(g,new T.PointsMaterial({color,size:1.05,sizeAttenuation:true,depthTest:false,transparent:true,opacity:.95}));
+  dots.renderOrder=10;scene.add(dots);l.userData.dots=dots;
+  return l;
+}
+function removeLine(l){if(!l)return;scene.remove(l);if(l.userData.dots)scene.remove(l.userData.dots);l.geometry.dispose();}
+function showHistory(){
+  removeLine(histLine);
+  histPts=[];ROUNDS.forEach(r=>{const seg=pathPoints(r.hist,4.5);if(histPts.length&&seg.length)histPts=histPts.concat(seg.slice(1));else histPts=seg.slice();});
+  histLine=makeLine(histPts,0xb8892f,true);
+  if(histLine)histLine.geometry.setDrawRange(0,histPts.length);
+}
+
+/* ---------- 游戏状态 ---------- */
+const S={round:0,belief:{west:.44,east:.10,south:.05,stay:.41},pending:null,
+  usedActions:[],chosen:null,playerIds:[],log:[],score:0,dianOut:false};
+function normalize(b){let s=0;BELIEFS.forEach(o=>{b[o.id]=Math.max(.02,b[o.id]);s+=b[o.id];});BELIEFS.forEach(o=>b[o.id]/=s);}
+
+function renderPanel(){
+  const r=ROUNDS[S.round];
+  const card=document.getElementById('roundCard');
+  if(r){card.innerHTML='<div class="card"><div class="t">第 '+r.n+' 回合 · '+r.title+'</div><div class="d">'+r.date+'　｜　三段式叙事</div>'+
+   '<p><b>敌情</b>　'+r.enemy+'</p><p><b>我方</b>　'+r.action+'</p><p><b>敌应</b>　'+r.react+'</p></div>';}
+  else card.innerHTML='<div class="card"><div class="t">推演结束</div><p>看结果，或点「重播史实路线」对照轨迹。</p></div>';
+
+  const wrap=document.getElementById('crossings');wrap.innerHTML='';
+  PLACES.filter(p=>p.type==='cross').forEach(p=>{
+    const b=document.createElement('button');b.className='act';b.style.width='auto';b.style.display='inline-block';
+    b.textContent=p.name;b.title=p.note;
+    if(S.chosen===p.id){b.style.background='var(--red)';b.style.color='#fff';b.style.borderColor='var(--red)';}
+    b.disabled=!r;b.onclick=()=>selectCrossing(p.id);wrap.append(b);
+  });
+
+  const aw=document.getElementById('actions');aw.innerHTML='';
+  ACTIONS.forEach(a=>{
+    const b=document.createElement('button');b.className='act'+(S.usedActions.indexOf(a.id)>=0?' on':'');
+    b.innerHTML=a.name+'<small>'+a.signal+'</small>'+(a.cav?'<small class="cav">'+a.cav+'</small>':'');
+    b.disabled=!r;b.onclick=()=>toggleAction(a.id);aw.append(b);
+  });
+
+  const bw=document.getElementById('belief');bw.innerHTML='';
+  BELIEFS.forEach(o=>{
+    const v=Math.round(S.belief[o.id]*100);
+    const d=document.createElement('div');d.className='bar';
+    d.innerHTML='<span>'+o.name+'</span><div class="track"><div class="fill" style="width:'+v+'%"></div></div><em>'+v+'%</em>';
+    bw.append(d);
+  });
+
+  const fw=document.getElementById('forces');fw.innerHTML='';
+  FORCES.forEach(f=>{
+    const d=document.createElement('div');d.className='force';
+    const eager=Math.round(f.eager*100);
+    d.innerHTML='<b>'+f.name+'</b><span>'+f.intent+'　·　'+f.zone+'　·　积极性 '+eager+'%</span>';
+    fw.append(d);
+  });
+
+  const btn=document.getElementById('commit');
+  btn.disabled=!r;btn.textContent=r?('执行第 '+r.n+' 回合 →'):'推演已结束';
+}
+function selectCrossing(id){S.chosen=id;PLACES.forEach(p=>{if(p.type==='cross')p.label.classList.toggle('sel',p.id===id);});renderPanel();}
+function toggleAction(id){const i=S.usedActions.indexOf(id);if(i>=0)S.usedActions.splice(i,1);else S.usedActions.push(id);renderPanel();}
+function renderLabels(){
+  const w=stage.clientWidth,h=stage.clientHeight,items=[];
+  PLACES.forEach(p=>{
+    const v=p.labelPos.clone().project(camera);
+    if(v.z>1||v.z<-1){p.label.style.display='none';return;}
+    items.push({p,x:(v.x*.5+.5)*w,y:(-v.y*.5+.5)*h});
+  });
+  items.sort((a,b)=>a.y-b.y);
+  const placed=[];
+  items.forEach(it=>{
+    let y=it.y;
+    for(let k=0;k<8;k++){
+      if(!placed.some(q=>Math.abs(q.x-it.x)<78&&Math.abs(q.y-y)<22))break;
+      y+=23;
+    }
+    placed.push({x:it.x,y});
+    const lab=it.p.label;
+    lab.style.display='block';lab.style.left=it.x+'px';lab.style.top=y+'px';
+    lab.style.zIndex=it.p.type==='cross'?3:1;
+  });
+}
+
+function applySignals(b,acts){
+  const nb=Object.assign({},b);
+  acts.forEach(id=>{const a=ACTIONS.filter(x=>x.id===id)[0];if(!a)return;
+    Object.keys(a.w).forEach(k=>nb[k]=(nb[k]||0)+a.w[k]*.55);});
+  normalize(nb);return nb;
+}
+
+function moveArrows(){
+  const top=BELIEFS.slice().sort((a,b)=>S.belief[b.id]-S.belief[a.id])[0];
+  const tp=BY[top.target].pos;
+  forceArrows.forEach((g,i)=>{
+    const f=FORCES[i],ang=(i/FORCES.length)*Math.PI*2;
+    const home=BY[f.home].pos;
+    const w=.25+f.eager*.6;
+    const tx=home.x+(tp.x-home.x)*w+Math.cos(ang)*3.5;
+    const tz=home.z+(tp.z-home.z)*w+Math.sin(ang)*3.5;
+    g.userData.from=g.position.clone();
+    g.userData.to=new T.Vector3(tx,height(tx,tz)+4.5,tz);
+    const d=g.userData.to.clone().sub(g.position);
+    if(d.length()>.2)g.lookAt(g.position.clone().add(d));
+    g.userData.t=0;
+  });
+}
+
+function commit(){
+  const r=ROUNDS[S.round];if(!r)return;
+  const chosen=S.chosen||r.correct;
+  const acts=S.usedActions.slice();
+  // 敌情判断有 2—3 天延迟：本回合生效的是上一回合释放的信号
+  const applied=S.pending||[];
+  if(applied.length)S.belief=applySignals(S.belief,applied);
+  S.pending=acts;
+
+  // 玩家路线：从上一落点 → 选定渡口 → 史实下一落点
+  let from=S.playerIds.length?S.playerIds[S.playerIds.length-1]:r.hist[0];
+  const seg=[from,chosen,(r.hist[r.hist.length-1]!==chosen?r.hist[r.hist.length-1]:null)].filter(Boolean);
+  const pts=pathPoints(seg,5.4);
+  playerPts=playerPts.concat(playerPts.length?pts.slice(1):pts);
+  removeLine(playerLine);
+  playerLine=makeLine(playerPts,0xa83226,false);
+  if(playerLine){animFrom=Math.max(0,playerPts.length-pts.length);playerLine.geometry.setDrawRange(0,animFrom);animLine=playerLine;animT=0;}
+  S.playerIds.push(chosen);if(r.hist[r.hist.length-1]!==chosen)S.playerIds.push(r.hist[r.hist.length-1]);
+
+  const hit=chosen===r.correct;
+  if(hit)S.score+=10;
+  S.log.push({n:r.n,chosen,correct:r.correct,hit,acts,belief:Object.assign({},S.belief),pending:applied});
+  moveArrows();
+  S.round++;S.chosen=null;S.usedActions=[];
+  if(S.round>=ROUNDS.length){
+    // 最后一回合的信号也生效一次，用于判定「滇军是否被调出云南」
+    if(S.pending&&S.pending.length)S.belief=applySignals(S.belief,S.pending);
+    S.dianOut=S.belief.south>.28&&S.log.some(l=>l.acts.indexOf('guiyang')>=0);
+    setTimeout(showResult,1250);
+  }
+  renderPanel();
+}
+
+function showResult(){
+  const box=document.getElementById('rbox');
+  showHistory();
+  let li='';S.log.forEach(l=>{
+    const a=l.acts.length?l.acts.map(id=>ACTIONS.filter(x=>x.id===id)[0].name).join('、'):'未释放信号';
+    li+='<li>第 '+l.n+' 渡：选 <b>'+BY[l.chosen].name+'</b>（'+ (l.hit?'与史实渡口一致':'与史实不同') +'）｜ 信号：'+a+'</li>';
+  });
+  box.innerHTML='<h1 style="font:600 21px SimSun,serif">推演复盘 · 你的路线 vs 史实路线</h1>'+
+   '<div class="big">'+ (S.dianOut?'✓ 达成胜利条件：滇军被调出云南，金沙江防线空虚':'△ 未达成：敌军没有被彻底调开，红军仍在合围圈里') +'</div>'+
+   '<div class="sub">胜负口径来自四个视频的共同结论：「只要能把滇军调出来，就是胜利」——不是「渡过去」。</div>'+
+   '<div class="sect">四回合决策</div><ol>'+li+'</ol>'+
+   '<div class="sect">渡口命中 '+S.score+' / 40</div>'+
+   '<p style="font-size:13px">红实线＝你的路线，金色虚线＝史实路线；已在 3D 沙盘上叠加，可关闭本页后拖动查看。</p>'+
+   '<div class="note">教学示意：地形、河道、兵力、坐标缩放均非测绘成果；二局假电令属回忆线索，已在按钮上标注。史实锚点见 competition/3D场景史实与坐标说明.md。</div>'+
+   '<div class="row"><button onclick="document.getElementById(\'result\').classList.remove(\'show\')">回到沙盘查看</button><button onclick="location.reload()">重新推演</button></div>';
+  document.getElementById('result').classList.add('show');
+}
+
+document.getElementById('commit').onclick=commit;
+document.getElementById('reset').onclick=()=>location.reload();
+document.getElementById('replay').onclick=()=>{showHistory();if(histLine){animFrom=0;histLine.geometry.setDrawRange(0,2);animLine=histLine;animT=0;}};
+
+/* ---------- 交互 ---------- */
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,theta,phi};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;theta=drag.theta-(e.clientX-drag.x)*.005;phi=Math.max(.25,Math.min(1.45,drag.phi-(e.clientY-drag.y)*.004));placeCamera();});
+canvas.addEventListener('pointerup',()=>{drag=null;});
+canvas.addEventListener('wheel',e=>{e.preventDefault();radius=Math.max(70,Math.min(300,radius*(1+Math.sign(e.deltaY)*.08)));placeCamera();},{passive:false});
+const ray=new T.Raycaster(),mv=new T.Vector2();
+canvas.addEventListener('click',e=>{
+  if(drag)return;
+  const r=canvas.getBoundingClientRect();
+  mv.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(mv,camera);
+  const hits=ray.intersectObjects(markerMeshes,false);
+  if(hits.length){const id=hits[0].object.userData.placeId;if(BY[id].type==='cross')selectCrossing(id);}
+});
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+
+/* ---------- 主循环 ---------- */
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(animLine&&animLine.geometry){
+    animT=Math.min(1,animT+dt*.85);
+    const total=animLine===histLine?histPts.length:playerPts.length;
+    const n=animFrom+Math.floor((total-animFrom)*animT);
+    animLine.geometry.setDrawRange(0,Math.max(2,n));
+    if(animT>=1)animLine=null;
+  }
+  forceArrows.forEach(g=>{
+    const u=g.userData;if(u.t>=1)return;
+    u.t=Math.min(1,u.t+dt*1.1);
+    const e=1-Math.pow(1-u.t,3);
+    g.position.lerpVectors(u.from,u.to,e);
+  });
+  if(playerLine&&playerPts.length){
+    const n=playerLine.geometry.drawRange.count||1;
+    const p=playerPts[Math.min(playerPts.length-1,n-1)];
+    if(p){redDot.position.copy(p);redDot.visible=true;}
+  }
+  renderLabels();
+  const a=new T.Vector3(0,0,0).project(camera),b2=new T.Vector3(0,0,-10).project(camera);
+  const ang=Math.atan2(-(b2.y-a.y),b2.x-a.x)*180/Math.PI+90;
+  document.getElementById('narrow').style.transform='rotate('+ang.toFixed(1)+'deg)';
+  renderer.render(scene,camera);
+  requestAnimationFrame(loop);
+}
+window.CZ3D={scene,camera,renderer,height,RIVER,WUJIANG,P,PLACES,FORCES};
+renderPanel();showHistory();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

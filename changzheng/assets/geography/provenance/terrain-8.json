@@ -1,0 +1,47 @@
+{
+  "id": 8,
+  "name": "夹金山",
+  "source": "NASA SRTM GL1 v3 / OpenTopography public bulk (1 arc-second)",
+  "source_url": "https://opentopography.s3.sdsc.edu/raster/SRTM_GL1/SRTM_GL1_srtm/",
+  "bounds": {
+    "north": 30.95,
+    "south": 30.45,
+    "east": 103.02,
+    "west": 102.42
+  },
+  "source_resolution": "1 arc-second (~30m at equator)",
+  "sampling_m_ns": 218.02941176470588,
+  "sampling_m_ew": 224.9677019769728,
+  "min": 1151.4,
+  "max": 5237.9,
+  "bytes": 458937,
+  "filled_output_samples": 0,
+  "tiles": [
+    {
+      "file": "N30E102.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    },
+    {
+      "file": "N30E103.tif",
+      "crs": "EPSG:4326",
+      "resolution": [
+        0.0002777777777777778,
+        0.0002777777777777778
+      ],
+      "width": 3601,
+      "height": 3601,
+      "nodata": -32768.0
+    }
+  ],
+  "sha256": "b82d8b6ebafc04012ecb3ed30d60a5a846d32eedf2eb4fdc2e93d4be59c8da1c",
+  "utc": "2026-10-21T09:27:24.570374+00:00",
+  "seconds": 0.16,
+  "fallback_errors": []
+}

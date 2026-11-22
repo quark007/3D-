@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -455,13 +456,14 @@ function selectAnimation(name) {
 }
 document.getElementById('animation').addEventListener('change', event => selectAnimation(event.target.value));
 
+const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
 try {
-  const loader = new GLTFLoader();
+  const loader = new GLTFLoader().setDRACOLoader(draco);
   loader.register(parser => ({
     name: 'CZ_embedded_images',
     beforeRoot() { parser.textureLoader = new T.TextureLoader(parser.options.manager); }
   }));
-  const source = await loader.loadAsync('/assets/characters/he-wen/he-wen-study-v1.glb');
+  const source = await loader.loadAsync('/assets/characters/he-wen/he-wen-web.glb');
   model = source.scene;
   model.name = 'HeWen_Independent_Study';
   const box = new T.Box3().setFromObject(model);
@@ -568,6 +570,8 @@ outgoingLight += diffuseColor.rgb * vec3(0.20, 0.06, 0.04) * (1.0 - hwEyeWrap) *
 } catch (error) {
   status.textContent = `模型加载失败：${error.message}`;
   console.error(error);
+} finally {
+  draco.dispose();
 }
 const clock = new T.Clock();
 renderer.setAnimationLoop(() => {

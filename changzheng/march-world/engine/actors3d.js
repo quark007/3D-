@@ -10,7 +10,7 @@
   const DEFAULT_HEIGHT = 1.76;
   const CHARACTER_PROFILES = {
     he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-web.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
-    wang_gui: { height: 1.70 },
+    wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', height: 1.70, scaleBias: 1, idle: 'Idle' },
     chen_xiaoman: { height: 1.67 },
     medic_1: { height: 1.61 },
     logistics_1: { height: 1.73 },
@@ -107,7 +107,9 @@
         return materials.get(material);
       }
       const model = skeleton.clone(source.scene);
-      const bounds = new T.Box3().setFromObject(model);
+      // Use posed vertices for independent rigs whose armature bounds include their bind pose.
+      if (independent) model.updateMatrixWorld(true);
+      const bounds = new T.Box3().setFromObject(model, Boolean(independent));
       const size = bounds.getSize(new T.Vector3());
       const center = bounds.getCenter(new T.Vector3());
       const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);

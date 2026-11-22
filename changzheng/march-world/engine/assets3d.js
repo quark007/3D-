@@ -25,8 +25,12 @@
     const response = await fetch('/assets/pbr/manifest.json', { signal });
     if (!response.ok) throw Error('场景材质清单 HTTP ' + response.status);
     const manifest = await response.json();
-    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+    const [{ GLTFLoader }, { DRACOLoader }] = await Promise.all([
+      import('three/addons/loaders/GLTFLoader.js'),
+      import('three/addons/loaders/DRACOLoader.js')
+    ]);
     signal?.throwIfAborted();
+    const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
     const jobs = [];
     for (const key of ['earth', 'wood', 'plaster', 'roof', 'rock']) {
       textures[key] = {};
@@ -53,7 +57,7 @@
       if (!response.ok) throw Error(`${key} HTTP ${response.status}`);
       const bytes = await response.arrayBuffer();
       signal?.throwIfAborted();
-      const loader = new GLTFLoader();
+      const loader = new GLTFLoader().setDRACOLoader(draco);
       loader.register(parser => ({ name: 'CZ_embedded_images', beforeRoot() { parser.textureLoader = new T.TextureLoader(parser.options.manager); } }));
       const source = await loader.parseAsync(bytes, url.slice(0, url.lastIndexOf('/') + 1));
       models[key] = source.scene;
@@ -69,6 +73,7 @@
       signal?.throwIfAborted();
     })());
     const results = await Promise.allSettled(jobs);
+    draco.dispose();
     const failed = results.find(result => result.status === 'rejected');
     if (failed || signal?.aborted) {
       dispose();

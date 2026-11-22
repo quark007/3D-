@@ -9,7 +9,7 @@
   };
   const DEFAULT_HEIGHT = 1.76;
   const CHARACTER_PROFILES = {
-    he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-study-v1.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
+    he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-web.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
     wang_gui: { height: 1.70 },
     chen_xiaoman: { height: 1.67 },
     medic_1: { height: 1.61 },
@@ -22,12 +22,12 @@
   const headings = { e: 0, s: Math.PI / 2, w: Math.PI, n: -Math.PI / 2 };
   const npcKey = anchor => M.anchors.npcKey(anchor.anchorId, anchor.label);
 
-  async function loadModel(T, GLTFLoader, url, signal) {
+  async function loadModel(T, GLTFLoader, draco, url, signal) {
     const response = await fetch(url, { signal });
     if (!response.ok) throw Error(`人物模型 ${url} HTTP ${response.status}`);
     const data = await response.arrayBuffer();
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-    const loader = new GLTFLoader();
+    const loader = new GLTFLoader().setDRACOLoader(draco);
     loader.register(parser => ({
       name: 'CZ_embedded_images',
       beforeRoot() {
@@ -54,8 +54,9 @@
   const hasModel = anchor => anchor.kind === 'npc' && npcKey(anchor) !== 'narrator';
 
   async function create(T, logicalScene, parent, signal) {
-    const [{ GLTFLoader }, skeleton] = await Promise.all([
+    const [{ GLTFLoader }, { DRACOLoader }, skeleton] = await Promise.all([
       import('three/addons/loaders/GLTFLoader.js'),
+      import('three/addons/loaders/DRACOLoader.js'),
       import('three/addons/utils/SkeletonUtils.js')
     ]);
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -63,15 +64,17 @@
       .map(anchor => CHARACTER_PROFILES[npcKey(anchor)]?.glbUrl).filter(Boolean));
     const loaded = new Map();
     const urls = new Set([...Object.values(paths), ...independentUrls]);
+    const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
     const results = await Promise.allSettled([...urls].map(async url => {
       try {
-        const source = await loadModel(T, GLTFLoader, url, signal);
+        const source = await loadModel(T, GLTFLoader, draco, url, signal);
         loaded.set(url, source);
       } catch (error) {
         if (signal?.aborted || !independentUrls.has(url)) throw error;
         console.warn(`独立人物模型回退：${url}`, error);
       }
     }));
+    draco.dispose();
     const failure = results.find(result => result.status === 'rejected');
     if (failure || signal?.aborted) {
       disposeModels(loaded.values());

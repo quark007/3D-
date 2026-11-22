@@ -7,12 +7,24 @@
     soldier: '/assets/models-v03/char_soldier.glb',
     medic: '/assets/models-v03/char_medic.glb'
   };
-  const cache = new Map();
+  const DEFAULT_HEIGHT = 1.76;
+  const CHARACTER_PROFILES = {
+    he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-study-v1.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
+    wang_gui: { height: 1.70 },
+    chen_xiaoman: { height: 1.67 },
+    medic_1: { height: 1.61 },
+    logistics_1: { height: 1.73 },
+    liaison_1: { height: 1.65 },
+    boatman_1: { height: 1.74 },
+    guide_1: { height: 1.68 },
+    civilian_1: { height: 1.63 }
+  };
+  const headings = { e: 0, s: Math.PI / 2, w: Math.PI, n: -Math.PI / 2 };
+  const npcKey = anchor => M.anchors.npcKey(anchor.anchorId, anchor.label);
 
-  async function loadRole(T, GLTFLoader, role, signal) {
-    if (cache.has(role)) return cache.get(role);
-    const response = await fetch(paths[role], { signal });
-    if (!response.ok) throw Error(`人物模型 ${role} HTTP ${response.status}`);
+  async function loadModel(T, GLTFLoader, url, signal) {
+    const response = await fetch(url, { signal });
+    if (!response.ok) throw Error(`人物模型 ${url} HTTP ${response.status}`);
     const data = await response.arrayBuffer();
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     const loader = new GLTFLoader();
@@ -23,68 +35,107 @@
         parser.textureLoader = new T.TextureLoader(parser.options.manager);
       }
     }));
-    const source = await loader.parseAsync(data, '/assets/models-v03/');
-    cache.set(role, source);
-    return source;
+    return loader.parseAsync(data, url.slice(0, url.lastIndexOf('/') + 1));
   }
 
-  function roleForAnchor(anchor) {
-    const key = M.anchors.npcKey(anchor.anchorId, anchor.label);
-    const style = M.anchors.NPC_STYLES[key] || {};
-    return style.role || 'soldier';
+  function disposeModels(sources) {
+    const resources = new Set();
+    for (const source of sources) source.scene.traverse(node => {
+      if (node.isSkinnedMesh) resources.add(node.skeleton);
+      if (node.geometry) resources.add(node.geometry);
+      for (const material of [].concat(node.material || [])) {
+        resources.add(material);
+        for (const value of Object.values(material)) if (value?.isTexture) resources.add(value);
+      }
+    });
+    for (const resource of resources) resource.dispose();
   }
 
-  const hasModel = anchor => anchor.kind === 'npc' && M.anchors.npcKey(anchor.anchorId, anchor.label) !== 'narrator';
+  const hasModel = anchor => anchor.kind === 'npc' && npcKey(anchor) !== 'narrator';
 
-  async function create(T, logicalScene, parent, signal, playerRole = 'soldier') {
+  async function create(T, logicalScene, parent, signal) {
     const [{ GLTFLoader }, skeleton] = await Promise.all([
       import('three/addons/loaders/GLTFLoader.js'),
       import('three/addons/utils/SkeletonUtils.js')
     ]);
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-    const roles = new Set([paths[playerRole] ? playerRole : 'soldier']);
-    for (const anchor of logicalScene.anchors) if (hasModel(anchor)) roles.add(roleForAnchor(anchor));
+    const independentUrls = new Set(logicalScene.anchors.filter(hasModel)
+      .map(anchor => CHARACTER_PROFILES[npcKey(anchor)]?.glbUrl).filter(Boolean));
     const loaded = new Map();
-    await Promise.all([...roles].map(async role => {
-      loaded.set(role, await loadRole(T, GLTFLoader, role, signal));
+    const urls = new Set([...Object.values(paths), ...independentUrls]);
+    const results = await Promise.allSettled([...urls].map(async url => {
+      try {
+        const source = await loadModel(T, GLTFLoader, url, signal);
+        loaded.set(url, source);
+      } catch (error) {
+        if (signal?.aborted || !independentUrls.has(url)) throw error;
+        console.warn(`独立人物模型回退：${url}`, error);
+      }
     }));
-    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const failure = results.find(result => result.status === 'rejected');
+    if (failure || signal?.aborted) {
+      disposeModels(loaded.values());
+      throw failure?.reason ?? new DOMException('Aborted', 'AbortError');
+    }
 
     const actors = [];
     const npcActors = new Map();
     const frustum = new T.Frustum(), projection = new T.Matrix4(), bounds = new T.Sphere(new T.Vector3(), 3);
     let playerActor = null;
+    let dialogueAnchorId = null;
+    function focusDialogue(event) {
+      const { sceneId, anchorId } = event.detail || {};
+      if (sceneId === logicalScene.sceneId) dialogueAnchorId = anchorId;
+    }
+    window.addEventListener('czmarch:interact', focusDialogue);
 
-    function makeActor(role, height = 1.78) {
-      const source = loaded.get(role) || loaded.get('soldier');
+    function makeActor(role, height, profile = {}, style = {}, anchor) {
+      const independent = loaded.get(profile.glbUrl);
+      const source = independent || loaded.get(paths[role]);
+      const materials = new Map();
+      function tint(material) {
+        const color = material.name === 'skin' ? style.skin : style.coat;
+        if (independent || !color || !material.color) return material;
+        if (!materials.has(material)) {
+          const variant = material.clone();
+          variant.color.lerp(new T.Color(color), .25);
+          materials.set(material, variant);
+        }
+        return materials.get(material);
+      }
       const model = skeleton.clone(source.scene);
       const bounds = new T.Box3().setFromObject(model);
       const size = bounds.getSize(new T.Vector3());
       const center = bounds.getCenter(new T.Vector3());
-      const scale = height / Math.max(size.y, 0.01);
+      const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);
       model.scale.setScalar(scale);
       model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
       model.traverse(node => {
         if (!node.isMesh) return;
+        if (node.material) node.material = Array.isArray(node.material) ? node.material.map(tint) : tint(node.material);
         node.castShadow = true;
         node.receiveShadow = true;
         node.frustumCulled = false;
       });
       const root = new T.Group();
       root.name = 'march-actor-' + role;
+      if (anchor) {
+        root.userData.anchorId = anchor.anchorId;
+        root.userData.modelUrl = independent ? profile.glbUrl : paths[role];
+      }
       root.add(model);
       parent.add(root);
       const mixer = new T.AnimationMixer(model);
       const actions = new Map();
       for (const clip of source.animations || []) actions.set(clip.name, mixer.clipAction(clip));
-      const actor = { root, model, mixer, actions, current: null, role };
-      play(actor, 'Idle');
+      const actor = { root, model, mixer, actions, current: null, role, materials, idle: profile.idle || 'Idle' };
+      play(actor, actor.idle);
       actors.push(actor);
       return actor;
     }
 
     function play(actor, name) {
-      const next = actor.actions.get(name) || actor.actions.get('Idle') || actor.actions.values().next().value;
+      const next = actor.actions.get(name) || actor.actions.get(actor.idle) || actor.actions.values().next().value;
       if (!next || actor.current === next) return;
       actor.current?.fadeOut(0.16);
       next.reset().fadeIn(0.16).play();
@@ -102,6 +153,7 @@
       const skeletons = new Set();
       actor.model.traverse(node => { if (node.isSkinnedMesh) skeletons.add(node.skeleton); });
       for (const skeleton of skeletons) skeleton.dispose();
+      for (const material of actor.materials.values()) material.dispose();
       parent.remove(actor.root);
     }
 
@@ -130,6 +182,7 @@
       update(dt, player, anchors, camera, surfaceHeight) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
         frustum.setFromProjectionMatrix(projection);
+        if (player.moving) dialogueAnchorId = null;
         ensurePlayer(player.roleId);
         place(playerActor, player.x, player.y, player.facing, surfaceHeight);
         play(playerActor, player.moving ? 'Walk' : 'Idle');
@@ -140,19 +193,35 @@
           let actor = npcActors.get(anchor.anchorId);
           if (!visible) { if (actor) actor.root.visible = false; continue; }
           if (!actor) {
-            actor = makeActor(roleForAnchor(anchor), 1.76);
+            const key = npcKey(anchor);
+            const profile = CHARACTER_PROFILES[key] || {};
+            const style = M.anchors.NPC_STYLES[key] || {};
+            actor = makeActor(style.role || 'soldier', profile.height ?? DEFAULT_HEIGHT, profile, style, anchor);
+            const facing = anchor.facing ?? logicalScene.npcFacing ?? logicalScene.spawn?.facing;
+            const heading = Number.isFinite(facing) ? facing : headings[facing] ?? Math.PI / 2;
+            actor.initialYaw = Math.atan2(Math.cos(heading), Math.sin(heading));
+            actor.root.rotation.y = actor.initialYaw;
             npcActors.set(anchor.anchorId, actor);
           }
           actor.root.visible = true;
-          place(actor, anchor.x, anchor.y, Math.PI / 2, surfaceHeight);
-          play(actor, anchor.near ? 'Talk' : 'Idle');
+          place(actor, anchor.x, anchor.y, undefined, surfaceHeight);
+          const dx = player.x - anchor.x, dz = player.y - anchor.y;
+          const distance = Math.hypot(dx, dz);
+          const engaged = anchor.near || anchor.anchorId === dialogueAnchorId;
+          const yaw = distance > .01 && (engaged || distance < 6) ? Math.atan2(dx, dz) : actor.initialYaw;
+          const delta = yaw - actor.root.rotation.y;
+          actor.root.rotation.y += Math.atan2(Math.sin(delta), Math.cos(delta)) * (1 - Math.exp(-8 * dt));
+          play(actor, engaged ? 'Talk' : actor.idle);
         }
         for (const actor of actors) if (actor.root.visible) actor.mixer.update(dt);
       },
       dispose() {
+        window.removeEventListener('czmarch:interact', focusDialogue);
         for (const actor of actors) disposeActor(actor);
         actors.length = 0;
         npcActors.clear();
+        disposeModels(loaded.values());
+        loaded.clear();
         playerActor = null;
       }
     };

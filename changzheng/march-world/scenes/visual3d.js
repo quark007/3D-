@@ -258,7 +258,7 @@
       }
       return value;
     }
-    const cellSize = scene.streetModel ? 3 : .75;
+    const cellSize = scene.streetModel ? 4 : .75;
     const cols = Math.ceil(w / cellSize), rows = Math.ceil(h / cellSize), dx = w / cols, dy = h / rows;
     const pads = props.filter(prop => ['house', 'houseWood', 'tent', 'stoneWall', 'archGate', 'yaodong', 'gate', 'stairs'].includes(prop.type)).map(prop => {
       const width = (prop.w || 6) + .7, depth = (prop.depth || (prop.type === 'stairs' ? prop.h : prop.type === 'gate' ? 1 : prop.w * .68)) + .7;

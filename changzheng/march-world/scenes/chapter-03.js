@@ -5,7 +5,7 @@
   K.define({
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
-    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30] },
+    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30], actorRange: 13 },
     /* Blender X east, Y north, Z up. One unit is one metre. */
     streetBlocked: [
       K.blockedRect(68.1, 24, 25.8, 12), K.blockedRect(85.875, 19.05, 7.65, 5.7),
@@ -13,6 +13,17 @@
       { ...K.blockedRect(80.52, 49.2, 6.68, 1.6), cameraHeight: 3.1 },
       K.blockedRect(21, 45, 40, 6), K.blockedRect(101, 45, 16, 6),
       K.blockedRect(41, 65, 32, 6), K.blockedRect(97, 61, 32, 6),
+      // Wall feet and furnishing strips. Keep the carriageway and gate approaches clear.
+      ...[[62,22,11],[99,26,9],[27,39,12],[111,43,15],[51,76,16],[119,72,14],[7,46,9],[151,43,10]]
+        .map(([x,y,w]) => ({ ...K.blockedRect(x-w/2,y-.82,w,1.64), cameraHeight: 1.6 })),
+      ...[[49,73.6,12],[120,69.5,12],[17,45,6],[52,11,25],[112,12,27],[36,84,36],[117,85,37]]
+        .map(([x,y,w]) => ({ ...K.blockedRect(x-w/2,y-.40,w,.80), cameraHeight: 1 })),
+      ...[[61,19.5],[103,27.5],[43,76],[125,72]]
+        .map(([x,y]) => ({ ...K.blockedRect(x-2,y-1.25,4,2.5), cameraHeight: 2.25 })),
+      ...[[39,77.5],[74,18],[112,75.5],[132,72]]
+        .map(([x,y]) => ({ ...K.blockedRect(x-1.5,y-.22,3,1.60), cameraHeight: .22 })),
+      ...[[21,50.65,40],[101,50.65,16],[41,64.41,32],[97,60.44,32]]
+        .map(([x,y,w]) => ({ ...K.blockedRect(x,y,w,1.08), cameraHeight: .75 })),
       K.blockedCircle(69, 41, .8), K.blockedCircle(58, 50, .7), K.blockedCircle(89, 49, .65)
     ],
     spawn: { x: 16, y: 58, facing: 'e' },

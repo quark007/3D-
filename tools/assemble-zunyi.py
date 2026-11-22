@@ -55,8 +55,8 @@ for folder,xy,height in [('tree_tree_stump_01',(-12,-11),1.25),('tree_tree_stump
         if collection != scene.collection:collection.objects.unlink(o)
     bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
     me=o.data;me.calc_loop_triangles()
-    if len(me.loop_triangles)>2350:
-        mod=o.modifiers.new('Scan reduction','DECIMATE');mod.ratio=2300/len(me.loop_triangles)
+    if len(me.loop_triangles)>1000:
+        mod=o.modifiers.new('Scan reduction','DECIMATE');mod.ratio=950/len(me.loop_triangles)
         bpy.ops.object.modifier_apply(modifier=mod.name)
     vs=[v.co.copy() for v in o.data.vertices]
     lo=Vector([min(p[j] for p in vs) for j in range(3)])
@@ -68,6 +68,7 @@ for folder,xy,height in [('tree_tree_stump_01',(-12,-11),1.25),('tree_tree_stump
         if obj.name in bpy.data.objects:bpy.data.objects.remove(obj,do_unlink=True)
     o.data.calc_loop_triangles()
     print(folder,len(o.data.loop_triangles))
+exec(compile((R/'tools/enrich-zunyi.py').read_text(encoding='utf-8-sig'),'enrich-zunyi.py','exec'))
 scene.render.engine='CYCLES'
 scene.cycles.samples=4
 scene.cycles.use_denoising=True

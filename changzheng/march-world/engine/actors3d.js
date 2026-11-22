@@ -196,7 +196,7 @@
             const distance = Math.hypot(anchor.x - player.x, anchor.y - player.y);
             const score = distance - (anchor.anchorId === dialogueAnchorId ? 100 : 0);
             const key = npcKey(anchor);
-            if (distance < 18 && score < (localActors.get(key)?.score ?? Infinity)) localActors.set(key, { anchor, score });
+            if (distance < (logicalScene.streetModel.actorRange ?? 18) && score < (localActors.get(key)?.score ?? Infinity)) localActors.set(key, { anchor, score });
           }
         }
         for (const anchor of anchors) {

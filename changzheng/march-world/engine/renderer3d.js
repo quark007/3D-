@@ -210,15 +210,51 @@
       geometry.setIndex(indices); geometry.computeVertexNormals();
       return geometry;
     }
+    // Use the scanned forest floor as a single continuous substrate. Grassy
+    // edges, worn tracks and contact shadows share its material and draw call.
+    function zunyiGroundColors(geometry) {
+      const positions = geometry.attributes.position;
+      const colors = [];
+      const clay = new T.Color('#c1b19c'), gravel = new T.Color('#9e9a8c');
+      const grass = new T.Color('#8caa73'), shade = new T.Color();
+      const footprints = logicalScene.streetBlocked.flatMap(({rect}) => rect ? [rect] : []);
+      for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i) + world.w / 2, y = positions.getZ(i) + world.h / 2;
+        const roadY = 58 - Math.max(0, x - 40) * .05;
+        const pattern = Math.sin(x * .53 + Math.sin(y * .42)) * Math.cos(y * .35 + x * .12);
+        const distance = Math.abs(y - roadY);
+        shade.copy(clay).lerp(gravel, .32 + .24 * pattern + .26 * Math.exp(-distance * .19));
+        shade.lerp(grass, T.MathUtils.clamp((distance - 6) / 27 + .22 * pattern, 0, .86));
+        const yardTrail = Math.min(
+          Math.abs(x - 61.5 - Math.sin(y * .22)) * .76 + Math.max(0,y-44,13-y),
+          Math.abs(y - 74 - Math.sin(x * .19)) + Math.max(0,36-x,x-136)
+        );
+        if (yardTrail < 3) shade.lerp(gravel, .64 * (1 - yardTrail / 3));
+        let contact = 0;
+        for (const [left, top, width, depth] of footprints) {
+          const d = Math.hypot(Math.max(left - x, x - left - width, 0), Math.max(top - y, y - top - depth, 0));
+          contact = Math.max(contact, 1 - Math.min(1, d / 1.4));
+        }
+        shade.multiplyScalar(1 - .24 * contact);
+        colors.push(shade.r, shade.g, shade.b);
+      }
+      geometry.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
+    }
     const ground = mesh(
       terrainPatch(world.w, world.h, world.w / 2, world.h / 2, terrain.cols, terrain.rows),
-      snowy ? snowSurface() : assets ? surface('earth', environment.groundTint, 3, .8) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
+      snowy ? snowSurface() : assets ? (street ? surface('earth', '#e4dad0', 2.2, .72) : surface('earth', environment.groundTint, 3, .8)) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
     );
     ground.name = 'march-pbr-ground';
+    if (street) {
+      ground.material.vertexColors = true;
+      zunyiGroundColors(ground.geometry);
+    }
     ground.castShadow = false;
     pickSurfaces.push(ground);
     if (assets) {
-      const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2, Math.ceil(terrain.cols / 3) * 3, Math.ceil(terrain.rows / 3) * 3);
+      const divisor = street ? 6 : 3;
+      const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2,
+        Math.ceil(terrain.cols / divisor) * 3, Math.ceil(terrain.rows / divisor) * 3);
       const positions = geometry.attributes.position, indices = [];
       for (let i = 0; i < geometry.index.count; i += 3) {
         const triangle = [geometry.index.getX(i), geometry.index.getX(i + 1), geometry.index.getX(i + 2)];
@@ -227,6 +263,17 @@
         if (Math.abs(x) > world.w / 2 || Math.abs(z) > world.h / 2) indices.push(...triangle);
       }
       geometry.setIndex(indices);
+      if (street) {
+        for (let i = 0; i < positions.count; i++) {
+          const x = positions.getX(i), z = positions.getZ(i);
+          const outside = Math.max(Math.abs(x) - world.w / 2, Math.abs(z) - world.h / 2);
+          const shoulder = T.MathUtils.smoothstep(outside, 8, 40);
+          const rise = 2.2 + 1.1 * Math.sin(x * .062) + .7 * Math.cos(z * .09);
+          positions.setY(i, positions.getY(i) + shoulder * rise);
+        }
+        geometry.computeVertexNormals();
+        zunyiGroundColors(geometry);
+      }
       const outskirts = mesh(geometry, ground.material);
       outskirts.name = 'march-terrain-outskirts';
       outskirts.castShadow = false;
@@ -1073,7 +1120,7 @@
 
     for (let side = 0; side < 3; side++) {
       const span = (side ? world.h : world.w) * 2.5;
-      const hills = new T.PlaneGeometry(span, 150, street ? 48 : 160, street ? 12 : 64);
+      const hills = new T.PlaneGeometry(span, 150, street ? 16 : 160, street ? 5 : 64);
       hills.rotateX(-Math.PI / 2);
       const positions = hills.attributes.position;
       for (let i = 0; i < positions.count; i++) {

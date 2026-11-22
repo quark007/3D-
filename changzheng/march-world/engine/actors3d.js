@@ -189,10 +189,21 @@
         ensurePlayer(player.roleId);
         place(playerActor, player.x, player.y, player.facing, surfaceHeight);
         play(playerActor, player.moving ? 'Walk' : 'Idle');
+        const localActors = new Map();
+        if (logicalScene.streetModel) {
+          for (const anchor of anchors) {
+            if (!hasModel(anchor) || !visibleAnchor(anchor, anchors)) continue;
+            const distance = Math.hypot(anchor.x - player.x, anchor.y - player.y);
+            const score = distance - (anchor.anchorId === dialogueAnchorId ? 100 : 0);
+            const key = npcKey(anchor);
+            if (distance < 18 && score < (localActors.get(key)?.score ?? Infinity)) localActors.set(key, { anchor, score });
+          }
+        }
         for (const anchor of anchors) {
           if (!hasModel(anchor)) continue;
           bounds.center.set(anchor.x - logicalScene.world.w / 2, surfaceHeight(anchor.x, anchor.y) + 1, anchor.y - logicalScene.world.h / 2);
-          const visible = visibleAnchor(anchor, anchors) && frustum.intersectsSphere(bounds);
+          const nearby = !logicalScene.streetModel || localActors.get(npcKey(anchor))?.anchor === anchor;
+          const visible = nearby && visibleAnchor(anchor, anchors) && frustum.intersectsSphere(bounds);
           let actor = npcActors.get(anchor.anchorId);
           if (!visible) { if (actor) actor.root.visible = false; continue; }
           if (!actor) {

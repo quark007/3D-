@@ -14,7 +14,7 @@ for (const f of fs.readdirSync(path.join(mwDir, 'scenes')).filter(f => /^chapter
 const M = global.window.CZMarchWorld._;
 let bad = 0;
 for (const scene of Object.values(M.scenes).sort((a, b) => a.chapterId - b.chapterId)) {
-  const grid = M.path.buildGrid(scene);
+  const grid = M.path.buildGrid(scene.streetBlocked ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
   const spawnOk = M.path.walkableAt(grid, scene.spawn.x, scene.spawn.y, 0.62);
   if (!spawnOk) { console.log(`!! ${scene.sceneId} 出生点不可行走 (${scene.spawn.x},${scene.spawn.y})`); bad++; }
   const unreachable = [];

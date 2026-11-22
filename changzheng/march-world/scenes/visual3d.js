@@ -182,7 +182,7 @@
   const landforms = {
     1: (x, y) => 1.3 + 4.4 * hill(x, y, 45, 31, 50, 25) + 1.6 * hill(x, y, 142, 28, 40, 28) + .008 * (80 - y),
     2: (x, y) => 1 + 11 * hill(x, y, 18, 12, 42, 36) + 5 * hill(x, y, 129, 27, 36, 25) + 1.8 * hill(x, y, 62, 38, 36, 24),
-    3: (x, y) => .8 + .03 * (170 - x) + .022 * (110 - y) + 1.6 * hill(x, y, 60, 22, 42, 26),
+    3: () => 1,
     4: (x, y) => 1.3 + 13 * hill(x, y, 17, 7, 44, 34) + 9 * hill(x, y, 154, 23, 43, 27) + 4 * hill(x, y, 95, 38, 32, 23),
     5: (x, y) => .8 + 18 * hill(x, y, 45, 10, 80, 38) + 13 * hill(x, y, 148, 25, 38, 32),
     6: (x, y) => .8 + 8 * hill(x, y, 44, 28, 53, 31) + 10 * hill(x, y, 148, 18, 38, 32),
@@ -258,7 +258,8 @@
       }
       return value;
     }
-    const cols = Math.ceil(w / .75), rows = Math.ceil(h / .75), dx = w / cols, dy = h / rows;
+    const cellSize = scene.streetModel ? 3 : .75;
+    const cols = Math.ceil(w / cellSize), rows = Math.ceil(h / cellSize), dx = w / cols, dy = h / rows;
     const pads = props.filter(prop => ['house', 'houseWood', 'tent', 'stoneWall', 'archGate', 'yaodong', 'gate', 'stairs'].includes(prop.type)).map(prop => {
       const width = (prop.w || 6) + .7, depth = (prop.depth || (prop.type === 'stairs' ? prop.h : prop.type === 'gate' ? 1 : prop.w * .68)) + .7;
       const left = Math.floor((prop.x - width / 2) / dx) * dx, right = Math.ceil((prop.x + width / 2) / dx) * dx;

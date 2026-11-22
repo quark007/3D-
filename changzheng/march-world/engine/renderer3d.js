@@ -8,7 +8,7 @@
     const environment = M.visual3d.environment(logicalScene);
     const snowy = environment.terrain === 'snow';
     const staging = M.visual3d.staging(logicalScene);
-    const assets = await M.assets3d.load(T, options.signal);
+    const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel);
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
     function releaseResources() {
@@ -59,6 +59,16 @@
     const surfaceHeight = terrain.support;
     const onSurface = (x, y, offset = 0) => toWorld(x, y, surfaceHeight(x, y) + offset);
     const pickSurfaces = [];
+    const street = assets.models.street;
+    const mergeGeometries = street ? (await import('three/addons/utils/BufferGeometryUtils.js')).mergeGeometries : null;
+    if (street) {
+      const [x, y] = logicalScene.streetModel.origin;
+      street.position.copy(onSurface(x, y, .04));
+      street.name = 'zunyi-realscan';
+      street.traverse(node => { if (node.isMesh) node.receiveShadow = true; });
+      worldRoot.add(street);
+      renderer.shadowMap.enabled = false;
+    }
     stats.landform = staging.name;
     stats.terrainVertices = terrain.heights.length;
     stats.terrainMin = Math.min(...terrain.heights);
@@ -231,7 +241,7 @@
     featherContext.fillRect(0, 0, 128, 128);
     const feather = new T.CanvasTexture(featherCanvas);
     feather.channel = 1;
-    for (const patch of logicalScene.terrain?.patches || []) {
+    for (const patch of (logicalScene.terrain?.patches || []).slice(street ? 2 : 0)) {
       const left = Math.max(0, Math.floor((patch.x - patch.rx) / terrain.dx)), right = Math.min(terrain.cols, Math.ceil((patch.x + patch.rx) / terrain.dx));
       const top = Math.max(0, Math.floor((patch.y - patch.ry) / terrain.dy)), bottom = Math.min(terrain.rows, Math.ceil((patch.y + patch.ry) / terrain.dy));
       const geometry = terrainPatch((right - left) * terrain.dx, (bottom - top) * terrain.dy, (left + right) * terrain.dx / 2, (top + bottom) * terrain.dy / 2, right - left, bottom - top, .018);
@@ -336,7 +346,7 @@
       const object = mesh(geometry, roadMaterial);
       object.castShadow = false;
     }
-    for (const road of logicalScene.terrain?.roads || []) roadRibbon(road);
+    for (const road of (logicalScene.terrain?.roads || []).slice(street ? 1 : 0)) roadRibbon(road);
 
     function groupAt(prop, height = 0) {
       const group = new T.Group();
@@ -974,6 +984,29 @@
       } else {
         stats.unsupportedProps.push(prop.type);
       }
+      if (street && ['lantern', 'table'].includes(prop.type)) {
+        const batches = new Map();
+        for (const child of group.children) {
+          if (!child.isMesh) continue;
+          if (!batches.has(child.material)) batches.set(child.material, []);
+          batches.get(child.material).push(child);
+        }
+        for (const [mat, parts] of batches) {
+          if (parts.length < 2) continue;
+          const geometries = parts.map(part => {
+            part.updateMatrix();
+            return part.geometry.clone().applyMatrix4(part.matrix);
+          });
+          const combined = mergeGeometries(geometries);
+          geometries.forEach(geometry => geometry.dispose());
+          if (!combined) continue;
+          for (const part of parts) {
+            group.remove(part);
+            part.geometry.dispose();
+          }
+          mesh(combined, mat, 0, 0, 0, group);
+        }
+      }
     }
 
     function alignedProp(original) {
@@ -1004,6 +1037,11 @@
     }
 
     for (const prop of props) {
+      if (street && ['house', 'houseWood', 'stoneWall', 'tree', 'pine', 'cliff'].includes(prop.type)) continue;
+      if (street && prop.type === 'table' && prop.x === 84 && prop.y === 42) {
+        simpleProp({ ...prop, x: 82.5, w: 1.65, h: 1.55 });
+        continue;
+      }
       if (prop.type === 'house') house(prop);
       else if (prop.type === 'houseWood') house(prop, true);
       else if (prop.type === 'tree') tree(prop);
@@ -1024,7 +1062,7 @@
     }
     stats.propsReady = stats.unsupportedProps.length === 0;
 
-    if (environment.vegetation) {
+    if (!street && environment.vegetation) {
       for (const prop of logicalScene.props.filter(p => p.type === 'tree')) {
         for (let i = 0; i < 3; i++) {
           const angle = i * 2.1 + prop.seed;
@@ -1035,7 +1073,7 @@
 
     for (let side = 0; side < 3; side++) {
       const span = (side ? world.h : world.w) * 2.5;
-      const hills = new T.PlaneGeometry(span, 150, 160, 64);
+      const hills = new T.PlaneGeometry(span, 150, street ? 48 : 160, street ? 12 : 64);
       hills.rotateX(-Math.PI / 2);
       const positions = hills.attributes.position;
       for (let i = 0; i < positions.count; i++) {
@@ -1064,7 +1102,7 @@
       }
     }
 
-    for (const [index, cliff] of (logicalScene.terrain?.cliffs || []).entries()) {
+    for (const [index, cliff] of (street ? [] : logicalScene.terrain?.cliffs || []).entries()) {
       const curve = new T.CatmullRomCurve3(cliff.pts.map(([x, y]) => toWorld(x, y)), false, 'centripetal');
       const length = curve.getLength(), steps = Math.ceil(length / .8), rows = 12;
       const points = curve.getSpacedPoints(steps), vertices = [], indices = [];
@@ -1107,6 +1145,15 @@
 
     worldRoot.updateMatrixWorld(true);
     const cameraObstacles = worldRoot.children.filter(object => object === ground || /^(march-prop-|march-cliff-line-)/.test(object.name)).map(object => ({ object, bounds: new T.Box3().setFromObject(object) }));
+    if (street) {
+      for (const { rect, cameraHeight = 7.6 } of logicalScene.streetBlocked) {
+        if (!rect) continue;
+        const [x, y, w, h] = rect;
+        const min = onSurface(x, y);
+        const max = new T.Vector3(min.x + w, min.y + cameraHeight, min.z + h);
+        cameraObstacles.push({ bounds: new T.Box3(min, max) });
+      }
+    }
     const cameraRay = new T.Raycaster(), cameraDirection = new T.Vector3(), rayOrigin = new T.Vector3(), cameraRight = new T.Vector3();
     let cameraDistance = 0;
 
@@ -1182,7 +1229,7 @@
       worldRoot.add(particles);
     }
 
-    for (const source of logicalScene.ambient?.smokes || []) {
+    for (const source of street ? [] : logicalScene.ambient?.smokes || []) {
       const geometry = new T.BufferGeometry(), positions = new Float32Array(24 * 3);
       for (let i = 0; i < 24; i++) { positions[i * 3] = Math.sin(i * 2.4) * .22; positions[i * 3 + 1] = i * .2; positions[i * 3 + 2] = Math.cos(i * 2.4) * .22; }
       geometry.setAttribute('position', new T.BufferAttribute(positions, 3));
@@ -1253,6 +1300,14 @@
         cameraRay.set(rayOrigin, cameraDirection); cameraRay.far = fullDistance + .3;
         for (const { object, bounds } of cameraObstacles) {
           if (!cameraRay.ray.intersectsBox(bounds)) continue;
+          if (!object) {
+            const point = cameraRay.ray.intersectBox(bounds, new T.Vector3());
+            if (point) {
+              const hitDistance = point.distanceTo(rayOrigin);
+              if (hitDistance > .15) distance = Math.min(distance, Math.max(.35, hitDistance - .4));
+            }
+            continue;
+          }
           const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
           if (hit) distance = Math.min(distance, Math.max(.35, hit.distance - .4));
         }
@@ -1333,6 +1388,7 @@
     }
 
     const view = {
+      streetActive: Boolean(street),
       cam,
       canvas,
       stats,
@@ -1420,7 +1476,7 @@
       for (const [id, marker] of markers) {
         const anchor = logicalScene.anchorEntities?.find(item => item.anchorId === id);
         if (anchor?.kind === 'npc') marker.visible = !!anchor.near;
-        else marker.visible = anchor ? anchor.enabled : true;
+        else marker.visible = anchor ? anchor.enabled && (!street || (logicalScene.focusActor && Math.hypot(anchor.x - logicalScene.focusActor.x, anchor.y - logicalScene.focusActor.y) <= 10)) : true;
         if (marker.visible) marker.rotation.z = time * .35;
       }
       if (particles) {

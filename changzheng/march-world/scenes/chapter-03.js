@@ -5,6 +5,16 @@
   K.define({
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
+    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30] },
+    /* Blender X east, Y north, Z up. One unit is one metre. */
+    streetBlocked: [
+      K.blockedRect(68.1, 24, 25.8, 12), K.blockedRect(85.875, 19.05, 7.65, 5.7),
+      { ...K.blockedRect(70.8, 49.2, 6.68, 1.6), cameraHeight: 3.1 },
+      { ...K.blockedRect(80.52, 49.2, 6.68, 1.6), cameraHeight: 3.1 },
+      K.blockedRect(21, 45, 40, 6), K.blockedRect(101, 45, 16, 6),
+      K.blockedRect(41, 65, 32, 6), K.blockedRect(97, 61, 32, 6),
+      K.blockedCircle(69, 41, .8), K.blockedCircle(58, 50, .7), K.blockedCircle(89, 49, .65)
+    ],
     spawn: { x: 16, y: 58, facing: 'e' },
     palette: {
       ground: '#8d8468', road: '#a89a80', roadEdge: '#6d6450',

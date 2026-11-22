@@ -9,6 +9,24 @@ import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 let canvas = document.getElementById('portrait');
+const characters = new Map([
+  ['he-wen', { name: '何文', detail: '指导员 · 1.78 m', path: '/assets/characters/he-wen/he-wen-web.glb' }],
+  ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }]
+]);
+const url = new URL(location.href);
+const requestedCharacter = url.searchParams.get('char');
+const characterId = characters.has(requestedCharacter) ? requestedCharacter : 'he-wen';
+const character = characters.get(characterId);
+const characterSelect = document.getElementById('character');
+characterSelect.value = characterId;
+characterSelect.addEventListener('change', () => {
+  url.searchParams.set('char', characterSelect.value);
+  location.assign(url);
+});
+document.title = character.name + ' · 独立人物预览';
+document.getElementById('character-title').textContent = document.title;
+document.getElementById('character-detail').textContent = character.detail;
+
 const status = document.getElementById('status');
 const stage = canvas.parentElement;
 const rendererParam = new URLSearchParams(location.search).get('renderer');
@@ -383,7 +401,7 @@ observer.observe(stage);
 
 function setView(view) {
   const portraitDistance = camera.aspect < 0.7 ? 1.6 : 1.05;
-  const target = new T.Vector3(0, view === 'body' ? 0.92 : 1.6, 0);
+  const target = new T.Vector3(0, view === 'body' ? 0.92 : characterId === 'wang-gui' ? 1.51 : 1.6, 0);
   const angle = ({ front: 0, quarter: Math.PI / 5, profile: Math.PI / 2, body: Math.PI / 10 })[view];
   const distance = view === 'body' ? (camera.aspect < 0.7 ? 3.7 : 3.2) : portraitDistance;
   controls.target.copy(target);
@@ -463,9 +481,9 @@ try {
     name: 'CZ_embedded_images',
     beforeRoot() { parser.textureLoader = new T.TextureLoader(parser.options.manager); }
   }));
-  const source = await loader.loadAsync('/assets/characters/he-wen/he-wen-web.glb');
+  const source = await loader.loadAsync(character.path);
   model = source.scene;
-  model.name = 'HeWen_Independent_Study';
+  model.name = characterId;
   const box = new T.Box3().setFromObject(model);
   model.position.y -= box.min.y;
   const stats = { meshes: 0, triangles: 0, skinnedMeshes: 0, bones: 0, expressions: [], animations: source.animations.map(clip => clip.name) };
@@ -565,6 +583,10 @@ outgoingLight += diffuseColor.rgb * vec3(0.20, 0.06, 0.04) * (1.0 - hwEyeWrap) *
     document.getElementById('animation').append(option);
   }
   for (const control of document.querySelectorAll('footer button,footer select,footer input')) control.disabled = false;
+  for (const [id, targets] of Object.entries({
+    blink: ['eyeBlinkLeft', 'eyeBlinkRight'], jaw: ['jawOpen'],
+    brow: ['browDownLeft', 'browDownRight'], smile: ['smile']
+  })) document.getElementById(id).disabled = !targets.some(key => keys.has(key));
   status.textContent = `独立三维模型 · ${Math.round(stats.triangles).toLocaleString()} 三角面 · ${stats.bones} 骨骼 · ${stats.expressions.length} 表情形态 · ${backend === 'webgpu' ? 'WebGPU' : 'WebGL2'}`;
   window.characterPreview = { stats, model, scene, camera, renderer, mixer, expression, setView, backend };
 } catch (error) {

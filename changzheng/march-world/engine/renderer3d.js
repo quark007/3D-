@@ -80,7 +80,8 @@
     let focus = null;
     let intro = null;
     let introOverlay = null;
-    let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, 1.05);
+    const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_CAM_DIST = 1.1;
+    let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
     let graphicsLost = false;
 
     function material(color, roughness = 0.9, metalness = 0) {
@@ -1239,25 +1240,52 @@
     }
 
     function cameraPosition(target, scale = 1) {
+      if (camera.aspect < .8) scale *= 1.18;
       return target.clone().add(new T.Vector3(...staging.offset).multiplyScalar(scale));
     }
 
-    function placeCamera(target, scale, dt) {
-      const desired = cameraPosition(target, scale);
-      cameraDirection.copy(desired).sub(target);
-      const fullDistance = cameraDirection.length();
-      cameraDirection.normalize(); cameraRight.set(cameraDirection.z, 0, -cameraDirection.x).normalize();
+    function clearDistance(target, direction, fullDistance) {
+      cameraRight.set(direction.z, 0, -direction.x).normalize();
       let distance = fullDistance;
       for (const offset of [-.28, 0, .28]) {
         rayOrigin.copy(target).addScaledVector(cameraRight, offset);
-        cameraRay.set(rayOrigin, cameraDirection); cameraRay.far = fullDistance + .3;
+        cameraRay.set(rayOrigin, direction); cameraRay.far = fullDistance + .3;
         for (const { object, bounds } of cameraObstacles) {
+          if (object !== ground && bounds.max.y < target.y - .15) continue;
           if (!cameraRay.ray.intersectsBox(bounds)) continue;
           const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
-          if (hit) distance = Math.min(distance, Math.max(.35, hit.distance - .4));
+          if (hit) distance = Math.min(distance, hit.distance - .4);
         }
       }
-      cameraDistance = !cameraDistance || distance < cameraDistance ? distance : T.MathUtils.lerp(cameraDistance, distance, 1 - Math.exp(-dt * 6));
+      return distance;
+    }
+
+    function placeCamera(target, scale, dt) {
+      cameraDirection.copy(cameraPosition(target, scale)).sub(target);
+      const fullDistance = cameraDirection.length();
+      cameraDirection.normalize();
+      let distance = clearDistance(target, cameraDirection, fullDistance);
+      if (distance < Math.min(fullDistance * .45, 3.5)) {
+        const heading = Math.atan2(cameraDirection.x, cameraDirection.z);
+        const elevation = Math.asin(cameraDirection.y);
+        const candidate = new T.Vector3();
+        for (const lift of [.28, .52]) {
+          const pitch = Math.min(Math.PI / 2, elevation + lift);
+          for (const yaw of [0, .45, -.45, .85, -.85]) {
+            candidate.set(Math.sin(heading + yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(heading + yaw) * Math.cos(pitch));
+            const clearance = clearDistance(target, candidate, fullDistance);
+            if (clearance > distance) {
+              cameraDirection.copy(candidate);
+              distance = clearance;
+            }
+            if (distance >= fullDistance) break;
+          }
+          if (distance >= fullDistance) break;
+        }
+      }
+      distance = Math.max(MIN_CAM_DIST, distance);
+      const change = (distance - cameraDistance) * (1 - Math.exp(-dt * 8));
+      cameraDistance = cameraDistance ? cameraDistance + Math.min(.31, change) : distance;
       camera.position.copy(target).addScaledVector(cameraDirection, cameraDistance);
       camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + .4);
       camera.lookAt(target);
@@ -1269,7 +1297,7 @@
     function follow(player, dt) {
       if (intro || graphicsLost) return;
       if (player.moving) focus = null;
-      const target = focus ? onSurface(focus.px, focus.py, 1).lerp(onSurface(focus.x, focus.y, 1), .5) : onSurface(player.x, player.y, 1.05);
+      const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
       placeCamera(followTarget, focus ? 1.35 : 1, dt);
@@ -1283,7 +1311,7 @@
     function finishIntro(result) {
       if (!intro) return;
       const resolve = intro.resolve;
-      followTarget.copy(onSurface(intro.player.x, intro.player.y, 1.05));
+      followTarget.copy(onSurface(intro.player.x, intro.player.y, FOCUS_HEIGHT));
       cameraDistance = 0;
       intro = null;
       introOverlay?.remove();
@@ -1295,7 +1323,7 @@
       if (!intro) return;
       intro.elapsed += dt;
       const progress = Math.min(1, intro.elapsed / intro.duration);
-      const playerPoint = onSurface(intro.player.x, intro.player.y, 1.05);
+      const playerPoint = onSurface(intro.player.x, intro.player.y, FOCUS_HEIGHT);
       const shot = data => ({ eye: onSurface(data[0], data[1], data[2]), look: onSurface(data[3], data[4], data[5]) });
       const first = shot(staging.shots[0]), second = shot(staging.shots[1]);
       const local = progress < .58 ? progress / .58 : (progress - .58) / .42, eased = local * local * (3 - 2 * local);
@@ -1342,7 +1370,7 @@
       frameTarget,
       drawGuide,
       playIntro,
-      headPoint(player) { return project(player.x, player.y, 2.15); },
+      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT); },
       surfaceHeight,
       groundHeight: terrain.height,
       resize,

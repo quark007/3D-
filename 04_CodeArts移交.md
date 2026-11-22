@@ -157,3 +157,37 @@ node serve.cjs 8080
 3. **10 个 NPC 独立模型**：目前只有何文、王贵两个；其余仍是 `anchors.js` 里 4 套模型换色
 4. **何文渲染升级移植**：`experiments/render-upgrade` 的皮肤/眼球/毛发着色器还没接到新预览页
 5. **手机端性能**：王贵 10.8 MB 未压缩版只在预览页用，进游戏必须走 web 版；同屏多 NPC 未测
+
+---
+
+## 七、给新账号的开场指令（直接整段粘贴）
+
+```
+接手一个已存在的工程，不要重新摸底，按下面的现状直接干。
+
+仓库：https://github.com/quark007/3D-.git
+先读仓库根目录 04_CodeArts移交.md，再读第三节。
+
+现状：
+- 3D 行走场景、遵义街市、何文/王贵/平民模型都已在仓库里，能跑。
+- 上一个 agent 的额度在 2026-11-22 21:17 断在王贵面部形态修正，
+  改的是 changzheng/tools/build_wang_gui.py 的 morph_deltas()（第 186–229 行），
+  脚本改了但模型没重建 —— 现在仓库里的 wang-gui-v1.glb 还是 20:58 那版。
+
+本次任务（只做这一件）：
+1. 修闭眼穿插：blink 把上下眼睑收到同一平面 y=1.666，改成上睑 1.662 / 下睑 1.669 分侧目标；
+   eye_white 的 UV 硬掩膜改成 smoothstep 过渡，消除硬边台阶。
+2. 修张嘴带动上唇：lower_lip 的 np.where(y<1.6005) 二值阈值改成 1.5mm 过渡带
+   （1/(1+exp((y-1.6005)/0.0015)) 或 smoothstep）。
+3. 重建：python tools/build_wang_gui.py
+4. 验收：起 node serve.cjs 8080，打开 /march-world/wang-gui-preview.html，
+   把「闭眼」「开口」拉到 1.0，正/侧/四分之三三个视角截图，
+   存到 evidence/wang-gui-final-1122/（文件名加 -v2），与现有 16 张对照。
+
+硬约束：
+- 脚本必须留在 changzheng/tools/ 这一层（用 parents[1] 定位工程根，挪走就报错）。
+- 站点根必须是 changzheng/，页面里资源是 /assets/... 绝对路径。
+- 不要动 renderer3d.js 的相机逻辑，那块刚修好并被验证过。
+- changzheng/experiments/render-upgrade/ 是未合并的着色器实验，不要整体覆盖到运行目录。
+- 每步做完给 文件:行号，不要只写"已优化"。
+```

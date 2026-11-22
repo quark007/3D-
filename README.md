@@ -34,6 +34,10 @@ node serve.cjs 8080
 
 第 3 章锚点「情报互相矛盾 · 指导员何文」北侧 `(84,40)` 聚焦时，`cameraDistance` 从正常 **15.381** 掉到 **1.043**、`cameraOccluded=true`，NPC 后背占满画面；同一锚点南侧 7 个位置全部正常。根因在 `march-world/engine/renderer3d.js:1245-1267 placeCamera()` 的遮挡收缩，叠加目标高度写死 1.05（胸口）。
 
+## 更新记录
+
+- **2026-11-22**：何文人物建模更新为 CodeArts 版 —— `he-wen-study-v1.glb` 25.2MB（42 meshes / 20 内嵌贴图 / 2 动画 / 1 骨骼），贴图增至 23 个文件共 82.6MB；`character-preview.html` 与 `engine/character-preview.js` 同步升级（新增皱眉/微笑形态、眉睫发丝、呼吸与注视微动、WebGPU/WebGL2 双后端自适应）。`00`～`03` 四份文档仍描述 11-20 的打包快照，未随本次模型更新重算。
+
 ---
 
 czstar.cc.cd

@@ -64,9 +64,487 @@
       const [x, y] = logicalScene.streetModel.origin;
       street.position.copy(onSurface(x, y, .04));
       street.name = 'zunyi-realscan';
-      street.traverse(node => { if (node.isMesh) node.receiveShadow = true; });
+      // 街景氛围：渐变天穹 + 与地平线同色的雾，远处房屋自然融进雾里，不再是"白盒子贴在灰幕上"
+      const SKY = { zenith: '#8b9da7', horizon: '#c4cac3', ground: '#a7a596' };
+      scene.fog.color.set(SKY.horizon);
+      scene.fog.near = 28; scene.fog.far = 210;
+      scene.background = new T.Color(SKY.horizon);
+      const skyGeometry = radius => {
+        const geometry = new T.SphereGeometry(radius, 32, 16), positions = geometry.attributes.position, colors = [];
+        const zenith = new T.Color(SKY.zenith), horizon = new T.Color(SKY.horizon), below = new T.Color(SKY.ground), c = new T.Color();
+        for (let i = 0; i < positions.count; i++) {
+          const h = positions.getY(i) / radius;
+          if (h >= 0) c.copy(horizon).lerp(zenith, Math.pow(h, .55));
+          else c.copy(horizon).lerp(below, Math.min(1, -h * 4));
+          colors.push(c.r, c.g, c.b);
+        }
+        geometry.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
+        return geometry;
+      };
+      // 天穹半径 520 < 相机远裁剪面 650（地图半径约 100），不用每帧跟随相机
+      const sky = new T.Mesh(skyGeometry(520), new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide, fog: false, depthWrite: false }));
+      sky.name = 'zunyi-sky'; sky.renderOrder = -1; sky.frustumCulled = false;
+      worldRoot.add(sky);
+      // 用同一片天空生成环境光照，暗部（木立面、檐下）不再死黑，玻璃能映出天色
+      let envTexture = null;
+      try {
+        const pmrem = new T.PMREMGenerator(renderer), envScene = new T.Scene();
+        const envSky = new T.Mesh(skyGeometry(40), new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide }));
+        envScene.add(envSky);
+        envTexture = pmrem.fromScene(envScene, .02).texture;
+        pmrem.dispose(); envSky.geometry.dispose(); envSky.material.dispose();
+      } catch (error) { console.warn('[zunyi] 环境光照生成失败，回退为无环境贴图', error); }
+      street.userData.envTexture = envTexture;
+
+      // ---- 贴图去重复：石板路、青砖、灰瓦、白灰墙（只改街景模型的这四种材质）----
+      // 原贴图每 2.4m 平铺一次，路面、墙面、屋面都能看出整齐的格子。按贴图结构分三种做法：
+      //  free   石板、白灰墙：Inigo Quilez「texture repetition」方法 3，低频噪声决定每片区域的贴图偏移，
+      //         相邻两种偏移按颜色差做窄过渡，接缝顺着石缝走
+      //  grid   灰瓦：瓦垄每张贴图 16 列、10 行（频谱实测），偏移取 (1/16, 1/10) 的整数倍，瓦垄和瓦口始终对齐
+      //  course 青砖：每张贴图 12 层砖，但每层砖块数 8~9 不等（扫描贴图不规整），任何区域过渡都会切出半块砖。
+      //         改为每层砖整层随机错开（竖向按整层、横向任意），并且每层每约 4.8m 换一段，断点各层错开
+      //  plank  木板：竖向板，每张贴图 9 块，板缝位置实测（宽度 109~117px，不完全等距，所以按实测位置分块）。
+      //         每块板随机换成贴图里的另一块、上下随机错开，约每 4.8m 换一段（断口看起来就是木板接头）
+      // 颜色、法线、粗糙度共用同一组偏移和权重。之后按世界坐标叠大尺度变化：路面深浅/潮湿斑，
+      // 墙根返潮、雨水竖向污痕，屋面深浅和青苔斑。关闭对比：localStorage.cz_zunyi_notile = '0' 后刷新
+      const NOTILE_PROFILES = {
+        stone:   { mode: 0, region: .9, guide: .1, edge: [.4, .6], macro: 0 },
+        plaster: { mode: 0, region: .7, guide: .1, edge: [.35, .65], macro: 2 },
+        roof:    { mode: 1, region: .8, guide: .3, edge: [.42, .58], q: [1 / 16, 1 / 10], macro: 3 },
+        brick:   { mode: 2, courses: 12, phase: .0017, cell: .5, macro: 1 },
+        wood:    { mode: 3, cell: .5, macro: 4, seams: [0.060547, 0.166992, 0.279297, 0.393555, 0.503906, 0.616211, 0.728516, 0.840820, 0.951172, 1.060547] }
+      };
+      const glslFloat = value => Number(value).toFixed(6);
+      const NOTILE_PARS = `
+varying vec3 czWorldPos;
+vec2 czOffA = vec2( 0.0 ), czOffB = vec2( 0.0 ), czDx = vec2( 0.0 ), czDy = vec2( 0.0 );
+float czF = 0.0, czMix = 0.0, czWet = 1.0, czTone = 0.5;
+float czHash( vec2 p ) { p = fract( p * vec2( 123.34, 456.21 ) ); p += dot( p, p + 45.32 ); return fract( p.x * p.y ); }
+float czNoise( vec2 p ) {
+  vec2 i = floor( p ), f = fract( p ), u = f * f * ( 3.0 - 2.0 * f );
+  return mix( mix( czHash( i ), czHash( i + vec2( 1.0, 0.0 ) ), u.x ), mix( czHash( i + vec2( 0.0, 1.0 ) ), czHash( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
+}
+void czNoTileSetup( vec2 uv ) {
+  czDx = dFdx( uv ); czDy = dFdy( uv );   // 用未偏移 UV 的导数采样，偏移跳变处不会出现 mipmap 接缝
+#if CZ_MODE == 2
+  float course = floor( ( uv.y - CZ_PHASE ) * CZ_COURSES );
+  float segment = floor( uv.x * CZ_CELL + czHash( vec2( course, 91.7 ) ) );
+  vec2 key = vec2( course, segment );
+  czOffA = vec2( czHash( key + vec2( 17.0, 3.0 ) ), floor( czHash( key + vec2( 53.0, 11.0 ) ) * CZ_COURSES ) / CZ_COURSES );
+  czOffB = czOffA; czF = 0.0; czMix = 0.0;
+#elif CZ_MODE == 3
+  // 板缝表 CZ_SEAMS：贴图里 9 块板的左边界（第 10 个是下一张贴图第 1 块的左边界）
+  float ux = uv.x - CZ_SEAMS[ 0 ], tile = floor( ux ), fu = ux - tile;
+  int j = 0;
+  for ( int k = 1; k < 9; k ++ ) if ( fu >= CZ_SEAMS[ k ] - CZ_SEAMS[ 0 ] ) j = k;
+  float j0 = CZ_SEAMS[ j ] - CZ_SEAMS[ 0 ], j1 = CZ_SEAMS[ j + 1 ] - CZ_SEAMS[ 0 ];
+  float plank = tile * 9.0 + float( j );
+  float segment = floor( uv.y * CZ_CELL + czHash( vec2( plank, 13.1 ) ) );
+  int s = int( floor( czHash( vec2( plank + 5.0, segment + 1.0 ) ) * 8.999 ) );
+  float t = ( fu - j0 ) / ( j1 - j0 );
+  float srcU = CZ_SEAMS[ s ] + t * ( CZ_SEAMS[ s + 1 ] - CZ_SEAMS[ s ] );
+  czOffA = vec2( srcU - uv.x, czHash( vec2( plank + 29.0, segment + 7.0 ) ) );
+  czOffB = czOffA; czF = 0.0; czMix = 0.0;
+  czTone = czHash( vec2( plank + 41.0, segment + 2.0 ) );
+#else
+  float l = czNoise( uv * CZ_REGION ) * 8.0, ia = floor( l );
+  czF = l - ia;
+  czOffA = sin( vec2( 3.0, 7.0 ) * ia );
+  czOffB = sin( vec2( 3.0, 7.0 ) * ( ia + 1.0 ) );
+  #if CZ_MODE == 1
+  czOffA = floor( czOffA / CZ_Q ) * CZ_Q;
+  czOffB = floor( czOffB / CZ_Q ) * CZ_Q;
+  #endif
+  czMix = smoothstep( CZ_EDGE0, CZ_EDGE1, czF );
+#endif
+}
+vec4 czNoTile( sampler2D tex, vec2 uv ) {
+#if CZ_MODE >= 2
+  return textureGrad( tex, uv + czOffA, czDx, czDy );
+#else
+  return mix( textureGrad( tex, uv + czOffA, czDx, czDy ), textureGrad( tex, uv + czOffB, czDx, czDy ), czMix );
+#endif
+}
+vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
+#if CZ_MODE >= 2
+  return textureGrad( tex, uv + czOffA, czDx, czDy );
+#else
+  vec4 a = textureGrad( tex, uv + czOffA, czDx, czDy ), b = textureGrad( tex, uv + czOffB, czDx, czDy );
+  czMix = smoothstep( CZ_EDGE0, CZ_EDGE1, czF - CZ_GUIDE * dot( a.rgb - b.rgb, vec3( 1.0 ) ) );
+  return mix( a, b, czMix );
+#endif
+}`;
+      const NOTILE_MACRO = `
+{
+  vec3 cw = czWorldPos;
+#if CZ_MACRO == 0
+  float broad = czNoise( cw.xz * 0.07 ) * 0.65 + czNoise( cw.xz * 0.23 ) * 0.35;
+  float warm = smoothstep( 0.5, 0.85, czNoise( cw.xz * 0.05 + 5.1 ) ) * 0.6;
+  float wet = smoothstep( 0.62, 0.8, czNoise( cw.xz * 0.11 + 17.3 ) );
+  diffuseColor.rgb *= mix( 0.84, 1.1, broad );
+  diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * vec3( 1.05, 0.99, 0.9 ), warm );
+  diffuseColor.rgb *= 1.0 - 0.16 * wet;
+  czWet = 1.0 - 0.3 * wet;   // 潮湿处更光滑，阴天里会有一点反光
+#elif CZ_MACRO == 3
+  float broad = czNoise( cw.xz * 0.09 + 2.3 ) * 0.7 + czNoise( cw.xz * 0.31 ) * 0.3;
+  float moss = smoothstep( 0.6, 0.84, czNoise( cw.xz * 0.16 + 3.7 ) );
+  diffuseColor.rgb *= mix( 0.86, 1.08, broad );
+  diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * vec3( 0.82, 0.93, 0.72 ), moss * 0.7 );
+#elif CZ_MACRO == 4
+  // 木作：每块板深浅不一；每间铺面整体色调不同（沿街开间宽 4m，分界在逻辑 x = 21 + 4k，即世界 x = 4k - 59），
+  // 部分铺面日晒褪成灰褐，越往上越明显；墙根 0.6m 内溅水发暗
+  float h = cw.y - CZ_BASE_Y;
+  float bay = floor( ( cw.x + 59.0 ) / 4.0 ), side = step( 1.5, cw.z );
+  float bayTone = czHash( vec2( bay, side * 7.0 + 3.0 ) );
+  diffuseColor.rgb *= ( 0.86 + 0.26 * czTone ) * ( 0.88 + 0.22 * bayTone );
+  float grey = dot( diffuseColor.rgb, vec3( 0.2126, 0.7152, 0.0722 ) );
+  float bleach = smoothstep( 0.55, 0.95, bayTone ) * 0.35 + smoothstep( 1.5, 4.5, h ) * 0.12;
+  diffuseColor.rgb = mix( diffuseColor.rgb, vec3( grey ) * vec3( 1.06, 1.02, 0.95 ) * 1.08, bleach );
+  diffuseColor.rgb *= 1.0 - 0.22 * ( 1.0 - smoothstep( 0.05, 0.6, h ) );
+#else
+  // 墙面：沿墙方向用 x+z，竖向压扁，得到横向成片、竖向拉长的变化
+  vec2 wall = vec2( cw.x + cw.z, cw.y );
+  float h = cw.y - CZ_BASE_Y;
+  float broad = czNoise( wall * vec2( 0.16, 0.1 ) ) * 0.7 + czNoise( wall * vec2( 0.5, 0.3 ) ) * 0.3;
+  float damp = 1.0 - smoothstep( 0.05, CZ_DAMP_H, h );                    // 墙根返潮
+  float streak = smoothstep( 0.55, 0.9, czNoise( wall * vec2( 2.6, 0.12 ) + 7.1 ) ); // 雨水竖向污痕
+  diffuseColor.rgb *= mix( CZ_BROAD_LO, CZ_BROAD_HI, broad );
+  diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * vec3( 0.78, 0.82, 0.74 ), damp * CZ_DAMP );
+  diffuseColor.rgb *= 1.0 - CZ_STREAK * streak * smoothstep( 0.4, 1.6, h );
+#endif
+}`;
+      const noTileEnabled = (() => { try { return localStorage.getItem('cz_zunyi_notile') !== '0'; } catch { return true; } })();
+      const noTileApplied = [];
+      const antiTile = (mat, kind) => {
+        const p = NOTILE_PROFILES[kind];
+        if (!p || !noTileEnabled || !mat.map || mat.userData.czNoTile) return false;
+        const C = T.ShaderChunk;
+        const mapChunk = C.map_fragment?.includes('texture2D( map, vMapUv )') ? C.map_fragment.replace('texture2D( map, vMapUv )', 'czNoTileMap( map, vMapUv )') : null;
+        if (!mapChunk) { console.warn('[zunyi] 当前 three.js 的 map_fragment 结构不同，贴图去重复已跳过'); return false; }
+        const roughChunk = C.roughnessmap_fragment.replace('texture2D( roughnessMap, vRoughnessMapUv )', 'czNoTile( roughnessMap, vRoughnessMapUv )');
+        const normalChunk = C.normal_fragment_maps.split('texture2D( normalMap, vNormalMapUv )').join('czNoTile( normalMap, vNormalMapUv )');
+        const wallTune = kind === 'plaster' ? { lo: .86, hi: 1.05, damp: .55, dampH: 1.1, streak: .14 } : { lo: .88, hi: 1.08, damp: .35, dampH: .8, streak: .08 };
+        const defines = [
+          ['CZ_MODE', p.mode], ['CZ_MACRO', p.macro],
+          ['CZ_REGION', glslFloat(p.region ?? .9)], ['CZ_GUIDE', glslFloat(p.guide ?? .1)],
+          ['CZ_EDGE0', glslFloat(p.edge?.[0] ?? .4)], ['CZ_EDGE1', glslFloat(p.edge?.[1] ?? .6)],
+          ['CZ_Q', `vec2( ${glslFloat(p.q?.[0] ?? 1)}, ${glslFloat(p.q?.[1] ?? 1)} )`],
+          ['CZ_COURSES', glslFloat(p.courses ?? 1)], ['CZ_PHASE', glslFloat(p.phase ?? 0)], ['CZ_CELL', glslFloat(p.cell ?? 1)],
+          ['CZ_BASE_Y', glslFloat(street.position.y)],
+          ['CZ_BROAD_LO', glslFloat(wallTune.lo)], ['CZ_BROAD_HI', glslFloat(wallTune.hi)],
+          ['CZ_DAMP', glslFloat(wallTune.damp)], ['CZ_DAMP_H', glslFloat(wallTune.dampH)], ['CZ_STREAK', glslFloat(wallTune.streak)]
+        ].map(([name, value]) => `#define ${name} ${value}`).join('\n')
+          + (p.seams ? `\nconst float CZ_SEAMS[ ${p.seams.length} ] = float[ ${p.seams.length} ]( ${p.seams.map(glslFloat).join(', ')} );` : '');
+        mat.userData.czNoTile = kind;
+        mat.onBeforeCompile = shader => {
+          shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nvarying vec3 czWorldPos;')
+            .replace('#include <project_vertex>', `#include <project_vertex>
+{
+  vec4 czP = vec4( transformed, 1.0 );
+  #ifdef USE_BATCHING
+  czP = batchingMatrix * czP;
+  #endif
+  #ifdef USE_INSTANCING
+  czP = instanceMatrix * czP;
+  #endif
+  czWorldPos = ( modelMatrix * czP ).xyz;
+}`);
+          shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\n' + defines + '\n' + NOTILE_PARS)
+            .replace('#include <map_fragment>', '#ifdef USE_MAP\nczNoTileSetup( vMapUv );\n#endif\n' + mapChunk + '\n' + NOTILE_MACRO)
+            .replace('#include <roughnessmap_fragment>', roughChunk + '\nroughnessFactor *= czWet;')
+            .replace('#include <normal_fragment_maps>', normalChunk);
+        };
+        mat.customProgramCacheKey = () => 'cz-zunyi-notile-' + kind + '-v3';
+        noTileApplied.push(kind);
+        return true;
+      };
+      stats.stoneNoTile = false;
+      const tuned = new Set();
+      street.traverse(node => {
+        if (!node.isMesh) return;
+        node.receiveShadow = true;
+        for (const mat of Array.isArray(node.material) ? node.material : [node.material]) {
+          if (!mat) continue;
+          const name = mat.name || '';
+          // 贴地的接触阴影片、告示纸、小草不投影，其余房屋和道具投影
+          if (!/contact|notice|grass/i.test(name)) node.castShadow = true;
+          if (tuned.has(mat)) continue;
+          tuned.add(mat);
+          if (envTexture && 'envMap' in mat) { mat.envMap = envTexture; mat.envMapIntensity = .55; }
+          if (/glass/i.test(name)) { mat.roughness = .18; mat.envMapIntensity = 1.1; mat.color.multiplyScalar(.7); }
+          if (/stone/i.test(name) && mat.normalScale) mat.normalScale.multiplyScalar(1.25);   // 石板缝更清楚
+          const tileKind = /stone/i.test(name) ? 'stone' : /brick/i.test(name) ? 'brick' : /roof/i.test(name) ? 'roof' : /plaster/i.test(name) ? 'plaster' : /wood/i.test(name) ? 'wood' : null;
+          if (tileKind && antiTile(mat, tileKind) && tileKind === 'stone') stats.stoneNoTile = true;
+          mat.needsUpdate = true;
+        }
+      });
+      stats.noTile = noTileApplied.slice();
       worldRoot.add(street);
-      renderer.shadowMap.enabled = false;
+      // 原来加载街景后整个关掉阴影，房子不投影、街面没有明暗，画面发平。桌面端重新打开，移动端保持关闭
+      renderer.shadowMap.enabled = !mobile;
+      stats.streetShadows = !mobile;
+    }
+
+    // ---- 街市生活：摊位、招幌（静态，按材质合并成 4 个网格）。只在街景章节且配置了 streetLife 时生成 ----
+    const STALL_DIRS = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
+    // 摊位局部坐标 → 逻辑坐标：lx 沿摊位宽度，lz 朝摊位正面（街道一侧）
+    function stallPoint(s, lx, lz) {
+      const f = STALL_DIRS[s.face] || STALL_DIRS.s, r = [f[1], -f[0]];
+      return [s.x + r[0] * lx + f[0] * lz, s.y + r[1] * lx + f[1] * lz];
+    }
+    const STEAM_AT = { tea: [-.98, .05, .82], food: [-.62, 0, .86] };   // [lx, lz, 高度]，与下方炉灶、锅的位置一致
+    if (street && logicalScene.streetLife) {
+      try { buildStreetLife(logicalScene.streetLife); }
+      catch (error) { console.warn('[zunyi] 街市装饰生成失败，已跳过', error); }
+    }
+    function buildStreetLife(life) {
+      let seed = 1935;
+      const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+      const parts = { wood: [], paint: [], cloth: [], sign: [] };
+      const BOX = new T.BoxGeometry(1, 1, 1), CYL = new T.CylinderGeometry(1, 1, 1, 10), BALL = new T.SphereGeometry(1, 10, 7), CONE = new T.ConeGeometry(1, 1, 14, 1, true);
+      const m4 = new T.Matrix4(), q = new T.Quaternion(), euler = new T.Euler(), size = new T.Vector3(), at3 = new T.Vector3(), tint = new T.Color();
+      function colorize(geometry, color) {
+        tint.set(color);
+        const count = geometry.attributes.position.count, colors = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) { colors[i * 3] = tint.r; colors[i * 3 + 1] = tint.g; colors[i * 3 + 2] = tint.b; }
+        geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
+        return geometry;
+      }
+      // x,y 为逻辑坐标，h 为世界高度；bucket 为 wood / paint / cloth
+      function add(bucket, base, color, x, y, h, yaw, sx, sy, sz, rx = 0) {
+        const geometry = base.clone();
+        geometry.applyMatrix4(m4.compose(at3.set(x - world.w / 2, h, y - world.h / 2), q.setFromEuler(euler.set(rx, yaw, 0)), size.set(sx, sy, sz)));
+        if (bucket !== 'wood') colorize(geometry, color);
+        parts[bucket].push(geometry);
+      }
+      function frame(s) {
+        const f = STALL_DIRS[s.face] || STALL_DIRS.s, r = [f[1], -f[0]];
+        const g0 = surfaceHeight(s.x, s.y), yaw = Math.atan2(-r[1], r[0]);
+        const P = (lx, lz) => stallPoint(s, lx, lz);
+        return {
+          g0,
+          box: (bucket, color, lx, lz, h, sx, sy, sz, rx = 0) => add(bucket, BOX, color, ...P(lx, lz), g0 + h, yaw, sx, sy, sz, rx),
+          cyl: (bucket, color, lx, lz, h, radius, height) => add(bucket, CYL, color, ...P(lx, lz), g0 + h, yaw, radius, height, radius),
+          ball: (bucket, color, lx, lz, h, rx, ry = rx, rz = rx) => add(bucket, BALL, color, ...P(lx, lz), g0 + h, yaw, rx, ry, rz),
+          cone: (color, lx, lz, h, radius, height) => add('cloth', CONE, color, ...P(lx, lz), g0 + h, yaw, radius, height, radius),
+          P
+        };
+      }
+      function table(F, w, d, h = .78, ox = 0) {
+        F.box('wood', null, ox, 0, h, w, .05, d);
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) F.box('wood', null, ox + sx * (w / 2 - .07), sz * (d / 2 - .07), (h - .03) / 2, .06, h - .03, .06);
+      }
+      // 布篷：后高前低、中间微垂，前沿有一道垂边；四根竹竿
+      function awning(F, s, color, w = s.w + .3) {
+        const back = -s.d / 2 - .05, front = s.d / 2 + .4, hb = 2.36, hf = 2.04;
+        for (const side of [-1, 1]) {
+          F.cyl('paint', '#8a7a4e', side * w / 2, back, hb / 2, .022, hb);
+          F.cyl('paint', '#8a7a4e', side * w / 2, front, hf / 2, .022, hf);
+        }
+        const us = 7, rows = [0, .34, .67, 1, 'flap'], positions = [], uvs = [], index = [];
+        rows.forEach((row, j) => {
+          const t = row === 'flap' ? 1 : row, v = back + (front - back) * t;
+          for (let i = 0; i < us; i++) {
+            const u = -w / 2 + w * i / (us - 1);
+            const sag = .07 * Math.sin(Math.PI * i / (us - 1)) * Math.sin(Math.PI * Math.min(t, 1)) ;
+            const h = hb + (hf - hb) * t - sag - (row === 'flap' ? .2 : 0) + .015;
+            const [x, y] = F.P(u, v);
+            positions.push(x - world.w / 2, F.g0 + h, y - world.h / 2); uvs.push(i / (us - 1), j / (rows.length - 1));
+          }
+        });
+        for (let j = 0; j < rows.length - 1; j++) for (let i = 0; i < us - 1; i++) {
+          const a = j * us + i, b = a + 1, c = a + us, d = c + 1;
+          index.push(a, c, b, b, c, d);
+        }
+        const geometry = new T.BufferGeometry();
+        geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
+        geometry.setIndex(index); geometry.computeVertexNormals();
+        parts.cloth.push(colorize(geometry, color));
+      }
+      function umbrella(F, lx, lz, color) {
+        F.cyl('wood', null, lx, lz, 1.02, .02, 2.04);
+        F.cone(color, lx, lz, 2.06 + .19, 1.05, .38);
+      }
+      const pick = list => list[Math.floor(rnd() * list.length)];
+      const BUILD = {
+        produce(F, s) {
+          table(F, s.w, s.d);
+          const heaps = [['#6f8a46', .1, 5], ['#c0702c', .06, 8], ['#8a2a1c', .045, 10]];
+          heaps.forEach(([color, radius, count], i) => {
+            const lx = (i - 1) * s.w * .3;
+            F.cyl('paint', '#8a6a3c', lx, 0, .88, .23, .13);
+            for (let k = 0; k < count; k++) F.ball('paint', color, lx + (rnd() - .5) * .26, (rnd() - .5) * .26, .95 + rnd() * .05, radius * (.85 + rnd() * .3));
+          });
+          for (const lx of [-.45, .45]) { F.cyl('paint', '#7d6036', lx, 0, .15, .24, .3); for (let k = 0; k < 3; k++) F.ball('paint', '#6f8a46', lx + (rnd() - .5) * .2, (rnd() - .5) * .2, .34, .14); }
+          awning(F, s, '#4a5a6c');
+        },
+        sandals(F, s) {
+          table(F, s.w * .5, s.d, .7, -s.w * .25);
+          for (let k = 0; k < 8; k++) F.box('paint', '#b39a5e', -s.w * .25 + (rnd() - .5) * .7, (rnd() - .5) * .5, .74 + k * .012, .1, .025, .26);
+          for (const side of [-1, 1]) F.box('wood', null, s.w * .22 + side * .55, -.15, .85, .05, 1.7, .05);
+          for (const h of [.95, 1.3, 1.65]) {
+            F.box('wood', null, s.w * .22, -.15, h, 1.16, .03, .03);
+            for (let k = 0; k < 5; k++) F.box('paint', pick(['#b39a5e', '#a38a50', '#c2a96a']), s.w * .22 - .44 + k * .22, -.13, h - .14, .09, .25, .02);
+          }
+        },
+        tea(F, s) {
+          table(F, 1.0, .82, .76, .35);
+          for (const lz of [-.52, .52]) {
+            F.box('wood', null, .35, lz, .42, 1.0, .05, .2);
+            for (const side of [-1, 1]) F.box('wood', null, .35 + side * .42, lz, .2, .05, .4, .16);
+          }
+          F.ball('paint', '#3b3430', .35, 0, .86, .1, .085, .1);
+          for (let k = 0; k < 4; k++) F.cyl('paint', '#d3cbb8', .05 + k * .2, (k % 2 ? .22 : -.22), .8, .045, .035);
+          F.cyl('paint', '#6b5646', STEAM_AT.tea[0], STEAM_AT.tea[1], .27, .22, .54);
+          F.ball('paint', '#2f2c2a', STEAM_AT.tea[0], STEAM_AT.tea[1], .64, .14, .12, .14);
+          awning(F, s, '#7d7466');
+        },
+        pottery(F, s) {
+          F.box('paint', '#a8925f', 0, 0, .008, s.w, .016, s.d);
+          const slots = [-.85, -.42, 0, .42, .85];
+          slots.forEach((lx, i) => {
+            const lz = (i % 2 ? .18 : -.15);
+            if (i % 3 === 0) { F.ball('paint', '#5b4130', lx, lz, .3, .24, .29, .24); F.cyl('paint', '#4d372a', lx, lz, .62, .11, .08); }
+            else if (i % 3 === 1) F.cyl('paint', pick(['#6e4e36', '#7d5a3e']), lx, lz, .18, .15, .36);
+            else for (let k = 0; k < 3; k++) F.cyl('paint', '#7c6a55', lx, lz, .035 + k * .055, .15 - k * .012, .05);
+          });
+          umbrella(F, s.w / 2 - .15, -.25, '#a2723e');
+        },
+        cloth(F, s) {
+          table(F, s.w, s.d);
+          const colors = ['#2f3d55', '#46566b', '#c9bd9f', '#7b7d78', '#6b4f3a', '#3b4a63'];
+          for (const lx of [-s.w / 3, 0, s.w / 3]) {
+            const n = 3 + Math.floor(rnd() * 2);
+            for (let k = 0; k < n; k++) F.box('paint', pick(colors), lx + (rnd() - .5) * .05, (rnd() - .5) * .08, .86 + k * .095, .46, .09, .32);
+          }
+          awning(F, s, '#8b6f4e');
+        },
+        food(F, s) {
+          for (const side of [-1, 1]) F.box('wood', null, side * .62, 0, .31, .5, .62, .42);
+          F.box('wood', null, 0, -.05, 1.0, 1.9, .05, .05);
+          for (const side of [-1, 1]) F.box('wood', null, side * .62, -.05, .82, .03, .34, .03);
+          F.cyl('paint', '#2e2b28', STEAM_AT.food[0], STEAM_AT.food[1], .71, .2, .18);
+          for (let k = 0; k < 6; k++) F.cyl('paint', '#d3cbb8', .52 + (k % 3) * .1, (k < 3 ? -.08 : .1), .66 + (k % 2) * .03, .05, .03);
+          for (const lx of [-.9, .9]) F.cyl('paint', '#6b5038', lx, .42, .16, .13, .32);
+          umbrella(F, 0, -.32, '#9a5a32');
+        },
+        grain(F, s) {
+          for (let k = 0; k < 4; k++) {
+            const lx = (k - 1.5) * s.w * .24;
+            F.ball('paint', k % 2 ? '#b8a47c' : '#a8946c', lx, -.05, .36, .27, .36, .25);
+            F.cyl('paint', pick(['#e7dfc9', '#c9a24a', '#d8cfb4']), lx, -.05, .7, .19, .04);
+          }
+          F.box('wood', null, .2, .32, .1, .28, .2, .28);
+          awning(F, s, '#8b8a7e');
+        },
+        herbs(F, s) {
+          table(F, s.w, s.d);
+          for (const lx of [-s.w / 3, 0, s.w / 3]) {
+            F.cyl('paint', '#a6874e', lx, 0, .82, .29, .035);
+            F.ball('paint', pick(['#6e6a3a', '#7a4e32', '#5a4a30']), lx, 0, .85, .21, .05, .21);
+          }
+          for (let k = 0; k < 5; k++) F.ball('paint', pick(['#5c5a34', '#6e5a3a']), -s.w / 2 + .2 + k * (s.w - .4) / 4, s.d / 2 + .3, 1.72, .07, .13, .07);
+          awning(F, s, '#5a4c3e');
+        }
+      };
+      for (const s of life.stalls || []) BUILD[s.kind]?.(frame(s), s);
+
+      // 招幌：竖向木牌 / 布幌，垂直于墙面挂在铺面立柱上，两面都能正读
+      const signs = (life.signs || []).slice(0, 16);
+      if (signs.length) {
+        const CELL_W = 128, CELL_H = 448, COLS = 8, atlas = document.createElement('canvas');
+        atlas.width = atlas.height = 1024;
+        const ctx = atlas.getContext('2d');
+        const FONT = '"KaiTi","STKaiti","Kaiti SC","SimSun","Songti SC","Noto Serif CJK SC",serif';
+        const STYLES = { dark: ['#2b211b', '#5a4330', '#d2ae63'], light: ['#b79f78', '#5b4632', '#2a1d16'], flag: ['#d8ccb0', '#2f2620', '#2a1d16'] };
+        signs.forEach((sign, i) => {
+          const x0 = (i % COLS) * CELL_W, y0 = Math.floor(i / COLS) * CELL_H, [bg, edge, ink] = STYLES[sign.style] || STYLES.dark;
+          ctx.fillStyle = edge; ctx.fillRect(x0, y0, CELL_W, CELL_H);
+          ctx.fillStyle = bg; ctx.fillRect(x0 + 9, y0 + 9, CELL_W - 18, CELL_H - 18);
+          for (let k = 0; k < 320; k++) { ctx.fillStyle = `rgba(0,0,0,${(rnd() * .09).toFixed(3)})`; ctx.fillRect(x0 + 9 + rnd() * (CELL_W - 18), y0 + 9 + rnd() * (CELL_H - 18), 1 + rnd() * 4, 1); }
+          const chars = [...sign.text], fontSize = chars.length === 1 ? 104 : chars.length === 2 ? 92 : 80;
+          ctx.fillStyle = ink; ctx.font = `bold ${fontSize}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          const step = Math.min(fontSize * 1.14, (CELL_H - 60) / chars.length);
+          chars.forEach((ch, k) => ctx.fillText(ch, x0 + CELL_W / 2, y0 + CELL_H / 2 + (k - (chars.length - 1) / 2) * step));
+        });
+        const base = street.position.y, W = .4, H = 1.3;
+        signs.forEach((sign, i) => {
+          const u0 = (i % COLS) * CELL_W / 1024, u1 = u0 + CELL_W / 1024;
+          const vTop = 1 - Math.floor(i / COLS) * CELL_H / 1024, vBottom = vTop - CELL_H / 1024;
+          const flag = sign.style === 'flag', out = flag ? .3 : .22;
+          const centerY = sign.front + sign.face * (out + W / 2), centerH = base + (flag ? 2.62 : 2.7);
+          const wx = sign.x - world.w / 2, wz = centerY - world.h / 2;
+          for (const side of [1, -1]) {
+            const plane = new T.PlaneGeometry(W, H);
+            const uv = plane.attributes.uv;
+            for (let k = 0; k < uv.count; k++) uv.setXY(k, u0 + uv.getX(k) * (u1 - u0), vBottom + uv.getY(k) * (vTop - vBottom));
+            plane.rotateY(side * Math.PI / 2);
+            plane.translate(wx + side * (flag ? .004 : .026), centerH, wz);
+            parts.sign.push(plane);
+          }
+          if (!flag) add('paint', BOX, '#3a2b20', sign.x, centerY, centerH, 0, .05, H + .04, W + .04);
+          // 挑杆：从墙内 0.1m 伸出到牌外 0.15m，墙面位置有误差也不会悬空
+          const armOut = out + W + .15, armMid = sign.front + sign.face * (armOut - .1) / 2;
+          add('wood', BOX, null, sign.x, armMid, base + 3.42, 0, .06, .07, armOut + .1);
+          const top = centerH + H / 2, cord = base + 3.42 - top;
+          for (const t of [.12, W - .12]) add('paint', BOX, '#2a221c', sign.x, sign.front + sign.face * (out + t), top + cord / 2, 0, .012, cord, .012);
+          if (flag) add('wood', BOX, null, sign.x, centerY, top + .02, 0, .03, .03, W + .06);
+          if (sign.lantern) {
+            const ly = sign.front + sign.face * (armOut - .05);
+            add('paint', CYL, '#2a221c', sign.x, ly, base + 3.3, 0, .005, .24, .005);
+            add('paint', BALL, '#a8321f', sign.x, ly, base + 3.02, 0, .17, .22, .17);
+            add('paint', CYL, '#2a221c', sign.x, ly, base + 3.25, 0, .07, .04, .07);
+            add('paint', CYL, '#2a221c', sign.x, ly, base + 2.79, 0, .07, .04, .07);
+          }
+        });
+        var signTexture = new T.CanvasTexture(atlas);
+        signTexture.colorSpace = T.SRGBColorSpace; signTexture.anisotropy = 4;
+      }
+      for (const g of [BOX, CYL, BALL, CONE]) g.dispose();
+
+      function merge(list) {
+        let vertices = 0, indices = 0;
+        for (const g of list) { vertices += g.attributes.position.count; indices += g.index ? g.index.count : g.attributes.position.count; }
+        const names = Object.keys(list[0].attributes).filter(name => list.every(g => g.attributes[name]));
+        const arrays = {}, index = new Uint32Array(indices);
+        for (const name of names) arrays[name] = new Float32Array(vertices * list[0].attributes[name].itemSize);
+        let vo = 0, io = 0;
+        for (const g of list) {
+          for (const name of names) arrays[name].set(g.attributes[name].array, vo * g.attributes[name].itemSize);
+          const count = g.attributes.position.count;
+          if (g.index) for (let i = 0; i < g.index.count; i++) index[io++] = g.index.getX(i) + vo;
+          else for (let i = 0; i < count; i++) index[io++] = vo + i;
+          vo += count; g.dispose();
+        }
+        const out = new T.BufferGeometry();
+        for (const name of names) out.setAttribute(name, new T.BufferAttribute(arrays[name], list[0].attributes[name].itemSize));
+        out.setIndex(new T.BufferAttribute(index, 1));
+        out.computeBoundingSphere();
+        return out;
+      }
+      let woodMaterial = null;
+      street.traverse(node => { if (!woodMaterial && node.isMesh) for (const m of [].concat(node.material)) if (/wood/i.test(m?.name || '')) { woodMaterial = m; break; } });
+      const env = street.userData.envTexture || null;
+      const lifeMaterials = {
+        wood: woodMaterial || new T.MeshStandardMaterial({ color: '#6b5038', roughness: .86 }),
+        paint: new T.MeshStandardMaterial({ vertexColors: true, roughness: .86, envMap: env, envMapIntensity: .55 }),
+        cloth: new T.MeshStandardMaterial({ vertexColors: true, roughness: .95, side: T.DoubleSide, envMap: env, envMapIntensity: .45 }),
+        sign: new T.MeshStandardMaterial({ map: signTexture || null, roughness: .78, envMap: env, envMapIntensity: .4 })
+      };
+      let triangles = 0;
+      for (const [key, list] of Object.entries(parts)) {
+        if (!list.length) continue;
+        const object = new T.Mesh(merge(list), lifeMaterials[key]);
+        object.name = 'zunyi-life-' + key;
+        object.castShadow = key !== 'sign'; object.receiveShadow = true;
+        triangles += object.geometry.index.count / 3;
+        worldRoot.add(object);
+      }
+      for (const [key, mat] of Object.entries(lifeMaterials)) if (!parts[key].length && mat !== woodMaterial) mat.dispose();
+      stats.streetLife = { stalls: (life.stalls || []).length, signs: signs.length, triangles: Math.round(triangles) };
     }
     stats.landform = staging.name;
     stats.terrainVertices = terrain.heights.length;
@@ -91,6 +569,15 @@
     let intro = null;
     let introOverlay = null;
     const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_CAM_DIST = 1.1;
+    // 街景专用机位：通用的 offset [7,4.1,8] 约 11.4m、斜 41° 看街，人物小、前景路面占半屏。
+    // 街景改成第三人称：7.6m、俯角约 21°，走路时自动转到人物身后，镜头略看向前方。
+    const STREET_CAM = { distance: 7.6, pitch: .36, focusScale: 1.12, lookAhead: 1.8, alignRate: 1.6, alignMaxAngle: 1.3, manualHold: 2.5, fov: 50 };
+    const BASE_HEADING = Math.atan2(staging.offset[0], staging.offset[2]);
+    const wrapAngle = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
+    const behindYaw = facing => wrapAngle(Math.atan2(-Math.cos(facing), -Math.sin(facing)) - BASE_HEADING);
+    const lookAhead = new T.Vector3(), lookAheadGoal = new T.Vector3();
+    let streetCamReady = false, lastManualLook = -Infinity;
+    if (street) { camera.fov = STREET_CAM.fov; camera.updateProjectionMatrix(); stats.streetCamera = true; }
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
     let graphicsLost = false;
 
@@ -1236,13 +1723,20 @@
       worldRoot.add(particles);
     }
 
-    for (const source of street ? [] : logicalScene.ambient?.smokes || []) {
+    // 街景：原有炊烟点与新模型对不上所以关掉；改为在茶摊炉子、小吃摊锅上冒热气
+    const steamSources = (logicalScene.streetLife?.stalls || []).filter(stall => STEAM_AT[stall.kind]).map(stall => {
+      const [lx, lz, h] = STEAM_AT[stall.kind], [x, y] = stallPoint(stall, lx, lz);
+      return { x, y, steam: true, h };
+    });
+    for (const source of street ? steamSources : logicalScene.ambient?.smokes || []) {
       const geometry = new T.BufferGeometry(), positions = new Float32Array(24 * 3);
       for (let i = 0; i < 24; i++) { positions[i * 3] = Math.sin(i * 2.4) * .22; positions[i * 3 + 1] = i * .2; positions[i * 3 + 2] = Math.cos(i * 2.4) * .22; }
       geometry.setAttribute('position', new T.BufferAttribute(positions, 3));
       const texture = feather.clone(); texture.channel = 0;
       const smoke = new T.Points(geometry, new T.PointsMaterial({ color: '#aaa99e', alphaMap: texture, size: 1.8, transparent: true, opacity: .12, depthWrite: false }));
-      smoke.position.copy(onSurface(source.x, source.y, .8)); worldRoot.add(smoke); smokeColumns.push(smoke);
+      smoke.position.copy(onSurface(source.x, source.y, source.h ?? .8));
+      if (source.steam) { smoke.material.color.set('#ece8de'); smoke.material.size = 1.05; smoke.material.opacity = .13; smoke.scale.set(.55, .4, .55); smoke.name = 'zunyi-steam'; }
+      worldRoot.add(smoke); smokeColumns.push(smoke);
     }
 
     function resize() {
@@ -1294,6 +1788,11 @@
 
     function cameraPosition(target, scale = 1) {
       if (camera.aspect < .8) scale *= 1.18;
+      if (street) {
+        // 与通用机位共用 orbitYaw 的定义（heading = BASE_HEADING + orbitYaw），方向键的相对移动不受影响
+        const heading = BASE_HEADING + orbitYaw, horizontal = Math.cos(STREET_CAM.pitch) * STREET_CAM.distance;
+        return target.clone().add(new T.Vector3(Math.sin(heading) * horizontal, Math.sin(STREET_CAM.pitch) * STREET_CAM.distance, Math.cos(heading) * horizontal).multiplyScalar(scale));
+      }
       const offset = new T.Vector3(...staging.offset);
       offset.applyAxisAngle(new T.Vector3(0, 1, 0), orbitYaw);
       return target.clone().add(offset.multiplyScalar(scale));
@@ -1357,15 +1856,34 @@
       stats.cameraOccluded = distance < fullDistance - .01;
     }
 
+    // 街景：首次进入时把镜头放到人物身后；走路时慢慢转回身后。
+    // 只在偏差小于约 75° 时跟随（掉头、横移不会把镜头甩过去），手动转镜头后 2.5 秒内不自动干预
+    function alignStreetCamera(player, dt) {
+      if (!Number.isFinite(player?.facing)) return;
+      const desired = behindYaw(player.facing);
+      if (!streetCamReady) { orbitTarget = orbitYaw = desired; streetCamReady = true; return; }
+      if (!player.moving || performance.now() - lastManualLook < STREET_CAM.manualHold * 1000) return;
+      const delta = wrapAngle(desired - orbitTarget);
+      if (Math.abs(delta) < STREET_CAM.alignMaxAngle) orbitTarget += delta * (1 - Math.exp(-dt * STREET_CAM.alignRate));
+    }
+
     function follow(player, dt) {
       if (intro || graphicsLost) return;
       if (player.moving) focus = null;
+      if (street) alignStreetCamera(player, dt);
       orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-14 * dt));
       stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
       const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT);
+      if (street) {
+        // 走路时镜头看向人物前方 1.8m，前方街道多露一些；停下或对话时平滑回到人物身上
+        const ahead = !focus && player.moving && Number.isFinite(player.facing) ? STREET_CAM.lookAhead : 0;
+        lookAheadGoal.set(Math.cos(player.facing || 0) * ahead, 0, Math.sin(player.facing || 0) * ahead);
+        lookAhead.lerp(lookAheadGoal, 1 - Math.exp(-dt * 2.5));
+        target.add(lookAhead);
+      }
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
-      placeCamera(followTarget, focus ? 1.35 : 1, dt);
+      placeCamera(followTarget, focus ? (street ? STREET_CAM.focusScale : 1.35) : 1, dt);
     }
 
     function frameTarget(player, target) {
@@ -1399,6 +1917,7 @@
     }
 
     function playIntro(player) {
+      if (street) alignStreetCamera(player, 0);   // 开场镜头的落点就在人物身后，结束时不跳机位
       const cfg = M.visual3d.intro(logicalScene);
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve('reduced-motion');
       introOverlay = document.createElement('div');
@@ -1438,6 +1957,7 @@
       playIntro,
       adjustCamera(dx) {
         if (!intro && Number.isFinite(dx)) {
+          lastManualLook = performance.now();
           orbitTarget -= dx * .006;
           movementYaw = null;
         }

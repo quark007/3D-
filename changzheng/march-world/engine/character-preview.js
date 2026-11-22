@@ -486,6 +486,16 @@ try {
   model.name = characterId;
   const box = new T.Box3().setFromObject(model);
   model.position.y -= box.min.y;
+  // 王贵：做旧与面部年龄感（皱纹、胡茬、泥渍、褶皱），与游戏内同一个模块。只支持 WebGL，WebGPU 下请加 &renderer=webgl
+  if (characterId === 'wang-gui') {
+    if (backend === 'webgpu') console.info('[人物做旧] WebGPU 预览下不生效，请在地址后加 &renderer=webgl 查看');
+    else {
+      try {
+        if (!window.CZMarchWorld?._?.characterWeathering) await import('./character-weathering.js');
+        window.CZMarchWorld._.characterWeathering.apply(T, model, 'wang_gui');
+      } catch (error) { console.warn('[人物做旧] 预览中加载失败', error); }
+    }
+  }
   const stats = { meshes: 0, triangles: 0, skinnedMeshes: 0, bones: 0, expressions: [], animations: source.animations.map(clip => clip.name) };
   const boneSet = new Set();
   const keys = new Set();

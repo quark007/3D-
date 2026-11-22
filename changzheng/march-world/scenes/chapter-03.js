@@ -2,10 +2,70 @@
 (() => {
   'use strict';
   const K = window.CZMarchWorld._.sceneKit, a = K.anchorHelper(3);
+  /* 街市生活（仅街景模型生效）：摊位、招幌与往来行人。坐标与 tools/assemble-zunyi.py 的沿街铺面一致：
+     北排铺面前沿 y≈50.8~51.0、南排 y≈65.0~65.2、东南排 y≈61.0~61.2；摊位压在墙脚器物带之外、路沿排水沟之内。
+     face 为摊位正面朝向（s=朝南/大 y，n=朝北，e=朝东）；vendor=±1 表示摊主站在摊位哪一侧。 */
+  const STREET_STALLS = [
+    { kind: 'produce', x: 27.0, y: 52.11, w: 2.2, d: 0.9, face: 's', vendor: 1 },
+    { kind: 'sandals', x: 35.0, y: 52.11, w: 2.0, d: 0.9, face: 's', vendor: -1 },
+    { kind: 'tea', x: 43.0, y: 52.28, w: 2.6, d: 1.25, face: 's', vendor: 1 },
+    { kind: 'pottery', x: 55.0, y: 52.11, w: 2.4, d: 0.9, face: 's', vendor: -1 },
+    { kind: 'cloth', x: 47.0, y: 63.9, w: 2.4, d: 0.9, face: 'n', vendor: 1 },
+    { kind: 'food', x: 67.0, y: 63.9, w: 2.4, d: 0.9, face: 'n', vendor: -1 },
+    { kind: 'grain', x: 115.0, y: 59.93, w: 2.2, d: 0.9, face: 'n', vendor: 1 },
+    { kind: 'herbs', x: 123.0, y: 59.93, w: 2.2, d: 0.9, face: 'n', vendor: -1 },
+    { kind: 'produce', x: 24.0, y: 76.0, w: 2.2, d: 0.9, face: 'e', vendor: -1 },
+    { kind: 'pottery', x: 24.0, y: 80.6, w: 2.2, d: 0.9, face: 'e', vendor: 1 },
+    { kind: 'grain', x: 30.0, y: 81.8, w: 2.2, d: 0.9, face: 'n', vendor: 1 },
+    { kind: 'cloth', x: 35.6, y: 80.7, w: 2.2, d: 0.9, face: 'n', vendor: -1 }
+  ];
+  /* 招幌挂在铺面立柱上、垂直于墙面，沿街走时能看到正面。front 为该开间的铺面前沿，face=+1 向南挑出 */
+  const STREET_SIGNS = [
+    { text: '雜貨', style: 'dark', x: 24.84, front: 50.825, face: 1 },
+    { text: '布莊', style: 'light', x: 32.84, front: 50.8, face: 1 },
+    { text: '草鞋', style: 'light', x: 36.84, front: 51.0, face: 1 },
+    { text: '茶', style: 'flag', x: 44.84, front: 50.825, face: 1, lantern: true },
+    { text: '米行', style: 'dark', x: 48.84, front: 50.95, face: 1 },
+    { text: '客棧', style: 'dark', x: 57.16, front: 50.875, face: 1, lantern: true },
+    { text: '藥舖', style: 'dark', x: 104.84, front: 50.825, face: 1 },
+    { text: '當', style: 'light', x: 112.84, front: 50.8, face: 1 },
+    { text: '染坊', style: 'light', x: 44.84, front: 65.125, face: -1 },
+    { text: '酒', style: 'flag', x: 49.16, front: 65.05, face: -1, lantern: true },
+    { text: '油鹽', style: 'dark', x: 64.84, front: 65.125, face: -1 },
+    { text: '羊肉粉', style: 'dark', x: 68.84, front: 65.175, face: -1, lantern: true },
+    { text: '銅器', style: 'dark', x: 100.84, front: 61.2, face: -1 },
+    { text: '書局', style: 'light', x: 105.16, front: 61.125, face: -1 },
+    { text: '鹽號', style: 'dark', x: 120.84, front: 61.2, face: -1 },
+    { text: '客棧', style: 'light', x: 125.16, front: 61.125, face: -1, lantern: true }
+  ];
+  /* 行人：沿路线往返（loop=true 为环线）。车道错开 ≥0.8m，避开剧情 NPC 站位 ≥1.7m。
+     role：soldier 为红军战士（通用模型）；farmer / woman / elder 为平民（assets/characters/civilians），tint 只换外衣颜色 */
+  const STREET_WALKERS = [
+    { role: 'soldier', speed: 1.35, phase: 0, route: [[27.0,56.0],[35.0,56.0],[43.0,55.85],[51.0,55.45],[59.0,55.05],[67.0,54.65],[75.0,54.25],[83.0,53.85],[91.0,53.45],[99.0,53.05],[107.0,52.65],[115.0,52.25],[123.0,51.82],[131.0,51.35],[139.0,50.88],[147.0,50.41]] },
+    { role: 'soldier', speed: 1.35, phase: 0, route: [[27.6,56.8],[35.6,56.8],[43.6,56.62],[51.6,56.22],[59.6,55.82],[67.6,55.42],[75.6,55.02],[83.6,54.62],[91.6,54.22],[99.6,53.82],[107.6,53.42],[115.6,53.02],[123.6,52.59],[131.6,52.12],[139.6,51.65],[147.6,51.18]] },
+    { role: 'farmer', speed: 1.15, phase: 0.35, route: [[65.0,58.45],[73.1,58.04],[81.2,57.64],[89.3,57.24],[91.0,55.65],[97.4,55.33],[101.0,55.15],[105.5,56.42],[113.6,56.02],[121.7,55.6],[129.8,55.12],[137.9,54.65],[146.0,54.17]] },
+    { role: 'woman', tint: 'brown', speed: 1.0, phase: 0.6, route: [[27.0,59.3],[33.0,59.3],[39.0,59.3],[45.0,59.05]] },
+    { role: 'elder', speed: 1.1, phase: 0.2, route: [[42.0,56.6],[37.0,57.2],[34.5,61.0],[32.5,66.0],[30.8,71.0],[28.5,74.5],[29.0,78.6],[33.0,78.4]] },
+    { role: 'soldier', speed: 1.45, phase: 0.5, route: [[67.0,53.65],[75.5,53.22],[84.0,52.8],[92.5,52.38],[101.0,51.95]] },
+    { role: 'woman', speed: 1.2, phase: 0.8, route: [[104.0,55.2],[112.4,54.78],[120.8,54.35],[129.2,53.86],[137.6,53.36],[146.0,52.87]] },
+    { role: 'farmer', tint: 'brown', loop: true, speed: 0.9, phase: 0.1, route: [[26.5,73.2],[31.5,73.4],[32.5,78.0],[27.0,78.3]] }
+  ];
+  const STREET_VENDORS = {
+    produce: { role: 'farmer', tint: 'brown' }, sandals: { role: 'farmer', tint: 'undyed' }, tea: { role: 'elder' },
+    pottery: { role: 'woman' }, cloth: { role: 'woman', tint: 'indigo' }, food: { role: 'farmer', tint: 'grey' },
+    grain: { role: 'elder', tint: 'brown' }, herbs: { role: 'elder', tint: 'grey' }
+  };
+  // 摊位连同摊主、遮棚立柱一起进入行走阻挡；cameraHeight 1 低于镜头目标点，不会推镜头
+  const stallFootprint = s => {
+    const alongX = s.face === 's' || s.face === 'n', span = s.w + 1.8, depth = s.d + .3;
+    const rect = alongX ? K.blockedRect(s.x - span / 2, s.y - depth / 2, span, depth) : K.blockedRect(s.x - depth / 2, s.y - span / 2, depth, span);
+    return { ...rect, cameraHeight: 1 };
+  };
   K.define({
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
     streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30], actorRange: 13 },
+    streetLife: { stalls: STREET_STALLS, signs: STREET_SIGNS, walkers: STREET_WALKERS, vendors: STREET_VENDORS },
     /* Blender X east, Y north, Z up. One unit is one metre. */
     streetBlocked: [
       K.blockedRect(68.1, 24, 25.8, 12), K.blockedRect(85.875, 19.05, 7.65, 5.7),
@@ -24,7 +84,8 @@
         .map(([x,y]) => ({ ...K.blockedRect(x-1.5,y-.22,3,1.60), cameraHeight: .22 })),
       ...[[21,50.65,40],[101,50.65,16],[41,64.41,32],[97,60.44,32]]
         .map(([x,y,w]) => ({ ...K.blockedRect(x,y,w,1.08), cameraHeight: .75 })),
-      K.blockedCircle(69, 41, .8), K.blockedCircle(58, 50, .7), K.blockedCircle(89, 49, .65)
+      K.blockedCircle(69, 41, .8), K.blockedCircle(58, 50, .7), K.blockedCircle(89, 49, .65),
+      ...STREET_STALLS.map(stallFootprint)
     ],
     spawn: { x: 16, y: 58, facing: 'e' },
     palette: {

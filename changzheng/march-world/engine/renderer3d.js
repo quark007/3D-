@@ -88,6 +88,7 @@
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
     let focus = null;
+    let orbitYaw = 0, orbitTarget = 0, movementYaw = null;
     let intro = null;
     let introOverlay = null;
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, 1.05);
@@ -1333,7 +1334,9 @@
     }
 
     function cameraPosition(target, scale = 1) {
-      return target.clone().add(new T.Vector3(...staging.offset).multiplyScalar(scale));
+      const offset = new T.Vector3(...staging.offset);
+      offset.applyAxisAngle(new T.Vector3(0, 1, 0), orbitYaw);
+      return target.clone().add(offset.multiplyScalar(scale));
     }
 
     function placeCamera(target, scale, dt) {
@@ -1371,6 +1374,8 @@
     function follow(player, dt) {
       if (intro || graphicsLost) return;
       if (player.moving) focus = null;
+      orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-14 * dt));
+      stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
       const target = focus ? onSurface(focus.px, focus.py, 1).lerp(onSurface(focus.x, focus.y, 1), .5) : onSurface(player.x, player.y, 1.05);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
@@ -1445,7 +1450,22 @@
       frameTarget,
       drawGuide,
       playIntro,
-      headPoint(player) { return project(player.x, player.y, 2.15); },
+      adjustCamera(dx) {
+        if (!intro && Number.isFinite(dx)) {
+          orbitTarget -= dx * .006;
+          movementYaw = null;
+        }
+      },
+      cameraRelativeMovement({ x, y }) {
+        if (!x && !y) {
+          movementYaw = null;
+          return { x, y };
+        }
+        movementYaw ??= Math.atan2(staging.offset[0], staging.offset[2]) + orbitYaw;
+        const sin = Math.sin(movementYaw), cos = Math.cos(movementYaw);
+        return { x: x * cos + y * sin, y: y * cos - x * sin };
+      },
+      headPoint(player) { return project(player.x, player.y, 2.15 + player.jumpHeight); },
       surfaceHeight,
       groundHeight: terrain.height,
       resize,

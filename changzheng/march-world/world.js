@@ -99,7 +99,9 @@
         const path = M.path.findPath(grid, player.x, player.y, w.x, w.y);
         if (path) player.moveTo(path);
       },
-      onDir() { player.stopPath(); }
+      onDir() { player.stopPath(); },
+      onJump() { if (!pauses.size) player.jump(); },
+      onLook(dx) { if (!pauses.size) view.adjustCamera?.(dx); }
     });
     session.input = input;
 
@@ -112,7 +114,12 @@
       const paused = pauses.size > 0;
       scene.pausedDim = paused;
       input.setEnabled(!paused);
-      if (!paused) player.advance(dt, input.vector());
+      if (!paused) {
+        const movement = input.vector();
+        const backward = input.wantsBack?.(movement);
+        const direction = view.cameraRelativeMovement?.(movement) ?? movement;
+        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward);
+      }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
       if (near !== session.lastNear) {
@@ -152,7 +159,7 @@
       previous.dispose();
     };
     live = session;
-    if (view.playIntro) {
+    if (view.playIntro && opts.playIntro !== false) {
       pauses.add('cinema');
       input.setEnabled(false);
       Promise.resolve(view.playIntro(player)).then(() => {

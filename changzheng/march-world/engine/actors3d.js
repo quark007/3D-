@@ -188,7 +188,11 @@
         if (player.moving) dialogueAnchorId = null;
         ensurePlayer(player.roleId);
         place(playerActor, player.x, player.y, player.facing, surfaceHeight);
-        play(playerActor, player.moving ? 'Walk' : 'Idle');
+        playerActor.root.position.y += player.jumpHeight;
+        play(playerActor, player.airborne && playerActor.actions.has('Jump') ? 'Jump' :
+          player.running && playerActor.actions.has('Run') ? 'Run' : player.moving ? 'Walk' : 'Idle');
+        if (playerActor.current) playerActor.current.timeScale = player.backing ? -.8 :
+          player.running && !playerActor.actions.has('Run') ? 1.6 : 1;
         const localActors = new Map();
         if (logicalScene.streetModel) {
           for (const anchor of anchors) {

@@ -30,9 +30,9 @@
   <button id="stateBtn">模拟 applyState</button>
   <button id="snapBtn">snapshot</button>
   <button id="destroyBtn">destroy</button>
-  <span id="hint">WASD/方向键行走 · E 交互 · 点击地面寻路移动 · 触屏用左下摇杆</span>
+  <span id="hint">WASD / 方向键移动 · Shift 跑步 · 空格跳跃 · Alt + 鼠标转视角 · E 交互 · 触屏用左下摇杆</span>
 </header>
-<div id="stage"><div id="world"></div></div>
+<div id="stage"><div id="world" tabindex="-1"></div></div>
 <footer>
   <span id="snap">snapshot: —</span>
   <span>A方模块 · 不启动小游戏/不写存档；交互仅以事件日志验证</span>
@@ -80,7 +80,9 @@
   async function mount() {
     const scene = window.CZMarchWorldManifest.scenes.find(s => s.sceneId === sel.value);
     try {
-      await window.CZMarchWorld.mount($('world'), { chapterId: scene.chapterId, sceneId: scene.sceneId, spawn: null, anchors: scene.anchors });
+      await window.CZMarchWorld.mount($('world'), { chapterId: scene.chapterId, sceneId: scene.sceneId, spawn: null, anchors: scene.anchors, playIntro: false });
+      world.focus({ preventScroll: true });
+      paused = false;
       log(`已挂载 ${scene.sceneId}（${scene.anchors.length} 锚点）`, 'evt');
     } catch (e) { log('挂载失败：' + e.message); }
   }

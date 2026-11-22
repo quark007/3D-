@@ -30,21 +30,47 @@
   const hint=document.createElement('small');hint.textContent='点地面寻路 · WASD / ↑↓←→';hint.className='czmw-control-hint86';settings.append(switcher,hand,size,toggle);panel.append(stick,pad,hint);container.append(settings);layout();hint.textContent=touch?'拖动摇杆或点地面前往':'点地面前往 · 方向键移动 · E 交谈';
   const action=document.createElement('button');action.type='button';action.className='czmw-act';action.dataset.czmwUi='true';action.hidden=true;action.textContent='交互';container.append(panel,action);
   on(action,'click',()=>{if(state.enabled)hooks.onInteract?.();});
-  let joyId=null,tap=null;
-  const center=()=>{state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
-  const reset=()=>{keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
+  let joyId=null,tap=null,shiftHeld=false,touchRun=false;
+  const center=()=>{touchRun=false;state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
+  const reset=()=>{shiftHeld=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
   function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往'):'点地面前往 · 方向键移动 · E 交谈';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
-  const updateJoy=e=>{const r=stick.getBoundingClientRect(),radius=Math.max(1,Math.min(r.width,r.height)*.34);let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);if(l>radius){x*=radius/l;y*=radius/l;}if(l<radius*.13)x=y=0;state.joy={x:x/radius,y:y/radius};knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;if(x||y)hooks.onDir?.();};
+  const updateJoy=e=>{const r=stick.getBoundingClientRect(),radius=Math.max(1,Math.min(r.width,r.height)*.34);let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);touchRun=e.pointerType==='touch'&&y<0&&l>=radius*1.25;if(l>radius){x*=radius/l;y*=radius/l;}if(l<radius*.13)x=y=0;state.joy={x:x/radius,y:y/radius};knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;if(x||y)hooks.onDir?.();};
   on(stick,'pointerdown',e=>{if(!state.enabled||e.button!==0||joyId!==null)return;e.preventDefault();e.stopPropagation();joyId=e.pointerId;stick.setPointerCapture?.(e.pointerId);captures.set(e.pointerId,stick);hooks.onDir?.();updateJoy(e);});
   on(stick,'pointermove',e=>{if(e.pointerId===joyId&&state.enabled){e.preventDefault();e.stopPropagation();updateJoy(e);}});
   const stopJoy=e=>{captures.delete(e.pointerId);if(e.pointerId===joyId){joyId=null;center();}e.stopPropagation();};on(stick,'pointerup',stopJoy);on(stick,'pointercancel',stopJoy);on(stick,'lostpointercapture',stopJoy);
   const ownUI=e=>e.target?.closest?.('[data-czmw-ui]');
-  on(window,'keydown',e=>{if(!state.enabled||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName))return;const dir=map[e.code];if(dir){keys.add(e.code);e.preventDefault();hooks.onDir?.();}else if(!ownUI(e)&&['KeyE','Space','Enter'].includes(e.code)){e.preventDefault();hooks.onInteract?.();}});
-  on(window,'keyup',e=>{keys.delete(e.code);});on(window,'blur',reset);on(document,'visibilitychange',()=>{if(document.hidden)reset();});
+  const isEditing = e => e.target?.closest?.('input,textarea,select,[contenteditable]');
+  on(window,'focusin',e=>{if(isEditing(e))reset();});
+  on(window,'keydown',e=>{
+    if(!state.enabled || isEditing(e) || e.ctrlKey || e.metaKey)return;
+    shiftHeld=e.shiftKey;
+    if(map[e.code]) {
+      e.preventDefault();
+      if(!e.repeat){keys.add(e.code);hooks.onDir?.();}
+    } else if(!ownUI(e) && !e.altKey && !e.repeat) {
+      if(e.code==='Space' && hooks.onJump){e.preventDefault();hooks.onJump();}
+      if(e.code==='KeyE' || e.code==='Enter'){e.preventDefault();hooks.onInteract?.();}
+    }
+  });
+  on(window,'keyup',e=>{shiftHeld=e.shiftKey;keys.delete(e.code);});
+  on(window,'blur',reset);
+  on(document,'visibilitychange',()=>{if(document.hidden)reset();});
+  on(container,'pointermove',e=>{
+    if(!state.enabled || ownUI(e))return;
+    if(e.pointerType==='mouse' && e.altKey) {
+      hooks.onLook?.(e.movementX);
+    } else if(e.pointerType==='touch' && tap?.id===e.pointerId) {
+      if(!tap.dragged && Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<8)return;
+      const dx=e.clientX-(tap.lastX??tap.x);
+      tap.dragged=true;
+      tap.lastX=e.clientX;
+      hooks.onLook?.(dx);
+    }
+  });
   on(container,'pointerdown',e=>{if(!state.enabled||e.button!==0||ownUI(e)||e.isPrimary===false)return;tap={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now()};});
-  on(container,'pointerup',e=>{const start=tap;tap=null;if(!start||start.id!==e.pointerId||!state.enabled||ownUI(e))return;if(Math.hypot(e.clientX-start.x,e.clientY-start.y)<8&&performance.now()-start.time<500){const r=container.getBoundingClientRect();hooks.onTap?.(e.clientX-r.left,e.clientY-r.top);}});on(container,'pointercancel',()=>tap=null);
+  on(container,'pointerup',e=>{const start=tap;tap=null;if(!start||start.dragged||start.id!==e.pointerId||!state.enabled||ownUI(e))return;if(Math.hypot(e.clientX-start.x,e.clientY-start.y)<8&&performance.now()-start.time<500){const r=container.getBoundingClientRect();hooks.onTap?.(e.clientX-r.left,e.clientY-r.top);}});on(container,'pointercancel',()=>tap=null);
   setMode(mode);
-  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...held.values()]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+state.joy.x,y=Number(dirs.has('s'))-Number(dirs.has('n'))+state.joy.y;const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v)reset();panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){reset();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();}};
+  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...held.values()]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+state.joy.x,y=Number(dirs.has('s'))-Number(dirs.has('n'))+state.joy.y;const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,wantsBack:movement=>movement.y>0,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v)reset();panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){reset();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();}};
  }
  M.controls86={create};
 })();

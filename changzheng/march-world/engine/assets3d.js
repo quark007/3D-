@@ -2,7 +2,7 @@
   'use strict';
   const M = window.CZMarchWorld._;
 
-  async function load(T, signal) {
+  async function load(T, signal, streetModel) {
     const textures = {}, models = {};
     const collect = (geometries, materials, maps) => {
       for (const set of Object.values(textures)) for (const texture of Object.values(set)) maps.add(texture);
@@ -52,6 +52,7 @@
       crate: '/assets/models/wooden_crate_01/model.gltf',
       fern: '/assets/models/fern_02/model.gltf'
     };
+    if (streetModel) sources.street = streetModel.url;
     for (const [key, url] of Object.entries(sources)) jobs.push((async () => {
       const response = await fetch(url, { signal });
       if (!response.ok) throw Error(`${key} HTTP ${response.status}`);

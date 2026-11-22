@@ -51,7 +51,7 @@
     const token = ++mountSeq;
 
     container.classList.add('czmw-host');
-    const grid = M.path.buildGrid(scene);
+
     const roleId=opts.roleId||(typeof GameState!=='undefined'?GameState.character?.id:null)||'soldier';
     const controller = new AbortController();
     pendingMount = { controller, container };
@@ -70,6 +70,7 @@
     if (token !== mountSeq || !view) { view?.dispose(); return false; }
     const project = (x, y, height) => view.project ? view.project(x, y, height) : M.proj.project(view.cam, x, y, height);
     const unproject = (sx, sy) => view.unproject ? view.unproject(sx, sy) : M.proj.unproject(view.cam, sx, sy);
+    const grid = M.path.buildGrid(view.streetActive ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
     const player = M.player.create(scene, grid, opts.spawn,roleId);
     const pin=document.createElement('div');pin.className='czmw-player-pin86';pin.dataset.role=player.roleId;pin.setAttribute('role','img');pin.setAttribute('aria-label','你的位置 · '+player.roleName);const roleLabel=document.createElement('span');roleLabel.textContent='你 · '+player.roleShort;pin.append(roleLabel,document.createElement('i'));container.append(pin);
     scene.focusActor=player;const anchorsMod = M.anchors.create(scene, container);
@@ -98,7 +99,9 @@
         const path = M.path.findPath(grid, player.x, player.y, w.x, w.y);
         if (path) player.moveTo(path);
       },
-      onDir() { player.stopPath(); }
+      onDir() { player.stopPath(); },
+      onJump() { if (!pauses.size) player.jump(); },
+      onLook(dx) { if (!pauses.size) view.adjustCamera?.(dx); }
     });
     session.input = input;
 
@@ -111,7 +114,12 @@
       const paused = pauses.size > 0;
       scene.pausedDim = paused;
       input.setEnabled(!paused);
-      if (!paused) player.advance(dt, input.vector());
+      if (!paused) {
+        const movement = input.vector();
+        const backward = input.wantsBack?.(movement);
+        const direction = view.cameraRelativeMovement?.(movement) ?? movement;
+        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward);
+      }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
       if (near !== session.lastNear) {
@@ -151,7 +159,7 @@
       previous.dispose();
     };
     live = session;
-    if (view.playIntro) {
+    if (view.playIntro && opts.playIntro !== false) {
       pauses.add('cinema');
       input.setEnabled(false);
       Promise.resolve(view.playIntro(player)).then(() => {

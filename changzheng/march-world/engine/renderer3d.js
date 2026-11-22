@@ -8,7 +8,7 @@
     const environment = M.visual3d.environment(logicalScene);
     const snowy = environment.terrain === 'snow';
     const staging = M.visual3d.staging(logicalScene);
-    const assets = await M.assets3d.load(T, options.signal);
+    const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel);
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
     function releaseResources() {
@@ -59,6 +59,15 @@
     const surfaceHeight = terrain.support;
     const onSurface = (x, y, offset = 0) => toWorld(x, y, surfaceHeight(x, y) + offset);
     const pickSurfaces = [];
+    const street = assets?.models?.street;
+    if (street) {
+      const [x, y] = logicalScene.streetModel.origin;
+      street.position.copy(onSurface(x, y, .04));
+      street.name = 'zunyi-realscan';
+      street.traverse(node => { if (node.isMesh) node.receiveShadow = true; });
+      worldRoot.add(street);
+      renderer.shadowMap.enabled = false;
+    }
     stats.landform = staging.name;
     stats.terrainVertices = terrain.heights.length;
     stats.terrainMin = Math.min(...terrain.heights);
@@ -78,6 +87,7 @@
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
     let focus = null;
+    let orbitYaw = 0, orbitTarget = 0, movementYaw = null;
     let intro = null;
     let introOverlay = null;
     const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_CAM_DIST = 1.1;
@@ -201,15 +211,49 @@
       geometry.setIndex(indices); geometry.computeVertexNormals();
       return geometry;
     }
+    function zunyiGroundColors(geometry) {
+      const positions = geometry.attributes.position;
+      const colors = [];
+      const clay = new T.Color('#c1b19c'), gravel = new T.Color('#9e9a8c');
+      const grass = new T.Color('#8caa73'), shade = new T.Color();
+      const footprints = (logicalScene.streetBlocked || []).flatMap(({rect}) => rect ? [rect] : []);
+      for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i) + world.w / 2, y = positions.getZ(i) + world.h / 2;
+        const roadY = 58 - Math.max(0, x - 40) * .05;
+        const pattern = Math.sin(x * .53 + Math.sin(y * .42)) * Math.cos(y * .35 + x * .12);
+        const distance = Math.abs(y - roadY);
+        shade.copy(clay).lerp(gravel, .32 + .24 * pattern + .26 * Math.exp(-distance * .19));
+        shade.lerp(grass, T.MathUtils.clamp((distance - 6) / 27 + .22 * pattern, 0, .86));
+        const yardTrail = Math.min(
+          Math.abs(x - 61.5 - Math.sin(y * .22)) * .76 + Math.max(0,y-44,13-y),
+          Math.abs(y - 74 - Math.sin(x * .19)) + Math.max(0,36-x,x-136)
+        );
+        if (yardTrail < 3) shade.lerp(gravel, .64 * (1 - yardTrail / 3));
+        let contact = 0;
+        for (const [left, top, width, depth] of footprints) {
+          const d = Math.hypot(Math.max(left - x, x - left - width, 0), Math.max(top - y, y - top - depth, 0));
+          contact = Math.max(contact, 1 - Math.min(1, d / 1.4));
+        }
+        shade.multiplyScalar(1 - .24 * contact);
+        colors.push(shade.r, shade.g, shade.b);
+      }
+      geometry.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
+    }
     const ground = mesh(
       terrainPatch(world.w, world.h, world.w / 2, world.h / 2, terrain.cols, terrain.rows),
-      snowy ? snowSurface() : assets ? surface('earth', environment.groundTint, 3, .8) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
+      snowy ? snowSurface() : assets ? (street ? surface('earth', '#e4dad0', 2.2, .72) : surface('earth', environment.groundTint, 3, .8)) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
     );
     ground.name = 'march-pbr-ground';
+    if (street) {
+      ground.material.vertexColors = true;
+      zunyiGroundColors(ground.geometry);
+    }
     ground.castShadow = false;
     pickSurfaces.push(ground);
     if (assets) {
-      const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2, Math.ceil(terrain.cols / 3) * 3, Math.ceil(terrain.rows / 3) * 3);
+      const divisor = street ? 6 : 3;
+      const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2,
+        Math.ceil(terrain.cols / divisor) * 3, Math.ceil(terrain.rows / divisor) * 3);
       const positions = geometry.attributes.position, indices = [];
       for (let i = 0; i < geometry.index.count; i += 3) {
         const triangle = [geometry.index.getX(i), geometry.index.getX(i + 1), geometry.index.getX(i + 2)];
@@ -1108,6 +1152,15 @@
 
     worldRoot.updateMatrixWorld(true);
     const cameraObstacles = worldRoot.children.filter(object => object === ground || /^(march-prop-|march-cliff-line-)/.test(object.name)).map(object => ({ object, bounds: new T.Box3().setFromObject(object) }));
+    if (street) {
+      for (const { rect, cameraHeight = 7.6 } of logicalScene.streetBlocked || []) {
+        if (!rect) continue;
+        const [x, y, w, h] = rect;
+        const min = onSurface(x, y);
+        const max = new T.Vector3(min.x + w, min.y + cameraHeight, min.z + h);
+        cameraObstacles.push({ bounds: new T.Box3(min, max) });
+      }
+    }
     const cameraRay = new T.Raycaster(), cameraDirection = new T.Vector3(), rayOrigin = new T.Vector3(), cameraRight = new T.Vector3();
     let cameraDistance = 0;
 
@@ -1183,7 +1236,7 @@
       worldRoot.add(particles);
     }
 
-    for (const source of logicalScene.ambient?.smokes || []) {
+    for (const source of street ? [] : logicalScene.ambient?.smokes || []) {
       const geometry = new T.BufferGeometry(), positions = new Float32Array(24 * 3);
       for (let i = 0; i < 24; i++) { positions[i * 3] = Math.sin(i * 2.4) * .22; positions[i * 3 + 1] = i * .2; positions[i * 3 + 2] = Math.cos(i * 2.4) * .22; }
       geometry.setAttribute('position', new T.BufferAttribute(positions, 3));
@@ -1241,7 +1294,9 @@
 
     function cameraPosition(target, scale = 1) {
       if (camera.aspect < .8) scale *= 1.18;
-      return target.clone().add(new T.Vector3(...staging.offset).multiplyScalar(scale));
+      const offset = new T.Vector3(...staging.offset);
+      offset.applyAxisAngle(new T.Vector3(0, 1, 0), orbitYaw);
+      return target.clone().add(offset.multiplyScalar(scale));
     }
 
     function clearDistance(target, direction, fullDistance) {
@@ -1251,8 +1306,16 @@
         rayOrigin.copy(target).addScaledVector(cameraRight, offset);
         cameraRay.set(rayOrigin, direction); cameraRay.far = fullDistance + .3;
         for (const { object, bounds } of cameraObstacles) {
-          if (object !== ground && bounds.max.y < target.y - .15) continue;
+          if (object && object !== ground && bounds.max.y < target.y - .15) continue;
           if (!cameraRay.ray.intersectsBox(bounds)) continue;
+          if (!object) {
+            const point = cameraRay.ray.intersectBox(bounds, new T.Vector3());
+            if (point) {
+              const hitDistance = point.distanceTo(rayOrigin);
+              if (hitDistance > .15) distance = Math.min(distance, hitDistance - .4);
+            }
+            continue;
+          }
           const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
           if (hit) distance = Math.min(distance, hit.distance - .4);
         }
@@ -1297,6 +1360,8 @@
     function follow(player, dt) {
       if (intro || graphicsLost) return;
       if (player.moving) focus = null;
+      orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-14 * dt));
+      stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
       const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
@@ -1361,6 +1426,7 @@
     }
 
     const view = {
+      streetActive: Boolean(street),
       cam,
       canvas,
       stats,
@@ -1370,7 +1436,22 @@
       frameTarget,
       drawGuide,
       playIntro,
-      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT); },
+      adjustCamera(dx) {
+        if (!intro && Number.isFinite(dx)) {
+          orbitTarget -= dx * .006;
+          movementYaw = null;
+        }
+      },
+      cameraRelativeMovement({ x, y }) {
+        if (!x && !y) {
+          movementYaw = null;
+          return { x, y };
+        }
+        movementYaw ??= Math.atan2(staging.offset[0], staging.offset[2]) + orbitYaw;
+        const sin = Math.sin(movementYaw), cos = Math.cos(movementYaw);
+        return { x: x * cos + y * sin, y: y * cos - x * sin };
+      },
+      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + (player.jumpHeight || 0)); },
       surfaceHeight,
       groundHeight: terrain.height,
       resize,
@@ -1448,7 +1529,7 @@
       for (const [id, marker] of markers) {
         const anchor = logicalScene.anchorEntities?.find(item => item.anchorId === id);
         if (anchor?.kind === 'npc') marker.visible = !!anchor.near;
-        else marker.visible = anchor ? anchor.enabled : true;
+        else marker.visible = anchor ? anchor.enabled && (!street || (logicalScene.focusActor && Math.hypot(anchor.x - logicalScene.focusActor.x, anchor.y - logicalScene.focusActor.y) <= 10)) : true;
         if (marker.visible) marker.rotation.z = time * .35;
       }
       if (particles) {

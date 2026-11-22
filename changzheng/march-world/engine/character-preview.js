@@ -11,7 +11,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 let canvas = document.getElementById('portrait');
 const characters = new Map([
   ['he-wen', { name: '何文', detail: '指导员 · 1.78 m', path: '/assets/characters/he-wen/he-wen-web.glb' }],
-  ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }]
+  ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }],
+  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', path: '/assets/characters/logistics/logistics-web.glb' }]
 ]);
 const url = new URL(location.href);
 const requestedCharacter = url.searchParams.get('char');

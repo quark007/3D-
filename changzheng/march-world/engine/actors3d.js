@@ -13,7 +13,7 @@
     wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', height: 1.70, scaleBias: 1, idle: 'Idle' },
     chen_xiaoman: { height: 1.67 },
     medic_1: { height: 1.61 },
-    logistics_1: { height: 1.73 },
+    logistics_1: { glbUrl: '/assets/characters/logistics/logistics-web.glb', height: 1.73, scaleBias: 1, idle: 'Idle' },
     liaison_1: { height: 1.65 },
     boatman_1: { height: 1.74 },
     guide_1: { height: 1.68 },

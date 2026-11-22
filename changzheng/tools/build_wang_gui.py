@@ -184,14 +184,19 @@ def age_geometry(positions, cloth=False):
 
 
 def morph_deltas(base, uv):
+    def smoothstep(edge0, edge1, value):
+        t = np.clip((value - edge0) / (edge1 - edge0), 0, 1)
+        return t * t * (3 - 2 * t)
+
     x, y, z = base[:, 0], base[:, 1], base[:, 2]
     front = np.clip((z - 0.045) / 0.035, 0, 1)
     mouth = gaussian(y, 1.588, 0.025) * gaussian(x, 0, 0.060) * front
     lip_line = (uv[:, 0] >= .33) & (uv[:, 0] < .66) & (uv[:, 1] > .88)
     jaw = np.zeros_like(base)
-    lower_lip = np.where(y < 1.6005, 1.0, 0.0)
+    lower_lip = 1 / (1 + np.exp(np.clip((y - 1.6005) / .0015, -60, 60)))
+    upper_lip = smoothstep(1.6045, 1.6085, y)
     jaw_weight = np.maximum(mouth, lip_line.astype(np.float64))
-    jaw[:, 1] = -0.042 * jaw_weight * lower_lip
+    jaw[:, 1] = jaw_weight * (-0.042 * lower_lip + 0.002 * upper_lip)
     jaw[:, 2] = 0.003 * jaw_weight * lower_lip
     smile = np.zeros_like(base)
     corners = gaussian(y, 1.600, 0.009) * gaussian(np.abs(x), 0.020, 0.014) * front
@@ -199,12 +204,14 @@ def morph_deltas(base, uv):
     smile[:, 1] = 0.0045 * corners + 0.0015 * gaussian(y, 1.635, 0.02) * front
     smile[:, 2] = 0.0015 * gaussian(y, 1.625, 0.025) * front
     deltas = {'jawOpen': jaw, 'smile': smile}
-    eye_white = (uv[:, 0] >= .66) & (uv[:, 1] > .88)
+    eye_white = smoothstep(.655, .665, uv[:, 0]) * smoothstep(.875, .885, uv[:, 1])
     for side, label in [(1, 'Left'), (-1, 'Right')]:
         eye = np.clip(gaussian(x, side * 0.032, 0.024) * gaussian(y, 1.666, 0.017) * front * 1.8, 0, 1)
         blink = np.zeros_like(base)
-        blink[:, 1] = (1.666 - y) * eye
-        blink[:, 2] = np.where(eye_white, -0.018 * eye, 0.004 * eye)
+        lid_weight = smoothstep(0, .006, np.abs(y - 1.666))
+        lid_target = np.where(y > 1.666, 1.662, 1.669)
+        blink[:, 1] = (lid_target - y) * eye * lid_weight
+        blink[:, 2] = (0.004 - 0.022 * eye_white) * eye
         deltas[f'eyeBlink{label}'] = blink
         brow = np.zeros_like(base)
         brow_weight = gaussian(x, side * 0.032, 0.022) * gaussian(y, 1.679, 0.008) * front
@@ -484,7 +491,8 @@ def build():
     glb.write_accessor(skin_primitive['attributes']['POSITION'], aged_positions)
     glb.write_accessor(skin_primitive['attributes']['NORMAL'], soften_nose_normals(recompute_normals(aged_positions, indices), aged_positions))
     target_names = []
-    for name, delta in morph_deltas(aged_positions).items():
+    skin_uv = glb.accessor(skin_primitive['attributes']['TEXCOORD_0'])
+    for name, delta in morph_deltas(aged_positions, skin_uv).items():
         accessor = glb.append_accessor(delta.astype(np.float32), 'VEC3')
         skin_primitive.setdefault('targets', []).append({'POSITION': accessor})
         target_names.append(name)

@@ -4,8 +4,8 @@
   "source": "assets/models-v03/char_soldier.glb",
   "sourceSha256": "f0dd36b340626ddbcb460506aed3cb02457cd231d34ff9ad861b78a8f54a7039",
   "asset": "assets/characters/wang-gui/wang-gui-v1.glb",
-  "sha256": "636ed637ed3858de3786b26daf26708c60ac8bc3edfc2aef64ef9ecfb42c1ca9",
-  "bytes": 10817960,
+  "sha256": "359560586f1d94b9a800f10efcbaf14394ee73445f8779e07140505589f2778e",
+  "bytes": 10818056,
   "joints": 32,
   "animations": [
     "CarryWalk",

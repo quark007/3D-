@@ -101,9 +101,23 @@
       },
       onDir() { player.stopPath(); },
       onJump() { if (!pauses.size) player.jump(); },
-      onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
+      onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); },
+      onToggleView() { if (!session.dead) { view.toggleViewMode?.(); syncViewMode(); } },
+      isFirstPerson: () => view.isFirstPerson?.() === true,
+      supportsViewMode: () => typeof view.setViewMode === 'function'
     });
     session.input = input;
+
+    /* 人称状态同步：第一人称隐藏“你 · 战士”名牌（不然贴在脸上），并刷新左上角按钮 */
+    function syncViewMode() {
+      const first = view.isFirstPerson?.() === true;
+      session.firstPerson = first;
+      pin.hidden = first;
+      input.syncViewMode?.();
+      return first;
+    }
+    session.syncViewMode = syncViewMode;
+    syncViewMode();
 
     const playerEntity={y:player.y,draw:()=>player.draw(view.canvas.getContext('2d'),view.cam)};
     scene.drawWater=ambient.drawWater;scene.drawSmoke=ambient.drawSmoke;scene.drawOverlay=ambient.drawOverlay;
@@ -115,10 +129,14 @@
       scene.pausedDim = paused;
       input.setEnabled(!paused);
       if (!paused) {
+        const firstPerson = view.isFirstPerson?.() === true;
+        if (firstPerson !== session.firstPerson) syncViewMode();
         const movement = input.vector();
-        const backward = input.wantsBack?.(movement);
+        /* 第一人称按视角前后走（FPS 手感），不再用“身体朝向的反方向”当后退 */
+        const backward = !firstPerson && input.wantsBack?.(movement);
         const direction = view.cameraRelativeMovement?.(movement) ?? movement;
         player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward, input.wantsWalk?.());
+        if (firstPerson) player.faceTo?.(view.lookFacing?.());
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
@@ -128,7 +146,7 @@
       }
       view.follow(player, dt);
       anchorsMod.layout(view.cam, scene.world.h, project);
-      const head=view.headPoint?view.headPoint(player):player.headPoint(view.cam);const px=Math.round(head.x*2)/2+'px',py=Math.round(head.y*2)/2+'px';if(pin.style.left!==px)pin.style.left=px;if(pin.style.top!==py)pin.style.top=py;
+      const head=view.headPoint?view.headPoint(player):player.headPoint(view.cam);const px=Math.round(head.x*2)/2+'px',py=Math.round(head.y*2)/2+'px';if(!session.firstPerson){if(pin.style.left!==px)pin.style.left=px;if(pin.style.top!==py)pin.style.top=py;}
       if(session.guide){
         const a=anchorsMod.anchors.find(a=>a.anchorId===session.guide.anchorId&&a.enabled);
         if(a){
@@ -157,6 +175,7 @@
       view = M.view.wrapCanvas(M.renderer.create(container, scene));
       session.view = view;
       previous.dispose();
+      syncViewMode();
     };
     live = session;
     if (view.playIntro && opts.playIntro !== false) {

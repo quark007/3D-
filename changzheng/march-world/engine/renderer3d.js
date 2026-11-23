@@ -581,6 +581,22 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     let followCamReady = false, lastManualLook = -Infinity;
     stats.cameraMode = 'shoulder';
     if (street) { camera.fov = STREET_CAM.fov; camera.updateProjectionMatrix(); stats.streetCamera = true; }
+
+    /* ---- 人称：第一人称（默认）/ 第三人称 ----
+       第一人称 = 相机贴在角色眼睛位置，鼠标只转视角，人物模型隐藏；
+       第三人称 = 沿用原来的肩后跟随机位。选择写进 localStorage，下一场沿用。 */
+    const FIRST_CAM = { eye: 1.64, fov: 68, pitchMin: -1.15, pitchMax: 1.02, lookPitch: .03, bob: .032, sprintBob: .058 };
+    const BASE_FOV = camera.fov;
+    let viewMode = 'first';
+    try { if (localStorage.getItem('cz_march_viewmode') === 'third') viewMode = 'third'; } catch { /* 隐私模式不落盘，保持第一人称 */ }
+    let bobPhase = 0, playerShown = true;
+    stats.viewMode = viewMode;
+    if (viewMode === 'first') {
+      orbitPitch = orbitPitchTarget = FIRST_CAM.lookPitch;
+      camera.fov = FIRST_CAM.fov;
+      camera.updateProjectionMatrix();
+      stats.cameraMode = 'first';
+    }
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
     let graphicsLost = false;
 
@@ -1651,7 +1667,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
         cameraObstacles.push({ bounds: new T.Box3(min, max) });
       }
     }
-    const cameraRay = new T.Raycaster(), cameraDirection = new T.Vector3(), rayOrigin = new T.Vector3(), cameraRight = new T.Vector3();
+    const cameraRay = new T.Raycaster(), cameraDirection = new T.Vector3(), rayOrigin = new T.Vector3(), cameraRight = new T.Vector3(), lookVector = new T.Vector3();
     let cameraDistance = 0;
 
     if (environment.terrain === 'wetland') {
@@ -1864,7 +1880,63 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       if (Math.abs(delta) < STREET_CAM.alignMaxAngle) orbitTarget += delta * (1 - Math.exp(-dt * STREET_CAM.alignRate));
     }
 
+    /* 第一人称：相机贴在眼睛位置，朝向完全由 orbitYaw / orbitPitch（鼠标）决定，
+       不再自动甩到人物身后；走路时给一点上下起伏，跑起来幅度更大。 */
+    function followFirstPerson(player, dt) {
+      if (intro || graphicsLost) return;
+      focus = null;
+      orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-20 * dt));
+      orbitPitch = T.MathUtils.lerp(orbitPitch, orbitPitchTarget, 1 - Math.exp(-20 * dt));
+      const speed = player.speed || 0, moving = speed > .05;
+      bobPhase += dt * (moving ? 7.4 + speed * 1.1 : 3.1);
+      const bob = moving ? Math.min(1, speed / M.player.SPEED) * (player.running ? FIRST_CAM.sprintBob : FIRST_CAM.bob) : 0;
+      const eye = onSurface(player.x, player.y, FIRST_CAM.eye + (player.jumpHeight || 0));
+      const sway = Math.cos(bobPhase) * bob;
+      camera.position.set(eye.x + sway * .32, eye.y + Math.sin(bobPhase * 2) * bob, eye.z + sway * .32);
+      const heading = BASE_HEADING + orbitYaw, pitch = orbitPitch;
+      lookVector.set(-Math.sin(heading) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(heading) * Math.cos(pitch));
+      camera.lookAt(camera.position.x + lookVector.x, camera.position.y + lookVector.y, camera.position.z + lookVector.z);
+      camera.updateMatrixWorld();
+      cameraDistance = 0;
+      stats.cameraDistance = 0;
+      stats.cameraOccluded = false;
+      stats.cameraMode = 'first';
+      stats.viewMode = 'first';
+      stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
+      stats.orbitPitch = +orbitPitch.toFixed(3);
+      stats.cameraSpeed = +speed.toFixed(3);
+      stats.cameraSpeedScale = 1;
+    }
+
+    // 切换人称：第一人称重置俯仰与人物显隐，第三人称立刻回到肩后机位。
+    function setViewMode(mode, options = {}) {
+      const next = mode === 'third' ? 'third' : 'first';
+      const changed = next !== viewMode;
+      viewMode = next;
+      stats.viewMode = next;
+      stats.cameraMode = next === 'first' ? 'first' : 'shoulder';
+      camera.fov = next === 'first' ? FIRST_CAM.fov : BASE_FOV;
+      camera.updateProjectionMatrix();
+      cameraDistance = 0;
+      followCamReady = false;
+      if (next === 'first') {
+        orbitPitch = orbitPitchTarget = Math.max(-.1, Math.min(.26, BASE_PITCH * .4));
+        focus = null;
+      } else {
+        orbitPitch = Math.max(-.08, Math.min(.85, orbitPitch));
+        orbitPitchTarget = orbitPitch < .05 ? BASE_PITCH : orbitPitch;
+        const actor = logicalScene.focusActor;
+        if (actor) followTarget.copy(onSurface(actor.x, actor.y, FOCUS_HEIGHT));
+      }
+      playerShown = next !== 'first';
+      actors?.setPlayerVisible?.(playerShown);
+      try { localStorage.setItem('cz_march_viewmode', next); } catch { /* 存不了就只在本场生效 */ }
+      if (changed) options.onChange?.(next);
+      return next;
+    }
+
     function follow(player, dt) {
+      if (viewMode === 'first') { followFirstPerson(player, dt); return; }
       if (intro || graphicsLost) return;
       if (player.moving) focus = null;
       alignFollowCamera(player, dt);
@@ -1872,6 +1944,8 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       orbitPitch = T.MathUtils.lerp(orbitPitch, orbitPitchTarget, 1 - Math.exp(-14 * dt));
       stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
       stats.orbitPitch = +orbitPitch.toFixed(3);
+      stats.cameraMode = 'shoulder';
+      stats.viewMode = 'third';
       const sprintAmount = Math.max(0, Math.min(1, ((player.speed || 0) - M.player.SPEED) / (M.player.RUN_SPEED - M.player.SPEED)));
       locomotionScale += (1 + sprintAmount * .2 - locomotionScale) * (1 - Math.exp(-dt * 4));
       stats.cameraSpeed = +(player.speed || 0).toFixed(3);
@@ -1961,8 +2035,14 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       adjustCamera(dx, dy) {
         if (intro || (!Number.isFinite(dx) && !Number.isFinite(dy))) return;
         lastManualLook = performance.now();
-        if (Number.isFinite(dx)) orbitTarget -= dx * .006;
-        if (Number.isFinite(dy)) orbitPitchTarget = Math.max(-.08, Math.min(.85, orbitPitchTarget + dy * .004));
+        const first = viewMode === 'first';
+        if (Number.isFinite(dx)) orbitTarget -= dx * (first ? .0045 : .006);
+        if (Number.isFinite(dy)) {
+          const next = orbitPitchTarget + dy * (first ? .0042 : .004);
+          orbitPitchTarget = first
+            ? Math.max(FIRST_CAM.pitchMin, Math.min(FIRST_CAM.pitchMax, next))
+            : Math.max(-.08, Math.min(.85, next));
+        }
         movementYaw = null;
       },
       cameraRelativeMovement({ x, y }) {
@@ -1970,11 +2050,24 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
           movementYaw = null;
           return { x, y };
         }
-        movementYaw ??= Math.atan2(staging.offset[0], staging.offset[2]) + orbitYaw;
+        // 第一人称每帧跟随视角（FPS 手感）；第三人称保持起步时锁定的朝向，避免转向时走偏。
+        if (viewMode === 'first') movementYaw = BASE_HEADING + orbitYaw;
+        else movementYaw ??= Math.atan2(staging.offset[0], staging.offset[2]) + orbitYaw;
         const sin = Math.sin(movementYaw), cos = Math.cos(movementYaw);
         return { x: x * cos + y * sin, y: y * cos - x * sin };
       },
       headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + (player.jumpHeight || 0)); },
+      /* ---- 人称切换对外接口（world.js 与 HUD 按钮使用） ---- */
+      getViewMode: () => viewMode,
+      isFirstPerson: () => viewMode === 'first',
+      setViewMode: mode => setViewMode(mode),
+      toggleViewMode: () => setViewMode(viewMode === 'first' ? 'third' : 'first'),
+      supportsViewMode: true,
+      /* 视角朝向对应的角色朝向角（第一人称时让身体跟着看的方向） */
+      lookFacing() {
+        const heading = BASE_HEADING + orbitYaw;
+        return Math.atan2(-Math.cos(heading), -Math.sin(heading));
+      },
       surfaceHeight,
       groundHeight: terrain.height,
       resize,
@@ -2022,6 +2115,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       camera.updateMatrixWorld();
       logicalScene.tick?.(dt);
       if (logicalScene.focusActor) {
+        if (viewMode === 'first' && playerShown) { playerShown = false; actors?.setPlayerVisible?.(false); }
         actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight);
         if (assets) {
           const p = logicalScene.focusActor;
@@ -2084,8 +2178,16 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       actors.dispose();
       throw new DOMException('3D initialization interrupted', 'AbortError');
     }
-    camera.position.copy(cameraPosition(followTarget));
-    camera.lookAt(followTarget);
+    actors.setPlayerVisible?.(viewMode !== 'first');
+    if (viewMode === 'first') {
+      const spawnEye = onSurface(followTarget.x + world.w / 2, followTarget.z + world.h / 2, FIRST_CAM.eye);
+      camera.position.copy(spawnEye);
+      const heading = BASE_HEADING + orbitYaw;
+      camera.lookAt(spawnEye.x - Math.sin(heading), spawnEye.y - Math.sin(orbitPitch), spawnEye.z - Math.cos(heading));
+    } else {
+      camera.position.copy(cameraPosition(followTarget));
+      camera.lookAt(followTarget);
+    }
     camera.updateMatrixWorld();
     raf = requestAnimationFrame(frame);
     return view;

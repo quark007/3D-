@@ -77,6 +77,8 @@
       },
       moveTo(path) { p.path = path; p.pathI = 0; },
       stopPath() { p.path = null; },
+      /* 第一人称：身体朝向跟着视角，切回第三人称时不会背对镜头 */
+      faceTo(angle) { if (Number.isFinite(angle)) p.facing = angle; },
       halt() {
         p.path = null; p.vx = p.vy = p.speed = 0; p.accumulator = 0;
         p.moving = p.running = p.walking = p.backing = false;

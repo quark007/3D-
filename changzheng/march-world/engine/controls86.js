@@ -27,9 +27,25 @@
   on(hand,'click',()=>{handed=handed==='left'?'right':'left';layout();try{localStorage.setItem('cz_march_hand90',handed);}catch{}});
   on(size,'click',()=>{large=!large;layout();try{localStorage.setItem('cz_march_large90',large?'1':'0');}catch{}});
   on(toggle,'click',()=>{shown=!shown;layout();reset();});
-  const hint=document.createElement('small');hint.textContent='点地面寻路 · WASD / ↑↓←→';hint.className='czmw-control-hint86';settings.append(switcher,hand,size,toggle);panel.append(stick,pad,hint);container.append(settings);layout();hint.textContent=touch?'拖动摇杆或点地面前往':'右键锁定视角 · 单击寻路 · WASD 移动 · C 步行 · Shift 冲刺';
+  const hint=document.createElement('small');hint.textContent='点地面寻路 · WASD / ↑↓←→';hint.className='czmw-control-hint86';settings.append(switcher,hand,size,toggle);panel.append(stick,pad,hint);container.append(settings);layout();hint.textContent=touch?'拖动摇杆或点地面前往 · 左上角切换人称':'右键锁定视角 · 单击寻路 · WASD 移动 · C 步行 · Shift 冲刺 · V 切换人称';
   const action=document.createElement('button');action.type='button';action.className='czmw-act';action.dataset.czmwUi='true';action.hidden=true;action.textContent='交互';container.append(panel,action);
   on(action,'click',()=>{if(state.enabled)hooks.onInteract?.();});
+  /* 人称切换：第一人称（默认）/ 第三人称。按钮常驻左上角，键盘 V 同步。 */
+  const viewBtn=document.createElement('button');viewBtn.type='button';viewBtn.className='czmw-view86';viewBtn.dataset.czmwUi='true';viewBtn.setAttribute('role','switch');container.append(viewBtn);
+  const syncView=()=>{
+   const supported=hooks.supportsViewMode?.()!==false;
+   viewBtn.hidden=!supported;
+   if(!supported)return;
+   const first=hooks.isFirstPerson?.()!==false;
+   viewBtn.dataset.mode=first?'first':'third';
+   viewBtn.setAttribute('aria-checked',String(first));
+   viewBtn.textContent=first?'第一人称':'第三人称';
+   viewBtn.title=first?'当前第一人称 · 按 V 或点击切到第三人称':'当前第三人称 · 按 V 或点击切到第一人称';
+   viewBtn.setAttribute('aria-label','视角：'+viewBtn.textContent+'，按 V 切换');
+  };
+  const toggleView=()=>{if(hooks.supportsViewMode?.()===false)return;hooks.onToggleView?.();syncView();};
+  on(viewBtn,'click',toggleView);
+  syncView();
   let joyId=null,tap=null,shiftHeld=false,touchRun=false,walkToggle=false;
   const finePointer=matchMedia('(pointer: fine)').matches&&typeof container.requestPointerLock==='function';
   const locked=()=>document.pointerLockElement===container;
@@ -37,7 +53,7 @@
   const lock=()=>{if(!finePointer||locked())return;try{const request=container.requestPointerLock();request?.catch?.(()=>{});}catch{}};
   const center=()=>{touchRun=false;state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
   const reset=()=>{shiftHeld=false;walkToggle=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
-  function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往'):'右键锁定视角 · 单击寻路 · WASD 移动 · C 步行 · Shift 冲刺';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
+  function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往 · 左上角切换人称'):'右键锁定视角 · 单击寻路 · WASD 移动 · C 步行 · Shift 冲刺 · V 切换人称';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
   const updateJoy=e=>{const r=stick.getBoundingClientRect(),radius=Math.max(1,Math.min(r.width,r.height)*.34);let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);touchRun=e.pointerType==='touch'&&y<0&&l>=radius*1.25;if(l>radius){x*=radius/l;y*=radius/l;}if(l<radius*.13)x=y=0;state.joy={x:x/radius,y:y/radius};knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;if(x||y)hooks.onDir?.();};
   on(stick,'pointerdown',e=>{if(!state.enabled||e.button!==0||joyId!==null)return;e.preventDefault();e.stopPropagation();joyId=e.pointerId;stick.setPointerCapture?.(e.pointerId);captures.set(e.pointerId,stick);hooks.onDir?.();updateJoy(e);});
   on(stick,'pointermove',e=>{if(e.pointerId===joyId&&state.enabled){e.preventDefault();e.stopPropagation();updateJoy(e);}});
@@ -49,6 +65,7 @@
   on(window,'keydown',e=>{
     if(!state.enabled || isEditing(e) || e.ctrlKey || e.metaKey)return;
     shiftHeld=e.shiftKey;
+    if(e.code==='KeyV'&&!e.repeat&&!ownUI(e)){e.preventDefault();toggleView();return;}
     if(e.code==='KeyC'&&!e.repeat&&!ownUI(e)){walkToggle=!walkToggle;e.preventDefault();return;}
     if(map[e.code]) {
       e.preventDefault();
@@ -88,8 +105,8 @@
    hasKeyboard:()=>keys.size>0,wantsBack:movement=>movement.y>0,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),wantsWalk:()=>walkToggle,pointerLocked:locked,
    showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},
    setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},
-   isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,
-   dispose(){reset();unlock();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();}
+   isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,syncViewMode:syncView,
+   dispose(){reset();unlock();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();viewBtn.remove();}
   };
  }
  M.controls86={create};

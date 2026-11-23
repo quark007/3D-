@@ -48,3 +48,14 @@
 .czmw-cinema-skip3d{position:absolute;right:max(18px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top));min-height:44px;padding:7px 16px;pointer-events:auto;border:1px solid #d4c29688;border-radius:3px;background:#14241dbb;color:#f4e8ce;cursor:pointer}
 @media(max-width:600px){.czmw-cinema-copy3d{bottom:90px;max-width:85%}.czmw-cinema-copy3d strong{font-size:34px}}
 @media(prefers-reduced-motion:reduce){.czmw-cinema3d *{animation:none!important;transition:none!important}}
+
+/* 人称切换：第一人称 / 第三人称（默认第一人称） */
+.czmw-view86{position:absolute;left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));z-index:16;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:7px 14px;border:1px solid #c5b58a;border-radius:4px;background:#20392fee;color:#f6ead0;font:600 12px/1.2 system-ui,sans-serif;letter-spacing:.04em;cursor:pointer;box-shadow:0 2px 10px #00000040;touch-action:manipulation}
+.czmw-view86::before{content:'◉';font-size:14px;line-height:1;color:#f4db98}
+.czmw-view86[data-mode=third]::before{content:'◎';color:#cfc09a}
+.czmw-view86:hover{background:#2c4a3bee}
+.czmw-view86:active{background:#7f3328}
+.czmw-view86[hidden]{display:none!important}
+.czmw-view86:focus-visible{outline:3px solid #ffe7a4;outline-offset:2px}
+@media(max-width:700px){.czmw-view86{left:max(10px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));min-height:40px;padding:6px 11px;font-size:11px;gap:5px}}
+.czmw-player-pin86[hidden]{display:none!important}

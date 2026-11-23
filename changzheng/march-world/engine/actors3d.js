@@ -122,6 +122,7 @@
     const npcActors = new Map();
     const frustum = new T.Frustum(), projection = new T.Matrix4(), bounds = new T.Sphere(new T.Vector3(), 3);
     let playerActor = null;
+    let playerVisible = true;   /* 第一人称时隐藏玩家本体，避免相机卡在自己脑袋里 */
     let dialogueAnchorId = null;
     function focusDialogue(event) {
       const { sceneId, anchorId } = event.detail || {};
@@ -250,6 +251,7 @@
         actors.splice(actors.indexOf(playerActor), 1);
       }
       playerActor = makeActor(role, 1.8);
+      playerActor.root.visible = playerVisible;
     }
 
     // ---- 街市行人与摊主：只在街景章节、配置了 streetLife 时出现；不是剧情 NPC，不能交互 ----
@@ -496,6 +498,11 @@
 
     return {
       ensurePlayer,
+      setPlayerVisible(visible) {
+        playerVisible = visible !== false;
+        if (playerActor) playerActor.root.visible = playerVisible;
+      },
+      isPlayerVisible() { return playerVisible; },
       playerState() { return playerActor?.motion ? { ...playerActor.motion } : null; },
       update(dt, player, anchors, camera, surfaceHeight) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);

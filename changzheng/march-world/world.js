@@ -105,6 +105,7 @@
       onJump() { if (!pauses.size) player.jump(); },
       lookCanvas: view.adjustCamera ? view.canvas : null,
       onSettings(open) { if (open) pause(settingsPause); else resume(settingsPause); },
+      onFreeLook(active) { view.setFreeLook?.(active); },
       onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;

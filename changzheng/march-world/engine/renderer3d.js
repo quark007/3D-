@@ -91,6 +91,17 @@
     const BASE_DISTANCE = 4.2, SHOULDER = .35, SPRINT_OFFSET = .8;
     let yaw = 0, pitch = .22, boom = BASE_DISTANCE;
     let viewYaw = 0, followingRoute = false;
+    let freeLookActive = false, freeLookYawOffset = 0, lockedBodyYaw = 0;
+    const wrapAngle = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
+    const isOrbiting = () => freeLookActive || freeLookYawOffset !== 0;
+    function setFreeLook(active) {
+      if (intro || freeLookActive === active) return;
+      freeLookActive = active;
+      if (active) {
+        if (!freeLookYawOffset) lockedBodyYaw = logicalScene.focusActor?.facing ?? yaw;
+        followingRoute = false;
+      }
+    }
     let intro = null;
     let introOverlay = null;
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
@@ -1377,7 +1388,10 @@
     function placeCamera(target, dt) {
       const inspection = staging.inspectionOffset;
       if (inspection) cameraDirection.set(...inspection).normalize();
-      else cameraDirection.set(-Math.cos(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.sin(yaw) * Math.cos(pitch));
+      else {
+        const orbitYaw = yaw + freeLookYawOffset;
+        cameraDirection.set(-Math.cos(orbitYaw) * Math.cos(pitch), Math.sin(pitch), -Math.sin(orbitYaw) * Math.cos(pitch));
+      }
       const fullDistance = inspection ? Math.hypot(...inspection) : boom;
       cameraRight.set(cameraDirection.z, 0, -cameraDirection.x).normalize();
       cameraUp.crossVectors(cameraDirection, cameraRight).normalize();
@@ -1408,9 +1422,13 @@
     const portraitScale = () => mobile && innerWidth < innerHeight ? 1.18 : 1;
     function follow(player, dt) {
       if (intro || graphicsLost) return;
+      if (!freeLookActive && freeLookYawOffset) {
+        freeLookYawOffset *= Math.exp(-dt * 22);
+        if (Math.abs(freeLookYawOffset) < .012) freeLookYawOffset = 0;
+      }
       if (player.navigating) followingRoute = true;
       else if (player.moving) followingRoute = false;
-      if (followingRoute && player.routeHeading != null) {
+      if (!isOrbiting() && followingRoute && player.routeHeading != null) {
         const delta = player.routeHeading - yaw;
         const turn = Math.atan2(Math.sin(delta), Math.cos(delta));
         yaw += turn * (1 - Math.exp(-dt * 12));
@@ -1422,7 +1440,7 @@
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.set(target.x, T.MathUtils.lerp(followTarget.y, target.y, blend), target.z);
       placeCamera(followTarget, dt);
-      player.faceCamera(viewYaw);
+      player.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
     }
 
     function finishIntro(result) {
@@ -1452,11 +1470,13 @@
 
     function initializeCamera(player) {
       yaw = viewYaw = player.facing;
+      freeLookActive = false;
+      freeLookYawOffset = 0;
       boom = BASE_DISTANCE * portraitScale();
       cameraDistance = null;
       followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
       placeCamera(followTarget, 0);
-      player.faceCamera(viewYaw);
+      player.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
     }
 
     function playIntro(player) {
@@ -1497,18 +1517,23 @@
       drawGuide,
       playIntro,
       initializeCamera,
+      setFreeLook,
       adjustCamera(dx, dy = 0) {
         if (intro || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
         const player = logicalScene.focusActor;
         if (!player?.navigating) followingRoute = false;
-        const nextYaw = player?.navigating ? yaw : yaw + dx * .004;
-        yaw = Math.atan2(Math.sin(nextYaw), Math.cos(nextYaw));
+        if (freeLookActive) freeLookYawOffset = wrapAngle(freeLookYawOffset + dx * .004);
+        else if (!player?.navigating) {
+          yaw = wrapAngle(yaw + dx * .004);
+          if (freeLookYawOffset) lockedBodyYaw = yaw;
+        }
         pitch = T.MathUtils.clamp(pitch + dy * .004, -.35, .75);
         placeCamera(followTarget, 0);
-        player?.faceCamera(viewYaw);
+        player?.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
       },
       cameraRelativeMovement({ x, y }) {
-        const sin = Math.sin(viewYaw), cos = Math.cos(viewYaw);
+        const heading = isOrbiting() ? lockedBodyYaw : viewYaw;
+        const sin = Math.sin(heading), cos = Math.cos(heading);
         return { x: -x * sin - y * cos, y: x * cos - y * sin };
       },
       headPoint(player) { return project(player.x, player.y, 2.15 + player.jumpHeight); },

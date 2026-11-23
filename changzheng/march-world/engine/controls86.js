@@ -30,7 +30,7 @@
   const hint=document.createElement('small');hint.textContent='点地面寻路 · WASD / ↑↓←→';hint.className='czmw-control-hint86';settings.append(switcher,hand,size,toggle);panel.append(stick,pad,hint);container.append(settings);layout();hint.textContent=touch?'拖动摇杆或点地面前往':'方向键移动 · E 交谈';
   const action=document.createElement('button');action.type='button';action.className='czmw-act';action.dataset.czmwUi='true';action.hidden=true;action.textContent='交互';container.append(panel,action);
   on(action,'click',()=>{if(state.enabled)hooks.onInteract?.();});
-  let joyId=null,tap=null,shiftHeld=false,altHeld=false,touchRun=false;
+  let joyId=null,tap=null,shiftHeld=false,walkSelected=false,touchRun=false;
   let lookCanvas = hooks.lookCanvas;
   const desktop = () => Boolean(lookCanvas && !touch);
   let wasLocked = false, programmaticUnlock = false;
@@ -42,7 +42,13 @@
     hooks.onLook?.(dx * scale, dy * scale);
   };
   const center=()=>{touchRun=false;state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
-  const reset=()=>{shiftHeld=altHeld=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
+  const altKeys = new Set();
+  function releaseFreeLook() {
+    if (!altKeys.size) return;
+    altKeys.clear();
+    hooks.onFreeLook?.(false);
+  }
+  const reset=()=>{releaseFreeLook();shiftHeld=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
   function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往'):'方向键移动 · E 交谈';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
   const updateJoy=e=>{const r=stick.getBoundingClientRect(),radius=Math.max(1,Math.min(r.width,r.height)*.34);let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);touchRun=e.pointerType==='touch'&&y<0&&l>=radius*1.25;if(l>radius){x*=radius/l;y*=radius/l;}if(l<radius*.13)x=y=0;state.joy={x:x/radius,y:y/radius};knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;if(x||y)hooks.onDir?.();};
   on(stick,'pointerdown',e=>{if(!state.enabled||e.button!==0||joyId!==null)return;e.preventDefault();e.stopPropagation();joyId=e.pointerId;stick.setPointerCapture?.(e.pointerId);captures.set(e.pointerId,stick);hooks.onDir?.();updateJoy(e);});
@@ -62,7 +68,19 @@
       return;
     }
     if(!state.enabled || isEditing(e) || e.ctrlKey || e.metaKey)return;
-    shiftHeld=e.shiftKey;altHeld=e.altKey;
+    shiftHeld=e.shiftKey;
+    if (desktop() && (e.code === 'AltLeft' || e.code === 'AltRight')) {
+      e.preventDefault();
+      if (e.repeat) return;
+      if (!altKeys.size) hooks.onFreeLook?.(true);
+      altKeys.add(e.code);
+      return;
+    }
+    if (e.code === 'KeyC' && !e.altKey) {
+      e.preventDefault();
+      if (!e.repeat) walkSelected = !walkSelected;
+      return;
+    }
     if(map[e.code]) {
       e.preventDefault();
       if(!e.repeat){keys.add(e.code);hooks.onDir?.();}
@@ -71,11 +89,19 @@
       if(e.code==='KeyE' || e.code==='Enter'){e.preventDefault();hooks.onInteract?.();}
     }
   });
-  on(window,'keyup',e=>{shiftHeld=e.shiftKey;altHeld=e.altKey;keys.delete(e.code);});
+  on(window,'keyup',e=>{
+    shiftHeld=e.shiftKey;
+    keys.delete(e.code);
+    if (altKeys.delete(e.code)) {
+      e.preventDefault();
+      if (!altKeys.size) hooks.onFreeLook?.(false);
+    }
+  });
   on(window,'blur',reset);
   on(document,'visibilitychange',()=>{if(document.hidden)reset();});
   const locked = () => Boolean(lookCanvas && document.pointerLockElement === lookCanvas);
   const unlock = () => {
+    releaseFreeLook();
     if (!locked()) return;
     programmaticUnlock = true;
     document.exitPointerLock();
@@ -112,7 +138,7 @@
     try { localStorage.setItem(sensitivityKey, String(sensitivity)); } catch {}
   });
   const shortcuts = document.createElement('p');
-  shortcuts.textContent = 'WASD 移动 · Shift 冲刺 · Alt 慢走 · E 交互 · 左键锁定视角 · Esc 设置 · Ctrl + 点击寻路';
+  shortcuts.textContent = 'WASD 移动 · Shift 冲刺 · C 切换慢走 · 按住 Alt 自由环视 · E 交互 · 左键锁定视角 · Esc 设置 · Ctrl + 点击寻路';
   const touchOptions = document.createElement('div');
   touchOptions.className = 'czmw-touch-options';
   dialog.append(title, resume, label, shortcuts, touchOptions);
@@ -163,6 +189,7 @@
     if (wasLocked && !state.enabled) {
       unlock();
     } else if (previouslyLocked && !wasLocked) {
+      releaseFreeLook();
       const userReleased = !programmaticUnlock && !document.pointerLockElement;
       programmaticUnlock = false;
       if (userReleased) openSettings();
@@ -210,7 +237,7 @@
   on(container, 'pointercancel', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   on(container, 'lostpointercapture', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   setMode(mode);
-  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,unlock,disableCamera(){unlock();closeSettings();lookCanvas=null;},wantsWalk:()=>altHeld,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());dialog.remove();panel.remove();settings.remove();action.remove();}};
+  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,unlock,disableCamera(){unlock();closeSettings();lookCanvas=null;},wantsWalk:()=>walkSelected,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());dialog.remove();panel.remove();settings.remove();action.remove();}};
  }
  M.controls86={create};
 })();

@@ -6,11 +6,12 @@
 - 站点根：`E:\新建文件夹\_gh_3D\changzheng`
 - **不要**用 `E:\新建文件夹\changzheng`：那是另一个仓库（GitCode `Cz-xh`），3D 部分是旧的，只有生成脚本较新，已全部同步到上面这个目录。
 
-## 二、开工前先读这三份
+## 二、开工前先读这四份
 
-1. `04_CodeArts移交.md` —— 第三节写断点位置，第七节就是本次任务
-2. `changzheng/tools/README-codearts.md` —— 脚本清单与环境
-3. `changzheng/tools/build_wang_gui.py` 的 `morph_deltas()`（第 186–229 行）
+1. `06_防超限作业规范.md` —— **先读这份**：禁止附图、截图规格、会话切片，不遵守会跑到一半被平台拒掉
+2. `04_CodeArts移交.md` —— 第三节写断点位置，第七节就是本次任务
+3. `changzheng/tools/README-codearts.md` —— 脚本清单与环境
+4. `changzheng/tools/build_wang_gui.py` 的 `morph_deltas()`（第 186–229 行）
 
 ## 三、当前状态（一句话）
 

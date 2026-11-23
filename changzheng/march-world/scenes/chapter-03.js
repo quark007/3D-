@@ -48,7 +48,17 @@
     streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30], actorRange: 13 },
     streetBlocked: walls,
     strictPlayable: true,
-    cameraBlocked: [{ ...K.blockedRect(61.02, 41.485, 2.26, 3.03), cameraMinHeight: 3.62, cameraHeight: 5.46 }],
+    // The west gate jambs extend beyond the shop façades. Use camera-only
+    // proxies for their projections and the curved underside of the arch.
+    cameraBlocked: [
+      ...[39.75, 44.515].map(y => ({ ...K.blockedRect(61.09, y, 2.12, 1.735), cameraHeight: 4.0 })),
+      ...Array.from({ length: 12 }, (_, i) => {
+        const width = 3.03 / 12, y = 41.485 + i * width;
+        const offset = Math.max(Math.abs(y - 43), Math.abs(y + width - 43));
+        const cameraMinHeight = 2.12 + Math.sqrt(Math.max(0, 1.52 ** 2 - offset ** 2));
+        return { ...K.blockedRect(61.02, y, 2.26, width), cameraMinHeight, cameraHeight: 5.46 };
+      })
+    ],
     spawn: { x: 57, y: 30, facing: 's' },
     palette: {
       ground: '#81795f', road: '#a39a85', roadEdge: '#6d6450', wood: '#7a5c40', roof: '#565248',

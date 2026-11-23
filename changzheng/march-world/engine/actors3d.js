@@ -168,6 +168,18 @@
         actors.splice(actors.indexOf(playerActor), 1);
       }
       playerActor = makeActor(role, 1.8);
+      const variants = new Map();
+      const cloneForFade = material => {
+        if (!variants.has(material)) variants.set(material, material.clone());
+        return variants.get(material);
+      };
+      playerActor.model.traverse(node => {
+        if (!node.isMesh || !node.material) return;
+        node.material = Array.isArray(node.material) ? node.material.map(cloneForFade) : cloneForFade(node.material);
+      });
+      playerActor.fadeMaterials = [...variants.entries()];
+      for (const [original, variant] of variants) playerActor.materials.set(original, variant);
+      playerActor.fade = 1;
     }
 
     function visibleAnchor(anchor, anchors) {
@@ -182,13 +194,28 @@
 
     return {
       ensurePlayer,
-      update(dt, player, anchors, camera, surfaceHeight) {
+      update(dt, player, anchors, camera, surfaceHeight, cameraDistance) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
         frustum.setFromProjectionMatrix(projection);
         if (player.moving) dialogueAnchorId = null;
         ensurePlayer(player.roleId);
         place(playerActor, player.x, player.y, player.facing, surfaceHeight);
         playerActor.root.position.y += player.jumpHeight;
+        const fade = cameraDistance >= .55
+          ? T.MathUtils.clamp(1 - (1.05 - cameraDistance) * 1.7, .15, 1)
+          : .15 * T.MathUtils.clamp((cameraDistance - .25) / .30, 0, 1);
+        if (fade !== playerActor.fade) {
+          playerActor.fade = fade;
+          for (const [original, material] of playerActor.fadeMaterials) {
+            const transparent = fade < 1 || original.transparent;
+            if (material.transparent !== transparent) {
+              material.transparent = transparent;
+              material.needsUpdate = true;
+            }
+            material.opacity = original.opacity * fade;
+            material.depthWrite = fade === 1 && original.depthWrite;
+          }
+        }
         play(playerActor, player.airborne && playerActor.actions.has('Jump') ? 'Jump' :
           player.running && playerActor.actions.has('Run') ? 'Run' : player.moving ? 'Walk' : 'Idle');
         if (playerActor.current) {

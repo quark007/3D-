@@ -580,6 +580,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     const lookAhead = new T.Vector3(), lookAheadGoal = new T.Vector3();
     let followCamReady = false, lastManualLook = -Infinity;
     stats.cameraMode = 'shoulder';
+    stats.baseHeading = +BASE_HEADING.toFixed(3);
     if (street) { camera.fov = STREET_CAM.fov; camera.updateProjectionMatrix(); stats.streetCamera = true; }
 
     /* ---- 人称：第一人称（默认）/ 第三人称 ----
@@ -897,6 +898,39 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       return group;
     }
 
+    /* 主楼内部：把墙体外框与隔墙登记成场景坐标的碰撞框，供 world.js / player.js 精确碰撞。
+       建筑只有 0 或 π 的 Y 轴旋转；这栋门朝 +Z（场景 +y，即南），无旋转。 */
+    function registerZunyiInterior(interior, prop, bodyW, bodyD, gallery) {
+      const t = .3, dw = 1.7, hw = bodyW / 2, hd = bodyD / 2;
+      const cx = prop.x, cy = prop.y;
+      const walls = [
+        { x1: cx - hw, x2: cx + hw, y1: cy - hd, y2: cy - hd + t },              // 北墙
+        { x1: cx - hw, x2: cx - hw + t, y1: cy - hd, y2: cy + hd },              // 西墙
+        { x1: cx + hw - t, x2: cx + hw, y1: cy - hd, y2: cy + hd },              // 东墙
+        { x1: cx - hw, x2: cx - dw / 2, y1: cy + hd - t, y2: cy + hd },          // 南墙（门西）
+        { x1: cx + dw / 2, x2: cx + hw, y1: cy + hd - t, y2: cy + hd }           // 南墙（门东）
+      ];
+      for (const c of interior.colliders || []) walls.push({ x1: cx + c.x1, x2: cx + c.x2, y1: cy + c.z1, y2: cy + c.z2, level: c.level || 0 });
+      logicalScene.zunyiInterior = {
+        cx, cy,
+        x1: cx - hw - gallery, x2: cx + hw + gallery,
+        y1: cy - hd - gallery, y2: cy + hd + gallery,
+        door: { x1: cx - dw / 2, x2: cx + dw / 2, y1: cy + hd - t, y2: cy + hd },
+        walls
+      };
+      /* 建筑不再是实心块：把盖住整栋楼的 blocked / streetBlocked 矩形摘掉，
+         改由 walls 精确碰撞（街景扫描模型那一整排房子也压在这块地上）。 */
+      const coversBuilding = block => {
+        const r = block.rect;
+        if (!r) return false;
+        return r[0] <= cx - hw + .6 && r[0] + r[2] >= cx + hw - .6
+          && r[1] <= cy - hd + .6 && r[1] + r[3] >= cy + hd - .6;
+      };
+      logicalScene.blocked = (logicalScene.blocked || []).filter(block => !coversBuilding(block));
+      logicalScene.streetBlocked = (logicalScene.streetBlocked || []).filter(block => !coversBuilding(block));
+      stats.zunyiInterior = { walls: walls.length, floor: interior.floor, room: interior.room };
+    }
+
     function house(prop, wooden = false) {
       const group = groupAt(prop);
       const width = prop.w || 10, depth = prop.depth || width * .68;
@@ -996,12 +1030,24 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       if (meeting) {
         const gallery = Math.min(1.15, depth * .14), bodyW = width - 2 * gallery, bodyD = depth - 2 * gallery;
         const floor = 3.08, eave = 5.95, px = width / 2 - .18, pz = depth / 2 - .18;
-        solid(width, .34, depth, stone);
-        room(0, 0, bodyW, bodyD, .34, eave);
-        solid(width - .12, .2, depth - .12, wood, 0, floor, 0);
+        /* 台基抬到 0.72：街景扫描的会址地面比地面高，台基压在它上面，室内地板才不会露出扫描石板 */
+        const plinth = .72;
+        solid(width, plinth, depth, stone);
+        /* 主楼内部：把整块实心体换成「四面墙 + 门洞 + 楼板开洞 + 真楼梯 + 二楼会议室」。
+           模块缺失时退回原来的实心盒子，行为与旧版一致。 */
+        const interior = M.zunyiInterior ? M.zunyiInterior.install({
+          T, group, solid, material, pickSurfaces,
+          mesh: (geometry, mat, x = 0, y = 0, z = 0, parent = group) => mesh(geometry, mat, x, y, z, parent),
+          width: bodyW, depth: bodyD, bottom: plinth, floor, eave, gallery,
+          opts: { doorWidth: 1.7, doorHeight: 2.3 }
+        }) : null;
+        if (!interior) {
+          room(0, 0, bodyW, bodyD, plinth, eave);
+          solid(width - .12, .2, depth - .12, wood, 0, floor, 0);
+        }
         for (const side of [-1, 1]) {
-          frame(0, side * pz, width - .2, .34, eave, 5);
-          for (let i = 0; i <= 5; i++) solid(.32, .2, .32, stone, -px + 2 * px * i / 5, .44, side * pz);
+          frame(0, side * pz, width - .2, plinth, eave, 5);
+          for (let i = 0; i <= 5; i++) solid(.32, .2, .32, stone, -px + 2 * px * i / 5, plinth + .1, side * pz);
           for (const y of [floor + .27, floor + .94]) solid(width - .3, .1, .12, wood, 0, y, side * pz);
           for (let i = 0; i <= 28; i++) solid(.065, .65, .065, wood, -px + 2 * px * i / 28, floor + .59, side * pz);
           for (const y of [floor + .27, floor + .94, eave - .12]) solid(.12, .1, depth - .3, wood, side * px, y, 0);
@@ -1014,9 +1060,10 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
           }
           beam([side * px, eave - .66, pz], [side * (px - .6), eave - .15, pz], .065, wood, group);
         }
-        door(0, .34, bodyD / 2, 1.7, 2.3);
-        steps(0, bodyD / 2 + .22, 2.25, .34, 2, gallery - .28);
+        if (!interior) door(0, plinth, bodyD / 2, 1.7, 2.3);
+        steps(0, bodyD / 2 + .22, 2.25, plinth, 3, gallery - .28);
         pitched(0, 0, width - .12, depth - .12, eave, 1.42, .22, 0, wall);
+        if (interior) registerZunyiInterior(interior, prop, bodyW, bodyD, gallery);
       } else if (loess) {
         const archive = chapter === 11 && wooden, side = seed % 2 ? -1 : 1;
         const base = .22, eave = archive ? 2.8 : 2.42 + (seed % 3) * .1;
@@ -1890,7 +1937,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       const speed = player.speed || 0, moving = speed > .05;
       bobPhase += dt * (moving ? 7.4 + speed * 1.1 : 3.1);
       const bob = moving ? Math.min(1, speed / M.player.SPEED) * (player.running ? FIRST_CAM.sprintBob : FIRST_CAM.bob) : 0;
-      const eye = onSurface(player.x, player.y, FIRST_CAM.eye + (player.jumpHeight || 0));
+      const eye = onSurface(player.x, player.y, FIRST_CAM.eye + (player.height || 0) + (player.jumpHeight || 0));
       const sway = Math.cos(bobPhase) * bob;
       camera.position.set(eye.x + sway * .32, eye.y + Math.sin(bobPhase * 2) * bob, eye.z + sway * .32);
       const heading = BASE_HEADING + orbitYaw, pitch = orbitPitch;
@@ -1950,7 +1997,8 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       locomotionScale += (1 + sprintAmount * .2 - locomotionScale) * (1 - Math.exp(-dt * 4));
       stats.cameraSpeed = +(player.speed || 0).toFixed(3);
       stats.cameraSpeedScale = +locomotionScale.toFixed(3);
-      const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT);
+      const eyeLift = player.height || 0;
+      const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT + eyeLift);
       if (street) {
         // 走路时镜头看向人物前方 1.8m，前方街道多露一些；停下或对话时平滑回到人物身上
         const ahead = !focus && player.moving && Number.isFinite(player.facing) ? STREET_CAM.lookAhead : 0;
@@ -1960,7 +2008,9 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       }
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
-      placeCamera(followTarget, focus ? (street ? STREET_CAM.focusScale : 1.35) : locomotionScale, dt);
+      // 室内空间窄，肩后机位收到一半，避免镜头卡进墙里
+      const indoorScale = player.indoor ? .5 : 1;
+      placeCamera(followTarget, (focus ? (street ? STREET_CAM.focusScale : 1.35) : locomotionScale) * indoorScale, dt);
     }
 
     function frameTarget(player, target) {
@@ -2062,13 +2112,19 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
         const sin = Math.sin(movementYaw), cos = Math.cos(movementYaw);
         return { x: x * cos + y * sin, y: y * cos - x * sin };
       },
-      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + (player.jumpHeight || 0)); },
+      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + (player.height || 0) + (player.jumpHeight || 0)); },
       /* ---- 人称切换对外接口（world.js 与 HUD 按钮使用） ---- */
       getViewMode: () => viewMode,
       isFirstPerson: () => viewMode === 'first',
       setViewMode: mode => setViewMode(mode),
       toggleViewMode: () => setViewMode(viewMode === 'first' ? 'third' : 'first'),
       supportsViewMode: true,
+      /* 调试/验收用：直接设定视角水平角与俯仰（orbitYaw 语义） */
+      setLook(yaw, pitch) {
+        if (Number.isFinite(yaw)) { orbitYaw = orbitTarget = yaw; }
+        if (Number.isFinite(pitch)) { orbitPitch = orbitPitchTarget = Math.max(FIRST_CAM.pitchMin, Math.min(FIRST_CAM.pitchMax, pitch)); }
+        movementYaw = null;
+      },
       /* 视角朝向对应的角色朝向角（第一人称时让身体跟着看的方向） */
       lookFacing() {
         const heading = BASE_HEADING + orbitYaw;

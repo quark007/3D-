@@ -1,0 +1,44 @@
+{
+  "zone": {
+    "cx": 81,
+    "cy": 30.5,
+    "walls": 10,
+    "x1": 74,
+    "x2": 88,
+    "y1": 26,
+    "y2": 35
+  },
+  "stats": {
+    "walls": 10,
+    "floor": 3.08,
+    "room": {
+      "x": 2.8499999999999996,
+      "z": 0.6099999999999999,
+      "w": 5.4,
+      "d": 4.880000000000001,
+      "y": 3.17
+    }
+  },
+  "door": {
+    "x": 81,
+    "y": 30.65,
+    "height": 0.78,
+    "indoor": true,
+    "moving": false
+  },
+  "stairs": {
+    "x": 76.18,
+    "y": 29.65,
+    "height": 3.17,
+    "indoor": true,
+    "moving": false
+  },
+  "meeting": {
+    "x": 82.56,
+    "y": 29.9,
+    "height": 3.17,
+    "indoor": true,
+    "moving": false
+  },
+  "errors": []
+}

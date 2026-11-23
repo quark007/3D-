@@ -72,6 +72,26 @@
     const unproject = (sx, sy) => view.unproject ? view.unproject(sx, sy) : M.proj.unproject(view.cam, sx, sy);
     const grid = M.path.buildGrid(view.streetActive ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
     const player = M.player.create(scene, grid, opts.spawn,roleId);
+    /* 主楼内部：墙厚 0.3m 的墙线在 1m 栅格里表达不出来，进楼后改用精确碰撞；
+       楼外仍然走栅格，两者在建筑外轮廓处切换。 */
+    const zone = scene.zunyiInterior;
+    if (zone) {
+      /* 室内走道和楼梯只有 1.1~1.7m 宽，玩家半径按 0.34 算（室外仍是 0.62） */
+      const R = 0.34 ** 2;
+      player.setCollider((x, y) => {
+        if (x > zone.x1 && x < zone.x2 && y > zone.y1 && y < zone.y2) {
+          const level = player.height > 1.7 ? 2 : 1;
+          for (const w of zone.walls) {
+            if (w.level && w.level !== level) continue;
+            const nx = Math.max(w.x1, Math.min(x, w.x2)), ny = Math.max(w.y1, Math.min(y, w.y2));
+            const dx = x - nx, dy = y - ny;
+            if (dx * dx + dy * dy < R) return false;
+          }
+          return true;
+        }
+        return M.path.walkableAt(grid, x, y, M.player.RADIUS);
+      });
+    }
     const pin=document.createElement('div');pin.className='czmw-player-pin86';pin.dataset.role=player.roleId;pin.setAttribute('role','img');pin.setAttribute('aria-label','你的位置 · '+player.roleName);const roleLabel=document.createElement('span');roleLabel.textContent='你 · '+player.roleShort;pin.append(roleLabel,document.createElement('i'));container.append(pin);
     scene.focusActor=player;const anchorsMod = M.anchors.create(scene, container);
     scene.anchorEntities=anchorsMod.anchors;
@@ -79,6 +99,7 @@
 
     const guidePin=document.createElement('div');guidePin.className='czmw-guide87';guidePin.hidden=true;container.append(guidePin);
     const session = { container, scene, grid, view, player,pin,guidePin, guide:null, route:[],routeAt:0, routeCell:'', anchorsMod, ambient, chapterId, sceneId, dead: false, lastNear: null };
+    scene.view3d = view;   /* 调试/验收取景用，与 session.view 同步 */
 
     /* 输入 */
     const input = M.input.create(container, {
@@ -137,6 +158,12 @@
         const direction = view.cameraRelativeMovement?.(movement) ?? movement;
         player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward, input.wantsWalk?.());
         if (firstPerson) player.faceTo?.(view.lookFacing?.());
+        /* 落地采样：进主楼后踩着台基 / 楼梯 / 二层楼板走，楼外回到地面 */
+        const floorAt = M.zunyiInterior?.floorHeightAt;
+        if (floorAt && scene.zunyiInterior) {
+          const fh = floorAt(player.x - scene.world.w / 2, player.y - scene.world.h / 2, player.height);
+          player.setFloor(fh == null ? 0 : fh, fh != null);
+        }
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
@@ -174,6 +201,7 @@
       previous.onGraphicsLost = null;
       view = M.view.wrapCanvas(M.renderer.create(container, scene));
       session.view = view;
+      scene.view3d = view;
       previous.dispose();
       syncViewMode();
     };
@@ -256,7 +284,7 @@
     s.guidePin?.remove();
     try { s.anchorsMod && s.anchorsMod.dispose(); } catch { /* 释放继续 */ }
     try { s.view && s.view.dispose(); } catch { /* 释放继续 */ }
-    if (scene) { scene.focusActor=null;scene.anchorEntities=null;scene.tick = null; scene.collectEntities = null; scene.drawWater = null; scene.drawSmoke = null; scene.drawOverlay = null; scene.drawGuide=null;scene.pausedDim = false; }
+    if (scene) { scene.focusActor=null;scene.anchorEntities=null;scene.view3d=null;scene.tick = null; scene.collectEntities = null; scene.drawWater = null; scene.drawSmoke = null; scene.drawOverlay = null; scene.drawGuide=null;scene.pausedDim = false; }
     s.container.classList.remove('czmw-host');
   }
 

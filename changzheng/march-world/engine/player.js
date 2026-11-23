@@ -30,7 +30,8 @@
       y: spawn && Number.isFinite(spawn.y) ? spawn.y : scene.spawn.y,
       facing: normFacing(spawn && spawn.facing != null ? spawn.facing : scene.spawn.facing),
       moving: false, running: false, walking: false, backing: false,
-      vx: 0, vy: 0, speed: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION
+      vx: 0, vy: 0, speed: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION,
+      height: 0, heightTarget: 0, indoor: false
     };
     if (!M.path.walkableAt(grid, p.x, p.y, RADIUS)) { const s = scene.spawn; p.x = s.x; p.y = s.y; }
 
@@ -46,9 +47,10 @@
       return 'n';
     }
     function tryMove(nx, ny) {
-      if (M.path.walkableAt(grid, nx, ny, RADIUS)) { p.x = nx; p.y = ny; return; }
-      if (M.path.walkableAt(grid, nx, p.y, RADIUS)) { p.x = nx; return; }   /* 沿墙滑动 */
-      if (M.path.walkableAt(grid, p.x, ny, RADIUS)) { p.y = ny; }
+      const free = (x, y) => p.test ? p.test(x, y) : M.path.walkableAt(grid, x, y, RADIUS);
+      if (free(nx, ny)) { p.x = nx; p.y = ny; return; }
+      if (free(nx, p.y)) { p.x = nx; return; }   /* 沿墙滑动 */
+      if (free(p.x, ny)) { p.y = ny; }
     }
     return {
       roleId:profile.role,roleName:profile.name,roleShort:profile.short,
@@ -61,6 +63,15 @@
       get speed() { return p.speed; },
       get velocity() { return { x: p.vx, y: p.vy }; },
       get airborne() { return p.jumpTime < JUMP_DURATION; },
+      /* 楼层高度（0 = 地面；主楼内部 / 楼梯 / 二层由 zunyi-interior 采样） */
+      get height() { return p.height; },
+      get indoor() { return p.indoor; },
+      setFloor(height, indoor) {
+        p.heightTarget = Number.isFinite(height) ? height : 0;
+        p.indoor = !!indoor;
+      },
+      setCollider(fn) { p.test = typeof fn === 'function' ? fn : null; },
+      canStand(x, y) { return p.test ? p.test(x, y) : M.path.walkableAt(grid, x, y, RADIUS); },
       get jumpHeight() {
         const progress = p.jumpTime / JUMP_DURATION;
         return 4 * JUMP_HEIGHT * progress * (1 - progress);
@@ -73,6 +84,7 @@
       setPos(x, y, facing) {
         p.x = x; p.y = y; if (facing != null) p.facing = normFacing(facing);
         p.path = null; p.vx = p.vy = p.speed = 0; p.accumulator = 0; p.jumpTime = JUMP_DURATION;
+        p.height = p.heightTarget = 0; p.indoor = false;
         p.moving = p.running = p.walking = p.backing = false;
       },
       moveTo(path) { p.path = path; p.pathI = 0; },
@@ -137,6 +149,11 @@
         p.running = p.moving && !p.backing && run && !walking;
         p.walking = p.moving && !p.backing && walking;
         p.t += dt * (p.running ? 1.5 : p.backing ? .8 : 1);
+        /* 楼层高度平滑：进门 / 上楼不会瞬移，走一步约 0.2m 的台阶也自然 */
+        if (p.height !== p.heightTarget) {
+          p.height += (p.heightTarget - p.height) * (1 - Math.exp(-16 * dt));
+          if (Math.abs(p.heightTarget - p.height) < .003) p.height = p.heightTarget;
+        }
       },
       draw(ctx, cam) {
         const pr = M.proj.project(cam, p.x, p.y, 0);

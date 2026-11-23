@@ -228,8 +228,8 @@
       actor.motion = { action: actor.current.getClip().name, speed, moveWeight, idleWeight: 1 - moveWeight, walkWeight: moveWeight, timeScale };
     }
 
-    function place(actor, x, y, facing, surfaceHeight) {
-      actor.root.position.set(x - logicalScene.world.w / 2, surfaceHeight(x, y), y - logicalScene.world.h / 2);
+    function place(actor, x, y, facing, surfaceHeight, lift = 0) {
+      actor.root.position.set(x - logicalScene.world.w / 2, surfaceHeight(x, y) + lift, y - logicalScene.world.h / 2);
       if (Number.isFinite(facing)) actor.root.rotation.y = Math.atan2(Math.cos(facing), Math.sin(facing));
     }
 
@@ -509,7 +509,7 @@
         frustum.setFromProjectionMatrix(projection);
         if (player.moving) dialogueAnchorId = null;
         ensurePlayer(player.roleId);
-        place(playerActor, player.x, player.y, player.facing, surfaceHeight);
+        place(playerActor, player.x, player.y, player.facing, surfaceHeight, player.height || 0);
         playerActor.root.position.y += player.jumpHeight;
         updatePlayerAnimation(playerActor, player);
         const localActors = new Map();

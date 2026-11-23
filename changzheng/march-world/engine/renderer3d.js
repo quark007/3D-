@@ -565,18 +565,21 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
     let focus = null;
-    let orbitYaw = 0, orbitTarget = 0, movementYaw = null;
+    let orbitYaw = 0, orbitTarget = 0, orbitPitch = 0, orbitPitchTarget = 0, movementYaw = null, locomotionScale = 1;
     let intro = null;
     let introOverlay = null;
     const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_CAM_DIST = 1.1;
-    // 街景专用机位：通用的 offset [7,4.1,8] 约 11.4m、斜 41° 看街，人物小、前景路面占半屏。
-    // 街景改成第三人称：7.6m、俯角约 21°，走路时自动转到人物身后，镜头略看向前方。
-    const STREET_CAM = { distance: 7.6, pitch: .36, focusScale: 1.12, lookAhead: 1.8, alignRate: 1.6, alignMaxAngle: 1.3, manualHold: 2.5, fov: 50 };
+    // 肩后机位：缩短通用场景距离；街景保留前方街道视野。鼠标可同时控制水平与俯仰。
+    const STREET_CAM = { distance: 6.2, pitch: .32, focusScale: 1.12, lookAhead: 1.8, alignRate: 1.6, alignMaxAngle: 1.3, manualHold: 2.5, fov: 50 };
     const BASE_HEADING = Math.atan2(staging.offset[0], staging.offset[2]);
+    const BASE_DISTANCE = street ? STREET_CAM.distance : Math.hypot(...staging.offset) * .68;
+    const BASE_PITCH = street ? STREET_CAM.pitch : Math.atan2(staging.offset[1], Math.hypot(staging.offset[0], staging.offset[2]));
+    orbitPitch = orbitPitchTarget = BASE_PITCH;
     const wrapAngle = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
     const behindYaw = facing => wrapAngle(Math.atan2(-Math.cos(facing), -Math.sin(facing)) - BASE_HEADING);
     const lookAhead = new T.Vector3(), lookAheadGoal = new T.Vector3();
-    let streetCamReady = false, lastManualLook = -Infinity;
+    let followCamReady = false, lastManualLook = -Infinity;
+    stats.cameraMode = 'shoulder';
     if (street) { camera.fov = STREET_CAM.fov; camera.updateProjectionMatrix(); stats.streetCamera = true; }
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
     let graphicsLost = false;
@@ -1788,14 +1791,9 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
 
     function cameraPosition(target, scale = 1) {
       if (camera.aspect < .8) scale *= 1.18;
-      if (street) {
-        // 与通用机位共用 orbitYaw 的定义（heading = BASE_HEADING + orbitYaw），方向键的相对移动不受影响
-        const heading = BASE_HEADING + orbitYaw, horizontal = Math.cos(STREET_CAM.pitch) * STREET_CAM.distance;
-        return target.clone().add(new T.Vector3(Math.sin(heading) * horizontal, Math.sin(STREET_CAM.pitch) * STREET_CAM.distance, Math.cos(heading) * horizontal).multiplyScalar(scale));
-      }
-      const offset = new T.Vector3(...staging.offset);
-      offset.applyAxisAngle(new T.Vector3(0, 1, 0), orbitYaw);
-      return target.clone().add(offset.multiplyScalar(scale));
+      const heading = BASE_HEADING + orbitYaw, distance = BASE_DISTANCE * scale;
+      const horizontal = Math.cos(orbitPitch) * distance;
+      return target.clone().add(new T.Vector3(Math.sin(heading) * horizontal, Math.sin(orbitPitch) * distance, Math.cos(heading) * horizontal));
     }
 
     function clearDistance(target, direction, fullDistance) {
@@ -1856,12 +1854,11 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       stats.cameraOccluded = distance < fullDistance - .01;
     }
 
-    // 街景：首次进入时把镜头放到人物身后；走路时慢慢转回身后。
-    // 只在偏差小于约 75° 时跟随（掉头、横移不会把镜头甩过去），手动转镜头后 2.5 秒内不自动干预
-    function alignStreetCamera(player, dt) {
+    // 肩后跟随：移动时缓慢回到人物身后；掉头、横移和刚手动观察后不强行甩镜头。
+    function alignFollowCamera(player, dt) {
       if (!Number.isFinite(player?.facing)) return;
       const desired = behindYaw(player.facing);
-      if (!streetCamReady) { orbitTarget = orbitYaw = desired; streetCamReady = true; return; }
+      if (!followCamReady) { orbitTarget = orbitYaw = desired; followCamReady = true; return; }
       if (!player.moving || performance.now() - lastManualLook < STREET_CAM.manualHold * 1000) return;
       const delta = wrapAngle(desired - orbitTarget);
       if (Math.abs(delta) < STREET_CAM.alignMaxAngle) orbitTarget += delta * (1 - Math.exp(-dt * STREET_CAM.alignRate));
@@ -1870,9 +1867,15 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     function follow(player, dt) {
       if (intro || graphicsLost) return;
       if (player.moving) focus = null;
-      if (street) alignStreetCamera(player, dt);
+      alignFollowCamera(player, dt);
       orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-14 * dt));
+      orbitPitch = T.MathUtils.lerp(orbitPitch, orbitPitchTarget, 1 - Math.exp(-14 * dt));
       stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
+      stats.orbitPitch = +orbitPitch.toFixed(3);
+      const sprintAmount = Math.max(0, Math.min(1, ((player.speed || 0) - M.player.SPEED) / (M.player.RUN_SPEED - M.player.SPEED)));
+      locomotionScale += (1 + sprintAmount * .2 - locomotionScale) * (1 - Math.exp(-dt * 4));
+      stats.cameraSpeed = +(player.speed || 0).toFixed(3);
+      stats.cameraSpeedScale = +locomotionScale.toFixed(3);
       const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT);
       if (street) {
         // 走路时镜头看向人物前方 1.8m，前方街道多露一些；停下或对话时平滑回到人物身上
@@ -1883,7 +1886,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       }
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
-      placeCamera(followTarget, focus ? (street ? STREET_CAM.focusScale : 1.35) : 1, dt);
+      placeCamera(followTarget, focus ? (street ? STREET_CAM.focusScale : 1.35) : locomotionScale, dt);
     }
 
     function frameTarget(player, target) {
@@ -1917,7 +1920,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     }
 
     function playIntro(player) {
-      if (street) alignStreetCamera(player, 0);   // 开场镜头的落点就在人物身后，结束时不跳机位
+      alignFollowCamera(player, 0);   // 开场镜头的落点就在人物身后，结束时不跳机位
       const cfg = M.visual3d.intro(logicalScene);
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve('reduced-motion');
       introOverlay = document.createElement('div');
@@ -1955,12 +1958,12 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       frameTarget,
       drawGuide,
       playIntro,
-      adjustCamera(dx) {
-        if (!intro && Number.isFinite(dx)) {
-          lastManualLook = performance.now();
-          orbitTarget -= dx * .006;
-          movementYaw = null;
-        }
+      adjustCamera(dx, dy) {
+        if (intro || (!Number.isFinite(dx) && !Number.isFinite(dy))) return;
+        lastManualLook = performance.now();
+        if (Number.isFinite(dx)) orbitTarget -= dx * .006;
+        if (Number.isFinite(dy)) orbitPitchTarget = Math.max(-.08, Math.min(.85, orbitPitchTarget + dy * .004));
+        movementYaw = null;
       },
       cameraRelativeMovement({ x, y }) {
         if (!x && !y) {

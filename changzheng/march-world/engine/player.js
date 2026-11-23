@@ -3,9 +3,14 @@
   'use strict';
   const NS = window.CZMarchWorld = window.CZMarchWorld || {};
   const M = NS._ = NS._ || {};
-  const SPEED = 9.5;         /* 世界单位/秒 */
-  const RUN_SPEED = SPEED * 1.6;
-  const BACKWARD_SPEED = SPEED * .65;
+  const WALK_SPEED = 1.5;    /* C 键步行：米/秒 */
+  const SPEED = 4;           /* 普通慢跑：米/秒 */
+  const RUN_SPEED = 7;       /* Shift 冲刺：米/秒 */
+  const BACKWARD_SPEED = 1.6;
+  const ACCELERATION = 10;   /* 起步与转向加速度：米/秒² */
+  const DECELERATION = 14;   /* 松键后的减速度：米/秒² */
+  const TURN_RATE = 11;
+  const STOP_SPEED = .035;
   const JUMP_DURATION = .64;
   const JUMP_HEIGHT = .76;
   const RADIUS = 0.62;       /* 碰撞半径 */
@@ -24,7 +29,8 @@
       x: spawn && Number.isFinite(spawn.x) ? spawn.x : scene.spawn.x,
       y: spawn && Number.isFinite(spawn.y) ? spawn.y : scene.spawn.y,
       facing: normFacing(spawn && spawn.facing != null ? spawn.facing : scene.spawn.facing),
-      moving: false, running: false, backing: false, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION
+      moving: false, running: false, walking: false, backing: false,
+      vx: 0, vy: 0, speed: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION
     };
     if (!M.path.walkableAt(grid, p.x, p.y, RADIUS)) { const s = scene.spawn; p.x = s.x; p.y = s.y; }
 
@@ -50,7 +56,10 @@
       get x() { return p.x; }, get y() { return p.y; }, get facing() { return p.facing; },
       get moving() { return p.moving; },
       get running() { return p.running; },
+      get walking() { return p.walking; },
       get backing() { return p.backing; },
+      get speed() { return p.speed; },
+      get velocity() { return { x: p.vx, y: p.vy }; },
       get airborne() { return p.jumpTime < JUMP_DURATION; },
       get jumpHeight() {
         const progress = p.jumpTime / JUMP_DURATION;
@@ -61,42 +70,70 @@
         p.jumpTime = 0;
         p.path = null;
       },
-      setPos(x, y, facing) { p.x = x; p.y = y; if (facing != null) p.facing = normFacing(facing); p.path = null; p.jumpTime = JUMP_DURATION; },
-      moveTo(path) { p.path = path; p.pathI = 0; },
-      stopPath() { p.path = null; p.moving = p.running = p.backing = false; },
-      /* Preserve wall-clock walking speed at 10–30 FPS, while collision stays at 60 Hz. */
-      advance(dt, vec, run = false, backward = false) {
-        p.accumulator=Math.min(.1,p.accumulator+Math.max(0,dt));
-        while(p.accumulator+1e-9>=1/60){this.update(1/60,vec,run,backward);p.accumulator-=1/60;}
+      setPos(x, y, facing) {
+        p.x = x; p.y = y; if (facing != null) p.facing = normFacing(facing);
+        p.path = null; p.vx = p.vy = p.speed = 0; p.accumulator = 0; p.jumpTime = JUMP_DURATION;
+        p.moving = p.running = p.walking = p.backing = false;
       },
-      update(dt, vec, run = false, backward = false) {
+      moveTo(path) { p.path = path; p.pathI = 0; },
+      stopPath() { p.path = null; },
+      halt() {
+        p.path = null; p.vx = p.vy = p.speed = 0; p.accumulator = 0;
+        p.moving = p.running = p.walking = p.backing = false;
+      },
+      /* 固定 60Hz 碰撞；加速度、松键减速和转向都基于实际速度，而不是输入开关。 */
+      advance(dt, vec, run = false, backward = false, walk = false) {
+        p.accumulator=Math.min(.1,p.accumulator+Math.max(0,dt));
+        while(p.accumulator+1e-9>=1/60){this.update(1/60,vec,run,backward,walk);p.accumulator-=1/60;}
+      },
+      update(dt, vec, run = false, backward = false, walk = false) {
         p.jumpTime = Math.min(JUMP_DURATION, p.jumpTime + dt);
-        const backing = !p.path && backward;
-        let vx = 0, vy = 0;
-        if (p.path) { /* 点击移动沿路径 */
+        const backing = !p.path && backward, walking = walk && !run;
+        let dx = 0, dy = 0, amount = 0, pathDistance = Infinity;
+        while (p.path) { /* 点击移动沿路径，终点前按制动距离减速 */
           const t = p.path[p.pathI];
-          if (!t) { p.path = null; }
-          else {
-            const dx = t.x - p.x, dy = t.y - p.y, d = Math.hypot(dx, dy);
-            if (d < 0.35) { p.pathI++; if (p.pathI >= p.path.length) p.path = null; }
-            else { vx = dx / d; vy = dy / d; }
-          }
-        } else if (vec && backing) {
-          // Backward input stays relative to the actor, including diagonal steps.
-          const cos = Math.cos(p.facing), sin = Math.sin(p.facing);
-          vx = -cos * vec.y - sin * vec.x;
-          vy = -sin * vec.y + cos * vec.x;
-        } else if (vec) { vx = vec.x; vy = vec.y; }
-        p.moving = !!(vx || vy);
-        p.backing = p.moving && backing;
-        p.running = p.moving && !p.backing && run;
-        if (p.moving) {
-          if (!p.backing) p.facing = Math.atan2(vy, vx);
-          const speed = p.backing ? BACKWARD_SPEED : p.running ? RUN_SPEED : SPEED;
-          tryMove(p.x + vx * speed * dt, p.y + vy * speed * dt);
-          /* 被墙挡住时取消寻路，避免顶着墙走 */
-          if (p.path && !M.path.walkableAt(grid, p.x + vx * 0.7, p.y + vy * 0.7, RADIUS) && !M.path.walkableAt(grid, p.x + vx * 0.7, p.y, RADIUS) && !M.path.walkableAt(grid, p.x, p.y + vy * 0.7, RADIUS)) p.path = null;
+          if (!t) { p.path = null; break; }
+          const tx = t.x - p.x, ty = t.y - p.y, d = Math.hypot(tx, ty);
+          if (d < .12) { p.pathI++; if (p.pathI >= p.path.length) p.path = null; continue; }
+          dx = tx / d; dy = ty / d; amount = 1; pathDistance = d; break;
         }
+        if (!p.path && vec) {
+          let vx = vec.x, vy = vec.y;
+          if (backing) {
+            // Backward input stays relative to the actor, including diagonal steps.
+            const cos = Math.cos(p.facing), sin = Math.sin(p.facing);
+            vx = -cos * vec.y - sin * vec.x;
+            vy = -sin * vec.y + cos * vec.x;
+          }
+          const length = Math.hypot(vx, vy);
+          if (length > .001) { dx = vx / length; dy = vy / length; amount = Math.min(1, length); }
+        }
+        let targetSpeed = amount * (backing ? BACKWARD_SPEED : walking ? WALK_SPEED : run ? RUN_SPEED : SPEED);
+        if (Number.isFinite(pathDistance)) targetSpeed = Math.min(targetSpeed, Math.sqrt(Math.max(0, pathDistance - .08) * 2 * DECELERATION));
+        const targetVx = dx * targetSpeed, targetVy = dy * targetSpeed;
+        const changeX = targetVx - p.vx, changeY = targetVy - p.vy, change = Math.hypot(changeX, changeY);
+        const maxChange = (targetSpeed > p.speed ? ACCELERATION : DECELERATION) * dt;
+        if (change > maxChange && change > 0) { p.vx += changeX / change * maxChange; p.vy += changeY / change * maxChange; }
+        else { p.vx = targetVx; p.vy = targetVy; }
+        p.speed = Math.hypot(p.vx, p.vy);
+        if (!targetSpeed && p.speed < STOP_SPEED) { p.vx = p.vy = p.speed = 0; }
+        if (amount && !backing) {
+          const desired = Math.atan2(dy, dx), delta = Math.atan2(Math.sin(desired - p.facing), Math.cos(desired - p.facing));
+          p.facing += delta * (1 - Math.exp(-TURN_RATE * dt));
+        }
+        if (p.speed > 0) {
+          const oldX = p.x, oldY = p.y;
+          tryMove(p.x + p.vx * dt, p.y + p.vy * dt);
+          if (p.x === oldX) p.vx = 0;
+          if (p.y === oldY) p.vy = 0;
+          p.speed = Math.hypot(p.vx, p.vy);
+          /* 被墙挡住时取消寻路，避免顶着墙走 */
+          if (p.path && amount && !M.path.walkableAt(grid, p.x + dx * 0.7, p.y + dy * 0.7, RADIUS) && !M.path.walkableAt(grid, p.x + dx * 0.7, p.y, RADIUS) && !M.path.walkableAt(grid, p.x, p.y + dy * 0.7, RADIUS)) p.path = null;
+        }
+        p.moving = p.speed >= STOP_SPEED;
+        p.backing = p.moving && backing;
+        p.running = p.moving && !p.backing && run && !walking;
+        p.walking = p.moving && !p.backing && walking;
         p.t += dt * (p.running ? 1.5 : p.backing ? .8 : 1);
       },
       draw(ctx, cam) {
@@ -119,5 +156,5 @@
     };
   }
 
-  M.player = { create, SPEED, RADIUS, ROLES, JUMP_DURATION };
+  M.player = { create, WALK_SPEED, SPEED, RUN_SPEED, RADIUS, ROLES, JUMP_DURATION };
 })();

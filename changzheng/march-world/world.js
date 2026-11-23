@@ -101,7 +101,7 @@
       },
       onDir() { player.stopPath(); },
       onJump() { if (!pauses.size) player.jump(); },
-      onLook(dx) { if (!pauses.size) view.adjustCamera?.(dx); }
+      onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;
 
@@ -118,7 +118,7 @@
         const movement = input.vector();
         const backward = input.wantsBack?.(movement);
         const direction = view.cameraRelativeMovement?.(movement) ?? movement;
-        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward);
+        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward, input.wantsWalk?.());
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
@@ -190,7 +190,7 @@
     const r = String(reason || 'default');
     if (!live || live.dead) return; /* 未挂载时暂停是安全空操作 */
     pauses.add(r);
-    live.input.setEnabled(false);live.player.stopPath();
+    live.input.setEnabled(false);live.player.stopPath();live.player.halt?.();
   }
   function resume(reason) {
     pauses.delete(String(reason || 'default'));

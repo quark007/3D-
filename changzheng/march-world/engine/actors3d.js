@@ -207,6 +207,26 @@
       actor.current = next;
     }
 
+    function updatePlayerAnimation(actor, player) {
+      if (player.airborne && actor.actions.has('Jump')) { play(actor, 'Jump'); return; }
+      const idle = actor.actions.get(actor.idle), walk = actor.actions.get('Walk');
+      if (!idle || !walk) {
+        play(actor, player.moving ? 'Walk' : actor.idle);
+        if (actor.current) actor.current.timeScale = player.backing ? -.8 : 1;
+        return;
+      }
+      // 当前四套主角只有 Idle/Walk。用实际速度混合权重并匹配步频，避免输入一开一关就跳动作。
+      const speed = Math.max(0, player.speed || 0), linear = Math.max(0, Math.min(1, speed / 1.15));
+      const moveWeight = linear * linear * (3 - 2 * linear);
+      const referenceSpeed = player.backing ? 1.6 : 2.2;
+      const timeScale = Math.max(.45, Math.min(3.4, speed / referenceSpeed)) * (player.backing ? -1 : 1);
+      idle.play(); walk.play();
+      idle.setEffectiveWeight(1 - moveWeight); walk.setEffectiveWeight(moveWeight);
+      idle.setEffectiveTimeScale(1); walk.setEffectiveTimeScale(timeScale);
+      actor.current = moveWeight >= .5 ? walk : idle;
+      actor.motion = { action: actor.current.getClip().name, speed, moveWeight, idleWeight: 1 - moveWeight, walkWeight: moveWeight, timeScale };
+    }
+
     function place(actor, x, y, facing, surfaceHeight) {
       actor.root.position.set(x - logicalScene.world.w / 2, surfaceHeight(x, y), y - logicalScene.world.h / 2);
       if (Number.isFinite(facing)) actor.root.rotation.y = Math.atan2(Math.cos(facing), Math.sin(facing));
@@ -476,6 +496,7 @@
 
     return {
       ensurePlayer,
+      playerState() { return playerActor?.motion ? { ...playerActor.motion } : null; },
       update(dt, player, anchors, camera, surfaceHeight) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
         frustum.setFromProjectionMatrix(projection);
@@ -483,10 +504,7 @@
         ensurePlayer(player.roleId);
         place(playerActor, player.x, player.y, player.facing, surfaceHeight);
         playerActor.root.position.y += player.jumpHeight;
-        play(playerActor, player.airborne && playerActor.actions.has('Jump') ? 'Jump' :
-          player.running && playerActor.actions.has('Run') ? 'Run' : player.moving ? 'Walk' : 'Idle');
-        if (playerActor.current) playerActor.current.timeScale = player.backing ? -.8 :
-          player.running && !playerActor.actions.has('Run') ? 1.6 : 1;
+        updatePlayerAnimation(playerActor, player);
         const localActors = new Map();
         if (logicalScene.streetModel) {
           for (const anchor of anchors) {

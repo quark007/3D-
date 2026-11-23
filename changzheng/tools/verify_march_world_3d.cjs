@@ -6,6 +6,7 @@ const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_mod
 
 async function main() {
   const root = path.resolve(__dirname, '..');
+  fs.mkdirSync(path.join(root, '_shots'), { recursive: true });
   const origin = process.env.CZ_PREVIEW_URL || 'http://127.0.0.1:8080';
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -467,6 +468,7 @@ async function main() {
     await page.keyboard.down('d');
     await page.waitForFunction(x => CZMarchWorld.snapshot().x > x + 2, { timeout: 15000 }, before.x);
     await page.keyboard.up('d');
+    await page.waitForFunction(() => !CZMarchWorld._.scenes[CZMarchWorld.snapshot().sceneId].focusActor.moving);
     const stopped = await snapshot();
     await frames(8);
     assert.deepEqual(await snapshot(), stopped);
@@ -534,6 +536,7 @@ async function main() {
     await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: joy.x + 30, y: joy.y, id: 1 }] });
     await page.waitForFunction(x => CZMarchWorld.snapshot().x > x + 1, { timeout: 15000 }, mobileBefore.x);
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForFunction(() => !CZMarchWorld._.scenes[CZMarchWorld.snapshot().sceneId].focusActor.moving);
     const mobileStopped = await snapshot();
     await frames(6);
     assert.deepEqual(await snapshot(), mobileStopped);
@@ -708,6 +711,7 @@ async function main() {
     await mobileMainClient.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: mobileMainJoy.x + 30, y: mobileMainJoy.y, id: 1 }] });
     await page.waitForFunction(x => CZMarchWorld.snapshot().x > x + .5, { timeout: 15000 }, mobileMainBefore.x);
     await mobileMainClient.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForFunction(() => !CZMarchWorld._.scenes[CZMarchWorld.snapshot().sceneId].focusActor.moving);
     const mobileMainStopped = await snapshot();
     await frames(6);
     assert.deepEqual(await snapshot(), mobileMainStopped);

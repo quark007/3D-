@@ -24,7 +24,7 @@
     // lodUrl：手机端优先加载约 8000 面的远景版本，不存在时自动用完整版；weathering：做旧与面部年龄感（character-weathering.js）
     // roam：同一章只出现一个王贵，剧情推进时自己走到下一个站位，等人时在站位附近踱步（见下方「走动的剧情人物」）
     //   speed 平时步速 m/s，hurrySpeed 离下个站位还远时的步速，pace 踱步半径 m（0 关闭），paceAway 玩家离站位多远时才踱步
-    wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', lodUrl: '/assets/characters/wang-gui/wang-gui-lod.glb', height: 1.70, scaleBias: 1, idle: 'Idle', weathering: 'wang_gui',
+    wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', height: 1.70, scaleBias: 1, idle: 'Idle', weathering: 'wang_gui',
       roam: { speed: 1.35, hurrySpeed: 2.5, pace: 2.4, paceAway: 9 } },
     chen_xiaoman: { height: 1.67 },
     medic_1: { height: 1.61 },

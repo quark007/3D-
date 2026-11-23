@@ -3351,7 +3351,6 @@ function _getGGXShader( lodMax, width, height ) {
 		name: 'PMREMGGXConvolution',
 
 		defines: {
-			'GGX_SAMPLES': GGX_SAMPLES,
 			'CUBEUV_TEXEL_WIDTH': 1.0 / width,
 			'CUBEUV_TEXEL_HEIGHT': 1.0 / height,
 			'CUBEUV_MAX_MIP': `${lodMax}.0`,
@@ -3360,6 +3359,7 @@ function _getGGXShader( lodMax, width, height ) {
 		uniforms: {
 			'envMap': { value: null },
 			'roughness': { value: 0.0 },
+			'sampleCount': { value: GGX_SAMPLES },
 			'mipInt': { value: 0 }
 		},
 
@@ -3374,6 +3374,8 @@ function _getGGXShader( lodMax, width, height ) {
 
 			uniform sampler2D envMap;
 			uniform float roughness;
+			// A uniform bound avoids inaccurate constant folding by the D3D11 compiler.
+			uniform uint sampleCount;
 			uniform float mipInt;
 
 			#define ENVMAP_TYPE_CUBE_UV
@@ -3439,8 +3441,8 @@ function _getGGXShader( lodMax, width, height ) {
 				vec3 tangent = normalize(cross(up, N));
 				vec3 bitangent = cross(N, tangent);
 
-				for(uint i = 0u; i < uint(GGX_SAMPLES); i++) {
-					vec2 Xi = hammersley(i, uint(GGX_SAMPLES));
+				for(uint i = 0u; i < sampleCount; i++) {
+					vec2 Xi = hammersley(i, sampleCount);
 
 					// For PMREM, V = N, so in tangent space V is always (0, 0, 1)
 					vec3 H_tangent = importanceSampleGGX_VNDF(Xi, vec3(0.0, 0.0, 1.0), roughness);

@@ -2,6 +2,74 @@
   'use strict';
   const M = window.CZMarchWorld._;
 
+  // Bake the January sky and the actual roofline from the courtyard once.
+  function bakeCourtyardEnvironment(T, renderer, street, point) {
+    const capture = new T.Scene();
+    const dome = new T.SphereGeometry(90, 32, 24);
+    const material = new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide });
+    const top = new T.Color('#8e9ca8'), horizon = new T.Color('#c4c8c4'), base = new T.Color('#3a3d3c');
+    const colors = [], color = new T.Color();
+    const positions = dome.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const altitude = positions.getY(i) / 90;
+      color.copy(horizon).lerp(altitude > 0 ? top : base, Math.min(1, Math.abs(altitude) * 2));
+      colors.push(color.r, color.g, color.b);
+    }
+    dome.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
+    const sky = new T.Mesh(dome, material);
+    sky.position.copy(point);
+    const generator = new T.PMREMGenerator(renderer);
+    capture.add(sky, new T.HemisphereLight('#d5e0ea', '#777268', 2), street);
+    try {
+      return generator.fromScene(capture, 0, .1, 100, { size: 64, position: point });
+    } finally {
+      capture.remove(street);
+      dome.dispose();
+      material.dispose();
+      generator.dispose();
+    }
+  }
+
+  function shadeCourtyardMaterial(mat, floorHeight) {
+    const stone = mat.name.startsWith('ZY_stone');
+    if (!stone && !mat.name.startsWith('ZY_glass')) return;
+    mat.onBeforeCompile = shader => {
+      shader.uniforms.floorHeight = { value: floorHeight };
+      shader.vertexShader = 'varying vec3 vCourtyardPos;\n' + shader.vertexShader.replace(
+        '#include <begin_vertex>', '#include <begin_vertex>\nvCourtyardPos = (modelMatrix * vec4(position, 1.0)).xyz;');
+      shader.fragmentShader = 'varying vec3 vCourtyardPos;\nuniform float floorHeight;\n' + shader.fragmentShader;
+      if (stone) {
+        // World-space noise crosses the paving UV seams. Elevated stonework stays matte.
+        shader.fragmentShader = `
+          float wetHash(vec2 p) {
+            vec3 h = fract(vec3(p.xyx) * .1031);
+            h += dot(h, h.yzx + 33.33);
+            return fract((h.x + h.y) * h.z);
+          }
+          float wetNoise(vec2 p) {
+            vec2 i = floor(p), f = fract(p);
+            f = f*f*(3.0-2.0*f);
+            return mix(mix(wetHash(i), wetHash(i+vec2(1,0)), f.x),
+                       mix(wetHash(i+vec2(0,1)), wetHash(i+1.0), f.x), f.y);
+          }
+        ` + shader.fragmentShader.replace('#include <roughnessmap_fragment>', `
+          #include <roughnessmap_fragment>
+          vec2 p = vCourtyardPos.xz;
+          float paving = 1.0 - smoothstep(.045, .10, abs(vCourtyardPos.y-floorHeight));
+          float wet = paving * smoothstep(.43, .71, .72*wetNoise(p*.42)+.28*wetNoise(p*1.37));
+          roughnessFactor = mix(roughnessFactor, mix(.79, .19, wet), paving);
+          diffuseColor.rgb *= mix(vec3(1.), vec3(.63,.68,.73), wet);
+        `).replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\nreflectedLight.indirectSpecular *= mix(1.0, 1.65, wet);');
+      } else {
+        shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', `
+          #include <emissivemap_fragment>
+          totalEmissiveRadiance += vec3(.28,.139,.041) * smoothstep(3.8,4.3,vCourtyardPos.y-floorHeight);
+        `);
+      }
+    };
+    mat.customProgramCacheKey = () => stone ? 'zunyi-wet-stone' : 'zunyi-upper-windows';
+  }
+
   async function create(container, logicalScene, options = {}) {
     const T = await import('three');
     if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -9,10 +77,13 @@
     const snowy = environment.terrain === 'snow';
     const staging = M.visual3d.staging(logicalScene);
     const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel);
+    const cinematic = logicalScene.sceneId === 'chapter-3/scene-zunyi';
+    let reflectionTarget = null;
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
     function releaseResources() {
       const geometries = new Set(), mats = new Set(), textures = new Set(), images = new Set();
+      reflectionTarget?.dispose();
       assets?.collect(geometries, mats, textures);
       for (const mat of materials.values()) mats.add(mat);
       worldRoot?.traverse(object => {
@@ -46,7 +117,7 @@
 
     const scene = new T.Scene();
     scene.background = new T.Color(staging.sky);
-    scene.fog = new T.Fog(staging.fog, environment.fogNear, environment.fogFar);
+    scene.fog = cinematic ? new T.FogExp2(staging.fog, .011) : new T.Fog(staging.fog, environment.fogNear, environment.fogFar);
     const camera = new T.PerspectiveCamera(52, 1, 0.1, 650);
     worldRoot = new T.Group();
     scene.add(worldRoot);
@@ -65,9 +136,21 @@
       const [x, y] = logicalScene.streetModel.origin;
       street.position.copy(onSurface(x, y, .04));
       street.name = 'zunyi-realscan';
-      street.traverse(node => { if (node.isMesh) node.receiveShadow = true; });
+      if (cinematic) {
+        reflectionTarget = bakeCourtyardEnvironment(T, renderer, street, onSurface(81, 41, 1.2));
+        scene.environment = reflectionTarget.texture;
+        scene.environmentIntensity = .78;
+      }
+      street.traverse(node => {
+        if (!node.isMesh) return;
+        node.receiveShadow = true;
+        if (cinematic) {
+          node.castShadow = true;
+          shadeCourtyardMaterial(node.material, street.position.y);
+        }
+      });
       worldRoot.add(street);
-      renderer.shadowMap.enabled = false;
+      renderer.shadowMap.enabled = cinematic;
     }
     stats.landform = staging.name;
     stats.terrainVertices = terrain.heights.length;
@@ -1250,18 +1333,43 @@
       grass.count = count; grass.name = 'march-wetland-grass'; grass.castShadow = true; grass.receiveShadow = true; worldRoot.add(grass);
     }
 
-    const hemi = new T.HemisphereLight(staging.fill, '#514b3f', staging.ambient);
+    const hemi = new T.HemisphereLight(staging.fill, cinematic ? '#716759' : '#514b3f', staging.ambient);
     scene.add(hemi);
     const sun = new T.DirectionalLight(staging.key, staging.power);
     sun.position.set(-45, 75, 35);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    const extent = assets ? 24 : 85;
+    const shadowSize = cinematic ? (mobile ? 512 : 1024) : 2048;
+    sun.shadow.mapSize.set(shadowSize, shadowSize);
+    const extent = cinematic ? 39 : assets ? 24 : 85;
+    if (cinematic) {
+      sun.target.position.copy(onSurface(79, 42));
+      sun.position.copy(sun.target.position).add(new T.Vector3(...staging.sun));
+    }
     Object.assign(sun.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, near: 1, far: 230 });
     sun.shadow.bias = -.00015;
-    sun.shadow.normalBias = .025;
+    sun.shadow.normalBias = cinematic ? .042 : .025;
     sun.shadow.radius = 2;
     sun.shadow.camera.updateProjectionMatrix();
+    if (cinematic && street) {
+      // Bake only the compound. A separate 1px pass keeps actor geometry out of
+      // the cache and the first playable frame inside the triangle budget.
+      const casters = new T.Scene();
+      const bakeCamera = new T.OrthographicCamera(-1, 1, 1, -1, .1, 1);
+      bakeCamera.position.y = 100;
+      const target = new T.WebGLRenderTarget(1, 1);
+      const previous = renderer.getRenderTarget();
+      casters.add(street, sun, sun.target);
+      renderer.shadowMap.autoUpdate = false;
+      renderer.shadowMap.needsUpdate = true;
+      try {
+        renderer.setRenderTarget(target);
+        renderer.render(casters, bakeCamera);
+      } finally {
+        renderer.setRenderTarget(previous);
+        target.dispose();
+        worldRoot.add(street);
+      }
+    }
     scene.add(sun, sun.target);
 
     const ringGeometry = new T.RingGeometry(0.65, 0.85, 32);
@@ -1585,7 +1693,7 @@
       logicalScene.tick?.(dt);
       if (logicalScene.focusActor) {
         actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight, intro || staging.inspectionOffset ? Infinity : (cameraDistance ?? Infinity));
-        if (assets) {
+        if (assets && !cinematic) {
           const p = logicalScene.focusActor;
           sun.target.position.copy(onSurface(p.x, p.y));
           sun.position.copy(sun.target.position).add(new T.Vector3(...staging.sun));

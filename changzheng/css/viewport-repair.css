@@ -1,0 +1,39 @@
+/* Last cascade layer: text must remain reachable at short heights and zoom. */
+.char-select-overlay{box-sizing:border-box!important;width:100%;height:100dvh;max-height:100dvh;padding:12px!important;overflow:auto!important;align-items:stretch}
+.char-select-content{box-sizing:border-box;width:min(1360px,100%);height:100%;min-height:0;max-height:100%;grid-template-rows:auto minmax(0,1fr) auto;gap:10px;overflow:visible}
+.char-select-header{min-width:0;min-height:0}.char-select-header .char-select-star{font-size:28px;line-height:1}
+.char-select-header .char-select-title{font-size:clamp(24px,3.6vh,36px)!important;margin:5px 0!important;line-height:1.3}
+.char-select-header .char-select-desc,.char-select-header .char-select-hint{font-size:14px;line-height:1.5;margin:4px 0;overflow-wrap:anywhere}
+.char-select-content .char-cards-grid{box-sizing:border-box;height:auto;min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;align-content:start;align-items:stretch;padding:4px;scrollbar-gutter:stable;overscroll-behavior:contain;grid-auto-rows:max-content}
+.char-cards-grid .char-card{box-sizing:border-box;min-height:max-content!important;height:auto!important;overflow:visible;padding:14px!important;flex-shrink:0;transform:none!important}
+.char-cards-grid .char-card::before{right:0;width:100%;height:90%;overflow:hidden}
+.char-cards-grid .char-card-avatar{flex:none;width:42px;height:42px;font-size:26px!important;margin:0 0 10px!important}
+.char-cards-grid .char-card-name{font-size:clamp(19px,2.6vh,25px);line-height:1.45;margin:0 0 8px;white-space:normal;overflow-wrap:anywhere}
+.char-cards-grid .char-card-desc{font-size:16px;line-height:1.65;min-height:0;margin:0 0 10px;white-space:normal;overflow:visible}
+.char-cards-grid .char-attrs{margin-top:auto;padding-top:6px;gap:4px;flex:none}
+.char-cards-grid .role-duty-label{display:block;font-size:13px;line-height:1.5;margin-bottom:4px}
+.char-cards-grid .role-duty{box-sizing:border-box;display:block!important;font-size:15px!important;line-height:1.5!important;padding:6px 8px!important;margin:3px 0!important;white-space:normal;overflow:visible;overflow-wrap:anywhere;flex:none}
+.char-cards-grid .char-card.selected::after{right:8px;top:12px;max-width:calc(100% - 88px);box-sizing:border-box;padding:4px 6px;font-size:13px;line-height:1.5;white-space:normal;transform:rotate(5deg)}
+.char-select-content .char-select-start{box-sizing:border-box;max-width:100%;height:auto;min-height:52px;padding:8px 28px!important;white-space:normal;flex-shrink:0}
+.char-select-start-text{font-size:22px;line-height:1.5}.char-select-start-hint{font-size:13px;line-height:1.5;white-space:normal}
+/* Keep the picture-only fullscreen viewer untouched. These are text dialogs. */
+:is(.prebattle-overlay,.command-overlay,.settlement-overlay,.telegram-overlay,.archive-overlay,.decrypt-overlay,.intel-buff-overlay,.linkcheck-overlay,.ration-overlay,.ration-result-overlay,.history-cards-overlay,.card-detail-overlay,.history-qa-overlay,.mailbox-overlay,.experience-overlay,.journey-overlay,.award-demo-overlay,.decision-film-overlay){box-sizing:border-box;max-width:100vw;max-height:100dvh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+:is(.prebattle-content,.command-content,.settlement-content,.telegram-content,.archive-content,.decrypt-content,.intel-buff-content,.linkcheck-content,.ration-content,.ration-result-content,.history-cards-content,.card-detail-content,.history-qa-content,.mailbox-content,.experience-panel,.journey-shell,.award-demo-panel,.decision-film-panel){box-sizing:border-box;min-width:0;min-height:0;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-padding-block:20px}
+:is(.prebattle-content,.command-content,.settlement-content,.experience-panel,.journey-shell,.award-demo-panel,.decision-film-panel,.npc-content,.sandbox-shell,.learning-content,.service-dialog) :is(h1,h2,h3,h4,p,label,summary,small,li,button){min-width:0;overflow-wrap:anywhere;word-break:normal;text-overflow:clip}
+:is(.prebattle-content,.command-content,.settlement-content,.experience-panel,.journey-shell,.award-demo-panel,.decision-film-panel,.npc-content,.sandbox-shell,.learning-content,.service-dialog) button{white-space:normal;line-height:1.5;flex-shrink:0}
+.decision-film-panel .decision-film-plan,.decision-film-panel .decision-film-status,.decision-film-panel small{display:block;max-height:none;height:auto;overflow:visible;white-space:normal;font-size:14px;line-height:1.6}
+.decision-film-panel{grid-template-rows:auto auto minmax(120px,1fr) auto auto auto;overflow:auto}
+.decision-film-panel header,.decision-film-nav,.award-demo-actions,.journey-header,.sandbox-head{flex-wrap:wrap;gap:10px;min-width:0}
+.npc-content{box-sizing:border-box;min-width:0;max-width:calc(100vw - 20px);max-height:calc(100dvh - 20px);overflow:auto}
+.npc-header,.npc-input-area,.npc-suggest-actions{flex-shrink:0}.npc-chat-flow{min-height:80px;overflow-y:auto;overflow-wrap:anywhere}.npc-suggest-actions{overflow-y:auto;max-height:44dvh}.npc-fixed-choice{height:auto;white-space:normal;line-height:1.6}
+.service-dialog{max-height:calc(100dvh - 24px);overflow:auto;overflow-wrap:anywhere}.service-dialog header{flex-wrap:wrap}.service-dialog :is(input,textarea,select){min-width:0;max-width:100%;box-sizing:border-box}
+.title-screen{overflow-y:auto;overflow-x:hidden}.title-extras-panel{max-width:calc(100vw - 32px)}
+.intro-overlay{box-sizing:border-box;overflow:auto}.intro-content,.telegram-paper{box-sizing:border-box;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;overflow-wrap:anywhere}
+.learning-workspace,.journey-workspace,.experience-panel main,.dungeon-panel .panel-body{min-width:0;overflow-wrap:anywhere}
+.pressure-overlay,.zunyi-overlay{box-sizing:border-box;max-width:100vw;max-height:100dvh;overflow:auto}.pressure-shell,.zunyi-shell{box-sizing:border-box;min-width:0;max-width:100%;overflow-wrap:anywhere}
+.pressure-shell header,.pressure-round,.zunyi-plan-rail,.journey-steps{flex-wrap:wrap;min-width:0}.pressure-round>strong,.journey-steps span,.zunyi-plan-rail button{white-space:normal;overflow-wrap:anywhere}
+.chapter-film-beat b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.6;min-height:2.6em;height:auto}
+.award-demo-actions{position:sticky!important;left:auto!important;right:auto!important;bottom:0;flex-wrap:wrap;height:auto;min-height:46px}.award-demo-actions button{max-width:100%;height:auto;white-space:normal}
+@media(max-width:900px){.char-cards-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.char-select-content .char-cards-grid{align-content:start}.char-cards-grid .char-card-desc{font-size:15px}.char-cards-grid .role-duty{font-size:14px!important}}
+@media(max-width:460px){.char-select-overlay{padding:8px!important}.char-cards-grid{grid-template-columns:1fr}.char-select-content{gap:6px}.char-cards-grid .char-card{padding:12px!important}.char-select-header .char-select-hint{display:none}.char-card-desc{text-align:left}}
+@media(max-height:560px){.char-select-overlay{padding:8px!important}.char-select-content{gap:6px}.char-select-header .char-select-star,.char-select-header .char-select-hint{display:none}.char-select-header .char-select-title{font-size:23px!important}.char-select-header .char-select-desc{font-size:13px}.char-select-content .char-select-start{min-height:44px;padding:5px 20px!important}.char-select-start-text{font-size:19px}.decision-film-panel{height:auto;grid-template-rows:auto}.decision-film-panel small{display:block!important}.decision-film-panel video{min-height:120px;max-height:40dvh}}

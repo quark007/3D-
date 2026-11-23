@@ -1,0 +1,56 @@
+/* Controls belong to the viewport host, never the transformed map. */
+.npc-face.npc-standing53{background-image:none;background-size:300% 200%;aspect-ratio:1/1;max-height:300px}
+/* [R5 2026-10-28] 工具栏定位唯一所有者仍是本文件。锚定改为 bottom（窄屏容器底 == 地图底）：
+   旧窄屏 top:var(--map-tools-top59,52px) 依赖 JS 事件链回写变量，回退 52px 相对 #mapContainer
+   顶部 —— 而窄屏容器顶部是「长征行记」章节标题区，变量未及时回写时工具栏压在章节标题上
+   （390×844 实测重叠）。bottom 锚定与行记展开/收起、变量时序完全无关。 */
+#mapContainer>.map-tools{position:absolute;right:12px;bottom:12px;left:auto;max-width:calc(100% - 24px);z-index:40;display:flex;flex-wrap:wrap;gap:4px;box-sizing:border-box}
+/* 701–960px：地图右栏不够宽，右下角与「底图审图号」条（bottom:10px、高约28px）重叠（768×1024 实测），抬到审图号上方。 */
+@media(min-width:701px) and (max-width:960px){#mapContainer>.map-tools{bottom:46px}}
+#mapContainer>.map-tools button{min-width:44px;min-height:44px;font-size:15px}
+.history-source{font-size:16px!important;line-height:1.6;opacity:1!important;color:#e7d5af;background:#263129;padding:8px 10px;font-style:normal;border-radius:4px;overflow-wrap:anywhere}
+.dungeon-panel .history-source,.archive-body .history-source,.character-card .history-source{color:#443a2b;background:#f1e8d4;overflow-wrap:anywhere}
+.dungeon-panel .panel-footer .btn-skip,.dungeon-panel .panel-footer .btn-exit{font-size:16px;opacity:1;-webkit-text-fill-color:currentColor}
+/* [P0 修复 2026-10-26] 删除本文件原 8-26 行的 (0,1,0) .btn-skip/.btn-exit 实色底规则：
+   它在 .dungeon-panel .panel-footer 内从未生效（被 field-editorial.css 的 (0,3,0) 规则压制，是死代码），
+   留着只会误导后人以为按钮配色由这里决定。现行有效配色见 field-editorial.css「章节详情页脚」段。
+   第 7 行 Safari 字号/-webkit-text-fill-color 兜底保留。 */
+.chapter-label,.field-chapter-date,.scene-library-card small,.npc-role-label{font-size:13px!important;line-height:1.65}
+.chapter-motion53{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;background:#142522;contain:strict}
+.chapter-motion53 svg{width:100%;height:100%;display:block;opacity:.7}
+.cm53-caption{position:absolute;left:18px;bottom:16px;font:13px/1.5 system-ui;color:#c9d3bd}
+.cm53-pulse{opacity:0;transform-box:fill-box;transform-origin:center}
+.qte-overlay:not(.open) .chapter-motion53{display:none}
+.cm53-drift,.cm53-boat{animation:cm53-drift 8s ease-in-out infinite alternate}
+.cm53-motes{animation:cm53-drift 12s ease-in-out infinite alternate;opacity:.45}
+.cm53-flag{animation:cm53-flag 6s ease-in-out infinite alternate;transform-origin:50% 50%}
+@keyframes cm53-drift{to{transform:translate(12px,5px)}}
+@keyframes cm53-flag{to{transform:skewY(2deg)}}
+@media(prefers-reduced-motion:reduce){.chapter-motion53 *{animation:none!important}}
+body:has(.npc-overlay.open) .chapter-motion53 *{animation-play-state:paused}
+@media(max-width:700px){#mapContainer>.map-tools{top:auto;bottom:64px;right:10px;flex-direction:row;align-items:center}.cm53-caption{font-size:12px;bottom:8px}.history-source{font-size:15px!important}}
+/* P0：从标题页打开「60秒看决策亮点」时，.award-demo-overlay 原 z-index:360 低于 .title-screen:8000，
+   浮层被标题页完全盖住（DOM 在、点击也生效，但视觉上"点了没反应"）。仅在标题页状态下抬到标题页之上。 */
+body.at-title>.award-demo-overlay,
+body.title-locked>.award-demo-overlay{z-index:9000!important}
+body.at-title>.defeat-overlay,
+body.title-locked>.defeat-overlay{z-index:9600!important}
+.qte-exit54{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:50;min-height:44px;padding:10px 18px;background:#253f33!important;color:#fff4d7!important;border:2px solid #dcc38e!important;font-size:16px!important;border-radius:12px}
+#qteOverlay:has(.qte-exit54) .qte-hud{padding-top:64px}
+.task54-panel{width:min(840px,100%);max-height:100%;overflow:auto;margin:auto;padding:clamp(16px,3vw,32px);background:#f3e8ce;color:#302e25;border:2px solid #957a50;border-radius:18px;box-sizing:border-box}
+.task54-panel h2{font-size:clamp(23px,4vw,34px);line-height:1.4;margin:0 0 16px;color:#302e25}
+.task54-panel p{font-size:17px;line-height:1.8;color:#393a2c}
+.task54-art{position:relative;height:150px;overflow:hidden;border-radius:12px;background:#142522;pointer-events:none}
+.task54-art svg{display:block;width:100%;height:100%}
+.task54-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin:20px 0}
+.task54-panel button{min-height:48px;background:#294739;color:#fff4d7;border:2px solid #7c6944;border-radius:10px;padding:12px;font-size:17px;line-height:1.5;white-space:normal;text-align:left}
+.task54-panel button.selected{background:#613927;color:#fff4d7;outline:3px solid #9b6828;outline-offset:2px}
+.task54-panel button:focus-visible,.task54-panel select:focus-visible{outline:3px solid #a64721;outline-offset:3px}
+.task54-panel button:disabled{opacity:1;background:#d9d4c1;color:#494939}
+.task54-board label{font-size:18px;line-height:1.6;color:#302e25}
+.task54-board select{display:block;width:100%;min-height:48px;margin-top:8px;background:#fff9ed;color:#302e25;font-size:17px;border:2px solid #72664d;border-radius:8px}
+.task54-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.task54-actions button{flex:1 1 200px;text-align:center}
+.task54-panel .task54-status{border-left:4px solid #85602c;padding:8px 12px;background:#e4dcc4;min-height:40px}
+.task54-panel .task54-note{font-size:14px;color:#4b4e3d}
+@media(max-width:600px){.chapter-task54{padding:10px!important}.task54-art{height:110px}.task54-actions{position:static}.qte-exit54{font-size:15px!important;padding:8px 12px}}

@@ -1,0 +1,24 @@
+/* Paper panels use dark ink; dark dialogue keeps light, readable text. */
+.dungeon-panel .challenge-item{background:#e3d5b9;border:1px solid #b19b74;padding:14px 16px;gap:14px}
+.dungeon-panel .challenge-name{color:#38271d;font-size:16px;font-weight:700;line-height:1.5}
+.dungeon-panel .challenge-desc{color:#574332;font-size:14px;line-height:1.75;margin-top:3px}
+.dungeon-panel .challenge-icon{width:36px;height:36px;font-size:21px;background:#d5c2a0;color:#733a27}
+.dungeon-panel .reward-item{background:#e0cd9f;color:#57331e;border-color:#ad8e52;font-size:14px;padding:9px 12px;line-height:1.5}
+.dungeon-panel .section-text,.dungeon-panel .spirit-quote{color:#493525;font-size:15px;line-height:1.85}
+.dungeon-panel .section-label{color:#813728;font-weight:700;font-size:16px}
+.dungeon-panel .panel-subtitle{color:#5f4531;font-size:14px}
+.npc-header{padding-right:58px}.npc-role-label{white-space:normal;line-height:1.65;color:#cbbda6!important;font-size:13px;overflow-wrap:anywhere}
+.npc-suggest-actions{flex-shrink:0;max-height:180px;overflow-y:auto;background:#211d18;border-top:1px solid #746449;padding:12px 16px;gap:8px}
+.npc-fixed-hint{flex-basis:100%;font-size:12px;line-height:1.6;color:#cdbfa7}
+.npc-fixed-choice,.npc-fixed-return{font:inherit;font-size:14px;padding:10px 14px;line-height:1.5;border:1px solid #b59b6d;background:#383830;color:#f3e7cf;border-radius:6px;cursor:pointer}
+.npc-fixed-choice:hover,.npc-fixed-choice:focus-visible{background:#54513e;outline:2px solid #e6c888;outline-offset:1px}
+.npc-fixed-choice:disabled{color:#c0b8a6;background:#292b26;border-color:#6d6b5a;cursor:default}
+.npc-fixed-choice:disabled:after{content:' · 已谈过'}
+.npc-fixed-return{background:#803d30;color:#fff0d8;border-color:#c48967}
+.npc-bubble-ai{color:#f0e8d8;line-height:1.8}.npc-bubble-player{color:#f2d6ab}
+@media(max-width:600px){.npc-suggest-actions{max-height:190px;padding:9px}.npc-fixed-choice,.npc-fixed-return{font-size:13px;padding:9px 11px}.npc-role-label{font-size:12px}.dungeon-panel .challenge-desc{font-size:14px}}
+.npc-fixed-mode .npc-input-area{display:none}
+.npc-mode-switch{font:inherit;font-size:12px;color:#d4c4aa;background:transparent;border:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
+.npc-name{flex-shrink:0;white-space:nowrap}.npc-role-label{min-width:0}
+.npc-dialogue-progress{display:flex;gap:5px;flex-basis:100%;height:5px;margin:2px 0 8px}.npc-dialogue-progress span{flex:1;border-radius:3px;background:#615b4e}.npc-dialogue-progress .done{background:#ceab66}.npc-dialogue-progress .current{background:#ac5d44}.npc-story-gate-progress{font-weight:700;color:#f2ce88;font-size:14px}.npc-fixed-return:disabled{background:#39342b;color:#c5baa5;border-color:#796a50;cursor:not-allowed}.npc-fixed-choice{flex-basis:100%;text-align:left}
+.npc-fixed-mode .npc-suggest-actions{max-height:min(46vh,340px)}

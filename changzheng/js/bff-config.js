@@ -1,0 +1,2 @@
+/* Public defaults; deployments may inject window.CZ_API_BASE or the api-base meta. */
+window.CZ_API_BASE=window.CZ_API_BASE||document.querySelector('meta[name="api-base"]')?.content||(['localhost','127.0.0.1',''].includes(location.hostname)?'http://127.0.0.1:8000':(location.protocol==='czgame:'?'czgame://app/api':location.hostname==='47.243.68.243'?location.origin+'/api':window.CZ_PUBLIC_API_BASE||'https://api.czstar.cc.cd'));

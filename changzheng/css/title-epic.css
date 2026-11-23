@@ -1,0 +1,39 @@
+/* Cinematic opening: quiet typography, one clear primary action, warm dawn. */
+.title-screen .title-copy{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:14px;width:min(720px,58vw);max-width:none;min-height:100dvh;padding:clamp(24px,4.8vh,54px) clamp(28px,5.5vw,100px);box-sizing:border-box}
+.title-copy .title-eyebrow{margin:0;font:13px/1.8 Georgia,"CZ Documentary Serif",serif;letter-spacing:4px;color:#dcc9a4}
+.title-copy .title-star{margin:6px 0 0;font-size:30px;line-height:1;color:#bd4a35}
+.title-copy h1{font:600 clamp(66px,12vh,116px)/1.05 "CZ Documentary Serif","CZ Documentary Serif","CZ Documentary Serif",serif;letter-spacing:.16em;margin:0 0 8px;color:#fff1d2;text-shadow:0 3px 20px #0008}
+.title-copy .title-line{font:clamp(17px,2.3vh,21px)/1.85 "CZ Documentary Serif",serif;margin:0 0 10px;color:#e9ddc4}
+.title-copy .title-scope{margin:0 0 4px;padding-top:8px;border-top:1px solid #a68b5c33;font:12px/1.9 Georgia,"CZ Documentary Serif",serif;letter-spacing:2.4px;color:#bfae86;max-width:460px}
+.title-copy .title-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:460px;gap:10px}
+.title-copy .title-actions #titleStart{grid-column:1/-1;min-width:0;min-height:64px;padding:16px 24px;background:linear-gradient(110deg,#a5412c,#7e241d);border:1px solid #d39f62;border-top:2px solid #efc58b;box-shadow:0 10px 30px #0006,inset 0 1px #f7d39c33;font-size:22px;letter-spacing:3px;text-align:left;transition:background-color .2s}
+.title-copy .title-actions #titleStart:hover{background:#b14a32;border-color:#ffe0a3}
+.title-copy .title-actions #titleStart .title-start-label{margin:0;font:inherit}
+.title-copy .title-actions #titleStart .title-start-arrow{margin-left:18px;color:#f7d8a2}
+.title-copy .title-actions #titleDemo,.title-copy .title-actions #titleHighlights{border:1px solid #b9a17a70;background:#101712aa;color:#e4d5b7;font:14px/1.6 'Microsoft YaHei',sans-serif;min-height:44px;padding:10px 8px}
+.title-copy .title-actions #titleRestart{grid-column:1/-1;justify-self:start;padding:4px 0;min-height:28px;color:#cfb991;font-size:13px}
+.title-extras{position:relative;width:100%;max-width:460px;color:#d5c4a2;font:14px/1.7 'Microsoft YaHei',sans-serif;z-index:8}
+.title-extras>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 0;border-bottom:1px solid #a68b5c66}
+.title-extras>summary::-webkit-details-marker{display:none}
+.title-extras[open]>summary span{transform:rotate(45deg)}
+.title-extras-panel{position:absolute;left:0;top:auto;bottom:100%;width:min(520px,76vw);box-sizing:border-box;max-height:min(60dvh,calc(100dvh - 150px));overflow:auto;padding:20px;background:#141d17f7;border:1px solid #a68b5c;box-shadow:0 15px 40px #0009}
+.title-extras .title-connection{margin:0;padding:0;border:0;max-width:none;gap:14px;align-items:flex-start}
+.title-extras .title-connection p{font-size:13px;line-height:1.8;color:#d7cbb1}
+.title-extras .title-links{margin-top:16px;gap:10px 16px}
+.title-extras .title-links a{font-size:14px}
+.title-extras .title-links button{font:14px/1.6 'Microsoft YaHei',sans-serif;background:#293328;color:#efdfbe;border:1px solid #a68b5c80;padding:8px 12px;min-height:40px;border-radius:2px;cursor:pointer}
+.title-extras-panel>button:not(.snow63-text-link){font:14px/1.6 'Microsoft YaHei',sans-serif;background:#293328;color:#efdfbe;border:1px solid #a68b5c80;border-radius:12px;padding:10px 14px;min-height:40px;max-width:100%;white-space:normal;cursor:pointer;margin:6px 8px 0 0}
+.title-extras-panel [hidden]{display:none!important}
+.title-extras-panel>button:not(.snow63-text-link):hover{background:#35432f;border-color:#cbb079}
+.title-copy .title-foot{margin: auto 0 0;padding-top:16px;font:13px/1.8 "CZ Documentary Serif",serif;letter-spacing:2px;color:#caba9b}
+.title-copy .title-foot small{font:12px/1.7 "CZ Documentary Serif",serif;color:#b5ab95;letter-spacing:0}
+.title-screen .title-landscape::after{background:radial-gradient(ellipse at 80% 12%,#f4d9a61a,transparent 50%),linear-gradient(90deg,#080e0cf5 0%,#080e0cc9 25%,#080e0c69 45%,transparent 75%),linear-gradient(0deg,#080e0c9e,transparent 50%)}
+.title-dawn{position:absolute;inset:-10%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 80% 20%,#ffe2a535,transparent 46%);opacity:.4}
+.title-fx-running .title-dawn{animation:title-dawn-rise 18s ease-out both}
+@keyframes title-dawn-rise{from{opacity:.15;transform:translate3d(1%,2%,0)}to{opacity:.65;transform:translate3d(-1%,0,0)}}
+body.at-title #renderFrameBadge{display:none!important}
+.title-extras summary:focus-visible,.title-copy button:focus-visible,.title-copy a:focus-visible{outline:2px solid #efca88;outline-offset:4px}
+@media(max-height:850px) and (min-width:701px){.title-screen .title-copy{gap:8px;padding-block:20px}.title-copy h1{font-size:clamp(54px,10vh,84px)}.title-copy .title-star{font-size:24px}.title-copy .title-line{font-size:16px;margin-bottom:4px}.title-copy .title-scope{font-size:11.5px;padding-top:5px;margin-bottom:0}.title-copy .title-actions #titleStart{min-height:52px;padding:11px 20px;font-size:20px}.title-copy .title-foot{font-size:12px;padding-top:8px}}
+@media(max-width:700px){.title-screen .title-copy{width:100%;padding:28px 24px;gap:12px}.title-copy .title-eyebrow{font-size:11.5px!important;letter-spacing:1.8px!important;white-space:nowrap}.title-copy h1{font-size:clamp(60px,10vh,90px)}.title-copy h1 span{display:block}.title-copy .title-scope{font-size:11px;letter-spacing:1.4px;line-height:1.7}.title-copy .title-actions{max-width:420px}.title-copy .title-foot{font-size:12px}.title-extras-panel{width:min(520px,calc(100vw - 48px));top:auto;bottom:100%;max-height:60dvh}.title-screen .title-landscape::after{background:linear-gradient(90deg,#080e0ce8,#080e0c83 65%,#080e0c30),linear-gradient(0deg,#080e0caa,transparent)}}
+@media(max-width:700px) and (max-height:800px){.title-screen .title-copy{padding-block:16px;gap:8px}.title-copy h1{font-size:clamp(44px,8vh,64px)}.title-copy .title-star{font-size:24px}.title-copy .title-line{font-size:16px;line-height:1.6;margin-bottom:0}.title-copy .title-scope{padding-top:4px;margin-bottom:0}.title-copy .title-actions #titleStart{min-height:52px;padding:10px 18px;font-size:20px}.title-copy .title-foot{padding-top:8px;letter-spacing:1px}}
+@media(prefers-reduced-motion:reduce){.title-dawn{animation:none!important;transform:none!important}.title-copy *{transition:none!important}}

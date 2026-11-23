@@ -1,0 +1,15 @@
+{
+  "sources": {
+    "serif": [
+      "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Serif/OTF/SimplifiedChinese/NotoSerifCJKsc-Regular.otf",
+      "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Serif/LICENSE"
+    ],
+    "sans": [
+      "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+      "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE"
+    ]
+  },
+  "characters": 2574,
+  "license": "SIL Open Font License; see accompanying license files",
+  "renamed": true
+}

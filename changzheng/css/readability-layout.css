@@ -1,0 +1,325 @@
+.xjg-brief{margin:auto}
+/* [unrecoverable line removed] */
+#panelChallenges{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+.dungeon-panel .challenge-item{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:#f6efdd;border:1px solid #b9ac8d;padding:14px 14px 12px;border-radius:0;box-shadow:none;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.dungeon-panel .challenge-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#c8b58c}
+.dungeon-panel .challenge-icon{width:34px;height:34px;font-size:17px;background:#ece1c8;border:1px solid #c8b58c}
+.dungeon-panel .challenge-name{font:600 15px/1.5 "CZ Documentary Serif",serif;color:#352e23}
+.dungeon-panel .challenge-desc{font:12px/1.7 inherit;color:#675d4d}
+.dungeon-panel .challenge-item[class*="-entry"]{cursor:pointer;border-color:#a9503a;background:#fbf4e4}
+.dungeon-panel .challenge-item[class*="-entry"]::before{background:#97372a}
+.dungeon-panel .challenge-item[class*="-entry"]::after{content:'点击开始 ▸';position:absolute;right:10px;top:10px;font:11px/1 "CZ Documentary Serif",serif;color:#97372a;letter-spacing:1px}
+.dungeon-panel .challenge-item[class*="-entry"]:hover,.dungeon-panel .challenge-item[class*="-entry"]:focus-visible{transform:translateY(-2px);border-color:#97372a;box-shadow:0 6px 16px rgba(83,62,38,.2)}
+
+/* ===== 统一「作战简报」开始卡（外部子游戏共用，AK 深色语言） ===== */
+.xjg-brief{width:min(520px,94vw);padding:20px 22px;background:#101114;color:#e8e2d2;border:1px solid #4a4d52;border-left:3px solid #ffcf24;font:15px/1.7 'Microsoft YaHei',sans-serif}
+.xjg-brief::backdrop{background:#04050acc}
+.xjg-brief h3{margin:0;font-size:20px;color:#f2f3f4;font-weight:800}
+.xjg-brief .xjg-sub{display:block;font-size:10px;letter-spacing:.18em;color:#8b8e93;margin:2px 0 10px}
+.xjg-brief p{margin:8px 0;font-size:13px;color:#c9c5b4}
+.xjg-brief-actions{display:flex;gap:10px;margin-top:14px}
+.xjg-brief button{font:inherit;background:#1a1c20;color:#e8e2d2;border:1px solid #4a4d52;padding:8px 14px;min-height:40px;cursor:pointer;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);transition:border-color .12s,transform .12s}
+.xjg-brief button:hover{border-color:#8b8e93;transform:translateY(-1px)}
+.xjg-brief .xjg-brief-go{background:#ffcf24;color:#111;font-weight:800;border-color:#ffcf24;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+-scene{filter:none!important;display:grid!important;grid-template-columns:minmax(0,42%) minmax(0,58%);align-items:stretch!important;justify-content:normal!important;gap:0;inset:0 0 28% 0;overflow:hidden}
+.qte-scene>.world3d-frame{grid-column:1;grid-row:1;align-self:stretch;margin:0!important;width:100%;height:100%!important;min-width:0;box-sizing:border-box;transform:none!important;transition:none!important;animation:none!important}
+.qte-scene>.world3d-frame>.world3d-view{flex:1;height:0!important;min-height:180px}
+.qte-scene>.qte-scene-text{grid-column:2;grid-row:1;align-self:center;justify-self:stretch;max-width:none;width:auto;margin:100px 24px 24px;padding:22px 24px;background:#14201bf2;border:1px solid #a48755;color:#fff1d4;font:600 clamp(18px,1.5vw,22px)/1.9 'Microsoft YaHei',sans-serif;text-align:left;text-shadow:none;overflow-wrap:anywhere;max-height:calc(100% - 140px);overflow:auto;box-sizing:border-box}
+.qte-hud{left:44%;right:2%;width:auto;transform:none!important}.qte-subtitle{color:#eadbc0!important}.qte-overlay.shaking .qte-scene{transform:none!important;animation:none!important}
+@media(min-width:900px){.journey-art{position:sticky;top:16px}.journey-scene{min-width:0}.journey-art .world3d-view{height:clamp(280px,45vh,450px)}}
+@media(max-width:760px){.qte-scene{grid-template-columns:minmax(0,43%) minmax(0,57%)}.qte-scene>.qte-scene-text{margin:110px 8px 8px;padding:12px;font-size:16px;line-height:1.8;max-height:calc(100% - 125px)}.qte-hud{left:45%;right:2%}.qte-title{font-size:18px;letter-spacing:1px}.qte-scene .world3d-tools{flex-wrap:wrap}.qte-scene .world3d-navigation{flex-wrap:wrap}.qte-scene .world3d-caption small,.qte-scene .world3d-navigation-hint{display:none}.qte-scene .world3d-caption span{font-size:16px}}
+
+.journey-workspace .journey-contrast-grid small{color:#4b4437!important;font-size:16px;line-height:1.8;opacity:1}.journey-workspace .journey-comparison a{color:#783722;text-decoration:underline;font-size:16px}
+
+.qte-scene>.cinema-frame,.qte-scene>.svg-scene{position:relative!important;inset:auto!important;grid-column:1;grid-row:1;width:100%;height:100%;margin:0;opacity:1}.qte-scene>.cinema-frame img,.qte-scene>.svg-scene svg{height:100%;width:100%;object-fit:contain}
+
+.journey-workspace .npc-story-card p,.journey-workspace .npc-story-card li,.journey-workspace .npc-story-card small,.journey-workspace .chapter-direction p,.journey-workspace .story-preparation p,.journey-workspace .story-preparation li{color:#eee1c6!important;opacity:1;text-shadow:none}
+
+
+/* ===== 全部可点击挑战卡统一悬停（通配 -entry 后缀，覆盖 67/68 系列 + 外部模块） ===== */
+.dungeon-panel .challenge-item[class*="-entry"]{cursor:pointer}
+.dungeon-panel .challenge-item[class*="-entry"] .challenge-desc::after{content:' ▸';color:#97372a;font-size:11px}
+
+/* ===== 每日挑战卡微调（纸面红条，避免与挑战网格打架） ===== */
+.daily68-card{grid-column:1/-1 !important}
+.daily68-card:hover .daily68-ico{transform:scale(1.12);transition:transform .15s ease}
+
+/* ===== 番外/终局标记：吴起镇卡加马鞍纹角标 ===== */
+.dungeon-panel .challenge-item.wuqi68-entry .challenge-icon{background:#f3e3c3;border-color:#97372a}
+
+
+/* ============================================================
+   小游戏弹窗统一外壳 · MINI-GAME DIALOG CHROME LAYER
+   参照业界通行做法：统一幕布/入场动画/深色滚动条/焦点环/触控尺寸。
+   只统一 chrome，不改各游戏自身配色与内部布局。
+   覆盖：67/68 系列 + 71 系列（通配 [class*="71"]）+ 作战简报卡。
+   ============================================================ */
+.mortar-dialog,.sidu-dialog,.xjg67-dialog,.drum67-dialog,.scout67-dialog,
+.fire68-dialog,.snowrun68-dialog,.wuqi68-dialog,.lazikou68-dialog,.xjg-brief,
+dialog[class*="71"],dialog[class*="72"]{
+  box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.04);
+  animation:mg-pop .22s cubic-bezier(.2,.9,.3,1.2);
+}
+.mortar-dialog::backdrop,.sidu-dialog::backdrop,.xjg67-dialog::backdrop,.drum67-dialog::backdrop,
+.scout67-dialog::backdrop,.fire68-dialog::backdrop,.snowrun68-dialog::backdrop,.wuqi68-dialog::backdrop,
+.lazikou68-dialog::backdrop,.xjg-brief::backdrop,dialog[class*="71"]::backdrop,dialog[class*="72"]::backdrop{
+  background:rgba(4,6,10,.82);
+  backdrop-filter:blur(3px) saturate(.9);
+  -webkit-backdrop-filter:blur(3px) saturate(.9);
+}
+@keyframes mg-pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+/* 统一焦点环（金色，覆盖各游戏各自的焦点色） */
+.mortar-dialog :focus-visible,.sidu-dialog :focus-visible,.xjg67-dialog :focus-visible,.drum67-dialog :focus-visible,
+.scout67-dialog :focus-visible,.fire68-dialog :focus-visible,.snowrun68-dialog :focus-visible,.wuqi68-dialog :focus-visible,
+.lazikou68-dialog :focus-visible,.xjg-brief :focus-visible,dialog[class*="71"] :focus-visible,dialog[class*="72"] :focus-visible{
+  outline:3px solid #ffcf24;outline-offset:2px;border-radius:2px;
+}
+/* 深色滚动条（暗色 UI 标配） */
+.mortar-dialog,.sidu-dialog,.xjg67-dialog,.drum67-dialog,.scout67-dialog,
+.fire68-dialog,.snowrun68-dialog,.wuqi68-dialog,.lazikou68-dialog,dialog[class*="71"],dialog[class*="72"]{
+  scrollbar-width:thin;scrollbar-color:#4a4d52 transparent;
+}
+.mortar-dialog::-webkit-scrollbar,.sidu-dialog::-webkit-scrollbar,.xjg67-dialog::-webkit-scrollbar,.drum67-dialog::-webkit-scrollbar,
+.scout67-dialog::-webkit-scrollbar,.fire68-dialog::-webkit-scrollbar,.snowrun68-dialog::-webkit-scrollbar,.wuqi68-dialog::-webkit-scrollbar,
+.lazikou68-dialog::-webkit-scrollbar,dialog[class*="71"]::-webkit-scrollbar,dialog[class*="72"]::-webkit-scrollbar{width:10px;height:10px}
+.mortar-dialog::-webkit-scrollbar-thumb,.sidu-dialog::-webkit-scrollbar-thumb,.xjg67-dialog::-webkit-scrollbar-thumb,.drum67-dialog::-webkit-scrollbar-thumb,
+.scout67-dialog::-webkit-scrollbar-thumb,.fire68-dialog::-webkit-scrollbar-thumb,.snowrun68-dialog::-webkit-scrollbar-thumb,.wuqi68-dialog::-webkit-scrollbar-thumb,
+.lazikou68-dialog::-webkit-scrollbar-thumb,dialog[class*="71"]::-webkit-scrollbar-thumb,dialog[class*="72"]::-webkit-scrollbar-thumb{background:#3a3d42;border-radius:5px;border:2px solid transparent;background-clip:content-box}
+.mortar-dialog::-webkit-scrollbar-thumb:hover,dialog[class*="71"]::-webkit-scrollbar-thumb:hover,dialog[class*="72"]::-webkit-scrollbar-thumb:hover{background:#5a5d62;background-clip:content-box}
+/* 触控目标（无障碍下限 44px）：只提升过小的按钮，不影响已是 42px+ 的 */
+.fire68-dialog button,.snowrun68-dialog button,.wuqi68-dialog button,.lazikou68-dialog button{min-height:44px}
+/* 画布统一内衬框 */
+.scout67-dialog canvas,.fire68-dialog canvas,.snowrun68-dialog canvas,.wuqi68-dialog canvas{border-radius:8px}
+/* 弹窗内文本选择色（品牌金） */
+.mortar-dialog ::selection,.sidu-dialog ::selection,.xjg67-dialog ::selection,.drum67-dialog ::selection,
+.scout67-dialog ::selection,.fire68-dialog ::selection,.snowrun68-dialog ::selection,.wuqi68-dialog ::selection,
+.lazikou68-dialog ::selection,dialog[class*="71"] ::selection,dialog[class*="72"] ::selection{background:#ffcf2455;color:inherit}
+/* 光敏安全：全局关停弹窗动画 */
+@media(prefers-reduced-motion:reduce){
+  .mortar-dialog,.sidu-dialog,.xjg67-dialog,.drum67-dialog,.scout67-dialog,
+  .fire68-dialog,.snowrun68-dialog,.wuqi68-dialog,.lazikou68-dialog,.xjg-brief,dialog[class*="71"],dialog[class*="72"]{animation:none}
+}
+
+/* ============================================================
+   小游戏弹窗布局治理 · LAYOUT GOVERNANCE v2（2026-10-25 实测修订）
+   实测问题（1280×720 视口，tools/ui-audit.html）：
+   1) 引擎注入 width:min(82.2dvh,100%) 把 1280×720 画布压到 592px
+      （0.46×），画布内 HUD 文字缩至 4-6px 不可读；
+   2) wuqi/scout/lazikou/run69 弹窗内容超高 59-201px，按钮区
+      被挤出视口（run69 实测 actions 越界）。
+   对策：画布优先（等比、宽度用满、62dvh 封顶）+ 操作排吸底
+   常显 + 矮视口压缩留白。全部 !important 压过运行时注入样式。
+   ============================================================ */
+.mortar-dialog,.sidu-dialog,.xjg67-dialog,.drum67-dialog,.scout67-dialog,
+.fire68-dialog,.snowrun68-dialog,.wuqi68-dialog,.lazikou68-dialog,.xjg-brief,
+dialog[class*="67"],dialog[class*="68"],dialog[class*="69"],
+dialog[class*="70"],dialog[class*="71"],dialog[class*="72"],dialog[class*="g30"]{
+  max-height:94dvh!important;
+  overflow:auto!important;
+  overscroll-behavior:contain;
+  margin:auto!important;
+}
+/* 画布等比撑满：宽度优先用满弹窗，高度 62dvh 封顶护住按钮区 */
+.mortar-dialog canvas,.sidu-dialog canvas,.xjg67-dialog canvas,.drum67-dialog canvas,
+.scout67-dialog canvas,.fire68-dialog canvas,.snowrun68-dialog canvas,.wuqi68-dialog canvas,
+.lazikou68-dialog canvas,.gcm-shell canvas,.sn-overlay canvas,
+dialog[class*="67"] canvas,dialog[class*="68"] canvas,dialog[class*="69"] canvas,
+dialog[class*="70"] canvas,dialog[class*="g30"] canvas{
+  width:min(100%,calc(min(62dvh,720px)*1.77778))!important;
+  height:auto!important;
+  max-width:100%!important;
+}
+/* 填充型舞台（内部 canvas 100%×100%）按同一公式约束外框 */
+.xjg-stage,.lazikou68-stage{
+  width:min(100%,calc(min(62dvh,720px)*1.77778))!important;
+}
+/* 操作排吸底：滚动到底前也始终可见（修复按钮被挤出视口） */
+.mortar-dialog [class*="actions"],.sidu-dialog [class*="actions"],.xjg67-dialog [class*="actions"],
+.drum67-dialog [class*="actions"],.scout67-dialog [class*="actions"],.fire68-dialog [class*="actions"],
+.snowrun68-dialog [class*="actions"],.wuqi68-dialog [class*="actions"],.lazikou68-dialog [class*="actions"],
+dialog[class*="67"] [class*="actions"],dialog[class*="68"] [class*="actions"],
+dialog[class*="69"] [class*="actions"],dialog[class*="70"] [class*="actions"],
+dialog[class*="71"] [class*="actions"],dialog[class*="72"] [class*="actions"],dialog[class*="g30"] [class*="actions"]{
+  position:sticky;bottom:0;z-index:6;
+  background:rgba(13,14,16,.86);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  margin-top:10px;padding:10px 2px 4px;
+  border-top:1px solid rgba(255,207,36,.28);
+}
+/* 矮视口：压缩外壳留白，给画布让高度 */
+@media (max-height:780px){
+  .mortar-dialog,.sidu-dialog,.xjg67-dialog,.drum67-dialog,.scout67-dialog,
+  .fire68-dialog,.snowrun68-dialog,.wuqi68-dialog,.lazikou68-dialog,.xjg-brief,
+  dialog[class*="67"],dialog[class*="68"],dialog[class*="69"],
+  dialog[class*="70"],dialog[class*="71"],dialog[class*="72"],dialog[class*="g30"]{
+    padding-top:10px!important;padding-bottom:8px!important;
+  }
+  .mortar-dialog h2,.sidu-dialog h2,.xjg67-dialog h2,.drum67-dialog h2,.scout67-dialog h2,
+  .fire68-dialog h2,.snowrun68-dialog h2,.wuqi68-dialog h2,.lazikou68-dialog h2,
+  dialog[class*="67"] h2,dialog[class*="68"] h2,dialog[class*="69"] h2,
+  dialog[class*="70"] h2,dialog[class*="71"] h2,dialog[class*="72"] h2,dialog[class*="g30"] h2{
+    font-size:19px!important;
+  }
+}
+/* 矮视口：作战简报两行截断 + 说明字号收紧 */
+.mortar-dialog p[data-intro],.sidu-dialog p[data-intro],.xjg67-dialog p[data-intro],.drum67-dialog p[data-intro],.scout67-dialog p[data-intro],.fire68-dialog p[data-intro],.snowrun68-dialog p[data-intro],.wuqi68-dialog p[data-intro],.lazikou68-dialog p[data-intro],dialog[class*="68"] p[data-intro],dialog[class*="69"] p[data-intro],dialog[class*="g30"] p[data-intro]{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.snowrun68-note,.sidu-note,.fire68-note{font-size:11px!important}
+
+/* 光敏安全（治理层同 Chrome 层约定） */
+@media(prefers-reduced-motion:reduce){
+  .mortar-dialog,.sidu-dialog,.xjg67-dialog,.drum67-dialog,.scout67-dialog,
+  .fire68-dialog,.snowrun68-dialog,.wuqi68-dialog,.lazikou68-dialog,.xjg-brief,
+  dialog[class*="67"],dialog[class*="68"],dialog[class*="69"],
+  dialog[class*="70"],dialog[class*="71"],dialog[class*="72"],dialog[class*="g30"]{animation:none!important}
+}
+
+/* 腊子口矮屏紧凑：HUD 一行化、说明让位（说明仍保留在简报与史实折叠里） */
+@media (max-height:780px){
+  .lazikou68-dialog .lazikou68-hud{display:flex;flex-wrap:wrap;gap:3px 14px;font-size:12px;margin:5px 0 3px}
+  .lazikou68-dialog .lazikou68-status{margin:2px 0;font-size:12px}
+  .lazikou68-dialog .lazikou68-note{display:none}
+}
+
+/* Integration72: dynamically mounted title actions inherit the existing button palette. */
+.title-extras-panel > button{min-height:44px;padding:10px 15px;border:1px solid #8d805b88;border-radius:15px;background:#303d2c;color:#e8d9b6;font:inherit;cursor:pointer}
+.title-extras-panel > button:hover{background:#40513a}
+.title-extras-panel > button:focus-visible{outline:3px solid #d7bc77;outline-offset:3px}
+
+/* Third batch: preserve an always-visible action row without changing engines. */
+dialog[data-wiring77][open]{display:flex!important;flex-direction:column!important;height:min(94dvh,900px)!important;overflow:hidden!important}
+dialog[data-wiring77]>header{flex:none}
+dialog[data-wiring77]>.batch77-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:4px 0;scrollbar-gutter:stable}
+dialog[data-wiring77]>[class*="actions"]{position:static!important;flex:none;max-height:28dvh;overflow:auto;box-sizing:border-box}
+
+/* 终章结局三分支（victory49 × medal72 燎原点数） */
+.victory49 .v49-sparkline{font:12px/1.6 system-ui,sans-serif;letter-spacing:.08em;color:#c9b47e;margin:6px 0 0}
+.victory49.v49-tier-1 #victory49-title{color:#cfd8dc}
+.victory49.v49-tier-2 #victory49-title{color:inherit}
+.victory49.v49-tier-3 #victory49-title{color:#ffcf24;text-shadow:0 0 26px rgba(255,207,36,.55)}
+.victory49.v49-tier-3 .v49-rays{opacity:.34}
+@media(prefers-reduced-motion:reduce){.victory49.v49-tier-3 .v49-rays{opacity:.18}}
+
+/* Shared touch targets for imported narrative games. */
+dialog[data-wiring77] button{min-height:44px!important}
+
+/* ============================================================
+   UI 实证优化 v3（2026-10-26 真浏览器逐元素画像驱动）
+   实测（1280×720）：wuqi 弹窗内滚 229px / scout 195px / lazikou 141px，
+   打开时画布下半段在折叠线以下。五个针对性压缩，全部纯展示层：
+   ============================================================ */
+@media (max-height:800px){
+  /* 1) 画布上限 62dvh → 55dvh（446→396px，操控区整体上移约 50px） */
+  .mortar-dialog canvas,.sidu-dialog canvas,.xjg67-dialog canvas,.drum67-dialog canvas,
+  .scout67-dialog canvas,.fire68-dialog canvas,.snowrun68-dialog canvas,.wuqi68-dialog canvas,
+  .lazikou68-dialog canvas,dialog[class*="67"] canvas,dialog[class*="68"] canvas{
+    width:min(100%,calc(min(55dvh,720px)*1.77778))!important;
+  }
+  .xjg-stage,.lazikou68-stage{width:min(100%,calc(min(55dvh,720px)*1.77778))!important}
+  /* 2) 作战简报两行截断（scout/lazikou 的 92px 长说明 → 约 60px） */
+  .scout67-brief,.lazikou68-brief{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  /* 3) 吴起战备面板单行横滚（105px → 约 44px） */
+  .wuqi68-buffs{
+    display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;
+    max-height:48px;font-size:12px;line-height:1.4;
+  }
+  .wuqi68-buffs>*{flex:0 0 auto;margin-right:8px}
+  .wuqi68-builds button{padding:5px 9px;min-height:40px}
+  /* 4) 弹窗头部收紧（88px → 约 66px） */
+  .scout67-dialog header,.lazikou68-dialog header,.wuqi68-dialog header{
+    margin-bottom:2px;
+  }
+  .scout67-dialog header span,.lazikou68-dialog header span,.wuqi68-dialog header span{
+    font-size:10px!important;letter-spacing:.12em!important;
+  }
+
+  /* scout 专项（v3.1）：brief 一行 + hud 单行 + 按钮紧凑 */
+  .scout67-brief{-webkit-line-clamp:1}
+  .scout67-hud{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .scout67-actions button{padding:6px 10px;min-height:40px}
+  /* 5) 常驻 note 单行省略（details 折叠里保留全文） */
+  .scout67-note:not(details),.lazikou68-note:not(details),.wuqi68-note:not(details),.fire68-note:not(details),.snowrun68-note:not(details){
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+}
+
+/* ============================================================
+   「墨金·星火」统一视觉层 v4（2026-10-26）—— 首屏与主 UI 整容
+   视觉诊断（真实截图评审）：标题细瘦压不住屏、纸黄×暗红"旧报纸糊墙"、
+   按钮为十年前页游质感。方向：现代展馆风——墨底、大黑宋、金色点睛、
+   朱砂 CTA、金线玻璃次按钮、emoji 徽章化。纯叠加层，可整体注释回滚。
+   ============================================================ */
+
+/* ── 1) 首屏标题 ── */
+.title-screen{background:#0b0f0c}
+.title-landscape{filter:saturate(.82) contrast(1.08) brightness(.9)}
+.title-landscape::after{border-color:#0b0f0c70}
+.title-eyebrow{color:#d9b76c!important;letter-spacing:9px!important;font:600 12px/1.8 'Microsoft YaHei',sans-serif!important}
+.title-star{color:#e6523c;text-shadow:0 0 26px #e6523c99,0 0 60px #e6523c44}
+.title-copy h1{font-weight:900!important;color:#f6ecd4!important;letter-spacing:.05em!important;
+  text-shadow:0 2px 0 #00000066,0 14px 48px #000000cc,0 0 90px #d9b76c26!important}
+.title-copy h1 span{color:#f2c14e!important;
+  background:linear-gradient(180deg,#ffedb0 8%,#f2c14e 48%,#c58a24 92%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 6px 22px #d9b76c40)}
+.title-line{color:#cec2a8!important;text-shadow:0 1px 8px #000a}
+
+
+/* v4.1 微调：背景去灰绿（暖罩+再降饱和）、标题文案行距与留白 */
+.title-landscape{filter:saturate(.72) contrast(1.1) brightness(.88)}
+.title-landscape::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(105deg,#0b0f0cf2 30%,#0b0f0c80 55%,#3a2b18 78%,#131108 100%)}
+.title-eyebrow{margin-bottom:2px}
+.title-line{margin:0 0 34px!important;line-height:2.2!important}
+
+/* v4.2 摩斯学堂条统一墨金风 + eyebrow 间距 */
+.morse-feature-entry{background:#131a13d9!important;border:1px solid #caa55e3d!important;
+  color:#d9c9a3!important;letter-spacing:.12em;backdrop-filter:blur(4px);
+  transition:border-color .16s,box-shadow .16s}
+.morse-feature-entry:hover{border-color:#e6c37e!important;box-shadow:0 8px 22px #0007}
+.morse-feature-entry span{color:#d9b76c!important}
+.title-eyebrow{margin-bottom:10px}
+/* ── 2) 首屏按钮组 ── */
+.title-actions button{background:#131a13ea!important;border:1px solid #caa55e4d!important;
+  color:#ecdfc3!important;letter-spacing:.14em;backdrop-filter:blur(5px);
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s}
+.title-actions button:hover{transform:translateY(-2px);border-color:#e6c37e!important;
+  box-shadow:0 10px 26px #0008,0 0 0 1px #e6c37e33}
+#titleStart{background:linear-gradient(135deg,#cc4630,#9c3020 70%)!important;
+  border:1px solid #ef9a6455!important;font-weight:700!important;letter-spacing:.28em!important;
+  box-shadow:0 12px 34px #cc463044,inset 0 1px 0 #ffffff2b!important}
+#titleStart:hover{transform:translateY(-2px);
+  box-shadow:0 18px 44px #cc463066,inset 0 1px 0 #ffffff38!important}
+#titleDemo{border-style:dashed}
+
+/* ── 3) 挑战卡：emoji 徽章化 + 卡面质感 ── */
+.challenge-item{background:linear-gradient(135deg,#161c15e8,#10140fe6)!important;
+  border:1px solid #c9a66333!important;border-radius:10px!important;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  position:relative;overflow:hidden}
+.challenge-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,#f2c14e,#c58a24);opacity:.75}
+.challenge-item:hover{transform:translateY(-2px);border-color:#e6c37e88!important;
+  box-shadow:0 10px 26px #0009}
+.challenge-icon{width:38px!important;height:38px!important;border-radius:9px!important;
+  font-size:19px!important;background:#0d120dee!important;
+  border:1px solid #c9a66355!important;box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #0007!important}
+.challenge-icon.qte{background:#2a120eee!important;color:#f0a08e!important}
+.challenge-icon.drag{background:#101d2aee!important;color:#9fc3dd!important}
+.challenge-icon.choice{background:#152210ee!important;color:#b5d8a5!important}
+.challenge-name{color:#f2e7cd!important;letter-spacing:.04em}
+
+/* ── 4) 顶部 HUD 微调：金线统一 ── */
+.hud-top{box-shadow:0 1px 0 #c9a66326,0 8px 28px #0006}
+.hud-logo .logo-text{letter-spacing:.3em;font-weight:700}
+.star-icon{text-shadow:0 0 14px #e6523caa}
+
+/* 光敏安全 */
+@media(prefers-reduced-motion:reduce){
+  .title-actions button,#titleStart,.challenge-item{transition:none;transform:none}
+}
+
+.challenge-desc{color:#d4c9b5!important}
+@media(hover:none){.wuqi68-builds button,.scout67-actions button{min-height:44px!important}}

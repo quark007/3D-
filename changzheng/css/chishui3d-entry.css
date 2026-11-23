@@ -1,0 +1,29 @@
+/* 四渡赤水 3D 沙盘：可选玩法入口，不改动主线剧情与存档 */
+.chishui3d-dialog{position:fixed;inset:0;width:100vw;max-width:none;height:100dvh;max-height:none;
+  margin:0;padding:0;border:0;background:#10160f;color:#f0e5d0;overflow:hidden;z-index:38000}
+.chishui3d-dialog::backdrop{background:#080d08e6}
+.chishui3d-dialog>header{position:absolute;top:0;left:0;right:0;height:48px;box-sizing:border-box;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 16px;
+  background:#18231c;border-bottom:1px solid #65725e;font:600 15px/1.5 var(--font-ui,system-ui)}
+.chishui3d-dialog>header span{letter-spacing:1px}
+.chishui3d-dialog>header button{min-height:34px;padding:5px 14px;background:#9b3a2e;color:#fff0d5;
+  border:1px solid #d6a68c;border-radius:4px;cursor:pointer;font:500 14px/1.4 var(--font-ui,system-ui)}
+.chishui3d-dialog>header button:hover{filter:brightness(1.15)}
+.chishui3d-dialog>iframe{position:absolute;top:48px;left:0;width:100%;height:calc(100% - 48px);
+  border:0;background:#10160f}
+/* 直接挂 body：行走剧情场景是 z-index:10000 的全屏层，挂在 dock 里会被盖住。 */
+.chishui3d-entry{position:fixed;right:14px;bottom:142px;z-index:40000;white-space:nowrap;
+  padding:9px 15px!important;min-height:38px;border-radius:20px!important;
+  background:#1e2b23ee!important;border:1px solid #b18b5b!important;color:#f0e5d0!important;
+  font:500 13px/1.4 var(--font-ui,system-ui)!important;cursor:pointer;opacity:.78;
+  box-shadow:0 4px 16px #0007;transition:opacity .2s,transform .2s}
+.chishui3d-entry:hover{opacity:1;transform:translateY(-2px)}
+.chishui3d-entry.is-current{opacity:1;background:#8a3a2c!important;border-color:#e0b277!important;
+  color:#fff3dc!important;box-shadow:0 0 0 2px #e0b27755,0 0 16px #d6a68c66}
+.chishui3d-entry.is-current::before{content:'● ';color:#e8c48b}
+#titleChishui3D{border-color:#b18b5b!important;background:#2b3a2c!important}
+@media(max-width:700px){
+  .chishui3d-dialog>header{height:44px;padding:0 10px;font-size:13px}
+  .chishui3d-dialog>iframe{top:44px;height:calc(100% - 44px)}
+  .chishui3d-entry{right:8px;bottom:132px;font-size:11px!important;padding:8px 11px!important}
+}

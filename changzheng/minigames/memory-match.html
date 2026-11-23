@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>EXP-02 · 记忆样本配对</title>
+<!--
+  用法（线索收集房间 iframe 嵌入）：
+    <iframe src="/minigames/memory-match.html" width="100%" height="720" style="border:0" loading="lazy"></iframe>
+  父页面监听通关信号：
+    window.addEventListener('message', e => { if (e.data === 'memory_success') { /* 发放线索 */ } });
+  本文件零外部依赖；卡面用字符符号，不用图片。
+-->
+<style>
+  :root{
+    --bg0:#121418;--steel:#364254;
+    --panel:rgba(22,27,34,.78);--panel2:rgba(28,34,43,.85);
+    --line:rgba(120,150,190,.22);--line2:rgba(140,175,215,.4);
+    --ink:#e6e8ec;--dim:#8a97a8;--faint:#5c6a7c;
+    --accent:#a8cceb;--glow:rgba(140,180,220,.45);
+    --ok:#7fd8cf;--bad:#c05b5b
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  body{
+    background:radial-gradient(900px 460px at 50% -10%,#1a212b 0%,transparent 60%),var(--bg0);
+    color:var(--ink);font-family:"JetBrains Mono","Cascadia Mono","SF Mono",Consolas,"Courier New","Microsoft YaHei",monospace;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:14px calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    user-select:none;-webkit-user-select:none
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    background-size:140px 140px}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px),
+      radial-gradient(120% 92% at 50% 40%,transparent 60%,rgba(0,0,0,.4) 100%)}
+  .shell{width:min(440px,94vw);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:8px;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.42);
+    position:relative;z-index:1}
+  .shell-head{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:10px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);letter-spacing:.08em}
+  .shell-head b{color:var(--accent);font-weight:600}
+  .stage{padding:16px;position:relative}
+  .corner{position:absolute;font-size:9.5px;color:var(--faint);letter-spacing:.12em}
+  .corner.tl{top:6px;left:12px}.corner.br{bottom:6px;right:12px}
+  .pills{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+  .pill{border:1px solid var(--line);border-radius:4px;padding:5px 13px;font-size:10.5px;color:var(--dim);
+    background:#0d1014;letter-spacing:.1em;white-space:nowrap}
+  .pill b{color:var(--accent);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(88vw,392px);margin:0 auto}
+  .card{aspect-ratio:1;perspective:700px;cursor:pointer}
+  .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,.1,.2,1)}
+  .card.open .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:6px;display:flex;align-items:center;justify-content:center;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid var(--line)}
+  .front{background:
+    linear-gradient(rgba(120,150,190,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,150,190,.05) 1px,transparent 1px),#10141a;
+    background-size:14px 14px,14px 14px,auto;color:#3a4552;font-size:17px;
+    box-shadow:inset 0 0 14px rgba(0,0,0,.4)}
+  .back{background:#161b22;transform:rotateY(180deg);color:var(--accent);font-size:clamp(24px,7vw,34px);
+    border-color:var(--line2);text-shadow:0 0 12px var(--glow)}
+  .card.matched{cursor:default}
+  .card.matched .back{color:var(--ink);border-color:rgba(127,216,207,.4);
+    text-shadow:0 0 10px rgba(127,216,207,.4);animation:settle .8s ease-out}
+  @keyframes settle{0%{box-shadow:0 0 0 rgba(127,216,207,.4)}100%{box-shadow:0 0 14px rgba(127,216,207,.14)}}
+  .shell-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+  .sbtn{flex:1;text-align:center;background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--dim);font-family:inherit;font-size:11px;letter-spacing:.14em;padding:9px 0;cursor:pointer;
+    text-decoration:none;transition:border-color .45s ease,color .45s ease}
+  .sbtn:hover{border-color:var(--line2);color:var(--accent)}
+  .overlay{position:fixed;inset:0;background:rgba(10,12,16,.78);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:9}
+  .overlay.show{display:flex}
+  .win{width:min(320px,86vw);background:rgba(20,24,30,.82);backdrop-filter:blur(8px);
+    border:1px solid rgba(127,216,207,.4);border-radius:8px;padding:26px 28px;text-align:center;
+    box-shadow:0 0 22px rgba(127,216,207,.12);animation:fadein .6s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .win h2{color:var(--ok);font-size:15px;letter-spacing:.35em;text-indent:.35em;font-weight:600;margin-bottom:8px}
+  .win p{color:var(--dim);font-size:11px;letter-spacing:.08em;margin-bottom:18px}
+  .win button{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--accent);
+    font-family:inherit;font-size:12px;letter-spacing:.2em;padding:10px 26px;cursor:pointer;transition:border-color .45s ease}
+  .win button:hover{border-color:var(--ok)}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<script src="../march-story/frame-report.js?v=8e3f525cf5eb53e3"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="shell-head"><span><b>EXP-02</b> · 记忆样本配对</span><span>MEMORY 4×4</span></div>
+  <div class="stage">
+    <span class="corner tl">SMP-PAIR</span><span class="corner br">REV.2</span>
+    <div class="pills">
+      <span class="pill">步数 <b id="steps">0</b></span>
+      <span class="pill">用时 <b id="time">0</b>s</span>
+      <span class="pill">配对 <b id="pairs">0</b>/8</span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="shell-foot">
+    <button class="sbtn" id="resetAll">重置实验</button>
+    <a class="sbtn" id="backLab" href="index.html">返回档案室</a>
+    <button class="sbtn" id="helpBtn">帮助</button>
+  </div>
+</div>
+<div class="overlay" id="overlay"><div class="win"><h2>PAIRS COMPLETE</h2><p id="result">全部样本配对完成。</p><button id="again">重新实验</button></div></div>
+<script>
+'use strict';
+/* 记忆翻牌配对：4×4 = 8 对符号，CSS 3D 翻转。通关后 postMessage('memory_success')。 */
+const KEY='memory_success';
+const SYMS=['★','●','▲','■','◆','✦','☰','✚'];
+const grid=document.getElementById('grid'),stepsEl=document.getElementById('steps'),timeEl=document.getElementById('time'),pairsEl=document.getElementById('pairs');
+let first=null,lock=false,steps=0,matched=0,sec=0,timer=null;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startTimer(){if(timer)return;timer=setInterval(()=>{sec++;timeEl.textContent=sec;},1000);}
+function stopTimer(){clearInterval(timer);timer=null;}
+
+function build(){
+  first=null;lock=false;steps=0;matched=0;sec=0;stopTimer();
+  stepsEl.textContent='0';timeEl.textContent='0';pairsEl.textContent='0';
+  grid.replaceChildren();
+  const deck=shuffle([...SYMS,...SYMS]);
+  deck.forEach(sym=>{
+    const c=document.createElement('div');c.className='card';
+    const inner=document.createElement('div');inner.className='inner';
+    const front=document.createElement('div');front.className='face front';front.textContent='？';
+    const back=document.createElement('div');back.className='face back';back.textContent=sym;
+    inner.append(front,back);c.append(inner);
+    c.addEventListener('click',()=>flip(c,sym));
+    grid.append(c);
+  });
+}
+function flip(card,sym){
+  if(lock||card.classList.contains('open')||card.classList.contains('matched'))return;
+  startTimer();
+  card.classList.add('open');
+  if(!first){first={card,sym};return;}
+  steps++;stepsEl.textContent=steps;
+  if(first.sym===sym){ // 配对成功：保持翻开
+    first.card.classList.add('matched');card.classList.add('matched');
+    matched++;pairsEl.textContent=matched;first=null;
+    if(matched===8)win();
+  }else{ // 不匹配：短暂展示后翻回
+    lock=true;
+    const a=first.card;first=null;
+    setTimeout(()=>{a.classList.remove('open');card.classList.remove('open');lock=false;},700);
+  }
+}
+function win(){
+  stopTimer();
+  document.getElementById('result').textContent='全部配对完成 · '+steps+' 步 / '+sec+' 秒，样本已归档。';
+  document.getElementById('overlay').classList.add('show');
+  try{window.CZMarchFrameReport(KEY);}catch(_){}
+}
+document.getElementById('again').addEventListener('click',()=>{document.getElementById('overlay').classList.remove('show');build();});
+document.getElementById('resetAll').addEventListener('click',()=>{document.getElementById('overlay').classList.remove('show');build();});
+document.getElementById('helpBtn').addEventListener('click',()=>alert('翻开两张相同符号即配对 · 全部 8 对配对完成后通关'));
+if(window.parent!==window)document.getElementById('backLab').remove(); // iframe 内由父页面控制导航
+build();
+/* 自动化/父页面测试钩子 */
+window.__czTest={win,build};
+</script>
+</body>
+</html>

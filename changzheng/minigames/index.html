@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>样本档案室 · 研习实验列表</title>
+<!--
+  实验列表（档案室）：主线"密室/奖励房间"的入口预览页，也可直接作为奖励房间整页嵌入。
+  每个实验为独立页面，共用本地 ../march-story/frame-report.js 完成回传辅助脚本：
+    mnist_success / keypad_success / memory_success / tictac_success / huarong_success / mine_success
+  主线嵌入单个实验示例：
+    <iframe src="/minigames/mnist-lock.html?pwd=1936" width="100%" height="700" style="border:0"></iframe>
+  推箱子玩法已由主线"教学工坊"实现（第 1 站 · 补给仓库，js/supply-sokoban71.js），此处不重复。
+-->
+<style>
+  :root{
+    --bg0:#121418;--steel:#364254;
+    --panel:rgba(22,27,34,.78);--panel2:rgba(28,34,43,.85);
+    --line:rgba(120,150,190,.22);--line2:rgba(140,175,215,.4);
+    --ink:#e6e8ec;--dim:#8a97a8;--faint:#5c6a7c;
+    --accent:#a8cceb;--glow:rgba(140,180,220,.45);
+    --ok:#7fd8cf
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  body{
+    background:radial-gradient(1000px 520px at 50% -8%,#1a212b 0%,transparent 60%),var(--bg0);
+    color:var(--ink);font-family:"JetBrains Mono","Cascadia Mono","SF Mono",Consolas,"Courier New","Microsoft YaHei",monospace;
+    min-height:100vh;padding:40px 16px calc(56px + env(safe-area-inset-bottom));position:relative
+  }
+  /* 均匀胶片颗粒 + 极细静态扫描线（不滚动、不喧宾夺主） */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    background-size:140px 140px}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px),
+      radial-gradient(120% 92% at 50% 40%,transparent 58%,rgba(0,0,0,.42) 100%)}
+  .wrap{max-width:800px;margin:0 auto;position:relative;z-index:1}
+  .sysline{text-align:center;font-size:10px;color:var(--faint);letter-spacing:.3em;margin-bottom:14px}
+  .sysline::before{content:"SYS://";color:var(--steel)}
+  h1{text-align:center;font-size:22px;font-weight:600;letter-spacing:.45em;text-indent:.45em;color:var(--ink)}
+  h1::after{content:"";display:block;width:180px;height:1px;margin:13px auto 0;
+    background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+  .sub{text-align:center;color:var(--dim);font-size:11px;letter-spacing:.2em;margin:12px 0 4px}
+  .progress{display:flex;justify-content:center;margin:16px 0 24px}
+  .chip{border:1px solid var(--line);border-radius:4px;padding:7px 18px;font-size:11px;color:var(--dim);
+    background:var(--panel);backdrop-filter:blur(8px);letter-spacing:.14em}
+  .chip b{color:var(--accent);font-weight:600}
+  .chip.all{border-color:rgba(127,216,207,.45);color:var(--ok);box-shadow:0 0 14px rgba(127,216,207,.12)}
+  .notice{background:var(--panel);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:8px;
+    padding:13px 16px;color:var(--dim);font-size:11px;line-height:2.1;letter-spacing:.05em;margin-bottom:28px}
+  .notice::before{content:"NOTE // ";color:var(--faint)}
+  .notice code{color:var(--accent);font-size:10.5px}
+  .notice b{color:var(--ink);font-weight:600}
+  .card{background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:8px;margin-bottom:26px;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.3);
+    transition:border-color .5s ease,box-shadow .5s ease}
+  .card:hover{border-color:var(--line2);box-shadow:0 0 0 1px rgba(0,0,0,.3),0 14px 38px rgba(0,0,0,.42),0 0 16px rgba(140,180,220,.08)}
+  .card.done{border-color:rgba(127,216,207,.4)}
+  .card header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .no{flex:none;font-size:10.5px;color:var(--accent);letter-spacing:.1em}
+  .card h2{font-size:13.5px;letter-spacing:.14em;font-weight:600;flex:1;min-width:0;color:var(--ink)}
+  .sig{flex:none;font-size:9.5px;color:var(--faint);border:1px solid var(--line);padding:3px 9px;border-radius:4px;letter-spacing:.05em}
+  .st{flex:none;font-size:10.5px;color:var(--faint);min-width:56px;text-align:right;letter-spacing:.12em}
+  .st.done{color:var(--ok)}
+  .card iframe{display:block;width:100%;border:0;border-top:1px solid var(--line);background:#121418}
+  .card iframe.h700{height:700px}.card iframe.h640{height:640px}.card iframe.h720{height:720px}
+  .card iframe.h660{height:660px}
+  .card footer{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-top:1px solid var(--line)}
+  .desc{font-size:10px;color:var(--faint);letter-spacing:.08em}
+  .open{color:var(--accent);font-size:10.5px;text-decoration:none;letter-spacing:.1em}
+  .open:hover{color:var(--ink)}
+  .tail{text-align:center;color:var(--faint);font-size:10px;letter-spacing:.34em;margin-top:8px}
+  @media(max-width:560px){
+    body{padding:28px 10px 44px}
+    h1{font-size:18px;letter-spacing:.3em;text-indent:.3em}
+    .card header{flex-wrap:wrap;gap:8px}
+    .sig{display:none}
+    .card iframe.h700,.card iframe.h640,.card iframe.h720,.card iframe.h660{height:600px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="sysline">ARCHIVE_ROOM / DIGITAL_SAMPLES</p>
+  <h1>样本档案室</h1>
+  <p class="sub">六项在档实验 · 完成后自动通知主线发放权限</p>
+  <div class="progress"><span class="chip" id="progressChip">已完成 <b id="doneCount">0</b> / 6</span></div>
+
+  <div class="notice">
+    每项实验均为独立单文件，用 <code>&lt;iframe src="…"&gt;</code> 嵌入主线任意房间；父页面监听
+    <code>window message</code> 即可收到完成信号（信号键见各卡右上角）。实验内部自带
+    <b>重置实验 / 帮助</b> 控件；嵌入状态下「返回档案室」自动隐藏，导航由父页面接管。
+    推箱子已在主线「教学工坊 · 补给仓库」内置，不在此重复。
+  </div>
+
+  <div class="card" data-key="mnist_success">
+    <header><span class="no">EXP-01</span><h2>MNIST 手写样本锁</h2><span class="st">待实验</span><span class="sig">mnist_success</span></header>
+    <iframe class="h700" src="mnist-lock.html?pwd=1936" loading="lazy" title="MNIST 手写样本锁"></iframe>
+    <footer><span class="desc">手写 0-9 · 本地识别 · 逐位解锁</span><a class="open" href="mnist-lock.html?pwd=1936" target="_blank" rel="noopener">单独打开 ↗</a></footer>
+  </div>
+
+  <div class="card" data-key="keypad_success">
+    <header><span class="no">EXP-06</span><h2>数字密码键盘</h2><span class="st">待实验</span><span class="sig">keypad_success</span></header>
+    <iframe class="h640" src="keypad-lock.html?pwd=1936" loading="lazy" title="数字密码键盘"></iframe>
+    <footer><span class="desc">与 EXP-01 同源的按键式密码装置 · 密码可独立定制</span><a class="open" href="keypad-lock.html?pwd=1936" target="_blank" rel="noopener">单独打开 ↗</a></footer>
+  </div>
+
+  <div class="card" data-key="memory_success">
+    <header><span class="no">EXP-02</span><h2>记忆样本配对</h2><span class="st">待实验</span><span class="sig">memory_success</span></header>
+    <iframe class="h720" src="memory-match.html" loading="lazy" title="记忆样本配对"></iframe>
+    <footer><span class="desc">4×4 八对符号 · 步数与用时结算</span><a class="open" href="memory-match.html" target="_blank" rel="noopener">单独打开 ↗</a></footer>
+  </div>
+
+  <div class="card" data-key="tictac_success">
+    <header><span class="no">EXP-03</span><h2>对弈终端 · 井字棋</h2><span class="st">待实验</span><span class="sig">tictac_success</span></header>
+    <iframe class="h640" src="tic-tac-toe.html" loading="lazy" title="对弈终端"></iframe>
+    <footer><span class="desc">执 ✕ 先手 · 赢得对局才放行</span><a class="open" href="tic-tac-toe.html" target="_blank" rel="noopener">单独打开 ↗</a></footer>
+  </div>
+
+  <div class="card" data-key="huarong_success">
+    <header><span class="no">EXP-04</span><h2>样本重排矩阵</h2><span class="st">待实验</span><span class="sig">huarong_success</span></header>
+    <iframe class="h660" src="huarong-15.html" loading="lazy" title="样本重排矩阵"></iframe>
+    <footer><span class="desc">1–15 归位 · 打乱必有解</span><a class="open" href="huarong-15.html" target="_blank" rel="noopener">单独打开 ↗</a></footer>
+  </div>
+
+  <div class="card" data-key="mine_success">
+    <header><span class="no">EXP-05</span><h2>路障排除协议</h2><span class="st">待实验</span><span class="sig">mine_success</span></header>
+    <iframe class="h720" src="mine-sweeper.html" loading="lazy" title="路障排除协议"></iframe>
+    <footer><span class="desc">9×9 · 10 雷 · 首点必安全</span><a class="open" href="mine-sweeper.html" target="_blank" rel="noopener">单独打开 ↗</a></footer>
+  </div>
+
+  <p class="tail">—— ARCHIVE LOG ENDS ——</p>
+</div>
+<script>
+'use strict';
+/* 收集子实验完成信号：点亮卡片、累计进度 */
+const KEYS={mnist_success:1,keypad_success:1,memory_success:1,tictac_success:1,huarong_success:1,mine_success:1};
+window.addEventListener('message',e=>{
+  if(!KEYS[e.data])return;
+  const card=document.querySelector('.card[data-key="'+e.data+'"]');
+  if(!card)return;
+  const st=card.querySelector('.st');
+  if(!card.classList.contains('done')){
+    card.classList.add('done');
+    st.textContent='✓ 已归档';
+    st.classList.add('done');
+  }else{
+    st.textContent='✓ '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  }
+  const done=document.querySelectorAll('.card.done').length;
+  const n=document.getElementById('doneCount');
+  if(n)n.textContent=done;
+  const chip=document.getElementById('progressChip');
+  if(chip&&done===6)chip.classList.add('all');
+});
+</script>
+</body>
+</html>

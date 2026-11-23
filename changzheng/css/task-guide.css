@@ -1,0 +1,11 @@
+.chapter-direction{display:block;box-sizing:border-box;grid-column:1/-1;margin:0 0 18px;padding:13px 16px;background:#252e24;border:1px solid #9f895d;border-left:4px solid #d0ac69;color:#f3e5c7}
+.chapter-direction>summary{cursor:pointer;font:600 15px/1.7 'Microsoft YaHei',sans-serif;color:#f6dfad}
+.chapter-direction>p{margin:10px 0;font:14px/1.85 'Microsoft YaHei',sans-serif;color:#eee4ce;white-space:normal}
+.chapter-direction .task-guide-locate{min-height:40px;padding:8px 13px;font:14px/1.5 'Microsoft YaHei',sans-serif;color:#fff0cf;background:#5f3427;border:1px solid #cba46a;cursor:pointer}
+.chapter-direction button:focus-visible{outline:3px solid #efd298;outline-offset:3px}
+.title-copy .title-howto{margin:0;max-width:460px;color:#ead6b3;font:13px/1.8 'Microsoft YaHei',sans-serif;letter-spacing:0}
+.map-first-guide{margin:10px 0;padding:12px 15px;background:#202b20;color:#efdfbe;border-left:3px solid #c49d61;font:14px/1.8 'Microsoft YaHei',sans-serif}
+.map-first-guide summary{font-weight:600;cursor:pointer}.map-first-guide p{margin:6px 0 0}
+.scene-library-card{box-sizing:border-box;min-height:240px;padding:28px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:14px;background:linear-gradient(130deg,#17251eea,#38352a),#17251e;color:#f2e4c7;border:1px solid #aa8b55;font:16px/1.8 'Microsoft YaHei',sans-serif}.scene-library-card p{margin:0}.scene-library-card button,.game-boot-status button{padding:10px 16px;background:#7a342a;color:#ffebc5;border:1px solid #c7a064;font:inherit;cursor:pointer}.scene-library-card small{font-size:14px;color:#e3d1ab}.game-boot-status{max-width:460px;margin:4px 0;color:#e7d5ac;font:14px/1.7 'Microsoft YaHei',sans-serif}
+@media(max-width:700px){.chapter-direction{padding:11px 12px}.title-copy .title-howto{font-size:12px}}
+.char-select-header{position:relative;padding-top:30px}.char-select-back,.award-demo-back{padding:9px 13px;color:#ffe9bf;background:#263026;border:1px solid #b1945f;cursor:pointer;font:15px/1.5 'Microsoft YaHei',sans-serif}.char-select-back{position:absolute;left:0;top:0}.award-demo-back{position:sticky;top:0;z-index:12;display:block;margin-bottom:12px;box-shadow:0 2px 8px #0006}.char-select-back:focus-visible,.award-demo-back:focus-visible{outline:2px solid #ffe4a2;outline-offset:3px}

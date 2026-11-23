@@ -1,0 +1,26 @@
+/* Task pages: restrained field-document hierarchy, compact controls, no blur. */
+.journey-overlay{backdrop-filter:none;background:#101411f5;padding:18px}
+.journey-shell{border-radius:2px;background:#20271f;box-shadow:none;border-top:4px solid #a33e2f}
+.journey-header{padding:16px 24px;background:#171e19}
+.journey-header h2{font-size:27px;letter-spacing:3px;margin:4px 0}
+.journey-steps{padding:11px 24px;gap:18px;background:#1b221c}
+.journey-steps span{font-size:13px;color:#c3b9a4}
+.journey-steps .current{color:#fff0cf;border-color:#b74734}
+.journey-scene,.journey-workspace{padding:22px}
+.journey-caption{font:16px/1.8 'Microsoft YaHei',sans-serif;margin:14px 0}
+.journey-shell textarea{font:16px/1.75 'Microsoft YaHei',sans-serif;min-height:120px;resize:vertical}
+.journey-shell button{min-height:42px;touch-action:manipulation;border-radius:2px}
+.journey-shell button:focus-visible,.service-dialog button:focus-visible{outline:3px solid #ebc980;outline-offset:3px}
+.service-dialog{width:min(540px,calc(100vw - 32px));box-sizing:border-box;padding:26px;background:#ece3ce;color:#292c23;border:1px solid #927b54;border-top:5px solid #963b2c;border-radius:2px;z-index:9999}
+.service-dialog::backdrop{background:#080e0cbd}
+.service-dialog header{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.service-dialog h2{font:700 25px "CZ Documentary Serif",serif;margin:0}
+.service-dialog p{font:15px/1.8 'Microsoft YaHei',sans-serif}
+.service-dialog label{display:block;margin:18px 0;font-size:15px}
+.service-dialog input[type=url],.service-dialog select{box-sizing:border-box;width:100%;padding:12px;margin-top:8px;background:#faf5e9;color:#252c25;border:1px solid #887b62;font:15px sans-serif}
+.service-dialog button{padding:10px 16px;background:#843629;color:#fff0d4;border:1px solid #9c6549;cursor:pointer}
+.service-dialog output{display:block;margin:16px 0;font-size:14px}
+#renderFrameBadge{position:fixed;right:12px;top:12px;z-index:9900;background:#111d16e8;color:#f2dfb9;padding:7px 10px;font:12px monospace;pointer-events:none}
+#renderFrameBadge[hidden]{display:none}
+@media(min-width:1000px){.journey-header{position:sticky;top:-18px;z-index:3}.journey-layout{grid-template-columns:minmax(300px,.9fr) minmax(400px,1.1fr)}}
+@media(max-width:760px){.journey-overlay{padding:0}.journey-header{padding:14px 16px}.journey-header h2{font-size:23px}.journey-scene,.journey-workspace{padding:16px}.journey-layout{grid-template-columns:1fr}.journey-caption{line-height:1.65}}

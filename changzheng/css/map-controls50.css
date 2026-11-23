@@ -1,0 +1,108 @@
+/* 地图区控件重排（仅布局，不改任何交互逻辑）
+   [P0 修复 2026-10-26] 工具栏挂载契约收归一处：
+     · .map-tools（路线/＋/－/数据馆/全图）由 ui-polish.js 挂在 #mapContainer 直下，
+       定位唯一所有者是 css/delivery53.css 的 #mapContainer>.map-tools（右下 absolute），
+       窄屏（≤700px）由 delivery53.css 媒体查询改为 bottom 锚定（地图区内、审图号条上方；R5 起不再依赖 --map-tools-top59 变量）。
+     · 契约：.map-world 带 transform（game-map.js apply()），按 CSS Transforms 规范会成为
+       其 fixed 后代的 containing block——任何地图控件禁止挂进 .map-world，也禁止对
+       #mapContainer 之外加 transform/filter/perspective 后仍依赖 fixed 定位。
+     · 本文件不再含任何 .map-tools 规则，只管 .map-collapse / .map-search / 数据馆抽屉。 */
+
+/* ---- 1.（已删）竖排工具栏规则随挂载点迁移一并移除：.map-tools 现挂 #mapContainer 直下，
+   .map-view 前缀选择器全部失配；定位与外观由 delivery53.css / field-editorial.css 接管。 ---- */
+
+/* ---- 2. 收起行记：地图左上角的左侧（地图外），右边缘距地图左边界 14px ----
+   --map-split 必须与 .map-view 的 left 断点保持同步：
+   默认 37%（field-editorial.css）、≥1400px 35%、≤1000px 38%。 */
+.map-container{--map-split:37%}
+@media(min-width:1400px){.map-container{--map-split:35%}}
+@media(max-width:1000px){.map-container{--map-split:38%}}
+.map-collapse{
+  left:auto!important;
+  right:calc(100% - var(--map-split) + 14px);
+  top:14px;
+}
+/* 收起行记后地图铺满整个容器，没有「左侧」可用，回到容器左上角内 */
+.map-wide .map-collapse{left:14px!important;right:auto}
+
+/* ---- 3. 搜索关卡：地图右上角（地图内部） ---- */
+.map-view .map-search{
+  position:absolute;top:14px;right:14px;left:auto;
+  z-index:23;
+  display:flex;flex-direction:column;align-items:flex-end;
+}
+.map-view .map-search input[type=search]{
+  box-sizing:border-box;
+  width:196px;min-height:38px;padding:8px 12px;
+  border:1px solid #8a7c5f88;border-radius:0;
+  background:#f2ebdce6;color:#3f4335;
+  font:13px/1.4 "Microsoft YaHei",sans-serif;
+}
+.map-view .map-search input[type=search]::placeholder{color:#7a715d}
+.map-view .map-search .chapter40-search-results{
+  position:absolute;top:calc(100% + 5px);right:0;left:auto;
+  min-width:230px;max-width:min(340px,70vw);max-height:52vh;overflow:auto;
+  background:#202b24;border:1px solid #8a7c5f88;z-index:24;
+}
+/* 空列表会剩下一条 2px 的边框细线，看起来像搜索框下面多了条黑杠 */
+.map-view .map-search .chapter40-search-results:empty{display:none}
+
+/* ---- 窄屏：工具栏的窄屏定位（bottom 锚定、审图号条上方）已收归 delivery53.css 媒体查询。
+   依据本文件原注释的历史实测：右下角会与「底图审图号」条（bottom:10px，宽 228px）整块重叠，
+   合规信息不能让位，故窄屏不放右下角。本块只保留行记收起钮与搜索框的窄屏适配。 ---- */
+@media(max-width:700px){
+  .map-collapse{left:12px!important;right:auto!important;top:var(--map-collapse-top59,160px)}
+  .map-wide .map-collapse{left:12px!important;right:auto!important;top:12px!important}
+  .map-view .map-search{top:10px;right:10px}
+  .map-view .map-search input[type=search]{width:150px;min-height:34px;font-size:12px;padding:6px 10px}
+}
+
+/* Match actual map bounds, including newer layout overrides and collapsed journal. */
+#mapContainer .map-collapse{top:var(--map-collapse-top59,14px)!important;left:auto!important;right:var(--map-collapse-right59,calc(100% - var(--map-split) + 14px))!important;}
+body.map-wide #mapContainer .map-collapse{left:14px!important;right:auto!important;top:14px!important;}
+.map-view .map-search{max-width:calc(100% - 28px);}
+.map-view .map-search .chapter40-search-results{min-width:0;width:min(340px,var(--map-search-width59,70vw));max-width:var(--map-search-width59,70vw);box-sizing:border-box;}
+.map-view .map-search .chapter40-search-results button{white-space:normal;overflow-wrap:anywhere;}
+@media(max-width:700px){
+ #mapContainer .map-collapse{top:var(--map-collapse-top59,160px)!important;left:12px!important;right:auto!important;}
+ body.map-wide #mapContainer .map-collapse{left:12px!important;right:auto!important;top:12px!important;}
+ .map-view .map-search{max-width:calc(100% - 20px);}
+}
+
+/* ---- 数据馆（data-museum65）：工具区按钮 + 时间轴抽屉 ----
+   按钮插在「全图」之前；三字按钮自降字号，避免撑宽工具栏。
+   选择器已随挂载点迁移改为 #mapContainer 前缀。 */
+#mapContainer .map-tools button[data-museum65]{font-size:12px;letter-spacing:1px}
+@keyframes data-museum65-slide{from{opacity:0;transform:translate(18px,-50%)}to{opacity:1;transform:translate(0,-50%)}}
+.data-museum65{
+  position:absolute;top:50%;right:74px;transform:translateY(-50%);
+  z-index:22;width:min(300px,58%);max-height:82%;overflow:auto;
+  box-sizing:border-box;padding:12px 14px;
+  background:#f2ebdcf2;border:1px solid #8a7c5f88;box-shadow:0 8px 24px rgba(20,16,8,.25);
+  color:#3f4335;font:13px/1.5 "Microsoft YaHei",sans-serif;
+  animation:data-museum65-slide .18s ease-out;
+}
+.data-museum65 header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 4px}
+.data-museum65 h3{margin:0;font-size:15px;letter-spacing:1px}
+.data-museum65-close{width:28px;height:28px;min-height:28px;padding:0;border:1px solid #8a7c5f88;background:#f2ebdce6;color:#3f4335;font-size:15px;line-height:1;cursor:pointer}
+.data-museum65-close:hover{background:#c9bd9f;color:#2d271e}
+.data-museum65>small{display:block;margin-bottom:8px;color:#7a715d}
+.data-museum65 h4{margin:10px 0 4px;font-size:13px;letter-spacing:1px}
+.data-museum65-list{list-style:none;margin:0;padding:0}
+.data-museum65-item{
+  display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  width:100%;box-sizing:border-box;padding:7px 9px;margin:2px 0;
+  border:1px solid #8a7c5f66;background:#f7f1e3;color:#3f4335;
+  cursor:pointer;text-align:left;font:inherit;
+}
+.data-museum65-item:hover{background:#c9bd9f;color:#2d271e}
+.data-museum65-date{flex:none;color:#7a715d;font-size:11px}
+.data-museum65-foot{margin-top:10px;border-top:1px dashed #8a7c5f88;padding-top:8px;color:#5c553f;font-size:12px}
+.data-museum65-foot a{color:#7b211d}
+/* 数据卡脚注固定在 Education43.dialog 底部 */
+.education43-dialog footer.data-museum65-foot{margin-top:auto;border-top:1px dashed #8a7c5f88;padding-top:8px}
+@media(max-width:700px){
+  @keyframes data-museum65-slide{from{opacity:0;transform:translate(18px,0)}to{opacity:1;transform:none}}
+  .data-museum65{top:96px;right:10px;left:10px;width:auto;max-height:62%;transform:none}
+  #mapContainer .map-tools button[data-museum65]{width:auto;min-height:34px;padding-inline:9px;font-size:10px;letter-spacing:0}
+}

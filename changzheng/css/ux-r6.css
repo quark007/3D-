@@ -1,0 +1,98 @@
+/* R6 2026-10-28 统一 UX 样式：任务卡 / 更多功能弹窗 / FAB 收起 / 标题继续副行 / 关闭钮热区。
+   原 则：桌面(≥701px)布局零变化；≤700px 才启用收拢。深色面板沿用 map-footer 的炭青底+金边。 */
+
+/* ---- 1. 当前任务卡（仅移动端显示；挂在 .map-footer 顶） ---- */
+.task-card-r6{display:none;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;
+  padding:10px 12px;background:#141f26;border:1px solid #b4955d66;border-radius:8px}
+.task-card-r6 .task-r6-title{grid-column:1;margin:0;font-size:14px;letter-spacing:1px;color:#f2dfbd}
+.task-card-r6 .task-r6-goal,.task-card-r6 .task-r6-cond{grid-column:1;margin:0;font-size:12px;line-height:1.6;color:#c4bba8;overflow-wrap:anywhere}
+.task-card-r6 .task-r6-cond{color:#d6c9a8}
+.task-card-r6 .task-r6-row{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}
+.task-card-r6 .task-r6-primary{min-height:44px;padding:8px 14px;font-size:14px;letter-spacing:1px;white-space:nowrap;
+  background:#884338;color:#fff0d7;border:1px solid #c8816366;border-radius:6px;cursor:pointer}
+.task-card-r6 .task-r6-primary:disabled{background:#3a2f31;color:#a99f92;border-color:#6b5a4e66;cursor:not-allowed}
+.task-card-r6 .task-r6-primary:focus-visible,.task-r6-extra:focus-visible{outline:3px solid #ffcf24;outline-offset:2px}
+.task-card-r6 .task-r6-extras{min-width:0}
+.task-card-r6 .task-r6-extras summary{min-height:44px;display:flex;align-items:center;padding:8px 10px;
+  font-size:12px;color:#b7b7ac;list-style:none;cursor:pointer;border:1px dashed #b4955d44;border-radius:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-card-r6 .task-r6-extras summary::-webkit-details-marker{display:none}
+.task-card-r6 .task-r6-extras summary::after{content:'▾';margin-left:auto}
+.task-card-r6 .task-r6-extras[open] summary::after{content:'▴'}
+.task-r6-extra{display:grid;gap:2px;width:100%;box-sizing:border-box;margin-top:6px;padding:8px 10px;
+  background:#1d3039;border:1px solid #95784f80;border-radius:6px;color:#e0d4be;text-align:left;cursor:pointer;font:inherit}
+.task-r6-extra small{font-size:11px;color:#b7b7ac}
+.task-card-r6 .task-r6-save{grid-column:1/-1;margin:0;font-size:11px;line-height:1.5;color:#8f8a7c}
+
+/* 360 特窄档：目标/条件文案各折两行，收紧行距与内边距保住 300px 底栏预算 */
+@media(max-width:380px){
+  .task-card-r6{padding:8px 10px;gap:3px}
+  .task-card-r6 .task-r6-goal,.task-card-r6 .task-r6-cond{line-height:1.45}
+}
+
+/* ---- 2. 翻站行「更多」触发钮 + 功能弹窗（仅移动端） ---- */
+.map-dock-toggle-r6{display:none}
+.dock-r6-dialog{width:min(92vw,420px);max-height:76dvh;overflow:auto;padding:0;border:1px solid #b4955d88;
+  background:#182b33;color:#e8e6df;border-radius:10px;box-shadow:0 12px 40px #000a}
+.dock-r6-dialog::backdrop{background:#0a0d10cc}
+.dock-r6-dialog header{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 14px;border-bottom:1px solid #b4955d44}
+.dock-r6-dialog h2{margin:0;font-size:15px;letter-spacing:1px;color:#f2dfbd}
+.dock-r6-close{min-height:44px;padding:8px 16px;background:#884338;color:#fff0d7;border:1px solid #c8816366;border-radius:6px;cursor:pointer}
+.dock-r6-close:focus-visible{outline:3px solid #ffcf24;outline-offset:2px}
+.dock-r6-dialog .experience-dock{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 14px}
+.dock-r6-dialog .experience-dock button{min-height:44px;padding:10px 12px;font-size:13px;white-space:normal;
+  background:#1d3039;color:#e0d4be;border:1px solid #95784f80;border-radius:6px;cursor:pointer}
+.dock-r6-dialog .experience-dock details{grid-column:1/-1;border:1px dashed #b4955d44;border-radius:6px;padding:4px 8px}
+.dock-r6-dialog .experience-dock details summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:13px}
+.dock-r6-dialog .experience-dock details>div{display:grid;gap:8px;padding-bottom:8px}
+.dock-r6-dialog .experience-dock details button{min-height:44px}
+.dock-r6-extra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 14px 4px}
+.dock-r6-extra button{min-height:44px;padding:10px 12px;font-size:13px;background:#24373d;color:#e0d4be;
+  border:1px solid #81989444;border-radius:6px;cursor:pointer}
+.dock-r6-extra button:focus-visible,.dock-r6-dialog .experience-dock button:focus-visible{outline:3px solid #ffcf24;outline-offset:2px}
+.dock-r6-note{margin:0;padding:10px 14px 14px;font-size:11px;line-height:1.6;color:#8f8a7c}
+
+/* ---- 3. 移动端底栏收拢（≤700px） ---- */
+@media(max-width:700px){
+  .task-card-r6{display:grid}
+  .map-dock-toggle-r6{display:flex;align-items:center;justify-content:center;min-width:64px}
+  /* 功能条与合规戳不再是常驻条；内容由「更多」弹窗承载（合规文案在弹窗底部保底可见） */
+  .map-footer .map-footer-secondary{display:none}
+  /* 翻站行紧凑化：单行 44px 热区，站名超长省略；提示语移除（任务卡已表达完成条件）。
+     .node-nav.node-nav 双类是刻意提特异性：field-editorial.css:7 晚于本文件加载且锁 3 列，
+     会把「更多」触发钮挤到第二行（实测 nodeNav 92px）。 */
+  .map-footer{padding:8px 10px;gap:8px}
+  .map-footer>.node-nav.node-nav{grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;width:100%}
+  .map-footer>.node-nav .node-nav-btn{height:44px;min-height:44px;padding:0 12px;font-size:13px}
+  .map-footer>.node-nav .node-nav-pos{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+  .map-footer .node-nav-hint{display:none}
+  /* 悬浮入口在章节/对话/任意模态期间收起，避免压住内容；关闭后自动恢复 */
+  body:has(:is(#dungeonPanel,#npcOverlay,#prebattleOverlay,#rationOverlay,#commandOverlay,#learningTaskOverlay,#zunyiChapterOverlay,.qte-overlay).open) :is(.spark69-fab,.corr69-fab),
+  body:has(dialog[open]) :is(.spark69-fab,.corr69-fab){display:none}
+}
+
+/* ---- 3a. body 直挂 FAB 移动端兜底（≤768px）：readability93.js 会把星火/记者钮搬进
+   HUD「更多记录」下拉；若搬迁未发生（旧 SW 缓存/JS 未执行），FAB 保持 JS 注入的
+   fixed left/right:16px bottom:110px，会压住 map-tools（右）与 experience-dock（701-768px）。
+   body> 直子选择器只命中未搬迁的 FAB（特异性 0,1,1 > 注入样式的 0,1,0，无需 !important，
+   也不受 field-editorial/cinema-ui 反压——两者不写这对选择器）；搬迁成功后 FAB 在
+   .records93 内，本规则不命中。bottom/left/right 全部显式反制，避免过约束钉死。 ---- */
+@media(max-width:768px){
+  body>.spark69-fab{left:8px;right:auto;top:62px;bottom:auto;min-width:0;min-height:44px;padding:6px 10px;font-size:12px}
+  body>.corr69-fab{right:8px;left:auto;top:62px;bottom:auto;min-width:0;min-height:44px;padding:6px 10px;font-size:12px}
+}
+
+/* ---- 3b. 全视口热区保底 44px（含桌面）：用户验收要求 360/390/768 热区≥44，
+   翻站/功能条按钮在桌面原为 30–40px，一并抬高。特异性 > 压过 cinema-ui.css 后加载规则。 ---- */
+.map-footer>.node-nav .node-nav-btn{height:44px;min-height:44px}
+.map-footer .map-footer-secondary .experience-dock button{min-height:44px;padding:8px 13px}
+.map-footer .experience-dock details>summary{min-height:44px}
+
+/* ---- 4. 标题页「继续这一程」恢复信息副行 ---- */
+.title-start-sub{margin:8px 0 0;font-size:12px;line-height:1.6;letter-spacing:.5px;color:#b7b7ac;text-align:center;overflow-wrap:anywhere}
+
+/* ---- 5. 统一关闭钮热区：对话浮层关闭钮在移动端至少 44px ---- */
+@media(max-width:700px){
+  .npc-close{width:44px;height:44px;min-width:44px;min-height:44px}
+}

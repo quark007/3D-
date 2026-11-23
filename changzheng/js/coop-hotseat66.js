@@ -1,0 +1,36 @@
+/* Local hotseat only. Seats share one team and one narrative identity. */
+const CoopHotseat66={
+ roles:{commander:'红军连长',logistics:'后勤补给员',soldier:'普通红军战士',medic:'红军女医护'},
+ phases:{dialog:['commander','交谈阶段'],deploy:['logistics','部署阶段'],supply:['logistics','补给阶段'],action:['soldier','行动阶段'],medical:['medic','互助阶段']},
+ selection:[],selecting:false,
+ state(){return GameState.coop??=GameState.migrateCoop(null);},
+ active(){return this.state().mode==='hotseat';},
+ owner(phase){const s=this.state(),role=this.phases[phase]?.[0];const found=s.seats.findIndex(v=>v.roleId===role);return found<0?0:found;},
+ allowed(phase){return !this.active()||(!this.handoff&&this.state().phase===phase&&this.state().activeSeat===this.owner(phase));},
+ enter(phase,run){if(!this.active())return run();const s=this.state(),seat=this.owner(phase);if(this.allowed(phase))return run();if(this.handoff)return;const d=document.createElement('dialog');d.className='coop66-handoff';const h=document.createElement('h2'),p=document.createElement('p'),b=document.createElement('button');h.textContent='本章 · '+this.phases[phase][1];p.textContent='请交给 · '+this.roles[s.seats[seat].roleId]+(s.seats[seat].roleId!==this.phases[phase][0]?'（本局兼岗）':'');b.textContent='我已接手 · 继续';d.append(h,p,b);d.addEventListener('cancel',e=>e.preventDefault());this.handoff=d;document.body.append(d);this.sync();b.onclick=()=>{d.close();d.remove();this.handoff=null;s.phase=phase;s.activeSeat=seat;GameState.save();this.sync();run();};d.showModal();b.focus();},
+ bind(button,phase){if(!button)return;button.dataset.coopPhase=phase;const blocked=!this.allowed(phase);if(blocked&&!button.disabled){button.disabled=true;button.dataset.coopDisabled='1';}else if(!blocked&&button.dataset.coopDisabled){button.disabled=false;delete button.dataset.coopDisabled;}},
+ sync(){const s=this.state(),bar=document.getElementById('coop66-status');if(bar){bar.hidden=!this.active();bar.replaceChildren();if(this.active()){const label=document.createElement('span');label.textContent=`同屏协作 · ${this.roles[s.seats[s.activeSeat].roleId]} · ${this.phases[s.phase][1]}`;bar.append(label);for(const [phase,[,name]]of Object.entries(this.phases)){const b=document.createElement('button');b.textContent=name;b.onclick=()=>this.enter(phase,()=>this.sync());bar.append(b);}}}
+  for(const [selector,phase]of [['#npcSendBtn,.npc-fixed-choice,.npc-fixed-return','dialog'],['#commandSubmit,#commandConfirm','dialog'],['#rationSubmitBtn','supply'],['#qteClimbBtn','action']])document.querySelectorAll(selector).forEach(b=>this.bind(b,phase));
+ },
+ selectCard(card,role,button){if(!this.selecting)return false;const index=this.selection.indexOf(role);if(index<0)this.selection.push(role);else this.selection.splice(index,1);card.classList.toggle('selected',index<0);card.setAttribute('aria-pressed',String(index<0));button.disabled=this.selection.length<2;button.querySelector('.char-select-start-hint').textContent=`${this.selection.length} 岗协作 · 请选择 2–4 个岗位`;GameUI.selectedCharId=this.selection[0]||null;return true;},
+ configure(){const s=GameState.migrateCoop(this.selecting?{mode:'hotseat',seats:this.selection.map(roleId=>({roleId})),activeSeat:0,phase:'dialog'}:null);s.activeSeat=s.mode==='hotseat'?this.ownerFor(s,'dialog'):0;GameState.coop=s;},
+ ownerFor(s,phase){const i=s.seats.findIndex(v=>v.roleId===this.phases[phase][0]);return i<0?0:i;},
+ add(key,n=1){if(!this.active()||!Number.isFinite(n)||n<=0)return;const s=this.state();s.contributions[key]=Math.min(1000000,(s.contributions[key]||0)+n);GameState.save();},
+ summary(){const c=this.state().contributions;return `同屏贡献：下令 ${c.orders} 次 · 省粮 ${c.foodSaved} 点 · QTE ${c.qteWins}/${c.qteAttempts} 次成功 · 恢复士气 ${c.moraleEvents} 次。省粮只计实际返还资源，不推算未发生消耗。`;},
+ wrap(object,key,phase,{entry=true,after}={}){const original=object?.[key];if(typeof original!=='function')return;object[key]=function(...args){const run=()=>{const before={food:GameState.resources.food,morale:GameState.resources.morale};const result=original.apply(this,args);if(after)after.call(CoopHotseat66,args,before,result);CoopHotseat66.sync();return result;};if(!CoopHotseat66.active())return original.apply(this,args);if(entry)return CoopHotseat66.enter(phase,run);if(!CoopHotseat66.allowed(phase))return;return run();};},
+ install(){if(this.installed)return;this.installed=true;const bar=document.createElement('aside');bar.id='coop66-status';bar.setAttribute('aria-label','当前协作席位与交接');document.body.append(bar);
+  const show=GameUI.showCharSelect;GameUI.showCharSelect=function(){const result=show.apply(this,arguments);CoopHotseat66.selection=[];CoopHotseat66.selecting=false;const grid=document.querySelector('.char-grid')||document.querySelector('.char-card')?.parentElement;if(grid){const label=document.createElement('label'),toggle=document.createElement('input');toggle.type='checkbox';label.className='coop66-selector';label.append(toggle,document.createTextNode(' 同屏双岗 · 2–4 人轮流操作（无须联网）'));grid.before(label);document.querySelectorAll('.coop66-selector').forEach((el,i,a)=>{if(i<a.length-1)el.remove();});toggle.onchange=()=>{CoopHotseat66.selecting=toggle.checked;CoopHotseat66.selection=[];document.querySelectorAll('.char-card').forEach(c=>{c.classList.remove('selected');c.setAttribute('aria-pressed','false');});GameUI.selectedCharId=null;document.getElementById('charSelectStart').disabled=true;};}return result;};
+  for(const [key,phase]of [['openNpcChat','dialog'],['showCommandPost','dialog'],['showRationAlloc','supply'],['startQTE','action']])this.wrap(GameUI,key,phase);
+  this.wrap(GameUI,'submitCommand','dialog',{entry:false});this.wrap(GameUI,'sendNpcMessage','dialog',{entry:false});
+  this.wrap(GameUI,'confirmActions','dialog',{entry:false,after(){if(GameUI.commandParseData?.actions)this.add('orders');}});
+  this.wrap(GameUI,'submitRationAlloc','supply',{entry:false,after(args,before){this.add('foodSaved',Math.max(0,GameState.resources.food-before.food));}});
+  this.wrap(GameUI,'onQteClimb','action',{entry:false});this.wrap(GameUI,'endQTE','action',{entry:false,after(args){this.add('qteAttempts');if(args[0])this.add('qteWins');}});
+  if(typeof Campaign55!=='undefined')this.wrap(Campaign55,'open','deploy');
+  if(typeof PressureChallenge!=='undefined'){this.wrap(PressureChallenge,'open','action');this.wrap(PressureChallenge,'commit','action',{entry:false});}
+  if(typeof CompanionBoard!=='undefined')this.wrap(CompanionBoard,'render','medical');
+  if(typeof StoryConsequences!=='undefined')this.wrap(StoryConsequences,'handover','medical',{after(args,before){if(GameState.resources.morale>before.morale)this.add('moraleEvents');}});
+  const choices=typeof NpcStory!=='undefined'&&NpcStory.showChoices;if(choices)NpcStory.showChoices=function(){const result=choices.apply(this,arguments);CoopHotseat66.sync();return result;};
+  const victory=typeof Victory49!=='undefined'&&Victory49.open;if(victory)Victory49.open=function(){const result=victory.apply(this,arguments);if(CoopHotseat66.active()&&this.dialog&&!this.dialog.querySelector('.coop66-summary')){const p=document.createElement('p');p.className='coop66-summary';p.textContent=CoopHotseat66.summary();this.dialog.querySelector('footer').append(p);}return result;};
+  this.sync();
+ }
+};document.addEventListener('DOMContentLoaded',()=>CoopHotseat66.install());

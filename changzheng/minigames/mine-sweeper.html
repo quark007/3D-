@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>EXP-05 · 路障排除协议</title>
+<!--
+  用法（奖励房间 iframe 嵌入）：
+    <iframe src="/minigames/mine-sweeper.html" width="100%" height="720" style="border:0" loading="lazy"></iframe>
+  父页面监听通关信号（仅胜利时发送）：
+    window.addEventListener('message', e => { if (e.data === 'mine_success') { /* 发放奖励 */ } });
+  操作：PC 左键点开 / 右键插旗；手机短按点开 / 长按插旗；另有「插旗模式」开关兜底。
+  本文件零外部依赖；首次点击保证不是雷（雷区在首次点开后生成）。
+-->
+<style>
+  :root{
+    --bg0:#121418;--steel:#364254;
+    --panel:rgba(22,27,34,.78);--panel2:rgba(28,34,43,.85);
+    --line:rgba(120,150,190,.22);--line2:rgba(140,175,215,.4);
+    --ink:#e6e8ec;--dim:#8a97a8;--faint:#5c6a7c;
+    --accent:#a8cceb;--glow:rgba(140,180,220,.45);
+    --ok:#7fd8cf;--bad:#c05b5b
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  body{
+    background:radial-gradient(900px 460px at 50% -10%,#1a212b 0%,transparent 60%),var(--bg0);
+    color:var(--ink);font-family:"JetBrains Mono","Cascadia Mono","SF Mono",Consolas,"Courier New","Microsoft YaHei",monospace;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:14px calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    user-select:none;-webkit-user-select:none
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    background-size:140px 140px}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px),
+      radial-gradient(120% 92% at 50% 40%,transparent 60%,rgba(0,0,0,.4) 100%)}
+  .shell{width:min(440px,94vw);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:8px;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.42);
+    position:relative;z-index:1}
+  .shell-head{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:10px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);letter-spacing:.08em}
+  .shell-head b{color:var(--accent);font-weight:600}
+  .stage{padding:14px;position:relative}
+  .corner{position:absolute;font-size:9.5px;color:var(--faint);letter-spacing:.12em}
+  .corner.tl{top:6px;left:12px}.corner.br{bottom:6px;right:12px}
+  .brief{font-size:10.5px;color:var(--dim);letter-spacing:.1em;text-align:center;margin-bottom:12px}
+  .bar{display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .pill{border:1px solid var(--line);border-radius:4px;padding:5px 13px;font-size:10.5px;color:var(--dim);
+    background:#0d1014;letter-spacing:.08em;white-space:nowrap}
+  .pill b{color:var(--accent);font-weight:600}
+  #flagMode{background:#0d1014;border:1px solid var(--line);border-radius:4px;color:var(--dim);
+    font-family:inherit;font-size:10.5px;letter-spacing:.08em;padding:6px 12px;cursor:pointer;white-space:nowrap;
+    transition:border-color .45s ease,color .45s ease}
+  #flagMode:hover{border-color:var(--line2);color:var(--accent)}
+  #flagMode.on{border-color:rgba(127,216,207,.45);color:var(--ok)}
+  .board{display:grid;grid-template-columns:repeat(9,32px);gap:3px;touch-action:manipulation;
+    width:max-content;margin:0 auto;background:#0d1014;border:1px solid var(--line);border-radius:6px;
+    padding:8px;box-shadow:inset 0 0 22px rgba(0,0,0,.45)}
+  .m{width:32px;height:32px;border-radius:4px;border:1px solid rgba(120,150,190,.16);
+    background:#1a2028;color:var(--ink);font-size:14px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+    transition:border-color .45s ease,background .2s ease}
+  .m:hover:enabled{border-color:var(--line2)}
+  .m.open{background:#12161c;border-color:rgba(120,150,190,.08);cursor:default;box-shadow:inset 0 0 8px rgba(0,0,0,.4)}
+  .m.flag{color:var(--accent)}
+  .m.boom{background:rgba(140,50,50,.28);border-color:rgba(192,91,91,.55)}
+  .m.mine{color:var(--bad)}
+  .n1{color:#8fb0c0}.n2{color:#8fb89a}.n3{color:#c08a78}.n4{color:#9a8fc4}
+  .n5{color:#a8cceb}.n6{color:#7fb3ad}.n7{color:#c9c3ad}.n8{color:#cf6a5c}
+  .shell-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+  .sbtn{flex:1;text-align:center;background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--dim);font-family:inherit;font-size:11px;letter-spacing:.14em;padding:9px 0;cursor:pointer;
+    text-decoration:none;transition:border-color .45s ease,color .45s ease}
+  .sbtn:hover{border-color:var(--line2);color:var(--accent)}
+  .overlay{position:fixed;inset:0;background:rgba(10,12,16,.78);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:9}
+  .overlay.show{display:flex}
+  .win{width:min(320px,86vw);background:rgba(20,24,30,.82);backdrop-filter:blur(8px);
+    border:1px solid rgba(127,216,207,.4);border-radius:8px;padding:26px 28px;text-align:center;
+    box-shadow:0 0 22px rgba(127,216,207,.12);animation:fadein .6s ease}
+  .win.fail{border-color:rgba(192,91,91,.4);box-shadow:0 0 22px rgba(192,91,91,.1)} /* 失败=暗红弱光，不刺眼 */
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .win h2{font-size:15px;letter-spacing:.35em;text-indent:.35em;font-weight:600;margin-bottom:8px;color:var(--ok)}
+  .win.fail h2{color:var(--bad)}
+  .win p{color:var(--dim);font-size:11px;letter-spacing:.08em;margin-bottom:18px}
+  .win button{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--accent);
+    font-family:inherit;font-size:12px;letter-spacing:.2em;padding:10px 26px;cursor:pointer;transition:border-color .45s ease}
+  .win button:hover{border-color:var(--ok)}
+  @media(max-width:380px){
+    .board{grid-template-columns:repeat(9,30px);gap:2px;padding:6px}
+    .m{width:30px;height:30px;font-size:13px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<script src="../march-story/frame-report.js?v=8e3f525cf5eb53e3"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="shell-head"><span><b>EXP-05</b> · 路障排除协议</span><span>GRID 9×9</span></div>
+  <div class="stage">
+    <span class="corner tl">SMP-81</span><span class="corner br">MINES:10</span>
+    <p class="brief">清空所有安全格即完成 · 首次点开保证安全</p>
+    <div class="bar">
+      <span class="pill">剩余 <b id="left">10</b></span>
+      <span class="pill">用时 <b id="time">0</b>s</span>
+      <button id="flagMode">⚑ 插旗模式:关</button>
+    </div>
+    <div class="board" id="board"></div>
+  </div>
+  <div class="shell-foot">
+    <button class="sbtn" id="resetAll">重置实验</button>
+    <a class="sbtn" id="backLab" href="index.html">返回档案室</a>
+    <button class="sbtn" id="helpBtn">帮助</button>
+  </div>
+</div>
+<div class="overlay" id="overlay"><div class="win"><h2 id="winTitle">FIELD CLEARED</h2><p id="winText"></p><button id="again">重新实验</button></div></div>
+<script>
+'use strict';
+/* 扫雷 9×9：10 雷。首次点开安全（雷区在首点后生成，避开点击格及其邻域）。
+   PC：左键点开 / 右键插旗；手机：短按点开 / 长按 0.45s 插旗；插旗模式开关兜底。
+   胜利（点开全部 71 个安全格）→ postMessage('mine_success')；触雷为暗红弱提示，不给信号，可重来。 */
+const KEY='mine_success';
+const SIZE=9,MINES=10;
+const boardEl=document.getElementById('board'),leftEl=document.getElementById('left'),timeEl=document.getElementById('time'),overlay=document.getElementById('overlay');
+let mines,open,flag,started,done,sec,timer,flagMode=false,longPress=null,lpFired=false;
+
+const nb=i=>{const x=i%SIZE,y=(i/SIZE)|0,r=[];
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+    if(!dx&&!dy)continue;
+    const nx=x+dx,ny=y+dy;
+    if(nx>=0&&nx<SIZE&&ny>=0&&ny<SIZE)r.push(ny*SIZE+nx);
+  }return r;};
+
+function cellEl(){return boardEl.children;}
+function startTimer(){if(timer)return;timer=setInterval(()=>{sec++;timeEl.textContent=sec;},1000);}
+function stopTimer(){clearInterval(timer);timer=null;}
+
+function build(){
+  mines=new Set();open=new Set();flag=new Set();
+  started=false;done=false;sec=0;stopTimer();
+  leftEl.textContent=MINES;timeEl.textContent='0';
+  boardEl.replaceChildren();
+  for(let i=0;i<81;i++){
+    const b=document.createElement('button');b.className='m';b.dataset.i=i;
+    boardEl.append(b);
+    b.addEventListener('pointerdown',e=>{
+      if(done)return;
+      lpFired=false;
+      longPress=setTimeout(()=>{lpFired=true;toggleFlag(i);},450); // 长按插旗
+      e.preventDefault();
+    });
+    b.addEventListener('pointerup',()=>{
+      clearTimeout(longPress);
+      if(done||lpFired){lpFired=false;return;}
+      flagMode?toggleFlag(i):reveal(i);
+    });
+    b.addEventListener('pointerleave',()=>clearTimeout(longPress));
+    b.addEventListener('contextmenu',e=>{e.preventDefault();if(!done)toggleFlag(i);}); // PC 右键插旗
+  }
+}
+function placeMines(safe){ // 首点及其邻域不放雷
+  const banned=new Set([safe,...nb(safe)]);
+  while(mines.size<MINES){
+    const i=Math.floor(Math.random()*81);
+    if(!banned.has(i))mines.add(i);
+  }
+}
+function count(i){let n=0;for(const k of nb(i))if(mines.has(k))n++;return n;}
+function paint(i){
+  const b=cellEl()[i],n=count(i);
+  b.classList.add('open');
+  if(n){b.textContent=n;b.classList.add('n'+n);}
+}
+function reveal(i){
+  if(done||open.has(i)||flag.has(i))return;
+  if(!started){started=true;placeMines(i);startTimer();}
+  if(mines.has(i))return boom(i);
+  const stack=[i];
+  while(stack.length){ // 泛洪点开空白区
+    const k=stack.pop();
+    if(open.has(k)||flag.has(k))continue;
+    open.add(k);paint(k);
+    if(count(k)===0)for(const t of nb(k))if(!open.has(t)&&!mines.has(t))stack.push(t);
+  }
+  if(open.size===81-MINES)win();
+}
+function toggleFlag(i){
+  if(done||open.has(i))return;
+  const b=cellEl()[i];
+  if(flag.has(i)){flag.delete(i);b.classList.remove('flag');b.textContent='';}
+  else{flag.add(i);b.classList.add('flag');b.textContent='⚑';}
+  leftEl.textContent=MINES-flag.size;
+}
+function boom(i){
+  done=true;stopTimer();
+  cellEl()[i].classList.add('boom','open');cellEl()[i].textContent='✸';
+  for(const k of mines)if(k!==i){const b=cellEl()[k];b.classList.add('open','mine');if(!flag.has(k))b.textContent='✸';}
+  const w=document.querySelector('.win');
+  w.classList.add('fail'); // 失败=暗红弱提示
+  document.getElementById('winTitle').textContent='DETONATION';
+  document.getElementById('winText').textContent='触发路障 · 协议中止 · 可重新实验。';
+  overlay.classList.add('show');
+}
+function win(){
+  done=true;stopTimer();
+  for(const k of mines){const b=cellEl()[k];if(!flag.has(k)){b.classList.add('flag');b.textContent='⚑';}}
+  document.querySelector('.win').classList.remove('fail');
+  document.getElementById('winText').textContent='全部安全格已排查 · 用时 '+sec+'s · 奖励已就绪。';
+  overlay.classList.add('show');
+  try{window.CZMarchFrameReport(KEY);}catch(_){}
+}
+document.getElementById('resetAll').addEventListener('click',()=>{overlay.classList.remove('show');build();});
+document.getElementById('again').addEventListener('click',()=>{overlay.classList.remove('show');build();});
+document.getElementById('flagMode').addEventListener('click',e=>{
+  flagMode=!flagMode;
+  e.currentTarget.textContent='⚑ 插旗模式:'+(flagMode?'开':'关');
+  e.currentTarget.classList.toggle('on',flagMode);
+});
+document.getElementById('helpBtn').addEventListener('click',()=>{});
+if(window.parent!==window)document.getElementById('backLab').remove(); // iframe 内由父页面控制导航
+build();
+/* 自动化/父页面测试钩子 */
+window.__czTest={win,reveal,toggleFlag};
+</script>
+</body>
+</html>

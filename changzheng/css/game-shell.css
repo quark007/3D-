@@ -1,0 +1,74 @@
+.at-title>.hud-top,.at-title>.map-container,.at-title>.map-footer,.at-title>.nav-bottom,.at-title>.intro-overlay,.at-title>.char-select-overlay{visibility:hidden;pointer-events:none}
+.prebattle-overlay.open,.command-overlay.open,.settlement-overlay.open,.telegram-overlay.open,.archive-overlay.open,.decrypt-overlay.open,.intel-buff-overlay.open,.npc-overlay.open,.char-select-overlay.open,.linkcheck-overlay.open,.ration-overlay.open,.ration-result-overlay.open,.history-cards-overlay.open,.card-detail-overlay.open,.history-qa-overlay.open,.mailbox-overlay.open{visibility:visible;opacity:1;transition:none}.prebattle-content{transition:none}.prebattle-overlay{backdrop-filter:none}
+.npc-story-completed{margin:8px 0 16px;padding:10px 0;border-bottom:1px solid #a5937055}.npc-story-completed>summary{cursor:pointer;font-size:13px;line-height:1.8}.npc-story-completed .npc-story-card{margin-top:14px}
+.title-locked{pointer-events:none}.title-locked>#titleScreen,.title-locked>.award-demo-overlay,.title-locked>.experience-overlay,.title-locked>dialog{pointer-events:auto}.title-locked>:not(#titleScreen):not(.award-demo-overlay):not(.experience-overlay):not(dialog){pointer-events:none!important}.title-actions #titleStart .title-start-label{font:inherit;margin:0}.title-actions #titleStart .title-start-arrow{margin-left:40px;font-size:24px}.npc-bubble-ai::before{content:attr(data-speaker)}
+.map-base{filter:none;contain:paint}.decision-film-overlay,.zunyi-overlay,.award-demo-overlay{backdrop-filter:none}.map-attribution{position:absolute;bottom:10px;left:calc(37% + 18px);z-index:10;padding:5px 8px;background:#e9e1d1df;color:#514632;font:11px/1.6 "Microsoft YaHei",sans-serif;pointer-events:none}.map-wide .map-attribution{left:16px}.demo-banner{position:fixed;top:76px;right:16px;max-width:520px;background:#762e23;color:#fff1d9;padding:10px 14px;z-index:9000;font:12px/1.8 "Microsoft YaHei",sans-serif}.demo-banner button{color:inherit;background:none;border:1px solid #d5ba81;padding:5px 9px;cursor:pointer;margin-left:10px}.title-actions #titleHighlights{background:transparent;font-size:12px;border-bottom:1px solid #b9a17a80;border-top:0;border-left:0;border-right:0}.hud-stat .hud-stat-name,.field-chapter-foot,.compliance-text,.title-foot small{font-size:12px!important}
+.title-screen{position:fixed;inset:0;z-index:8000;background:#121713;color:#f0e5d0;overflow:auto;isolation:isolate}.title-screen[hidden]{display:none}.title-landscape{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#111610fa 4%,#111610e6 31%,#11161030 80%),linear-gradient(0deg,#111610b0,transparent 60%),url('../assets/art/march-landscape.webp') 75% center/cover no-repeat}.title-landscape::after{content:'';position:absolute;inset:0;border:14px solid #11161055;pointer-events:none}.title-copy{padding:clamp(28px,6vh,70px) clamp(24px,8vw,140px);max-width:860px}.title-eyebrow{font:12px/1.8 Georgia,serif;color:#c4b99f;letter-spacing:5px}.title-star{display:block;color:#bd4935;font-size:32px;margin:28px 0 8px}.title-copy h1{font:500 clamp(54px,8vw,112px)/1.14 "CZ Documentary Serif",serif;letter-spacing:.13em;margin:0 0 22px}.title-copy h1 span{display:block}.title-line{font:18px/2 "CZ Documentary Serif",serif;color:#d4c9b3;margin:0 0 26px}.title-actions{display:flex;flex-wrap:wrap;gap:12px;max-width:580px}.title-actions button,.title-connection button{padding:14px 20px;border:1px solid #b9a17a80;background:#1d241b;color:#e9ddc6;cursor:pointer;font:15px/1.5 inherit;min-height:48px}.title-actions #titleStart{display:flex;justify-content:space-between;align-items:center;background:#9b3a2e;color:#fff2dc;min-width:240px;border-color:#bf624b}.title-actions #titleStart span{font-size:24px;margin-left:40px}#titleRestart{font-size:12px;background:transparent;border:0;text-decoration:underline}#titleRestart[hidden]{display:none}.title-connection{margin-top:28px;border-top:1px solid #a5937440;padding-top:18px;max-width:480px;display:flex;gap:18px;align-items:center}.title-connection button{font-size:12px;padding:9px 12px;white-space:nowrap}.title-connection p{font-size:11px;line-height:1.9;color:#bcbca9;margin:0}.title-foot{font-size:12px;line-height:2;color:#bdb49d;margin-top:30px;letter-spacing:2px}.title-foot small{font-size:10px;color:#a3a996;letter-spacing:1px}
+.map-collapse{position:absolute;top:14px;left:calc(37% - 100px);z-index:12;background:#212b20;color:#e6dbc5;border:1px solid #9e9b7460;padding:8px 10px;cursor:pointer}.map-wide .chapter-banner{display:none}.map-wide .map-view{left:0}.map-wide .field-map-heading{left:140px}.map-wide .map-collapse{left:14px}.map-wide .map-footer-secondary{display:none}.map-wide .map-footer{padding-block:5px}.game-home{background:none;color:#e1d1b4;border:0;border-bottom:1px solid #776c52;padding:8px;font-size:12px;cursor:pointer}.task-background-hidden>.map-container>.chapter-banner{visibility:hidden}.task-background-hidden>.hud-top{z-index:30}
+.npc-portrait svg{display:block;width:min(100%,150px);height:auto;min-height:140px;color:#b7bda5;filter:drop-shadow(0 0 7px #a5ab8560)}.npc-portrait{display:flex;align-items:center;justify-content:center;padding:24px 10px 50px;min-width:120px}.npc-portrait::after{content:attr(data-name);writing-mode:horizontal-tb;position:absolute;inset:auto 8px 18px;text-align:center;font:13px/1.8 "CZ Documentary Serif",serif;letter-spacing:2px;color:#cfbea0}.npc-portrait.emotion-tense{border-right-color:#c06443}.npc-portrait.emotion-tense svg{filter:drop-shadow(0 0 12px #bc3a27aa)}.npc-portrait.emotion-tragic svg,.npc-portrait.emotion-defeat svg{filter:grayscale(.7) brightness(.8)}.npc-portrait.emotion-hopeful svg{filter:drop-shadow(0 0 9px #c3a75488)}.npc-typing-content{display:inline;white-space:pre-wrap;line-height:2;overflow-wrap:anywhere}.npc-typing-indicator{background:#11180f99;border-left:2px solid #777d65;padding:12px 16px}.npc-chat-flow{scroll-behavior:auto}.npc-overlay,.experience-overlay,.journey-overlay,.learning-overlay,.command-overlay{backdrop-filter:none}.npc-bubble-ai,.npc-bubble-player{overflow-wrap:anywhere}
+.story-fold{margin:12px 0;border:1px solid #8e866450;padding:10px 14px}.story-fold>summary{cursor:pointer;color:inherit;font-size:13px}.story-fold[open]>summary{margin-bottom:14px}.npc-story-recap{margin-top:22px}.chapter-film-strip img{content-visibility:auto;contain-intrinsic-size:320px 180px}
+@media(max-width:700px){.title-copy{padding:28px 24px}.title-copy h1{font-size:68px}.title-star{margin-top:20px}.title-landscape{background-position:68% center}.title-actions{display:grid}.title-copy h1 span{display:inline}.title-connection{align-items:flex-start}.title-foot{margin-top:22px}.map-collapse{left:auto;right:12px;top:12px}.map-wide .map-collapse{left:12px;right:auto}.npc-portrait{min-width:80px;width:96px;padding:15px 5px 48px}.npc-portrait svg{min-height:90px}.npc-portrait::after{font-size:11px}.title-line{font-size:16px}}
+
+/* Decisions are real controls, with the same visual weight by touch or keyboard. */
+.prebattle-content{max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain}
+.prebattle-option{font:inherit;color:inherit;text-align:center;appearance:none;min-width:0}
+.prebattle-option-icon{font:italic 36px/1.2 Georgia,serif;color:#bf7056;opacity:1}
+.command-tile{font-family:inherit;color:inherit;line-height:1.5}
+.command-tile[aria-pressed="true"]{border-color:#cb8b62;box-shadow:inset 3px 0 #b74932!important}
+.prebattle-option:focus-visible,.command-tile:focus-visible{outline:2px solid #f1d2a5;outline-offset:3px}
+@media(max-width:700px){
+  :root{--hud-h:100px}
+  /* 原来 height 写死 var(--hud-h)、行高写死 32px 44px：而 .hud-left 里除了 logo 还塞了
+     主菜单 / 玩法指引 / 本程目标 / 全部静音，360px 宽下必然折成两三行（实测 98px 高），
+     行高不够 → .hud-left 被垂直居中后上半截跑出视口（y=-25），下半截压住 .hud-right 的
+     「队伍 / 弹药」标签，重叠 29px。改成行高跟随内容、总高跟随内容，
+     --hud-h 由 js/ui-polish.js 按实际高度回写，地图/面板的 inset 才不会错位。 */
+  .hud-top{height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 44px;align-content:start;gap:4px;padding:8px 12px}
+  .hud-left{justify-content:space-between;gap:8px;min-width:0}
+  /* 目标条让它吃满剩余宽度，否则「本程目标 · 找到当前操作」会被挤成两行 */
+  .hud-left #objective43{flex:1 1 auto;min-width:0}
+  .hud-logo{gap:8px}.logo-text{font-size:18px;letter-spacing:2px}.game-home{min-height:32px;padding:4px 10px;font-size:12px}
+  .hud-right{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;width:100%}
+  .hud-right .hud-stat{min-width:0;min-height:44px;padding:0 10px;grid-template-rows:16px 24px;align-content:center}
+  .hud-stat .hud-stat-name{font-size:11px!important;letter-spacing:1px}.hud-right .stat-val{font-size:21px;line-height:24px}
+  .demo-banner{top:calc(var(--hud-h) + 6px);right:8px;max-width:calc(100vw - 16px);padding:5px 8px;line-height:1.5;font-size:11px}
+  .demo-banner button{font-size:11px;min-height:32px;padding:4px 8px;margin-left:8px}
+  .demo-mode .prebattle-content{margin-top:48px;max-height:calc(100dvh - 80px)}
+  .map-footer .experience-dock button{min-height:40px;font-size:11px}
+  .map-footer .node-nav-btn{min-height:36px;font-size:11px}
+  .command-tile{min-height:44px}
+  .prebattle-stamp{position:static;display:table;transform:none;margin:0 auto 12px;font-size:11px;padding:3px 8px}
+}
+@media(min-width:500px) and (max-width:700px) and (max-height:500px){.demo-banner{top:8px;right:68px;font-size:0;background:transparent;border:0;padding:0}.demo-banner button{margin:0;font-size:11px;background:#762e23}}
+@media(prefers-reduced-motion:reduce){.title-screen *,.npc-content *,.prebattle-content *,.command-content *,.decision-film-panel *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+.title-links{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;font:12px/1.8 "Microsoft YaHei",sans-serif}.title-links a{color:#d0b38a;text-decoration:none;border-bottom:1px solid #806f50;padding:5px 0}.title-links a:hover{color:#ffddb0}.title-links a:focus-visible{outline:2px solid #e7b372;outline-offset:4px}
+
+/* Closed task layers must not keep off-screen scene panels visible to observers. */
+.dungeon-panel:not(.open),.command-overlay:not(.open),.prebattle-overlay:not(.open),.settlement-overlay:not(.open),.npc-overlay:not(.open){display:none!important}
+
+/* 章节屏/路线图（没有全屏覆盖层打开时）演示条仍是 fixed 定位在 HUD 下方，
+   ≤700px 下会压住章节头的「02 / 12」和「收起行记」按钮 —— 这两个都在正文流里，
+   不是浮层。这里按演示条实测高度给 .map-container 让出空间（不写死数字：
+   --demo-banner-h 由 js/ui-polish.js 回写，量不到时退回 42px 的窄屏实测值）。
+   全屏面板打开的情形由 mission40.css 里「贴顶通栏 + 内容 padding-top」处理，二者不重叠生效。 */
+@media(max-width:700px){
+  body.demo-mode:not(:has(.command-overlay.open)):not(:has(.prebattle-overlay.open)) .map-container{
+    padding-top:calc(var(--demo-banner-h, 42px) + 10px);
+  }
+  /* .map-collapse 是绝对定位（top:12px），父级 padding 不会带动它，得单独让位；
+     它是「收起行记」按钮，被压住就等于点不到，必须让。 */
+  body.demo-mode:not(:has(.command-overlay.open)):not(:has(.prebattle-overlay.open)) .map-collapse{
+    top:calc(var(--demo-banner-h, 42px) + 22px);
+  }
+}
+
+/* 701–1000px（平板竖屏/小窗）：演示条按 520px 宽定位会横穿地图列顶部的「1934 — 1936」标题。
+   这里收窄到 200px 靠右，避开居中标题；高度变化由 --demo-banner-h 自动跟随。 */
+@media(min-width:701px) and (max-width:1000px){
+  .demo-banner{max-width:200px}
+}
+
+/* 演示模式浮条 z-index 是 9000，而 .toast 只有 300 —— 刚弹出的提示条会被浮条压掉最后一行。
+   提示条是「刚刚发生的那件事」的即时反馈，应该压在浮条之上。 */
+body.demo-mode .toast{z-index:9100}

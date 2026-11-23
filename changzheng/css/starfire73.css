@@ -1,0 +1,36 @@
+/* Third-batch shells and collection: owned drawing surfaces, no global canvas override. */
+.starfire73-game,.starfire73-brief,.starfire73-catalog{box-sizing:border-box;margin:auto!important;width:min(1080px,96vw);max-height:94dvh;overflow:auto;overscroll-behavior:contain;background:#14251f;color:#eadfc7;border:1px solid #b59a64;border-radius:15px;padding:20px;font:15px/1.65 "Microsoft YaHei",sans-serif}
+.starfire73-brief{width:min(650px,94vw)}
+.starfire73-game::backdrop,.starfire73-brief::backdrop,.starfire73-catalog::backdrop{background:#08130eeb}
+.starfire73-game header,.starfire73-catalog header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.starfire73-game h2,.starfire73-brief h2,.starfire73-catalog h2{font:600 clamp(20px,3vw,28px)/1.4 "CZ Documentary Serif",serif;margin:4px 0 10px;color:#efdbad}
+.starfire73-game small,.starfire73-brief small,.starfire73-catalog small{font-size:11px;letter-spacing:.1em;color:#c7af78}
+.starfire73-game canvas{display:block;box-sizing:border-box;width:min(100%,750px);height:auto;aspect-ratio:16/9;max-height:none;margin:12px auto;background:#21392f;border:1px solid #59745e;border-radius:9px}
+.starfire73-game button,.starfire73-brief button,.starfire73-catalog button{font:inherit;min-height:44px;min-width:44px;border:1px solid #a48e60;border-radius:8px;background:#304638;color:#f0e5cd;padding:8px 13px;cursor:pointer}
+.starfire73-game button:hover,.starfire73-brief button:hover,.starfire73-catalog button:hover{background:#405940}
+.starfire73-game button:disabled,.starfire73-brief button:disabled{opacity:.4;cursor:default}
+.starfire73-game :focus-visible,.starfire73-brief :focus-visible,.starfire73-catalog :focus-visible{outline:3px solid #ebc979;outline-offset:3px}
+.starfire73-game [data-content]{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.starfire73-game [data-content]>p{width:100%;margin:4px 0}
+.starfire73-game [data-stats],.starfire73-game [role=status]{padding:8px 12px;background:#0f1c16;border-left:3px solid #cfb073;margin:8px 0;font-variant-numeric:tabular-nums}
+.sf73-actions{display:flex;flex-wrap:wrap;gap:8px;position:sticky;bottom:0;z-index:5;padding:10px 0;background:#14251ff5;border-top:1px solid #a48e6055}
+.sf73-code{font-size:20px;color:#efcf81;letter-spacing:.14em;overflow-wrap:anywhere}
+.sf73-library{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px;margin:18px 0}
+.sf73-card{background:#f1e8d2;color:#3d3c2c;border:1px solid #b9a884;border-left:3px solid #97372a;border-radius:5px;padding:16px}
+.sf73-card h3{font:600 18px/1.5 "CZ Documentary Serif",serif;margin:6px 0}.sf73-card small{color:#7a6b4c;letter-spacing:0}.sf73-badge{color:#886628}
+.sf73-mode{padding:6px 10px;border-left:3px solid #c5a05b;background:#18251b;font-size:12px!important;color:#e7cd97!important}
+.starfire-hard73 [data-hint],.starfire-hard73 [data-retract]{display:none!important}
+.starfire73-entry{cursor:pointer;min-height:72px;background:#f6efdd!important;border:1px solid #b9ac8d!important;border-left:3px solid #97372a!important;color:#352e23!important}
+.starfire73-entry:hover{background:#fbf4e4!important}.starfire73-entry:focus-visible{outline:3px solid #a88b4d;outline-offset:2px}
+.blanket72-dialog,.zunyi72-dialog,.lantern72-dialog,.fishhook72-dialog,.wildveg72-dialog,.bridge72-dialog{margin:auto!important;max-height:94dvh!important;overflow:auto!important;box-sizing:border-box}
+.blanket72-dialog button,.zunyi72-dialog button,.lantern72-dialog button,.fishhook72-dialog button,.wildveg72-dialog button,.bridge72-dialog button{min-height:44px!important;min-width:44px!important}
+.blanket72-dialog [class$=actions],.zunyi72-dialog [class$=actions],.lantern72-dialog [class$=actions],.fishhook72-dialog [class$=actions],.wildveg72-dialog [class$=actions],.bridge72-dialog [class$=actions]{position:sticky;bottom:0;z-index:6;display:flex;flex-wrap:wrap;gap:7px;background:#101c18f5;padding:9px 0;border-top:1px solid #b59a6466}
+.starfire73-game [hidden],.starfire73-catalog [hidden]{display:none!important}
+@media(max-width:700px){.starfire73-game,.starfire73-catalog{padding:12px}.starfire73-game header,.starfire73-catalog header{gap:8px}.starfire73-game header button,.starfire73-catalog header button{flex:none;max-width:105px}.starfire73-game [data-content]>button{flex:1 1 auto}.starfire73-game canvas{margin:8px auto}.starfire73-game p,.starfire73-brief p{font-size:13px}.sf73-actions{gap:6px}.starfire73-game details{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.starfire73-game *,.starfire73-catalog *{animation:none!important;transition:none!important}}
+
+.starfire73-game canvas{width:auto!important;max-width:100%!important;height:min(34dvh,300px)!important;aspect-ratio:16/9!important;object-fit:contain}
+.sf73-access{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.sf73-access button{min-width:44px;min-height:44px;touch-action:none;font-size:14px!important}.sf73-access p{width:100%;color:#f1dab0;font-size:15px}
+
+/* Native action rows stay in document flow so they never cover card touch targets. */
+.blanket72-dialog [class$=actions],.zunyi72-dialog [class$=actions],.lantern72-dialog [class$=actions],.fishhook72-dialog [class$=actions],.wildveg72-dialog [class$=actions],.bridge72-dialog [class$=actions]{position:static!important}

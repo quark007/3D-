@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>EXP-06 · 数字密码键盘</title>
+<!--
+  用法（与 MNIST 手写锁同源的按键式密码装置）：
+    <iframe src="/minigames/keypad-lock.html?pwd=1936" width="100%" height="640" style="border:0" loading="lazy"></iframe>
+  父页面监听通关信号：
+    window.addEventListener('message', e => { if (e.data === 'keypad_success') { /* 放行 */ } });
+  密码定制：URL ?pwd=1234 或父页面注入 window.CZ_KEYPAD_PASSWORD（默认 1936）。
+  本文件零外部依赖；纯本地校验。
+-->
+<style>
+  :root{
+    --bg0:#121418;--steel:#364254;
+    --panel:rgba(22,27,34,.78);--panel2:rgba(28,34,43,.85);
+    --line:rgba(120,150,190,.22);--line2:rgba(140,175,215,.4);
+    --ink:#e6e8ec;--dim:#8a97a8;--faint:#5c6a7c;
+    --accent:#a8cceb;--glow:rgba(140,180,220,.45);
+    --ok:#7fd8cf;--bad:#c05b5b
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  body{
+    background:radial-gradient(900px 460px at 50% -10%,#1a212b 0%,transparent 60%),var(--bg0);
+    color:var(--ink);font-family:"JetBrains Mono","Cascadia Mono","SF Mono",Consolas,"Courier New","Microsoft YaHei",monospace;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:14px calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    user-select:none;-webkit-user-select:none
+  }
+  /* 均匀胶片颗粒 + 极细静态扫描线（不滚动、不喧宾夺主） */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    background-size:140px 140px}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px),
+      radial-gradient(120% 92% at 50% 40%,transparent 60%,rgba(0,0,0,.4) 100%)}
+  .shell{width:min(400px,94vw);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:8px;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.42);
+    position:relative;z-index:1}
+  .shell-head{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:10px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);letter-spacing:.08em}
+  .shell-head b{color:var(--accent);font-weight:600}
+  .stage{padding:18px 16px 14px;position:relative}
+  .corner{position:absolute;font-size:9.5px;color:var(--faint);letter-spacing:.12em}
+  .corner.tl{top:6px;left:12px}.corner.br{bottom:6px;right:12px}
+  .screen{background:#0d1014;border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:14px;
+    box-shadow:inset 0 0 18px rgba(0,0,0,.5)}
+  .screen .label{font-size:9.5px;color:var(--faint);letter-spacing:.2em;margin-bottom:8px}
+  .screen .value{font-size:26px;letter-spacing:.35em;min-height:34px;color:var(--accent);
+    text-shadow:0 0 10px var(--glow);word-break:break-all}
+  .screen .value i{font-style:normal;color:var(--faint);animation:caret 1.2s steps(1) infinite}
+  @keyframes caret{50%{opacity:0}}
+  .screen.err{border-color:rgba(192,91,91,.6);box-shadow:inset 0 0 18px rgba(0,0,0,.5),0 0 12px rgba(192,91,91,.18);
+    transition:border-color .6s ease}
+  .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .k{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--ink);
+    font-family:inherit;font-size:17px;padding:13px 0;cursor:pointer;touch-action:manipulation;
+    transition:border-color .45s ease,background .45s ease,transform .12s ease;position:relative}
+  .k:hover{border-color:var(--line2);background:linear-gradient(180deg,rgba(50,62,78,.5),rgba(30,37,47,.5))}
+  .k:active{transform:scale(.96);box-shadow:0 0 10px var(--glow);transition:transform .12s ease,box-shadow .5s ease}
+  .k.fn{color:var(--dim);font-size:14px}
+  .confirm{width:100%;margin-top:9px;background:linear-gradient(180deg,rgba(54,66,84,.55),rgba(34,42,54,.55));
+    border:1px solid var(--line2);border-radius:6px;color:var(--accent);font-family:inherit;font-size:14px;
+    letter-spacing:.3em;text-indent:.3em;padding:12px 0;cursor:pointer;touch-action:manipulation;
+    transition:border-color .45s ease,box-shadow .45s ease,transform .12s ease}
+  .confirm:hover{box-shadow:0 0 12px rgba(140,180,220,.22)}
+  .confirm:active{transform:scale(.98)}
+  .shell-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+  .sbtn{flex:1;text-align:center;background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--dim);font-family:inherit;font-size:11px;letter-spacing:.14em;padding:9px 0;cursor:pointer;
+    text-decoration:none;transition:border-color .45s ease,color .45s ease}
+  .sbtn:hover{border-color:var(--line2);color:var(--accent)}
+  .msg{min-height:16px;font-size:10.5px;color:var(--faint);text-align:center;letter-spacing:.1em;margin-top:10px;transition:color .5s}
+  .msg.bad{color:var(--bad)}
+  .overlay{position:fixed;inset:0;background:rgba(10,12,16,.78);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:9}
+  .overlay.show{display:flex}
+  .win{width:min(320px,86vw);background:rgba(20,24,30,.82);backdrop-filter:blur(8px);
+    border:1px solid rgba(127,216,207,.4);border-radius:8px;padding:26px 28px;text-align:center;
+    box-shadow:0 0 22px rgba(127,216,207,.12);animation:fadein .6s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .win h2{color:var(--ok);font-size:15px;letter-spacing:.35em;text-indent:.35em;font-weight:600;margin-bottom:8px}
+  .win p{color:var(--dim);font-size:11px;letter-spacing:.08em;margin-bottom:18px}
+  .win button{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--accent);
+    font-family:inherit;font-size:12px;letter-spacing:.2em;padding:10px 26px;cursor:pointer;transition:border-color .45s ease}
+  .win button:hover{border-color:var(--ok)}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<script src="../march-story/frame-report.js?v=8e3f525cf5eb53e3"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="shell-head"><span><b>EXP-06</b> · 数字密码键盘</span><span>PASSKEY TERM.</span></div>
+  <div class="stage">
+    <span class="corner tl">SMP-KEYPAD</span><span class="corner br">REV.1</span>
+    <div class="screen" id="screen">
+      <div class="label">ENTER PASSKEY // 输入密码</div>
+      <div class="value" id="value"><i>▌</i></div>
+    </div>
+    <div class="keys" id="keys"></div>
+    <button class="confirm" id="confirm">确 认</button>
+    <div class="msg" id="msg">密码 4 位 · 输入完成后按确认</div>
+  </div>
+  <div class="shell-foot">
+    <button class="sbtn" id="resetAll">重置实验</button>
+    <a class="sbtn" id="backLab" href="index.html">返回档案室</a>
+    <button class="sbtn" id="helpBtn">帮助</button>
+  </div>
+</div>
+<div class="overlay" id="overlay"><div class="win"><h2>ACCESS GRANTED</h2><p>密码核对无误 · 装置解锁 · 已通知主线</p><button id="again">重新实验</button></div></div>
+<script>
+'use strict';
+/* 数字密码键盘：与 MNIST 手写锁（EXP-01）同源的按键式密码装置。
+   输入即校验长度，确认时核对；错误输入框闪烁暗光一次，正确平滑过渡到通关弹窗。
+   通关后 window.parent.postMessage('keypad_success','*') 通知父页面。 */
+const KEY='keypad_success';
+const qs=new URLSearchParams(location.search);
+const PWD=String(window.CZ_KEYPAD_PASSWORD||qs.get('pwd')||'1936').replace(/\D/g,'');
+
+const valueEl=document.getElementById('value'),screenEl=document.getElementById('screen'),msgEl=document.getElementById('msg'),overlay=document.getElementById('overlay');
+let buf='';
+function render(){valueEl.innerHTML='';for(const ch of buf){const s=document.createElement('span');s.textContent=ch;valueEl.append(s);}const i=document.createElement('i');i.textContent='▌';valueEl.append(i);}
+function msg(t,c){msgEl.textContent=t;msgEl.className='msg'+(c?' '+c:'');}
+function press(k){
+  if(buf.length>=PWD.length)return;
+  buf+=k;render();
+  msg('已输入 '+buf.length+' / '+PWD.length+' 位');
+}
+function back(){buf=buf.slice(0,-1);render();msg('已输入 '+buf.length+' / '+PWD.length+' 位');}
+function clearAll(){buf='';render();msg('已清空');screenEl.classList.remove('err');}
+function submit(){
+  if(buf.length<PWD.length){msg('位数不足 · 还差 '+(PWD.length-buf.length)+' 位','bad');return;}
+  if(buf===PWD){win();}
+  else{ // 错误：输入框闪烁一次暗光，缓动衰减
+    screenEl.classList.add('err');msg('核对失败 · 密码不符','bad');
+    setTimeout(()=>screenEl.classList.remove('err'),650);
+    buf='';render();
+  }
+}
+function buildKeys(){
+  const box=document.getElementById('keys');box.replaceChildren();
+  const layout=['1','2','3','4','5','6','7','8','9','C','0','⌫'];
+  for(const k of layout){
+    const b=document.createElement('button');b.className='k'+(/[0-9]/.test(k)?'':' fn');b.textContent=k;
+    b.addEventListener('click',()=>{if(k==='C')clearAll();else if(k==='⌫')back();else press(k);});
+    box.append(b);
+  }
+}
+function win(){overlay.classList.add('show');try{window.CZMarchFrameReport(KEY);}catch(_){}}
+document.getElementById('confirm').addEventListener('click',submit);
+document.getElementById('resetAll').addEventListener('click',()=>{clearAll();msg('实验已重置 · 请重新输入');overlay.classList.remove('show');});
+document.getElementById('again').addEventListener('click',()=>{clearAll();overlay.classList.remove('show');});
+document.getElementById('helpBtn').addEventListener('click',()=>msg('输入 '+PWD.length+' 位数字密码 → 确认；C 清空，⌫ 退格'));
+window.addEventListener('keydown',e=>{ // PC 键盘辅助
+  if(/^[0-9]$/.test(e.key))press(e.key);
+  else if(e.key==='Backspace')back();
+  else if(e.key==='Escape')clearAll();
+  else if(e.key==='Enter')submit();
+});
+if(window.parent!==window)document.getElementById('backLab').remove(); // iframe 内由父页面控制导航
+buildKeys();render();
+/* 自动化/父页面测试钩子 */
+window.__czTest={win,press,submit,state:()=>buf};
+</script>
+</body>
+</html>

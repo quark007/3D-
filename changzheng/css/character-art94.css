@@ -1,0 +1,27 @@
+/* character-art94.css — 手绘立绘接入（young-soldier）
+   「普通红军战士」选人卡：原画为白纸水彩，按「档案贴照」处理——
+   微倾角纸片贴在卡片右上（左缘渐隐入卡面，标题/描述压过处仍可读），
+   纸底不抠图；正文与职责块抬到贴照之上，深浅两套卡片主题都成立。 */
+.char-card[data-char-id="soldier"]::before{
+  content:'';
+  position:absolute;
+  top:5%;
+  right:4%;
+  left:auto;
+  width:26%;
+  height:36%;
+  background-image:linear-gradient(90deg,#18251ce0,#18251c00 34%),url('../assets/portraits/young-soldier.webp');
+  background-size:100% 100%,cover;
+  background-position:left top,center bottom;
+  background-repeat:no-repeat;
+  border:1px solid #00000030;
+  box-shadow:0 3px 9px #0000004d;
+  transform:rotate(2.2deg);
+  opacity:.94;
+  filter:sepia(.14) saturate(.86) contrast(.98);
+  mix-blend-mode:normal;
+}
+.char-card[data-char-id="soldier"]>*{
+  position:relative;
+  z-index:1;
+}

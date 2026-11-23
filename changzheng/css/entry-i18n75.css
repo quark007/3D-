@@ -1,0 +1,23 @@
+/* Longer English strings wrap naturally; original Chinese layout is unchanged. */
+html[lang=en] #titleScreen h1{font:500 clamp(48px,6.2vw,86px)/1.08 Georgia,serif!important;letter-spacing:.015em!important;word-break:normal;overflow-wrap:normal}
+html[lang=en] #titleScreen h1 span{font:inherit;letter-spacing:inherit;display:block}
+html[lang=en] #titleScreen :is(.title-eyebrow,.title-line,.title-foot,.title-start-label){letter-spacing:normal!important}
+html[lang=en] #titleScreen .title-line{line-height:1.6}
+html[lang=en] #titleScreen .title-foot{font-size:13px;line-height:1.7}
+html[lang=en] #titleScreen .title-foot small{font-size:12px;line-height:1.6;display:inline-block;max-width:100%}
+html[lang=en] #titleScreen .title-extras-panel{gap:12px;padding:16px;scroll-padding-top:16px}
+html[lang=en] #titleScreen .title-extras-panel :is(button,a,p,label,span){max-width:100%;min-width:0;white-space:normal;overflow-wrap:break-word;letter-spacing:normal!important;line-height:1.5}
+html[lang=en] #titleScreen .title-connection{display:grid;grid-template-columns:minmax(140px,auto) minmax(0,1fr);gap:14px;align-items:start}
+html[lang=en] #titleScreen .title-connection button{margin:0;min-height:44px}
+html[lang=en] #titleScreen .title-connection p{margin:0}
+html[lang=en] #titleScreen #titleStart{white-space:normal}
+html[lang=en] #titleScreen .title-start-label{font-size:clamp(22px,3.2vw,34px);line-height:1.25}
+html[lang=en] #charSelectOverlay :is(.char-select-title,.char-select-desc,.char-select-hint,.char-card-name,.char-select-start-text,.char-select-start-hint){letter-spacing:normal!important}
+html[lang=en] #charSelectOverlay .char-card-name{font-size:22px;line-height:1.4}
+html[lang=en] #charSelectOverlay .char-card-desc{font-size:14px!important;line-height:1.6!important}
+html[lang=en] #charSelectOverlay .char-select-hint{animation:none!important}
+html[lang=en] #charSelectOverlay .role-duty{font-size:14px!important;white-space:normal}
+@media(max-width:700px){html[lang=en] #titleScreen h1{font-size:clamp(42px,12vw,64px)!important}html[lang=en] #titleScreen .title-connection{grid-template-columns:minmax(0,1fr)}html[lang=en] #titleScreen .title-extras-panel{padding:14px}html[lang=en] #titleScreen .title-links{gap:10px;align-items:stretch}html[lang=en] #charSelectOverlay .char-select-desc{font-size:13px;line-height:1.5}html[lang=en] #charSelectOverlay .coop66-selector{font-size:12px;line-height:1.5}}
+
+/* English strings are taller: keep the disclosure as an upward overlay so its full scroll area stays inside the viewport. */
+html[lang=en] #titleScreen .title-extras-panel{position:absolute;inset:auto auto 100% 0;transform:none;width:100%;box-sizing:border-box;max-height:min(60dvh,calc(100dvh - 150px));margin:0;overflow:auto}

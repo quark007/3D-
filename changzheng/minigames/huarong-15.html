@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>EXP-04 · 样本重排矩阵</title>
+<!--
+  用法（档案室/密码关卡 iframe 嵌入）：
+    <iframe src="/minigames/huarong-15.html" width="100%" height="660" style="border:0" loading="lazy"></iframe>
+  父页面监听通关信号：
+    window.addEventListener('message', e => { if (e.data === 'huarong_success') { /* 放行 */ } });
+  本文件零外部依赖；打乱采用"从复原态随机走 160 步"，天然保证有解。
+-->
+<style>
+  :root{
+    --bg0:#121418;--steel:#364254;
+    --panel:rgba(22,27,34,.78);--panel2:rgba(28,34,43,.85);
+    --line:rgba(120,150,190,.22);--line2:rgba(140,175,215,.4);
+    --ink:#e6e8ec;--dim:#8a97a8;--faint:#5c6a7c;
+    --accent:#a8cceb;--glow:rgba(140,180,220,.45);
+    --ok:#7fd8cf;--bad:#c05b5b
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  body{
+    background:radial-gradient(900px 460px at 50% -10%,#1a212b 0%,transparent 60%),var(--bg0);
+    color:var(--ink);font-family:"JetBrains Mono","Cascadia Mono","SF Mono",Consolas,"Courier New","Microsoft YaHei",monospace;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:14px calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+    user-select:none;-webkit-user-select:none
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    background-size:140px 140px}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px),
+      radial-gradient(120% 92% at 50% 40%,transparent 60%,rgba(0,0,0,.4) 100%)}
+  .shell{width:min(420px,94vw);background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:8px;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 10px 34px rgba(0,0,0,.42);
+    position:relative;z-index:1}
+  .shell-head{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:10px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);letter-spacing:.08em}
+  .shell-head b{color:var(--accent);font-weight:600}
+  .stage{padding:16px;position:relative}
+  .corner{position:absolute;font-size:9.5px;color:var(--faint);letter-spacing:.12em}
+  .corner.tl{top:6px;left:12px}.corner.br{bottom:6px;right:12px}
+  .brief{font-size:10.5px;color:var(--dim);letter-spacing:.1em;text-align:center;margin-bottom:12px}
+  .pill{display:block;width:max-content;margin:0 auto 12px;border:1px solid var(--line);border-radius:4px;
+    padding:5px 15px;font-size:10.5px;color:var(--dim);background:#0d1014;letter-spacing:.1em}
+  .pill b{color:var(--accent);font-weight:600}
+  .pad{width:max-content;margin:0 auto;background:#0d1014;border:1px solid var(--line);border-radius:6px;
+    padding:8px;box-shadow:inset 0 0 22px rgba(0,0,0,.45)}
+  canvas{display:block;width:min(300px,80vw);height:auto;border-radius:3px;cursor:pointer;touch-action:none}
+  .hint{color:var(--faint);font-size:10px;margin-top:10px;text-align:center;letter-spacing:.12em}
+  .hint::before{content:"» "}
+  .shell-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+  .sbtn{flex:1;text-align:center;background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--dim);font-family:inherit;font-size:11px;letter-spacing:.14em;padding:9px 0;cursor:pointer;
+    text-decoration:none;transition:border-color .45s ease,color .45s ease}
+  .sbtn:hover{border-color:var(--line2);color:var(--accent)}
+  .overlay{position:fixed;inset:0;background:rgba(10,12,16,.78);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:9}
+  .overlay.show{display:flex}
+  .win{width:min(320px,86vw);background:rgba(20,24,30,.82);backdrop-filter:blur(8px);
+    border:1px solid rgba(127,216,207,.4);border-radius:8px;padding:26px 28px;text-align:center;
+    box-shadow:0 0 22px rgba(127,216,207,.12);animation:fadein .6s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .win h2{color:var(--ok);font-size:15px;letter-spacing:.35em;text-indent:.35em;font-weight:600;margin-bottom:8px}
+  .win p{color:var(--dim);font-size:11px;letter-spacing:.08em;margin-bottom:18px}
+  .win button{background:transparent;border:1px solid var(--line2);border-radius:6px;color:var(--accent);
+    font-family:inherit;font-size:12px;letter-spacing:.2em;padding:10px 26px;cursor:pointer;transition:border-color .45s ease}
+  .win button:hover{border-color:var(--ok)}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<script src="../march-story/frame-report.js?v=8e3f525cf5eb53e3"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="shell-head"><span><b>EXP-04</b> · 样本重排矩阵</span><span>MATRIX 4×4</span></div>
+  <div class="stage">
+    <span class="corner tl">SMP-15</span><span class="corner br">SOLVABLE</span>
+    <p class="brief">把 1–15 归位 · 点击空格旁的方块滑动</p>
+    <span class="pill">步数 <b id="steps">0</b></span>
+    <div class="pad"><canvas id="cv" width="288" height="288"></canvas></div>
+    <div class="hint">数字变青色表示已归位</div>
+  </div>
+  <div class="shell-foot">
+    <button class="sbtn" id="resetAll">重置实验</button>
+    <a class="sbtn" id="backLab" href="index.html">返回档案室</a>
+    <button class="sbtn" id="helpBtn">帮助</button>
+  </div>
+</div>
+<div class="overlay" id="overlay"><div class="win"><h2>MATRIX SOLVED</h2><p id="result">样本按序归档。</p><button id="again">重新实验</button></div></div>
+<script>
+'use strict';
+/* 数字华容道（4×4 滑块拼图，Canvas 实现）。
+   打乱：从复原态随机走 160 步（不立即回退），保证必然有解且不会开局即复原。
+   通关后 postMessage('huarong_success') 通知父页面。 */
+const KEY='huarong_success';
+const N=4,CELL=72;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=288*dpr;cv.height=288*dpr;cv.style.height='auto';ctx.scale(dpr,dpr);
+const stepsEl=document.getElementById('steps'),overlay=document.getElementById('overlay');
+let a,blank,steps=0;
+
+const isSolved=g=>g.every((v,i)=>i<15?v===i+1:v===0);
+function neighborsOf(i){const x=i%N,y=(i/N)|0,r=[];
+  if(x>0)r.push(i-1);if(x<N-1)r.push(i+1);if(y>0)r.push(i-N);if(y<N-1)r.push(i+N);return r;}
+function shuffled(){
+  let g=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0],b=15,last=-1;
+  for(let k=0;k<160;k++){
+    const opts=neighborsOf(b).filter(n=>n!==last);
+    const n=opts[Math.floor(Math.random()*opts.length)];
+    g[b]=g[n];g[n]=0;last=b;b=n;
+  }
+  return isSolved(g)?shuffled():g; // 概率极低的复原态则重打乱
+}
+function draw(){
+  ctx.clearRect(0,0,288,288);
+  ctx.fillStyle='#10141a';ctx.fillRect(0,0,288,288);
+  for(let i=0;i<16;i++){
+    if(i===blank)continue;
+    const x=(i%N)*CELL,y=((i/N)|0)*CELL,v=a[i],ok=v===i+1;
+    ctx.fillStyle=ok?'#17231f':'#1a2028';
+    ctx.strokeStyle=ok?'rgba(127,216,207,.5)':'rgba(120,150,190,.28)';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(x+3,y+3,CELL-6,CELL-6,5);else ctx.rect(x+3,y+3,CELL-6,CELL-6);
+    ctx.fill();ctx.stroke();
+    ctx.fillStyle=ok?'#7fd8cf':'#a8cceb';
+    ctx.font=(v>9?'23px':'25px')+' "JetBrains Mono",Consolas,"Courier New",monospace';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(v,x+CELL/2,y+CELL/2+1);
+  }
+}
+function tryMove(i){
+  if(!neighborsOf(blank).includes(i))return;
+  a[blank]=a[i];a[i]=0;blank=i;steps++;stepsEl.textContent=steps;
+  draw();
+  if(isSolved(a))win();
+}
+cv.addEventListener('pointerdown',e=>{
+  const r=cv.getBoundingClientRect(),s=288/r.width;
+  tryMove(Math.floor((e.clientY-r.top)*s/CELL)*N+Math.floor((e.clientX-r.left)*s/CELL));
+  e.preventDefault();
+});
+function reset(){a=shuffled();blank=a.indexOf(0);steps=0;stepsEl.textContent='0';draw();}
+function win(){overlay.classList.add('show');document.getElementById('result').textContent='全部按序归档 · 共 '+steps+' 步。';try{window.CZMarchFrameReport(KEY);}catch(_){}}
+document.getElementById('resetAll').addEventListener('click',reset);
+document.getElementById('again').addEventListener('click',()=>{overlay.classList.remove('show');reset();});
+document.getElementById('helpBtn').addEventListener('click',()=>{});
+if(window.parent!==window)document.getElementById('backLab').remove(); // iframe 内由父页面控制导航
+reset();
+/* 自动化/父页面测试钩子 */
+window.__czTest={win,reset,isSolved:()=>isSolved(a)};
+</script>
+</body>
+</html>

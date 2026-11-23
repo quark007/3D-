@@ -1,0 +1,49 @@
+/* Selected direction: field command room in-game; cinematic marching title. */
+:root{--field-canvas:#19211c;--field-ink:#111812;--field-paper:#f2e5c9;--field-brass:#b49b68;--field-red:#8f3027;--field-text:#f5ead3;--field-muted:#d1c5aa}
+.learning-overlay{padding:12px;background:radial-gradient(ellipse at 10% 0%,#6a2a2245,transparent 55%),#0c120ff5;backdrop-filter:none!important}
+.learning-content{width:min(1460px,100%);max-width:100%;max-height:calc(100dvh - 24px);display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:0;padding:0;overflow:hidden;background:repeating-linear-gradient(91deg,#fff2 0 1px,transparent 1px 7px),var(--field-canvas);border:1px solid var(--field-brass);border-top:4px solid var(--field-red);border-radius:2px;box-shadow:0 16px 55px #0009;color:var(--field-text);text-shadow:none}
+.learning-scene{min-width:0;align-self:start;padding:18px 14px;max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;background:linear-gradient(#0b110d88,#121a1455)}
+.learning-workspace{min-width:0;max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:24px 28px 28px;box-sizing:border-box;border-left:1px solid #8c795660;isolation:isolate;position:relative}
+.learning-content .learning-eyebrow{color:#dcc69b;font:600 15px/1.7 'Microsoft YaHei',sans-serif;letter-spacing:1px;margin:0 0 12px}
+.learning-content h2{font:700 clamp(26px,3vw,38px)/1.4 "CZ Documentary Serif","CZ Documentary Serif","CZ Documentary Serif",serif;color:#fff0cf;text-shadow:none;letter-spacing:3px;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid #9f8651}
+.learning-content .learning-body{color:#f4ead3;font:18px/1.95 'Microsoft YaHei','PingFang SC',sans-serif;letter-spacing:0;opacity:1;text-shadow:none}
+.learning-content .learning-note{color:#d1c5aa;font:15px/1.8 'Microsoft YaHei',sans-serif;opacity:1;text-shadow:none;border-left:3px solid #9c4735;margin:12px 0;padding-left:12px}
+.learning-content a{color:#efcc92;font-size:15px;text-decoration:underline;text-underline-offset:4px}
+.learning-content .learning-question{font:700 21px/1.65 "CZ Documentary Serif",serif;color:#f9e6c3;margin:26px 0 12px;letter-spacing:0}
+.learning-workspace button{min-height:48px;font-size:17px;line-height:1.7;touch-action:manipulation}
+.learning-content .learning-option{position:relative;width:100%;margin:10px 0;padding:14px 18px;text-align:left;transform:none;translate:none;border:1px solid #9b8966;border-left:4px solid #9b8966;border-radius:2px;background:#263229;color:#fff0d1;font:600 17px/1.7 'Microsoft YaHei',sans-serif;opacity:1;text-shadow:none}
+.learning-content .learning-option:hover,.learning-content .learning-option.selected{background:#3a4936;border-color:#ddc18c;translate:none}
+.learning-content .learning-feedback{min-height:28px;color:#f4d18e!important;font:600 16px/1.8 'Microsoft YaHei',sans-serif;margin:12px 0}
+.learning-next{display:block;position:sticky;bottom:0;z-index:2;width:100%;padding:14px 20px;border:1px solid #c59d63;border-top:3px solid #e0bf88;border-radius:2px;background:#8f3027;color:#fff1d0;font-weight:700;box-shadow:0 -8px 16px #19211c;cursor:pointer}
+.learning-next[aria-disabled='true']{background:#354034;color:#e2d6bb;border-color:#8f8263}
+.learning-content .learning-close{color:#ead7b0;border-color:#a38d64;font-size:16px;border-radius:2px;padding:10px 18px}
+.chapter-video-decisions{position:relative;isolation:isolate;margin:20px 0;padding:20px;background:linear-gradient(120deg,#282a1e,#1b241d);border:1px solid #aa8d59;border-top:4px solid #9b392c;border-radius:2px;color:#f5e9ce;box-shadow:inset 0 0 24px #0003}
+.chapter-video-decisions h3{color:#ffebc0!important;font:700 24px/1.5 "CZ Documentary Serif","CZ Documentary Serif","CZ Documentary Serif",serif!important;margin:0 0 10px!important;letter-spacing:1px}
+.chapter-video-decisions .chapter-plan-note{color:#ded0b2!important;font:16px/1.8 'Microsoft YaHei',sans-serif;opacity:1;text-shadow:none;margin:8px 0 15px}
+.chapter-video-decisions .chapter-plan-preset{width:100%;text-align:left;margin:10px 0;padding:13px 16px;border:1px solid #b39662;border-left:4px solid #bb6850;border-radius:2px;background:#63372a;color:#fff1d4;font:600 17px/1.7 'Microsoft YaHei',sans-serif;cursor:pointer;opacity:1;transform:none}
+.chapter-video-decisions .chapter-plan-preset:hover,.chapter-video-decisions .chapter-plan-preset.selected{background:#923d2d;border-color:#f3cc82;box-shadow:inset 4px 0 #f1c56e}
+.chapter-video-decisions label{display:block;margin:18px 0 0;color:#f9e7c6!important;font:600 17px/1.8 'Microsoft YaHei',sans-serif}
+.chapter-video-decisions .chapter-plan-input{position:relative;z-index:1;display:block;box-sizing:border-box;width:100%;min-height:118px;margin-top:8px;padding:14px 16px;background:#f2e5c9!important;color:#241f17!important;-webkit-text-fill-color:#241f17;caret-color:#7e2921;border:2px solid #b39767;border-radius:2px;font:17px/1.8 'Microsoft YaHei',sans-serif;opacity:1;pointer-events:auto;user-select:text;-webkit-user-select:text;touch-action:auto;resize:vertical;text-shadow:none}
+.chapter-video-decisions .chapter-plan-input::placeholder{color:#635640!important;opacity:1;-webkit-text-fill-color:#635640}
+.chapter-video-decisions .chapter-plan-input:focus{outline:3px solid #d49b54;outline-offset:2px;border-color:#772d21}
+.chapter-video-decisions .chapter-plan-counter{display:block;margin:5px 0 10px;text-align:right;color:#d7c8a6;font:14px/1.6 'Microsoft YaHei',sans-serif}
+.chapter-video-decisions .chapter-plan-submit{background:#8f3027;color:#fff1d0;font-weight:700;border-color:#cfaa70;border-radius:2px;min-height:48px}
+.chapter-video-decisions .chapter-plan-status{min-height:29px;margin:12px 0 0;color:#f4d18e!important;font:600 16px/1.8 'Microsoft YaHei',sans-serif;opacity:1;text-shadow:none}
+.learning-workspace button:focus-visible,.chapter-video-decisions button:focus-visible{outline:3px solid #f2ce8b;outline-offset:3px}
+.command-content,.zunyi-shell,.sandbox-shell{background:repeating-linear-gradient(0deg,#ffffff02 0 1px,transparent 1px 6px),#18221b;border-color:#a58b5e;border-radius:2px;color:#f5e9d0}
+.command-content p,.command-content label{color:#e7d9bd;font-size:17px;line-height:1.8;text-shadow:none}
+.command-content textarea,.command-content input[type='text'],.zunyi-shell textarea{background:#f2e5c9;color:#241f17;caret-color:#8b3025;font:17px/1.8 'Microsoft YaHei',sans-serif;user-select:text;-webkit-user-select:text}
+.title-screen{background:#080e0c;color:#fff0d3}
+.title-landscape::after{background:linear-gradient(90deg,#080e0cf2 2%,#080e0cb5 37%,transparent 75%),linear-gradient(0deg,#080e0cc9,transparent 38%);animation:none}
+.title-copy{max-width:980px;box-sizing:border-box;padding-block:clamp(18px,3.5vh,44px)}
+.title-copy h1{font-family:"CZ Documentary Serif","CZ Documentary Serif","CZ Documentary Serif",serif;font-weight:700;letter-spacing:.16em;color:#fff1d3;text-shadow:0 4px 18px #000b}
+.title-star{font-size:40px;color:#c33f2b;text-shadow:0 0 18px #a7372440}
+.title-line{color:#eee1c5;font-size:clamp(17px,2vh,21px);line-height:1.9;text-shadow:0 2px 5px #000}
+.title-eyebrow{color:#d7c5a1;font-size:14px;letter-spacing:4px}
+.title-actions #titleStart{background:linear-gradient(110deg,#9c3325,#76241c);border:1px solid #d29765;border-top:3px solid #cf8b55;min-height:58px;font-weight:700;box-shadow:0 6px 24px #0005}
+.title-actions button,.title-links button,.title-connection button{border-radius:2px;background-color:#202a21;color:#f0dfbd;border-color:#ae9060;min-height:44px;font-family:'Microsoft YaHei',sans-serif}
+.title-connection p,.title-foot,.title-foot small{color:#d1c5aa;font-size:14px;line-height:1.8}
+.title-actions #titleHighlights,.title-actions #titleRestart,.title-links a{color:#f0d5a5;font-size:15px}
+@media(max-width:850px){.learning-content{display:block;overflow-y:auto;max-height:calc(100dvh - 16px)}.learning-overlay{padding:8px}.learning-scene{max-height:34dvh;padding:10px;overflow:auto}.learning-workspace{max-height:none;overflow:visible;padding:20px 18px;border-left:0;border-top:1px solid #8c795660}.learning-next{bottom:0}.chapter-video-decisions{padding:16px}.title-copy{padding-inline:24px}.title-copy h1{font-size:clamp(50px,8vh,86px)}}
+@media(max-height:690px) and (min-width:851px){.title-copy{gap:7px;padding-block:18px}.title-copy h1{font-size:64px}.title-star{font-size:28px}.title-line{font-size:16px;line-height:1.6}.title-actions button{min-height:42px;padding-block:10px}.title-actions #titleStart{min-height:48px}.title-foot,.title-connection p{font-size:12px;line-height:1.6}}
+@media(max-width:650px){.title-copy{gap:8px;padding:18px 22px;justify-content:center}.title-copy h1{font-size:clamp(44px,7vh,68px);line-height:1.05}.title-star{font-size:28px}.title-line{font-size:16px;line-height:1.65}.title-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%;gap:8px}.title-actions #titleStart{grid-column:1/-1;min-width:0;min-height:48px}.title-actions button{padding:9px 10px;font-size:14px;min-height:42px}.title-actions #titleRestart{grid-column:1/-1;min-height:28px;padding:3px}.title-connection{gap:10px;padding-top:8px}.title-connection p{font-size:12px;line-height:1.6}.title-links{display:flex;gap:12px;flex-wrap:wrap}.title-links a{font-size:14px}.title-foot,.title-foot small{font-size:12px;line-height:1.6}}

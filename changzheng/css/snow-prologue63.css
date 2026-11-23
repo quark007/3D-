@@ -1,0 +1,69 @@
+/* Study opening: readable HTML controls over a code-native SVG stage. */
+.snow63-dialog{box-sizing:border-box;width:min(1100px,96vw);max-width:96vw;max-height:94dvh;overflow:auto;padding:0;margin:auto!important;border:1px solid #b7a783;background:#1b2927;color:#f5f0df;border-radius:4px}
+.snow63-dialog::backdrop{background:#07100ee8}
+.snow63-dialog header{padding:18px 24px;border-bottom:1px solid #8d8a70;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.snow63-dialog h2{font-size:clamp(23px,3vw,34px);margin:0;font-weight:500;letter-spacing:3px}
+.snow63-kicker{font-size:12px;letter-spacing:2px;color:#d8caad;width:100%}
+.snow63-controls{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.snow63-dialog button,.hero63-entry button{box-sizing:border-box;min-height:44px;white-space:normal;height:auto;padding:10px 18px;font:inherit;line-height:1.5;border:1px solid #b9ab87;border-radius:3px;color:#fff9e8;background:#40544b;cursor:pointer}
+.snow63-dialog button:hover,.hero63-entry button:hover{background:#56695e}
+.snow63-dialog button:focus-visible,.hero63-entry button:focus-visible{outline:3px solid #eed7a5;outline-offset:3px}
+.snow63-dialog .snow63-primary{background:#873c35}
+.snow63-art{aspect-ratio:2.39;overflow:hidden;background:#758780}
+.snow63-art svg{width:100%;height:auto;max-width:none;display:block}
+.snow63-caption{padding:12px 26px 0;line-height:1.85;font-size:clamp(16px,1.65vw,20px);min-height:92px}
+.snow63-caption p{margin:8px 0}.snow63-caption strong{color:#dfcca4;font-weight:500}
+.snow63-caption ul{font-size:15px;padding-left:22px}
+.snow63-actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 26px}
+.snow63-boundary{font-size:13px;line-height:1.7;color:#d3ccbb}
+.snow63-dialog>.snow63-boundary{padding:0 26px 14px;margin:0}
+.snow63-dialog progress{display:block;width:calc(100% - 52px);height:5px;margin:0 26px 12px;accent-color:#b89969}
+.snow63-card-portrait{margin:0 0 16px}.snow63-card-portrait svg{width:100%;height:auto;display:block}
+.title-extras-panel .snow63-text-link{display:block;width:auto;min-height:40px;height:auto;max-width:100%;padding:8px 4px;margin:0;color:#eddfbe;border:0;border-radius:0;background:none;box-shadow:none;font:inherit;line-height:1.6;white-space:normal;text-align:left}
+.title-extras-panel .snow63-text-link:hover{text-decoration:underline}
+.title-extras:not([open]) .title-extras-panel{display:none!important}
+.map-node.snow63-distant{visibility:hidden;pointer-events:none}
+.snow63-more{position:relative;color:#e5d7b6}.snow63-more summary{cursor:pointer;min-height:40px;display:flex;align-items:center;padding:4px 14px}
+.snow63-more>div{position:absolute;bottom:100%;left:0;min-width:210px;max-height:55dvh;overflow:auto;background:#243b30;border:1px solid #ac9971;z-index:90;padding:8px;display:grid;gap:5px}
+.snow63-more:not([open])>div{display:none}
+.hero63-entry{margin:18px 0;padding:14px;border-top:1px solid #b9ab87;display:flex;flex-wrap:wrap;gap:9px}.hero63-entry h3,.hero63-entry small{width:100%;margin:0}
+.snow63-nav-more{flex:1;text-align:center}.snow63-nav-more summary{justify-content:center;height:100%}.snow63-nav-more>div{right:12px;left:auto}.snow63-nav-more .nav-btn{min-height:50px;width:100%}
+.snow63-steps{display:flex;gap:12px;flex-wrap:wrap;padding-left:24px;color:#8c322b;font-size:14px}.snow63-steps li{margin-right:18px}.snow63-first-hint{color:#793c2e;font-size:14px}
+.snow63-start-hint{outline:3px solid #a8503b;outline-offset:3px;animation:snow63-hint 1.7s ease-in-out 3}
+@keyframes snow63-hint{50%{outline-color:#eed49a}}
+/* No full-screen hit shield: the panel is a drawer, with an independent return button. */
+#dungeonPanel.dungeon-panel{position:fixed;inset:var(--hud-h,80px) 0 var(--nav-h,60px) auto;width:min(560px,94vw);height:auto;max-height:calc(100dvh - var(--hud-h,80px) - var(--nav-h,60px))}
+#dungeonPanel[data-rendering63=true]{pointer-events:none}
+#dungeonPanel .panel-header{position:sticky;top:0;z-index:3;background:#eee5cf}
+.snow63-panel-return{min-height:40px;padding:7px 15px;background:#334d3e;color:#fff5da;border:1px solid #a18c65;margin:0 0 10px;cursor:pointer}
+#dungeonPanel .panel-footer{flex-shrink:0}
+@media(max-width:700px){.snow63-dialog{width:98vw;max-width:98vw;max-height:97dvh}.snow63-dialog header{padding:12px 16px}.snow63-controls{margin:0}.snow63-controls button{padding:7px 10px;font-size:13px}.snow63-caption{padding-inline:16px;font-size:16px}.snow63-actions{padding:12px 16px}.snow63-art{max-height:29dvh}.snow63-caption ul{font-size:14px}#dungeonPanel.dungeon-panel{width:94vw}}
+@media(prefers-reduced-motion:reduce){.snow63-art *{animation:none!important}}
+/* Keep the live decision controls in the viewport; only narrative text scrolls. */
+.snow63-dialog[open]{display:grid;grid-template-rows:auto minmax(90px,28dvh) minmax(64px,1fr) auto 5px auto;height:min(820px,96dvh);max-height:96dvh;overflow:hidden}
+.snow63-dialog .snow63-art{height:100%;max-height:none;aspect-ratio:auto}
+.snow63-dialog .snow63-art svg{width:100%;height:100%;object-fit:contain}
+.snow63-dialog .snow63-caption{min-height:0;overflow:auto;overscroll-behavior:contain;padding-top:4px}
+.snow63-dialog .snow63-actions{background:#1b2927;align-items:center;padding-block:8px}
+.snow63-dialog .snow63-boundary{max-height:52px;overflow:auto;margin-block:0;padding-bottom:4px;font-size:12px}
+.snow63-dialog progress{margin-bottom:0}
+.snow63-dialog textarea{box-sizing:border-box;display:block;width:100%;min-height:84px;background:#11201d;color:#fff;border:1px solid #b9ab87;padding:10px;font:inherit;resize:vertical}
+.snow63-dialog textarea::placeholder{color:#c3c9c3}
+/* [P0 修复 2026-10-26] 原行为无作用域，全章节隐藏了稍后学习/退出按钮；预期作用域是雪山序章首章抽屉态（snow-prologue63.js:77 仅第1站挂 .snow63-first-chapter，同文件:25/:63 均已套用）。 */
+.snow63-first-chapter #dungeonPanel #panelBack,.snow63-first-chapter #dungeonPanel #panelClose,.snow63-first-chapter #dungeonPanel #btnExit,.snow63-first-chapter #dungeonPanel #btnSkip{display:none!important}
+#dungeonPanel .npc-story-card .npc-story-start,#dungeonPanel .npc-story-card .npc-story-actions{display:none}
+#dungeonPanel .panel-footer #btnEnter{flex:1;width:100%}
+.npc-fixed-mode .npc-model56{display:none!important}
+.hero64-catalog .hero64-slot{display:inline-flex;vertical-align:top;box-sizing:border-box;flex-direction:column;width:calc(50% - 12px);margin:6px;padding:16px;border:1px dashed #8c8c7b;background:#353e36;color:#d5d5ca;min-height:190px}
+.hero64-catalog .hero64-slot.collected{border:2px solid #c1a16b;background:#3d4c37;color:#fff1d4}
+.hero64-catalog .hero64-slot button{margin-top:auto;min-height:44px}
+.hero64-role-badge{align-self:flex-start;display:inline-block;padding:2px 9px;margin-top:2px;border:1px solid #c1a16b;border-radius:10px;font-size:12px;line-height:1.6;color:#eed7a5;background:rgba(193,161,107,.14)}
+.hero63-entry .hero64-role-badge{align-self:center}
+@media(max-height:760px) and (min-width:701px){.snow63-dialog header{padding:8px 18px}.snow63-dialog h2{font-size:26px}.snow63-dialog .snow63-caption{font-size:16px;line-height:1.6}.snow63-dialog .snow63-actions button{padding:7px 12px}.snow63-dialog[open]{grid-template-rows:auto minmax(80px,25dvh) minmax(60px,1fr) auto 5px auto}}
+@media(max-width:700px){.snow63-dialog[open]{grid-template-rows:auto minmax(70px,20dvh) minmax(64px,1fr) auto 5px auto;height:97dvh;max-height:97dvh}.snow63-dialog .snow63-actions{gap:6px}.snow63-dialog .snow63-actions button{font-size:14px;padding:7px 10px}.hero64-catalog .hero64-slot{width:calc(100% - 12px);min-height:140px}.snow63-first-chapter .hud-top{padding-block:5px;gap:5px}.snow63-first-chapter .hud-title{font-size:17px}.snow63-first-chapter #nextStep63{font-size:12px;padding:5px 8px}}
+/* English prologue display (html[lang="en"]): slightly tighter type so 1280x720 / 1366x768 stay inside the dialog */
+html[lang="en"] .snow63-dialog h2{letter-spacing:.5px}
+html[lang="en"] .snow63-caption{font-size:clamp(15px,1.55vw,19px);line-height:1.7}
+html[lang="en"] .snow63-caption ul{font-size:14px}
+html[lang="en"] .snow63-dialog .snow63-caption{font-size:16px;line-height:1.6}
+html[lang="en"] .snow63-controls button{font-size:14px;padding:8px 12px}

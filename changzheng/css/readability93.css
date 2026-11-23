@@ -1,0 +1,58 @@
+/* Explicit surface pairs: never carry pale type from a dark card onto paper. */
+#charSelectOverlay .char-select-content{background:#18231c!important;color:#f0e5d0!important;border:1px solid #667463!important;box-shadow:none!important}
+#charSelectOverlay .char-select-header{background:transparent!important}
+#charSelectOverlay :is(.char-select-title,.char-card-name,.char-card-desc,.char-select-desc,.char-select-hint,.role-duty-label,.coop66-selector){color:#f0e5d0!important;text-shadow:none!important;opacity:1!important}
+#charSelectOverlay .char-select-hint{animation:none!important;letter-spacing:.04em!important}
+#charSelectOverlay :is(.char-select-desc,.char-select-hint,.role-duty-label,.char-select-start-hint){font-size:15px!important;line-height:1.7!important}
+#charSelectOverlay .char-card{background:#121c16!important;border-color:#65725e!important}
+#charSelectOverlay .role-duty{background:#293d30!important;color:#f4eddd!important;font:500 16px/1.6 var(--font-ui)!important;border-left-color:#ccab79!important}
+#charSelectOverlay .char-card.selected{border:2px solid #e1c48e!important;box-shadow:inset 0 -3px #e1c48e!important}
+#charSelectOverlay .char-select-back{background:#293d30!important;color:#f4eddd!important}
+#charSelectOverlay .char-select-start{color:#fff4df!important;background:#9b3a2e!important;opacity:1!important}
+#charSelectOverlay .char-select-start:disabled{background:#344038!important;border-color:#879584!important;cursor:not-allowed!important}
+#charSelectOverlay .char-select-start :is(span,.char-select-start-text,.char-select-start-hint){color:#f4eddd!important;opacity:1!important}
+#charSelectOverlay .char-card::after,#charSelectOverlay .char-select-content::before{background:none!important}
+/* Walking-story dialogue: fully dark shell with legible body, hints and controls. */
+dialog.march83-dialog,dialog.supplies93,dialog.experience-entry93{background:#18231c!important;color:#f0e5d0!important;border:1px solid #65725e!important;font-family:var(--font-ui);margin:auto}
+dialog.march83-dialog :is(header,footer,.march83-body){background:#18231c!important;color:#f0e5d0!important}
+dialog.march83-dialog :is(h2,h3,h4,p,strong,b,label,summary,.march83-line){color:#f0e5d0!important;text-shadow:none!important}
+dialog.march83-dialog :is(small,.march83-label,.march83-progress){color:#d0c5ae!important;font-size:14px!important;line-height:1.7!important;opacity:1!important}
+dialog.march83-dialog .march83-progress{color:#efbfaa!important}
+dialog.march83-dialog :is(.march89-dialog-step,.march89-action-hint){background:#2a3d31!important;color:#f4eddd!important;border-color:#85967a!important}
+dialog.march83-dialog :is(.march87-clue-card,.march89-task,.march83-work article){background:#26372d!important;color:#f0e5d0!important}
+dialog.march83-dialog :is(.march87-clue-card,.march89-task) :is(p,small,strong,summary){color:#f0e5d0!important;opacity:1!important}
+dialog.march83-dialog :is(button,select,input,textarea),dialog.supplies93 button,dialog.experience-entry93 button{background:#2c4436!important;color:#fff2d8!important;border:1px solid #95a185!important;min-height:44px!important;font:500 16px/1.6 var(--font-ui)!important;box-shadow:none!important;opacity:1!important}
+dialog.march83-dialog button:disabled{background:#364039!important;color:#d4d9cf!important;border-style:dashed!important;cursor:not-allowed}
+dialog.march83-dialog .march83-line{font-size:19px!important;line-height:1.9!important;user-select:text}
+dialog.march83-dialog :is(p,label,summary){font-size:16px;line-height:1.8}
+dialog.supplies93,dialog.experience-entry93{box-sizing:border-box;width:min(640px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:24px;overflow:auto;border-radius:6px}
+dialog.supplies93 :is(h2,p,dt,dd),dialog.experience-entry93 :is(h2,p){color:#f0e5d0!important;opacity:1!important}
+dialog.supplies93 p,dialog.experience-entry93 p{font-size:16px;line-height:1.8}
+.supplies93 dl{display:grid;grid-template-columns:1fr auto;gap:14px;border-block:1px solid #65725e;padding:18px 0}.supplies93 dd{margin:0;font-variant-numeric:tabular-nums}
+.hud-top .supplies-trigger93,.hud-top .records93>summary{display:flex;align-items:center;justify-content:center;min-height:44px;box-sizing:border-box;padding:8px 13px;background:#2c4436!important;color:#fff2d8!important;border:1px solid #95a185!important;border-radius:5px;font:500 14px/1.5 var(--font-ui)!important;white-space:nowrap;cursor:pointer}
+.records93{position:relative}.records93>summary{list-style:none}.records93>summary::-webkit-details-marker{display:none}.records93>div{position:absolute;top:calc(100% + 10px);right:0;padding:10px;min-width:160px;background:#18231c;border:1px solid #95a185;display:grid;gap:8px;z-index:3000}
+.records93 .spark69-fab,.records93 .corr69-fab{position:static!important;inset:auto!important;transform:none!important;width:100%;min-height:44px;background:#2c4436!important;color:#fff2d8!important;box-shadow:none!important;animation:none!important}
+.march93-task-hint{position:absolute;top:14px;left:16px;width:300px;max-width:calc(100% - 130px);z-index:20;background:#18271ff5;color:#fff2d8;border:1px solid #adbd9b;border-left:3px solid #dec395;border-radius:7px;box-shadow:0 5px 18px #0003;font:16px/1.75 var(--font-ui);box-sizing:border-box;pointer-events:auto}
+.march93-task-hint header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;border-bottom:1px solid #75866d}
+.march93-task-hint header strong{color:#f4e6c7;font-size:15px}
+.march93-task-hint header button{padding:5px 12px;min-height:44px;font:500 14px/1.5 var(--font-ui);background:#334f3e;color:#fff2d8;border:1px solid #a7b496}
+.march93-task-hint>div{padding:12px 14px}.march93-task-hint>div[hidden]{display:none!important}
+.march93-task-hint h3{margin:0 0 8px;color:#fff2d8;font-size:17px;line-height:1.6}.march93-task-hint p{color:#e0d8c5;margin:7px 0;font-size:15px;line-height:1.8}
+@media(max-width:700px){.march93-task-hint{left:10px;top:10px;width:255px;max-width:calc(100% - 110px)}.march93-task-hint header{padding:5px 8px;gap:6px}.march93-task-hint header strong{font-size:14px}.march93-task-hint>div{max-height:32dvh;overflow:auto}.march93-task-hint p{font-size:15px}}
+:is(dialog,[role=dialog]) :is(input,textarea)::placeholder{color:#b7c3b1;opacity:1}
+:is(button,summary,input,textarea,select):focus-visible{outline:2px solid #e3c992;outline-offset:3px}
+@media(max-width:700px){#charSelectOverlay .char-select-content{padding:15px!important}#charSelectOverlay .char-card{padding:16px!important}#charSelectOverlay .role-duty{display:block!important;font-size:16px!important}dialog.march83-dialog .march83-line{font-size:18px!important}.hud-top .hud-title{font-size:16px}.hud-top .supplies-trigger93,.hud-top .records93>summary{font-size:12px!important;padding:6px 8px}.hud-top .march90-place{display:none}}
+
+#charSelectOverlay .char-select-content{overflow-x:hidden!important}#charSelectOverlay :is(.char-select-header,.char-cards-grid,.char-card){min-width:0;box-sizing:border-box}
+
+/* 章节入口弹窗：按钮原本是裸 inline-block，会挤成一团并贴住说明文字。 */
+dialog.experience-entry93 > h2{margin:0 0 14px!important;font-size:22px!important;line-height:1.5!important}
+dialog.experience-entry93 > p{margin:0 0 10px!important}
+dialog.experience-entry93 > p.march83-note{font-size:14px!important;color:#d0c5ae!important}
+dialog.experience-entry93 > button,dialog.supplies93 > button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  margin:18px 10px 0 0!important;padding:9px 20px!important;border-radius:5px!important;cursor:pointer!important}
+dialog.experience-entry93 > button:first-of-type{background:#9b3a2e!important;border-color:#d6a68c!important;font-weight:700!important}
+dialog.experience-entry93 > button:hover,dialog.supplies93 > button:hover{filter:brightness(1.15)}
+dialog.experience-entry93::backdrop{background:#080d0ad9}
+@media(max-width:700px){dialog.experience-entry93 > button{width:100%;margin:10px 0 0!important}}

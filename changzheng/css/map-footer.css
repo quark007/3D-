@@ -1,0 +1,20 @@
+/* This footer is a flex item in the page, never an overlay on the map. */
+html,body{overflow:clip}
+.map-container{min-height:0}
+.nav-bottom{flex-shrink:0}
+.map-footer{position:relative;z-index:100;flex:0 0 auto;display:grid;gap:10px;padding:12px 20px 10px;background:linear-gradient(110deg,#302328f7,#182b33fa);border-top:1px solid #b4955d55;box-shadow:0 -8px 26px #0003}
+.map-footer>.node-nav{position:static;inset:auto;transform:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 14px;align-items:center;justify-self:center;width:min(100%,690px);max-width:100%;box-sizing:border-box;padding:0;margin:0;border:0;border-radius:0;box-shadow:none;background:none}
+.map-footer .node-nav-btn{height:42px;min-height:42px;margin:0;padding:0 20px}
+.map-footer .node-nav-pos{min-width:0;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.map-footer .node-nav-hint{position:static;inset:auto;transform:none;grid-column:1/-1;grid-row:2;text-align:center;padding:0;background:none;white-space:normal;animation:none;font-size:11px;line-height:1.5;color:#b5b1a0}
+.map-footer-secondary{display:flex;justify-content:space-between;align-items:center;gap:12px;min-width:0}
+.map-footer .experience-dock{position:static;inset:auto;z-index:auto;flex:0 1 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:0;background:none;border:0;box-shadow:none;border-radius:0;min-width:0}
+.map-footer .experience-dock button{min-height:38px;padding:7px 13px;font-size:12px;white-space:nowrap;border-color:#95784f80;background:#1d3039}
+.map-footer .compliance-stamp{position:static;inset:auto;z-index:auto;flex:0 1 auto;transform:none;display:flex;gap:7px;margin:0;padding:0;background:none;border:0;box-shadow:none;opacity:1;max-width:380px;min-width:0}
+.map-footer .compliance-stamp::before{content:'教育说明';flex-shrink:0;transform:none;border:1px solid #a46b5777;padding:2px 5px;font-size:10px;letter-spacing:0;color:#d6a990;opacity:1}
+.map-footer .compliance-text{font-size:10px;line-height:1.6;letter-spacing:0;color:#c4bba8}
+body:has(.nav-btn.active:not([data-nav='map'])) .map-footer>.node-nav{display:none}
+@media(max-width:800px){.map-footer{padding:10px 12px 8px;gap:8px}.map-footer-secondary{flex-direction:column;gap:7px}.map-footer .experience-dock{width:100%;max-width:620px}.map-footer .experience-dock button{min-height:36px;padding:6px 3px;font-size:11px}.map-footer .compliance-stamp{max-width:none;justify-content:center}.map-footer .compliance-text{font-size:10px}.map-footer .node-nav-btn{padding:0 13px}.map-footer .node-nav-pos{font-size:12px}}
+@media(max-width:380px){.map-footer{padding-inline:8px}.map-footer>.node-nav{column-gap:7px}.map-footer .node-nav-btn{padding-inline:9px;font-size:12px}.map-footer .experience-dock{gap:3px}.map-footer .experience-dock button{font-size:10px}.map-footer .compliance-stamp::before{display:none}}
+@media(max-height:550px) and (min-width:801px){.map-footer{padding-block:6px;gap:5px}.map-footer .node-nav-hint{display:none}.map-footer .node-nav-btn{height:34px;min-height:34px}.map-footer .experience-dock button{min-height:32px}}
+body:has(.dungeon-panel.open) .map-footer{display:none}

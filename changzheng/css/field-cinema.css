@@ -1,0 +1,39 @@
+/* The field notebook: one visual hierarchy, deliberate red accents, readable text. */
+:root{--march-ink:#171e1a;--march-paper:#ede1c6;--march-muted:#c0c4b2;--march-red:#a43c2b;--march-rule:#9c8b634f}
+.journey-header,.sandbox-head,.command-header{background:#121b17;border-bottom:1px solid var(--march-rule)}
+.journey-header h2,.sandbox-head h1,.command-header h2{font-family:"CZ Documentary Serif",'Songti SC',serif;font-weight:600;color:var(--march-paper);text-shadow:none}
+.journey-shell{border-top:4px solid var(--march-red)}
+.journey-scene{background:linear-gradient(180deg,#1a2823,#17211c);border-right:1px solid var(--march-rule)}
+.journey-workspace,.sandbox-console{background:#20271e;color:var(--march-paper)}
+.journey-workspace h3,.sandbox-console h2{font:600 clamp(23px,2vw,30px)/1.5 "CZ Documentary Serif",serif;margin:20px 0 16px;letter-spacing:1px}
+.journey-muted,.journey-caption,.sandbox-status,.sandbox-note,.learning-body{color:var(--march-muted);font-size:15px;line-height:1.85}
+.journey-item{border-bottom:1px solid var(--march-rule);padding:14px 0}
+.journey-item b{font-size:17px}.journey-counter strong{min-width:30px;text-align:center;font:600 22px Georgia,serif}
+.journey-counter button{width:44px;height:44px;border:1px solid #a89b7477;background:#18221b;color:#f2dfb7}
+.journey-cargo{border:1px solid var(--march-rule);background:#17221b}.journey-cargo-head{padding-bottom:10px;border-bottom:1px solid var(--march-rule)}
+.journey-cargo-item,.journey-dropzone,.sandbox-tray button{font-size:15px;line-height:1.65;box-shadow:none;transition:background-color .08s,border-color .08s}
+.journey-cargo-item[aria-pressed=true]{outline:2px solid #e4bd79;background:#583828}
+.journey-dropzone{min-height:68px;padding:15px;border:1px dashed #8c9874;background:#18221a;text-align:left}
+.journey-dropzone.is-assigned{border-style:solid;border-left:3px solid #b34a33;background:#283124}
+.journey-dropzone span{display:block;color:#f0d3a0;font-size:14px;margin-top:7px}
+.journey-feedback:not(:empty){padding:12px 15px;border-left:3px solid #bc5138;background:#372c21;color:#ffe4b4;font-size:15px;line-height:1.7}
+.journey-timing{contain:layout paint}.journey-cross-count{font-variant-numeric:tabular-nums}.journey-timing-status{min-height:1.8em}
+.sandbox-head{padding:18px 28px}.sandbox-head h1{font-size:32px;letter-spacing:4px}.sandbox-head p{font-size:13px;line-height:1.8}
+.sandbox-body{grid-template-columns:minmax(0,1fr) minmax(340px,390px)}
+.sandbox-world-label{top:auto;bottom:76px;left:20px;max-width:calc(100% - 40px);padding:12px 16px;background:#122019e8;border-left:3px solid #a44330}
+.sandbox-legend{bottom:18px;left:20px;background:#102018dd;font-size:12px}
+.sandbox-sites button,.sandbox-pool button,.sandbox-tray button{font-size:14px;min-height:42px}
+.sandbox-console textarea{font-size:15px;line-height:1.8;min-height:112px}.sandbox-metrics span{font-size:12px}.sandbox-metrics b{font-size:25px}
+.sandbox-primary,.journey-button{background:#963c2b!important;border-color:#bd7650!important;color:#fff0d3!important;min-height:46px}
+.chapter-direction{margin:0 0 18px;border-top:2px solid #a44530;border-bottom:1px solid var(--march-rule);background:#17231c;color:var(--march-paper)}
+.chapter-direction summary{padding:13px 16px;font:15px/1.8 'Microsoft YaHei',sans-serif;cursor:pointer;list-style-position:inside}
+.chapter-direction p{padding:0 16px 15px;margin:0;color:var(--march-muted);font:14px/1.9 'Microsoft YaHei',sans-serif}
+.learning-content,.command-content,.zunyi-shell{border-radius:2px;box-shadow:none}
+.learning-content h2,.prebattle-title{font-family:"CZ Documentary Serif",serif;letter-spacing:2px}.learning-option{font-size:16px;line-height:1.8;padding:15px 18px}
+.world3d-frame{border-radius:0;border-color:var(--march-rule);box-shadow:none}.world3d-caption{background:#14241d;color:#e4d2ae}
+.world3d-caption small{color:#bac5b1}.world3d-site{font:14px 'Microsoft YaHei',sans-serif!important}
+.input-ack{outline:2px solid #e7bc77!important;outline-offset:2px}
+.journey-shell button:disabled,.sandbox-console button:disabled{opacity:.65;cursor:default;filter:none}
+.sandbox-overlay button:focus-visible,.chapter-direction summary:focus-visible,.learning-option:focus-visible{outline:3px solid #e6bc78;outline-offset:3px}
+@media(max-width:850px){.sandbox-body{grid-template-columns:1fr}.sandbox-world{height:44dvh;min-height:270px}.sandbox-console{padding:18px}.sandbox-head{padding:16px}.sandbox-world-label{bottom:65px}.journey-header h2{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.journey-shell *,.sandbox-shell *{transition:none!important;animation:none!important}}

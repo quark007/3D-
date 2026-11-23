@@ -1,0 +1,2466 @@
+{
+  "version": 1,
+  "coordinateSystem": "A-side scene ground coordinates; B does not invent positions",
+  "chapters": [
+    {
+      "chapterId": 1,
+      "title": "中央苏区·出发",
+      "date": "1934年10月",
+      "sceneId": "chapter-1/scene-ruijin"
+    },
+    {
+      "chapterId": 2,
+      "title": "血战湘江",
+      "date": "1934年11月",
+      "sceneId": "chapter-2/scene-xiangjiang"
+    },
+    {
+      "chapterId": 3,
+      "title": "遵义会议",
+      "date": "1935年1月15日-17日",
+      "sceneId": "chapter-3/scene-zunyi"
+    },
+    {
+      "chapterId": 4,
+      "title": "四渡赤水",
+      "date": "1935年1月-3月",
+      "sceneId": "chapter-4/scene-chishui"
+    },
+    {
+      "chapterId": 5,
+      "title": "巧渡金沙江",
+      "date": "1935年5月",
+      "sceneId": "chapter-5/scene-jinsha"
+    },
+    {
+      "chapterId": 6,
+      "title": "强渡大渡河",
+      "date": "1935年5月25日",
+      "sceneId": "chapter-6/scene-dadu"
+    },
+    {
+      "chapterId": 7,
+      "title": "飞夺泸定桥",
+      "date": "1935年5月29日",
+      "sceneId": "chapter-7/scene-luding"
+    },
+    {
+      "chapterId": 8,
+      "title": "翻越雪山",
+      "date": "1935年6月",
+      "sceneId": "chapter-8/scene-snowmount"
+    },
+    {
+      "chapterId": 9,
+      "title": "穿越草地",
+      "date": "1935年8月",
+      "sceneId": "chapter-9/scene-grassland"
+    },
+    {
+      "chapterId": 10,
+      "title": "腊子口战役",
+      "date": "1935年9月",
+      "sceneId": "chapter-10/scene-lazikou"
+    },
+    {
+      "chapterId": 11,
+      "title": "吴起镇·落脚",
+      "date": "1935年10月19日",
+      "sceneId": "chapter-11/scene-wuqi"
+    },
+    {
+      "chapterId": 12,
+      "title": "三大主力·会师",
+      "date": "1936年10月",
+      "sceneId": "chapter-12/scene-huining"
+    }
+  ],
+  "requestedBindings": [
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-01-he_wen",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-01-he_wen",
+      "kind": "npc",
+      "label": "进入剧情、确认玩家岗位 · 指导员何文"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-02-logistics_1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-02-logistics_1",
+      "kind": "npc",
+      "label": "整装携行、拖动物资 · 后勤协作员"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-02-wang_gui",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-02-wang_gui",
+      "kind": "npc",
+      "label": "整装携行、拖动物资 · 老班长王贵"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-03-civilian_1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-03-civilian_1",
+      "kind": "npc",
+      "label": "出发告别 · 送行群众"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-03-chen_xiaoman",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-03-chen_xiaoman",
+      "kind": "npc",
+      "label": "出发告别 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-04-he_wen",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-04-he_wen",
+      "kind": "npc",
+      "label": "提交自由行动计划 · 指导员何文"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-04-logistics_1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-04-logistics_1",
+      "kind": "npc",
+      "label": "提交自由行动计划 · 后勤协作员"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-04-wang_gui",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-04-wang_gui",
+      "kind": "npc",
+      "label": "提交自由行动计划 · 老班长王贵"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-04-medic_1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-04-medic_1",
+      "kind": "npc",
+      "label": "提交自由行动计划 · 卫生员"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-05-wang_gui",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-05-wang_gui",
+      "kind": "npc",
+      "label": "行路互助与渡河协作 · 老班长王贵"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-05-chen_xiaoman",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "行路互助与渡河协作 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-06-chen_xiaoman",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-06-chen_xiaoman",
+      "kind": "npc",
+      "label": "第一章行记 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/dialogue-01-06-narrator",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-dialogue-01-06-narrator",
+      "kind": "npc",
+      "label": "第一章行记 · 解说旁白"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/main-task",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-main-task",
+      "kind": "task",
+      "label": "中央苏区·出发 · 岗位协作"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/legacy-drag-1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-legacy-drag-1",
+      "kind": "task",
+      "label": "携行与岗位协作"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/legacy-choice-1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "自由决策推演"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/legacy-qte-1",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "于都阶段协作"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/legacy-choice-2",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-legacy-choice-2",
+      "kind": "task",
+      "label": "行记与史实对照"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/game-bridge",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-game-bridge",
+      "kind": "task",
+      "label": "于都河浮桥 · 星夜架桥"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/workshop-warehouse",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-workshop-warehouse",
+      "kind": "task",
+      "label": "补给仓库 · 让出一条路"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/history",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/scene3d",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/exit",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-01-narrator",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-01-narrator",
+      "kind": "npc",
+      "label": "战役背景与当前职责 · 解说旁白"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-01-he_wen",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-01-he_wen",
+      "kind": "npc",
+      "label": "战役背景与当前职责 · 指导员何文"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-02-liaison_1",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-02-liaison_1",
+      "kind": "npc",
+      "label": "有限情报抵达 · 交通联络员"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-03-medic_1",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-03-medic_1",
+      "kind": "npc",
+      "label": "伤员与物资冲突 · 卫生员"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-03-logistics_1",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-03-logistics_1",
+      "kind": "npc",
+      "label": "伤员与物资冲突 · 后勤协作员"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-04-he_wen",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-04-he_wen",
+      "kind": "npc",
+      "label": "玩家提交掩护／转移方案 · 指导员何文"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-04-wang_gui",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-04-wang_gui",
+      "kind": "npc",
+      "label": "玩家提交掩护／转移方案 · 老班长王贵"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-05-liaison_1",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-05-liaison_1",
+      "kind": "npc",
+      "label": "执行受阻与重新安排 · 交通联络员"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-05-chen_xiaoman",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "执行受阻与重新安排 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-06-wang_gui",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-06-wang_gui",
+      "kind": "npc",
+      "label": "战后清点与沉默 · 老班长王贵"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/dialogue-02-06-narrator",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-dialogue-02-06-narrator",
+      "kind": "npc",
+      "label": "战后清点与沉默 · 解说旁白"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/main-task",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-main-task",
+      "kind": "task",
+      "label": "血战湘江 · 岗位协作"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/legacy-qte-1",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "突破封锁"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/legacy-choice-1",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "生死抉择"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/game-guard",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-game-guard",
+      "kind": "task",
+      "label": "湘江接应 · 分批转运"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/game-snipe",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-game-snipe",
+      "kind": "task",
+      "label": "1937番外 · 观察与疏导"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/game-blanket",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-game-blanket",
+      "kind": "task",
+      "label": "半条被子 · 夜宿沙洲"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/game-aid",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-game-aid",
+      "kind": "task",
+      "label": "湘江接应 · 物资转运"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/workshop-stretcher",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-workshop-stretcher",
+      "kind": "task",
+      "label": "双人担架 · 一起走"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/hero-chenshuxiang64",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-hero-chenshuxiang64",
+      "kind": "task",
+      "label": "陈树湘 · 断肠明志"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/history",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/scene3d",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 2,
+      "storyId": "chapter-2/exit",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "anchorId": "chapter-2/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-01-narrator",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-01-narrator",
+      "kind": "npc",
+      "label": "到达遵义、说明身份 · 解说旁白"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-01-he_wen",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-01-he_wen",
+      "kind": "npc",
+      "label": "到达遵义、说明身份 · 指导员何文"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-02-liaison_1",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-02-liaison_1",
+      "kind": "npc",
+      "label": "接收、分类、核对资料 · 交通联络员"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-03-he_wen",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-03-he_wen",
+      "kind": "npc",
+      "label": "情报互相矛盾 · 指导员何文"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-03-liaison_1",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-03-liaison_1",
+      "kind": "npc",
+      "label": "情报互相矛盾 · 交通联络员"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-04-logistics_1",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-04-logistics_1",
+      "kind": "npc",
+      "label": "自定义基层保障方案 · 后勤协作员"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-04-he_wen",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-04-he_wen",
+      "kind": "npc",
+      "label": "自定义基层保障方案 · 指导员何文"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-05-wang_gui",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-05-wang_gui",
+      "kind": "npc",
+      "label": "等候与战友交谈 · 老班长王贵"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-05-chen_xiaoman",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "等候与战友交谈 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-06-narrator",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-06-narrator",
+      "kind": "npc",
+      "label": "会后史实说明与任务复盘 · 解说旁白"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/dialogue-03-06-he_wen",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-dialogue-03-06-he_wen",
+      "kind": "npc",
+      "label": "会后史实说明与任务复盘 · 指导员何文"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/main-task",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-main-task",
+      "kind": "task",
+      "label": "核对资料 · 保障传递"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/legacy-drag-1",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-legacy-drag-1",
+      "kind": "task",
+      "label": "情报梳理"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/legacy-choice-1",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "资料核对"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/game-zunyi",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-game-zunyi",
+      "kind": "task",
+      "label": "遵义会议 · 抉择二十分钟"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/game-lamp",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-game-lamp",
+      "kind": "task",
+      "label": "苟坝夜灯"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/game-poem",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-game-poem",
+      "kind": "task",
+      "label": "娄山关诗卷"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/workshop-circuit",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-workshop-circuit",
+      "kind": "task",
+      "label": "战地电台 · 断线重连"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/hero-meihu64",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-hero-meihu64",
+      "kind": "task",
+      "label": "半条被子 · 红军坟"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/history",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/scene3d",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 3,
+      "storyId": "chapter-3/exit",
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchorId": "chapter-3/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-01-narrator",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-01-narrator",
+      "kind": "npc",
+      "label": "进入赤水沙盘 · 解说旁白"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-01-he_wen",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-01-he_wen",
+      "kind": "npc",
+      "label": "进入赤水沙盘 · 指导员何文"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-02-liaison_1",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-02-liaison_1",
+      "kind": "npc",
+      "label": "山路观察点获取消息 · 交通联络员"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-03-wang_gui",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-03-wang_gui",
+      "kind": "npc",
+      "label": "拼接行动顺序 · 老班长王贵"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-03-logistics_1",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-03-logistics_1",
+      "kind": "npc",
+      "label": "拼接行动顺序 · 后勤协作员"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-04-boatman_1",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-04-boatman_1",
+      "kind": "npc",
+      "label": "河谷渡运点调度 · 船工"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-05-liaison_1",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-05-liaison_1",
+      "kind": "npc",
+      "label": "多轮行动、对手适应 · 交通联络员"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-06-he_wen",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-06-he_wen",
+      "kind": "npc",
+      "label": "接应与四渡史实对照 · 指导员何文"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/dialogue-04-06-narrator",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-dialogue-04-06-narrator",
+      "kind": "npc",
+      "label": "接应与四渡史实对照 · 解说旁白"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/main-task",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-main-task",
+      "kind": "task",
+      "label": "四渡赤水 · 岗位协作"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/legacy-qte-1",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "声东击西"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/legacy-choice-1",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "战术调度"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/game-bluff",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-game-bluff",
+      "kind": "task",
+      "label": "迷雾渡河"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/game-cipher",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-game-cipher",
+      "kind": "task",
+      "label": "军委二局 · 密电破局"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/game-lantern",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-game-lantern",
+      "kind": "task",
+      "label": "苟坝马灯 · 夜路寻道"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/game-nightlamp",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-game-nightlamp",
+      "kind": "task",
+      "label": "苟坝夜灯 · 马灯密室"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/history",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/scene3d",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/exit",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-01-narrator",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-01-narrator",
+      "kind": "npc",
+      "label": "抵达渡运环境 · 解说旁白"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-01-boatman_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-01-boatman_1",
+      "kind": "npc",
+      "label": "抵达渡运环境 · 船工"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-02-logistics_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-02-logistics_1",
+      "kind": "npc",
+      "label": "核对船只和运力 · 后勤协作员"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-02-boatman_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-02-boatman_1",
+      "kind": "npc",
+      "label": "核对船只和运力 · 船工"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-03-medic_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-03-medic_1",
+      "kind": "npc",
+      "label": "拖拽编排渡运顺序 · 卫生员"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-03-logistics_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-03-logistics_1",
+      "kind": "npc",
+      "label": "拖拽编排渡运顺序 · 后勤协作员"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-04-he_wen",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-04-he_wen",
+      "kind": "npc",
+      "label": "输入自由渡运方案 · 指导员何文"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-04-boatman_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-04-boatman_1",
+      "kind": "npc",
+      "label": "输入自由渡运方案 · 船工"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-05-chen_xiaoman",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "夜间联络与操作受阻 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-05-boatman_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-05-boatman_1",
+      "kind": "npc",
+      "label": "夜间联络与操作受阻 · 船工"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-06-boatman_1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-06-boatman_1",
+      "kind": "npc",
+      "label": "渡运完成与回望 · 船工"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/dialogue-05-06-narrator",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-dialogue-05-06-narrator",
+      "kind": "npc",
+      "label": "渡运完成与回望 · 解说旁白"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/main-task",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-main-task",
+      "kind": "task",
+      "label": "巧渡金沙江 · 岗位协作"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/game-scout",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-game-scout",
+      "kind": "task",
+      "label": "夜探渡口"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/legacy-drag-1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-legacy-drag-1",
+      "kind": "task",
+      "label": "渡江调度"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/legacy-choice-1",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "船只分配"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/game-alliance",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-game-alliance",
+      "kind": "task",
+      "label": "彝海结盟 · 倾听与信任"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/workshop-ropes",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-workshop-ropes",
+      "kind": "task",
+      "label": "绳结解围 · 整理携行绳"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/history",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/scene3d",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 5,
+      "storyId": "chapter-5/exit",
+      "sceneId": "chapter-5/scene-jinsha",
+      "anchorId": "chapter-5/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-01-narrator",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-01-narrator",
+      "kind": "npc",
+      "label": "安顺场环境与任务 · 解说旁白"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-01-he_wen",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-01-he_wen",
+      "kind": "npc",
+      "label": "安顺场环境与任务 · 指导员何文"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-02-boatman_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-02-boatman_1",
+      "kind": "npc",
+      "label": "岸边准备 · 船工"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-02-logistics_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-02-logistics_1",
+      "kind": "npc",
+      "label": "岸边准备 · 后勤协作员"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-02-he_wen",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-02-he_wen",
+      "kind": "npc",
+      "label": "岸边准备 · 指导员何文"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-03-he_wen",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-03-he_wen",
+      "kind": "npc",
+      "label": "选择本组配合方式 · 指导员何文"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-03-logistics_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-03-logistics_1",
+      "kind": "npc",
+      "label": "选择本组配合方式 · 后勤协作员"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-03-wang_gui",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-03-wang_gui",
+      "kind": "npc",
+      "label": "选择本组配合方式 · 老班长王贵"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-03-medic_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-03-medic_1",
+      "kind": "npc",
+      "label": "选择本组配合方式 · 卫生员"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-04-liaison_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-04-liaison_1",
+      "kind": "npc",
+      "label": "自由协同计划 · 交通联络员"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-04-he_wen",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-04-he_wen",
+      "kind": "npc",
+      "label": "自由协同计划 · 指导员何文"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-05-boatman_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-05-boatman_1",
+      "kind": "npc",
+      "label": "渡河执行与状态反馈 · 船工"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-05-chen_xiaoman",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "渡河执行与状态反馈 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-06-medic_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-06-medic_1",
+      "kind": "npc",
+      "label": "岸上接应与下一步 · 卫生员"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-06-logistics_1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-06-logistics_1",
+      "kind": "npc",
+      "label": "岸上接应与下一步 · 后勤协作员"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-06-he_wen",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-06-he_wen",
+      "kind": "npc",
+      "label": "岸上接应与下一步 · 指导员何文"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/dialogue-06-06-narrator",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-dialogue-06-06-narrator",
+      "kind": "npc",
+      "label": "岸上接应与下一步 · 解说旁白"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/main-task",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-main-task",
+      "kind": "task",
+      "label": "强渡大渡河 · 岗位协作"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/game-mortar",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-game-mortar",
+      "kind": "task",
+      "label": "观测与渡口调度"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/game-pontoon",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-game-pontoon",
+      "kind": "task",
+      "label": "浮桥通行 · 连接与检查"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/game-ferry",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-game-ferry",
+      "kind": "task",
+      "label": "大渡河 · 渡运调度"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/game-yihai",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-game-yihai",
+      "kind": "task",
+      "label": "彝海结盟"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/legacy-qte-1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "勇士冲锋"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/legacy-choice-1",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "火力压制"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/history",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/scene3d",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 6,
+      "storyId": "chapter-6/exit",
+      "sceneId": "chapter-6/scene-dadu",
+      "anchorId": "chapter-6/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-01-narrator",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-01-narrator",
+      "kind": "npc",
+      "label": "抵达桥头、观察铁索 · 解说旁白"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-01-wang_gui",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-01-wang_gui",
+      "kind": "npc",
+      "label": "抵达桥头、观察铁索 · 老班长王贵"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-02-he_wen",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-02-he_wen",
+      "kind": "npc",
+      "label": "分工与行动前交流 · 指导员何文"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-02-logistics_1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-02-logistics_1",
+      "kind": "npc",
+      "label": "分工与行动前交流 · 后勤协作员"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-02-wang_gui",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-02-wang_gui",
+      "kind": "npc",
+      "label": "分工与行动前交流 · 老班长王贵"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-02-medic_1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-02-medic_1",
+      "kind": "npc",
+      "label": "分工与行动前交流 · 卫生员"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-03-wang_gui",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-03-wang_gui",
+      "kind": "npc",
+      "label": "玩家输入行动方案 · 老班长王贵"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-03-he_wen",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-03-he_wen",
+      "kind": "npc",
+      "label": "玩家输入行动方案 · 指导员何文"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-04-chen_xiaoman",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-04-chen_xiaoman",
+      "kind": "npc",
+      "label": "攀索／桥头配合反馈 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-05-logistics_1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-05-logistics_1",
+      "kind": "npc",
+      "label": "后续跟进与照料 · 后勤协作员"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-05-medic_1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-05-medic_1",
+      "kind": "npc",
+      "label": "后续跟进与照料 · 卫生员"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-05-he_wen",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-05-he_wen",
+      "kind": "npc",
+      "label": "后续跟进与照料 · 指导员何文"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-06-narrator",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-06-narrator",
+      "kind": "npc",
+      "label": "夺桥史实与个人行记 · 解说旁白"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/dialogue-07-06-wang_gui",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-dialogue-07-06-wang_gui",
+      "kind": "npc",
+      "label": "夺桥史实与个人行记 · 老班长王贵"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/main-task",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-main-task",
+      "kind": "task",
+      "label": "飞夺泸定桥 · 岗位协作"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/game-mortar",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-game-mortar",
+      "kind": "task",
+      "label": "观测与渡口调度"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/legacy-qte-1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "铁索攀爬"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/legacy-drag-1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-legacy-drag-1",
+      "kind": "task",
+      "label": "铺设桥板"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/legacy-choice-1",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "突击指挥"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/game-chains",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-game-chains",
+      "kind": "task",
+      "label": "泸定桥 · 铁索铺板协作"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/workshop-bridge",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-workshop-bridge",
+      "kind": "task",
+      "label": "木桥工坊 · 让队伍通过"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/hero-ludingqiao64",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-hero-ludingqiao64",
+      "kind": "task",
+      "label": "飞夺泸定桥 · 突击视角"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/history",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/scene3d",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 7,
+      "storyId": "chapter-7/exit",
+      "sceneId": "chapter-7/scene-luding",
+      "anchorId": "chapter-7/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-01-narrator",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-01-narrator",
+      "kind": "npc",
+      "label": "山脚准备 · 解说旁白"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-01-wang_gui",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-01-wang_gui",
+      "kind": "npc",
+      "label": "山脚准备 · 老班长王贵"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-02-logistics_1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-02-logistics_1",
+      "kind": "npc",
+      "label": "被服和负重分担 · 后勤协作员"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-03-chen_xiaoman",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-03-chen_xiaoman",
+      "kind": "npc",
+      "label": "战友体力下降 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-03-medic_1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-03-medic_1",
+      "kind": "npc",
+      "label": "战友体力下降 · 卫生员"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-04-wang_gui",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-04-wang_gui",
+      "kind": "npc",
+      "label": "自由行军与互助计划 · 老班长王贵"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-04-he_wen",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-04-he_wen",
+      "kind": "npc",
+      "label": "自由行军与互助计划 · 指导员何文"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-04-logistics_1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-04-logistics_1",
+      "kind": "npc",
+      "label": "自由行军与互助计划 · 后勤协作员"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-04-medic_1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-04-medic_1",
+      "kind": "npc",
+      "label": "自由行军与互助计划 · 卫生员"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-05-liaison_1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-05-liaison_1",
+      "kind": "npc",
+      "label": "风雪中失去照应 · 交通联络员"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-05-chen_xiaoman",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "风雪中失去照应 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-06-chen_xiaoman",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-06-chen_xiaoman",
+      "kind": "npc",
+      "label": "下山清点与关系回声 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/dialogue-08-06-narrator",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-dialogue-08-06-narrator",
+      "kind": "npc",
+      "label": "下山清点与关系回声 · 解说旁白"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/main-task",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-main-task",
+      "kind": "task",
+      "label": "翻越雪山 · 岗位协作"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/legacy-choice-1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "雪山行军"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/legacy-qte-1",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "攀登坚持"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/game-snow",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-game-snow",
+      "kind": "task",
+      "label": "雪山互助 · 观察择路"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/workshop-stretcher",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-workshop-stretcher",
+      "kind": "task",
+      "label": "双人担架 · 一起走"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/hero-monument63",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-hero-monument63",
+      "kind": "task",
+      "label": "丰碑"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/hero-laoshanjie64",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-hero-laoshanjie64",
+      "kind": "task",
+      "label": "老山界"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/history",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/scene3d",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/exit",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-01-narrator",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-01-narrator",
+      "kind": "npc",
+      "label": "进入草地 · 解说旁白"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-01-guide_1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-01-guide_1",
+      "kind": "npc",
+      "label": "进入草地 · 向导"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-01-liaison_1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-01-liaison_1",
+      "kind": "npc",
+      "label": "进入草地 · 交通联络员"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-02-logistics_1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-02-logistics_1",
+      "kind": "npc",
+      "label": "盘点口粮和饮水 · 后勤协作员"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-02-wang_gui",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-02-wang_gui",
+      "kind": "npc",
+      "label": "盘点口粮和饮水 · 老班长王贵"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-03-chen_xiaoman",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-03-chen_xiaoman",
+      "kind": "npc",
+      "label": "陷入泥泞与援助 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-03-wang_gui",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-03-wang_gui",
+      "kind": "npc",
+      "label": "陷入泥泞与援助 · 老班长王贵"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-04-guide_1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-04-guide_1",
+      "kind": "npc",
+      "label": "自定义寻路与行军方案 · 向导"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-04-he_wen",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-04-he_wen",
+      "kind": "npc",
+      "label": "自定义寻路与行军方案 · 指导员何文"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-05-chen_xiaoman",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "宿营与分享 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-05-medic_1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-05-medic_1",
+      "kind": "npc",
+      "label": "宿营与分享 · 卫生员"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-06-wang_gui",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-06-wang_gui",
+      "kind": "npc",
+      "label": "走出草地后的行记 · 老班长王贵"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/dialogue-09-06-narrator",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-dialogue-09-06-narrator",
+      "kind": "npc",
+      "label": "走出草地后的行记 · 解说旁白"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/main-task",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-main-task",
+      "kind": "task",
+      "label": "穿越草地 · 岗位协作"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/legacy-drag-1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-legacy-drag-1",
+      "kind": "task",
+      "label": "探路行军"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/legacy-choice-1",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "生存抉择"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/game-collect",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-game-collect",
+      "kind": "task",
+      "label": "青稞采集"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/game-fire",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-game-fire",
+      "kind": "task",
+      "label": "夜营守火种"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/game-ration",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-game-ration",
+      "kind": "task",
+      "label": "草地同行 · 分粮交接"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/game-fish",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-game-fish",
+      "kind": "task",
+      "label": "金色的鱼钩 · 老班长"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/game-veg",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-game-veg",
+      "kind": "task",
+      "label": "草地食堂 · 野菜辨识"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/game-matches",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-game-matches",
+      "kind": "task",
+      "label": "七根火柴 · 守护火种"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/hero-fish63",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-hero-fish63",
+      "kind": "task",
+      "label": "金色的鱼钩"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/hero-matches63",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-hero-matches63",
+      "kind": "task",
+      "label": "七根火柴"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/hero-night63",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-hero-night63",
+      "kind": "task",
+      "label": "草地夜行"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/hero-belt63",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-hero-belt63",
+      "kind": "task",
+      "label": "半截皮带"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/hero-yidaihanliang64",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-hero-yidaihanliang64",
+      "kind": "task",
+      "label": "一袋干粮"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/history",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/scene3d",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/exit",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-01-narrator",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-01-narrator",
+      "kind": "npc",
+      "label": "抵近峡口 · 解说旁白"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-01-liaison_1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-01-liaison_1",
+      "kind": "npc",
+      "label": "抵近峡口 · 交通联络员"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-02-liaison_1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-02-liaison_1",
+      "kind": "npc",
+      "label": "观察通道与报告 · 交通联络员"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-03-he_wen",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-03-he_wen",
+      "kind": "npc",
+      "label": "岗位分工 · 指导员何文"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-03-logistics_1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-03-logistics_1",
+      "kind": "npc",
+      "label": "岗位分工 · 后勤协作员"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-03-wang_gui",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-03-wang_gui",
+      "kind": "npc",
+      "label": "岗位分工 · 老班长王贵"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-03-medic_1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-03-medic_1",
+      "kind": "npc",
+      "label": "岗位分工 · 卫生员"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-04-wang_gui",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-04-wang_gui",
+      "kind": "npc",
+      "label": "玩家提交协同方案 · 老班长王贵"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-04-he_wen",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-04-he_wen",
+      "kind": "npc",
+      "label": "玩家提交协同方案 · 指导员何文"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-05-chen_xiaoman",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "攀爬／传令受阻 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-05-liaison_1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-05-liaison_1",
+      "kind": "npc",
+      "label": "攀爬／传令受阻 · 交通联络员"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-06-medic_1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-06-medic_1",
+      "kind": "npc",
+      "label": "通道打开后的整理 · 卫生员"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/dialogue-10-06-narrator",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-dialogue-10-06-narrator",
+      "kind": "npc",
+      "label": "通道打开后的整理 · 解说旁白"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/main-task",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-main-task",
+      "kind": "task",
+      "label": "腊子口战役 · 岗位协作"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/legacy-qte-1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-legacy-qte-1",
+      "kind": "task",
+      "label": "悬崖攀爬"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/legacy-choice-1",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "战术突破"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/game-lob",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-game-lob",
+      "kind": "task",
+      "label": "腊子口 · 联络与通路准备"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/game-press",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-game-press",
+      "kind": "task",
+      "label": "哈达铺读报"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/history",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/scene3d",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 10,
+      "storyId": "chapter-10/exit",
+      "sceneId": "chapter-10/scene-lazikou",
+      "anchorId": "chapter-10/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-01-narrator",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-01-narrator",
+      "kind": "npc",
+      "label": "抵达陕北背景 · 解说旁白"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-01-he_wen",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-01-he_wen",
+      "kind": "npc",
+      "label": "抵达陕北背景 · 指导员何文"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-02-liaison_1",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-02-liaison_1",
+      "kind": "npc",
+      "label": "与当地接洽 · 交通联络员"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-02-civilian_1",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-02-civilian_1",
+      "kind": "npc",
+      "label": "与当地接洽 · 送行群众"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-03-logistics_1",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-03-logistics_1",
+      "kind": "npc",
+      "label": "分配住宿和现有物资 · 后勤协作员"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-03-medic_1",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-03-medic_1",
+      "kind": "npc",
+      "label": "分配住宿和现有物资 · 卫生员"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-04-he_wen",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-04-he_wen",
+      "kind": "npc",
+      "label": "自由整顿方案 · 指导员何文"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-04-wang_gui",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-04-wang_gui",
+      "kind": "npc",
+      "label": "自由整顿方案 · 老班长王贵"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-05-chen_xiaoman",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "回应一路承诺 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-06-narrator",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-06-narrator",
+      "kind": "npc",
+      "label": "阶段回顾与后续时间转场 · 解说旁白"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/dialogue-11-06-he_wen",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-dialogue-11-06-he_wen",
+      "kind": "npc",
+      "label": "阶段回顾与后续时间转场 · 指导员何文"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/main-task",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-main-task",
+      "kind": "task",
+      "label": "吴起镇·落脚 · 岗位协作"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/legacy-choice-1",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "扎根陕北"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/game-final",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-game-final",
+      "kind": "task",
+      "label": "吴起镇 · 接应路线核验"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/workshop-archive",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-workshop-archive",
+      "kind": "task",
+      "label": "档案修复 · 拼回这一页"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/history",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/scene3d",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/exit",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-exit",
+      "kind": "exit",
+      "label": "继续下一站"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-01-narrator",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-01-narrator",
+      "kind": "npc",
+      "label": "时间转场 · 解说旁白"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-02-liaison_1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-02-liaison_1",
+      "kind": "npc",
+      "label": "接应来人和核对信息 · 交通联络员"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-02-he_wen",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-02-he_wen",
+      "kind": "npc",
+      "label": "接应来人和核对信息 · 指导员何文"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-02-logistics_1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-02-logistics_1",
+      "kind": "npc",
+      "label": "接应来人和核对信息 · 后勤协作员"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-02-wang_gui",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-02-wang_gui",
+      "kind": "npc",
+      "label": "接应来人和核对信息 · 老班长王贵"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-02-medic_1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-02-medic_1",
+      "kind": "npc",
+      "label": "接应来人和核对信息 · 卫生员"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-03-he_wen",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-03-he_wen",
+      "kind": "npc",
+      "label": "会宁与将台堡资料整理 · 指导员何文"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-04-logistics_1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-04-logistics_1",
+      "kind": "npc",
+      "label": "玩家安排接应与保障 · 后勤协作员"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-04-medic_1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-04-medic_1",
+      "kind": "npc",
+      "label": "玩家安排接应与保障 · 卫生员"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-04-he_wen",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-04-he_wen",
+      "kind": "npc",
+      "label": "玩家安排接应与保障 · 指导员何文"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-05-chen_xiaoman",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-05-chen_xiaoman",
+      "kind": "npc",
+      "label": "战友重逢／彼此介绍 · 青年战士陈小满"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-05-wang_gui",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-05-wang_gui",
+      "kind": "npc",
+      "label": "战友重逢／彼此介绍 · 老班长王贵"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-06-narrator",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-06-narrator",
+      "kind": "npc",
+      "label": "终章行记与历史回望 · 解说旁白"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/dialogue-12-06-he_wen",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-dialogue-12-06-he_wen",
+      "kind": "npc",
+      "label": "终章行记与历史回望 · 指导员何文"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/main-task",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-main-task",
+      "kind": "task",
+      "label": "会师协作 · 同行回望"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/legacy-drag-1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-legacy-drag-1",
+      "kind": "task",
+      "label": "三军汇聚"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/legacy-choice-1",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-legacy-choice-1",
+      "kind": "task",
+      "label": "战略部署"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/game-drum",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-game-drum",
+      "kind": "task",
+      "label": "会师腰鼓"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/history",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-history",
+      "kind": "task",
+      "label": "本章史实与来源"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/scene3d",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-scene3d",
+      "kind": "task",
+      "label": "3D剧情地点模拟体验"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/exit",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-exit",
+      "kind": "exit",
+      "label": "旅途回顾"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-prologue",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-prologue",
+      "kind": "task",
+      "label": "序章 · 让世界看见长征"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/extra-run",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-extra-run",
+      "kind": "task",
+      "label": "全程协作推演"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/extra-grassland30",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-extra-grassland30",
+      "kind": "task",
+      "label": "草地行程协作"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/extra-zhiluo",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-extra-zhiluo",
+      "kind": "task",
+      "label": "直罗镇 · 番外接应"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/extra-night",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-extra-night",
+      "kind": "task",
+      "label": "夜行军纵队 · 番外"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-newsroom",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-newsroom",
+      "kind": "task",
+      "label": "真相编辑部"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-morse",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-morse",
+      "kind": "task",
+      "label": "摩斯学堂"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-correspondent",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-correspondent",
+      "kind": "task",
+      "label": "随军记者"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-spark",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-spark",
+      "kind": "task",
+      "label": "星火传承档案"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-daily",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-spark",
+      "kind": "task",
+      "label": "今日行程 · 可选同行"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/extra-report",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-history",
+      "kind": "task",
+      "label": "我的长征年报"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/extra-snow-letter",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-extra-prologue",
+      "kind": "task",
+      "label": "时空信箱 · 斯诺定稿配音回信"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-mnist-lock",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-mnist-lock",
+      "kind": "task",
+      "label": "手写数字辨识"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-keypad-lock",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-keypad-lock",
+      "kind": "task",
+      "label": "密码锁研习"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-memory-match",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-memory-match",
+      "kind": "task",
+      "label": "线索记忆"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-tic-tac-toe",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-tic-tac-toe",
+      "kind": "task",
+      "label": "井字棋研习"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-huarong-15",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-huarong-15",
+      "kind": "task",
+      "label": "样本重排"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-mine-sweeper",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-mine-sweeper",
+      "kind": "task",
+      "label": "路障排查"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/archive-sokoban-dark",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-archive-sokoban-dark",
+      "kind": "task",
+      "label": "物资推箱"
+    },
+    {
+      "chapterId": 8,
+      "storyId": "chapter-8/chapter-task54",
+      "sceneId": "chapter-8/scene-snowmount",
+      "anchorId": "chapter-8/anchor-chapter-task54",
+      "kind": "task",
+      "label": "雪山互助 · 整理背囊"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/chapter-task54",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-chapter-task54",
+      "kind": "task",
+      "label": "草地同行 · 核对路线"
+    },
+    {
+      "chapterId": 11,
+      "storyId": "chapter-11/chapter-task54",
+      "sceneId": "chapter-11/scene-wuqi",
+      "anchorId": "chapter-11/anchor-chapter-task54",
+      "kind": "task",
+      "label": "陕北落脚 · 整理行记"
+    },
+    {
+      "chapterId": 12,
+      "storyId": "chapter-12/chapter-task54",
+      "sceneId": "chapter-12/scene-huining",
+      "anchorId": "chapter-12/anchor-chapter-task54",
+      "kind": "task",
+      "label": "会师相迎 · 协作分工"
+    },
+    {
+      "chapterId": 1,
+      "storyId": "chapter-1/journey-full",
+      "sceneId": "chapter-1/scene-ruijin",
+      "anchorId": "chapter-1/anchor-main-task",
+      "kind": "task",
+      "label": "星夜启程 · 原六阶段完整岗位协作"
+    },
+    {
+      "chapterId": 9,
+      "storyId": "chapter-9/ration-native",
+      "sceneId": "chapter-9/scene-grassland",
+      "anchorId": "chapter-9/anchor-main-task",
+      "kind": "task",
+      "label": "青稞面分配 · 原分粮资料与算法"
+    }
+  ],
+  "scenes": [],
+  "bindings": {}
+}

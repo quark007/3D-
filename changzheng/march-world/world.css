@@ -59,3 +59,6 @@
 .czmw-sensitivity input{grid-column:1/-1;width:100%;margin:0;accent-color:#dbc393}
 .czmw-touch-options{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
 .czmw-touch-options .czmw-switch86{margin:0}
+
+.czmw-street-line{position:absolute;z-index:11;max-width:min(176px,48%);width:max-content;transform:translate(-50%,-100%);padding:5px 9px;border:1px solid #b6a47a80;border-radius:4px;background:#192720df;color:#efe2c5;pointer-events:none;opacity:0;transition:opacity .24s ease;text-align:center;font:12px/1.5 system-ui,sans-serif}
+.czmw-street-line.is-visible{opacity:1}

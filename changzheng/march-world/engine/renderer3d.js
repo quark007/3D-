@@ -127,14 +127,25 @@
     const toWorld = (x, y, height = 0) => new T.Vector3(x - world.w / 2, height, y - world.h / 2);
     const props = logicalScene.props.map(alignedProp);
     const terrain = M.visual3d.terrain(logicalScene, props);
-    const surfaceHeight = terrain.support;
+    const steps = logicalScene.stepSurfaces;
+    const surfaceHeight = (x, y) => {
+      const base = terrain.support(x, y);
+      if (!steps || !assets.models.street) return base;
+      // A narrow approach band lets the stance rise before the leading foot reaches each nosing.
+      let rise = .009;
+      for (const [sx, sy, w, h, z] of steps) {
+        const edge = Math.max(sx - x, x - sx - w, sy - y, y - sy - h);
+        if (edge <= .16) rise = Math.max(rise, z * (1 - T.MathUtils.smoothstep(edge, 0, .16)));
+      }
+      return base + .04 + rise;
+    };
     const onSurface = (x, y, offset = 0) => toWorld(x, y, surfaceHeight(x, y) + offset);
     const pickSurfaces = [];
     const street = assets.models.street;
     const mergeGeometries = street ? (await import('three/addons/utils/BufferGeometryUtils.js')).mergeGeometries : null;
     if (street) {
       const [x, y] = logicalScene.streetModel.origin;
-      street.position.copy(onSurface(x, y, .04));
+      street.position.copy(toWorld(x, y, terrain.support(x, y) + .04));
       street.name = 'zunyi-realscan';
       if (cinematic) {
         reflectionTarget = bakeCourtyardEnvironment(T, renderer, street, onSurface(81, 41, 1.2));
@@ -164,7 +175,7 @@
     guideLine.frustumCulled = false;
     worldRoot.add(guideLine);
     let guideRoute = null;
-    let actors = null;
+    let actors = null, streetLife;
     let dead = false;
     let raf = 0;
     let last = 0;
@@ -1296,7 +1307,7 @@
       for (const { rect, cameraHeight = 7.6, cameraMinHeight = 0 } of [...logicalScene.streetBlocked, ...(logicalScene.cameraBlocked || [])]) {
         if (!rect || cameraHeight < 1.1) continue;
         const [x, y, w, h] = rect;
-        const min = onSurface(x, y, cameraMinHeight);
+        const min = toWorld(x, y, terrain.support(x, y) + cameraMinHeight);
         const max = new T.Vector3(min.x + w, min.y + cameraHeight - cameraMinHeight, min.z + h);
         cameraObstacles.push({ bounds: new T.Box3(min, max) });
       }
@@ -1658,6 +1669,7 @@
         options.signal?.removeEventListener('abort', abort);
         canvas.removeEventListener('webglcontextlost', contextLost);
         actors?.dispose();
+        streetLife?.dispose();
         releaseResources();
         sun.shadow.dispose();
         introOverlay?.remove();
@@ -1700,6 +1712,8 @@
           sun.target.updateMatrixWorld();
         }
       }
+      if (streetLife && logicalScene.focusActor)
+        streetLife.update(logicalScene.pausedDim ? 0 : dt, logicalScene.focusActor, camera);
       const time = ts * .001;
       for (const fire of fires) {
         fire.material.uniforms.time.value = time;
@@ -1749,6 +1763,8 @@
       }
     }
 
+    if (street && logicalScene.streetLife)
+      streetLife = M.streetLife.create(T, logicalScene, container, scene, onSurface, cam, cameraObstacles);
     actors = await M.actors3d.create(T, logicalScene, scene, options.signal, options.roleId);
     if (options.signal?.aborted || graphicsLost) {
       actors.dispose();

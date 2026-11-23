@@ -180,6 +180,10 @@
       playerActor.fadeMaterials = [...variants.entries()];
       for (const [original, variant] of variants) playerActor.materials.set(original, variant);
       playerActor.fade = 1;
+      playerActor.gait = { idle: playerActor.actions.get('Idle'), walk: playerActor.actions.get('Walk'), run: playerActor.actions.get('Run') };
+      playerActor.gaitWeights = [1, 0, 0];
+      playerActor.stride = 0;
+      for (const action of Object.values(playerActor.gait)) action?.play();
     }
 
     function visibleAnchor(anchor, anchors) {
@@ -216,13 +220,22 @@
             material.depthWrite = fade === 1 && original.depthWrite;
           }
         }
-        play(playerActor, player.airborne && playerActor.actions.has('Jump') ? 'Jump' :
-          player.running && playerActor.actions.has('Run') ? 'Run' : player.moving ? 'Walk' : 'Idle');
-        if (playerActor.current) {
-          const strideRate = player.speed / (player.running && playerActor.actions.has('Run') ? 6.5 : 1.8);
-          playerActor.current.timeScale = player.airborne || !player.moving ? 1 :
-            player.reversing ? -strideRate : strideRate;
+        const gait = playerActor.gait;
+        const move = T.MathUtils.smoothstep(player.speed, .04, .85);
+        const run = gait.run && !player.reversing ? T.MathUtils.smoothstep(player.speed, 2.2, 3.8) : 0;
+        const targets = [1 - move, move * (1 - run), move * run];
+        const blend = 1 - Math.exp(-dt * 18);
+        for (const [i, action] of [gait.idle, gait.walk, gait.run].entries()) {
+          playerActor.gaitWeights[i] = T.MathUtils.lerp(playerActor.gaitWeights[i], targets[i], blend);
+          action?.setEffectiveWeight(playerActor.gaitWeights[i]);
         }
+        const stride = player.speed * (player.reversing ? -1 : 1);
+        playerActor.stride = T.MathUtils.lerp(playerActor.stride, stride, blend);
+        gait.walk?.setEffectiveTimeScale(playerActor.stride / 1.8);
+        gait.run?.setEffectiveTimeScale(Math.abs(playerActor.stride) / 4);
+        const lean = !gait.run && !player.reversing
+          ? .085 * T.MathUtils.smoothstep(player.speed, 1.8, 6.5) : 0;
+        playerActor.model.rotation.x = T.MathUtils.lerp(playerActor.model.rotation.x, lean, blend);
         const localActors = new Map();
         if (logicalScene.streetModel) {
           for (const anchor of anchors) {

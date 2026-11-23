@@ -46,6 +46,24 @@
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
     streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30], actorRange: 13 },
+    // Stone mesh dimensions in the Blender assembly, converted to logical X east / Y south.
+    stepSurfaces: [
+      [59, 41.485, 10, 3.03, .014],
+      [68.125, 24, 25.75, 12, .46],
+      ...Array.from({ length: 3 }, (_, i) => [77.85, 35.99 + i * .35, 6.30, .38, (3 - i) * .145]),
+      ...[68.9, 93.1].flatMap(x => Array.from({ length: 5 }, (_, i) =>
+        [x - .625, 37.215 - i * .28, 1.25, .29, (i + 1) * .093]))
+    ],
+    streetLife: [
+      { stops: [[56.2, 38], [58.8, 42], [56.5, 47]], observe: [62, 43] },
+      { stops: [[58.3, 39], [56.2, 43], [58.7, 47]], observe: [62, 43] },
+      { stops: [[56.2, 55], [58.7, 51], [57.2, 58]] },
+      { stops: [[58.7, 55], [56.2, 51], [58.6, 59]] },
+      { stops: [[74.8, 45.5], [76, 40], [71.7, 42]], observe: [70, 43] },
+      { stops: [[76, 46.7], [73.6, 41.2], [72.7, 44]], observe: [70, 43] },
+      { stops: [[91, 47], [92, 43], [89, 45.5]], observe: [94.75, 47.45] },
+      { stops: [[91.2, 49], [95.9, 44.5], [89.4, 46.8]], observe: [94.75, 47.45] }
+    ],
     streetBlocked: walls,
     strictPlayable: true,
     // The west gate jambs extend beyond the shop façades. Use camera-only

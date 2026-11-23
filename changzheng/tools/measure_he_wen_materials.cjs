@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_modules/puppeteer-core');
 
 (async () => {
@@ -10,7 +11,9 @@ const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_mod
   const label = args.find(arg => !arg.startsWith('--')) || `materials-${backend}`;
   const outputDir = path.join(root, '..', 'evidence', 'he-wen-material-2026-11-24');
   fs.mkdirSync(outputDir, { recursive: true });
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cz-hewen-material-'));
   const browser = await puppeteer.launch({
+    userDataDir,
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     headless: true,
     protocolTimeout: 180000,
@@ -28,8 +31,8 @@ const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_mod
   try {
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 1 });
     const origin = process.env.PREVIEW_ORIGIN || 'http://127.0.0.1:8080';
-    await page.goto(`${origin}/march-world/character-preview.html?renderer=${backend}`, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.characterPreview?.stats, { timeout: 180000 });
+    await page.goto(`${origin}/march-world/character-preview.html?renderer=${backend}`, { waitUntil: 'domcontentloaded', timeout: 180000 });
+    await page.waitForFunction(() => window.characterPreview?.stats, { timeout: 60000 });
     await page.evaluate(() => new Promise(resolve => {
       let count = 0;
       const warm = () => ++count >= 12 ? resolve() : requestAnimationFrame(warm);
@@ -46,6 +49,7 @@ const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_mod
             transparent: mat.transparent, alphaTest: mat.alphaTest, depthWrite: mat.depthWrite,
             alphaToCoverage: mat.alphaToCoverage, roughness: mat.roughness, metalness: mat.metalness,
             clearcoat: mat.clearcoat, sheen: mat.sheen,
+            nodes: Object.fromEntries(['colorNode', 'normalNode', 'roughnessNode', 'emissiveNode'].map(key => [key, !!mat[key]])),
             maps: Object.fromEntries(['map', 'normalMap', 'roughnessMap', 'aoMap'].filter(key => mat[key]).map(key => [key, {
               width: mat[key].image?.width || 0, height: mat[key].image?.height || 0,
               repeat: mat[key].repeat.toArray(), anisotropy: mat[key].anisotropy
@@ -99,18 +103,46 @@ const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_mod
       })));
     }
     if (shot) {
-      await page.evaluate(() => {
+      await page.evaluate(async () => {
+        const T = await import('three');
+        const { camera, model, renderer } = characterPreview;
         characterPreview.setView('front');
-        characterPreview.camera.position.set(0, 1.612, 0.55);
+        const skin = model.getObjectByName('HeWen_Skin');
+        model.updateMatrixWorld(true);
+        skin.skeleton?.update();
+        const point = new T.Vector3();
+        window.__measureHeWenCloseup = () => {
+          camera.updateMatrixWorld();
+          let min = Infinity, max = -Infinity;
+          for (let index = 0; index < skin.geometry.attributes.position.count; index++) {
+            skin.getVertexPosition(index, point);
+            skin.localToWorld(point);
+            if (point.y < 1.44) continue;
+            point.project(camera);
+            min = Math.min(min, point.y);
+            max = Math.max(max, point.y);
+          }
+          const rect = renderer.domElement.getBoundingClientRect();
+          const canvasFraction = (max - min) / 2;
+          return { canvasFraction, viewportFraction: canvasFraction * rect.height / innerHeight, cameraDistance: camera.position.z };
+        };
+        const initial = window.__measureHeWenCloseup();
+        const rect = renderer.domElement.getBoundingClientRect();
+        const targetCanvasFraction = 0.60 * innerHeight / rect.height;
+        const distance = initial.cameraDistance * initial.canvasFraction / targetCanvasFraction;
+        camera.position.set(0, 1.612, Math.max(0.3, distance));
       });
       await page.evaluate(() => new Promise(resolve => {
         let count = 0;
         const settle = () => ++count >= 12 ? resolve() : requestAnimationFrame(settle);
         requestAnimationFrame(settle);
       }));
+      report.closeup = await page.evaluate(() => window.__measureHeWenCloseup());
       const shotPath = path.resolve(outputDir, shot);
       await page.screenshot({ path: shotPath, type: 'jpeg', quality: 80 });
-      report.screenshot = { path: path.relative(root, shotPath), bytes: fs.statSync(shotPath).size };
+      const bytes = fs.statSync(shotPath).size;
+      if (bytes > 300 * 1024) throw new Error(`JPEG exceeds 300 KB: ${bytes}`);
+      report.screenshot = { path: path.relative(root, shotPath), bytes, viewport: [1280, 800], quality: 80 };
     }
     report.passed = report.errors.length === 0 && report.failedRequests.length === 0 && report.actualBackend === backend;
   } catch (error) {
@@ -123,5 +155,6 @@ const puppeteer = require(process.env.PUPPETEER_PATH || '../../_browser/node_mod
     const { materials, ...summary } = report;
     console.log(JSON.stringify(summary, null, 2));
     await browser.close();
+    fs.rmSync(userDataDir, { recursive: true, force: true });
   }
 })();

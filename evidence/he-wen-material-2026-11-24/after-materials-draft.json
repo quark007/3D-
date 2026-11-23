@@ -1,0 +1,538 @@
+{
+  "label": "after-materials-draft",
+  "backend": "webgl",
+  "viewport": [
+    1280,
+    800
+  ],
+  "frameSamples": 120,
+  "errors": [],
+  "warnings": [
+    "THREE.WebGLProgram: Program Info Log: (210,91-147): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(209,41-69): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(210,92-120): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(209,41-69): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n(210,92-120): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision",
+    "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+    "THREE.WebGLProgram: Program Info Log: (860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero",
+    "THREE.WebGLProgram: Program Info Log: (860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero",
+    "THREE.WebGLProgram: Program Info Log: (934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero",
+    "THREE.WebGLProgram: Program Info Log: (934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero"
+  ],
+  "failedRequests": [],
+  "actualBackend": "webgl",
+  "modelTriangles": 29139,
+  "meshCount": 42,
+  "materialCount": 20,
+  "materials": [
+    {
+      "name": "HeWen_DullBuckle",
+      "mesh": "HeWen_BeltBuckle",
+      "type": "MeshStandardMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.5799999833106995,
+      "metalness": 1,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_WornCotton",
+      "mesh": "HeWen_BreastPocket",
+      "type": "MeshPhysicalMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 1,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 0.35,
+      "maps": {
+        "map": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            5,
+            5
+          ],
+          "anisotropy": 16
+        },
+        "normalMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            5,
+            5
+          ],
+          "anisotropy": 16
+        },
+        "roughnessMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            5,
+            5
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_BrowStrandHair",
+      "mesh": "HeWen_BrowStrands",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0.35,
+      "depthWrite": true,
+      "alphaToCoverage": true,
+      "roughness": 0.47999998927116394,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 0,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_RedClothTabs",
+      "mesh": "HeWen_CapRedStar",
+      "type": "MeshStandardMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.8600000143051147,
+      "metalness": 0,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_TunicCotton",
+      "mesh": "HeWen_Clothes",
+      "type": "MeshPhysicalMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 1,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 0.35,
+      "maps": {
+        "map": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            5,
+            5
+          ],
+          "anisotropy": 16
+        },
+        "normalMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            5,
+            5
+          ],
+          "anisotropy": 16
+        },
+        "roughnessMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            5,
+            5
+          ],
+          "anisotropy": 16
+        },
+        "aoMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_MatteButtons",
+      "mesh": "HeWen_CollarHook",
+      "type": "MeshPhysicalMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.550000011920929,
+      "metalness": 1,
+      "clearcoat": 0.30000001192092896,
+      "sheen": 0,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_Skin.eyebrow001",
+      "mesh": "HeWen_Eyebrows",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0.25,
+      "depthWrite": true,
+      "alphaToCoverage": true,
+      "roughness": 0.550000011920929,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 0,
+      "maps": {
+        "map": {
+          "width": 512,
+          "height": 512,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_LashHair",
+      "mesh": "HeWen_Eyelashes",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0.35,
+      "depthWrite": true,
+      "alphaToCoverage": true,
+      "roughness": 0.4000000059604645,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 0,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_Skin.high-poly",
+      "mesh": "HeWen_Eyes",
+      "type": "MeshPhysicalMaterial",
+      "side": 0,
+      "transparent": true,
+      "alphaTest": 0,
+      "depthWrite": false,
+      "alphaToCoverage": false,
+      "roughness": 0.11999999731779099,
+      "metalness": 0,
+      "clearcoat": 0.550000011920929,
+      "sheen": 0,
+      "maps": {
+        "map": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_Skin.short04",
+      "mesh": "HeWen_Hair",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0.35,
+      "depthWrite": true,
+      "alphaToCoverage": true,
+      "roughness": 0.6200000047683716,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 1,
+      "maps": {
+        "map": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_HairStrandDark",
+      "mesh": "HeWen_HairStrands",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0.35,
+      "depthWrite": true,
+      "alphaToCoverage": true,
+      "roughness": 0.36000001430511475,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 1,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_HairStrandLight",
+      "mesh": "HeWen_HairStrandsLight",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0.35,
+      "depthWrite": true,
+      "alphaToCoverage": true,
+      "roughness": 0.4000000059604645,
+      "metalness": 0,
+      "clearcoat": 0,
+      "sheen": 1,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_WornLeatherBelt",
+      "mesh": "HeWen_LeatherBelt",
+      "type": "MeshPhysicalMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 1,
+      "metalness": 0,
+      "clearcoat": 0.15,
+      "sheen": 0,
+      "maps": {
+        "map": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            4,
+            4
+          ],
+          "anisotropy": 16
+        },
+        "normalMap": {
+          "width": 512,
+          "height": 512,
+          "repeat": [
+            4,
+            4
+          ],
+          "anisotropy": 16
+        },
+        "roughnessMap": {
+          "width": 512,
+          "height": 512,
+          "repeat": [
+            4,
+            4
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_TrimFlap",
+      "mesh": "HeWen_PocketFlap",
+      "type": "MeshStandardMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.8999999761581421,
+      "metalness": 0,
+      "maps": {
+        "map": {
+          "width": 512,
+          "height": 256,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        },
+        "normalMap": {
+          "width": 512,
+          "height": 256,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_ClothShoes",
+      "mesh": "HeWen_Shoes",
+      "type": "MeshStandardMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.8700000047683716,
+      "metalness": 0,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_SkinPBR",
+      "mesh": "HeWen_Skin",
+      "type": "MeshPhysicalMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 1,
+      "metalness": 0,
+      "clearcoat": 0.03,
+      "sheen": 0,
+      "maps": {
+        "map": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        },
+        "normalMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        },
+        "roughnessMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            4,
+            4
+          ],
+          "anisotropy": 16
+        },
+        "aoMap": {
+          "width": 1024,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_TearLine",
+      "mesh": "HeWen_TearLineL",
+      "type": "MeshPhysicalMaterial",
+      "side": 2,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.05999999865889549,
+      "metalness": 0,
+      "clearcoat": 1,
+      "sheen": 0,
+      "maps": {}
+    },
+    {
+      "name": "HeWen_Skin.teeth_base",
+      "mesh": "HeWen_Teeth",
+      "type": "MeshStandardMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.20000000298023224,
+      "metalness": 0,
+      "maps": {
+        "map": {
+          "width": 512,
+          "height": 512,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_Skin.tongue01",
+      "mesh": "HeWen_Tongue",
+      "type": "MeshStandardMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.8039000034332275,
+      "metalness": 0,
+      "maps": {
+        "map": {
+          "width": 256,
+          "height": 256,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    },
+    {
+      "name": "HeWen_TrimPlacket",
+      "mesh": "HeWen_TunicClosure",
+      "type": "MeshStandardMaterial",
+      "side": 0,
+      "transparent": false,
+      "alphaTest": 0,
+      "depthWrite": true,
+      "alphaToCoverage": false,
+      "roughness": 0.8999999761581421,
+      "metalness": 0,
+      "maps": {
+        "map": {
+          "width": 64,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        },
+        "normalMap": {
+          "width": 64,
+          "height": 1024,
+          "repeat": [
+            1,
+            1
+          ],
+          "anisotropy": 16
+        }
+      }
+    }
+  ],
+  "maxAnisotropy": 16,
+  "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "averageFrameMs": 31.109999999999975,
+  "fps": 32.14400514304085,
+  "calls": 175,
+  "renderTriangles": 116689,
+  "textures": 39,
+  "geometries": 44,
+  "passed": true
+}

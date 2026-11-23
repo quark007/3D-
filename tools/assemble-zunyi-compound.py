@@ -37,6 +37,12 @@ def tiled_wall(name):
     block(name,x-.018,y-.018,w+.036,d+.036,-.022,h-.23,'brick')
     block('石脚',x-.065,y-.065,w+.13,d+.13,-.02,.33,'stone')
     block('瓦压顶',x-.12,y-.12,w+.24,d+.24,h-.25,h,'roof')
+    if FOLIAGE_POLISH and name=='东围墙':
+        for i in range(round(d/.265)):
+            yy=y+.133+i*.265
+            block('围墙瓦当',x-.15,yy-.087,.29,.174,h-.135,h+.005,'roof')
+        for z in (.28, h-.255):
+            block('墙脚与瓦檐收边',x-.082,y,w+.09,d,z-.07,z+.03,'stone' if z<1 else 'brick')
     if name in ('北围墙','东围墙','南围墙'):
         long=w>d
         length=w if long else d
@@ -175,18 +181,30 @@ for name in ('井台','槐树花台'):
     for sx,sy,sw,sd in ((x,y,w,.22),(x,y+d-.22,w,.22),(x,y+.22,.22,d-.44),(x+w-.22,y+.22,.22,d-.44)):
         block(name,sx,sy,sw,sd,-.015,h,'stone')
     block('井口' if name=='井台' else '花台覆土',x+.22,y+.22,w-.44,d-.44,-.03,.10 if name=='井台' else h-.12,'wood')
-zy_tree(*xy(94.75,47.45))
-# A few silhouettes behind the walls break the roofline without adding outbuildings.
-for index,(x,y,z) in enumerate(((72,17.8,5.4),(98,17.85,5.6),(103.15,28,5.3),(103.12,54,5.5))):
-    cx,cy=xy(x,y)
-    rng=random.Random(index+303)
-    beam('墙边细树干',(cx,cy,-.02),(cx,cy,z),.20,.20,'wood')
-    for _ in range(5):
-        a,b,c=cx+rng.uniform(-1.6,1.6),cy+rng.uniform(-.56,.56),z+rng.uniform(-.46,.7)
-        r=rng.uniform(.78,1.32)
-        beam('树冠支枝',(cx,cy,z-.80),(a,b,c),.085,.085,'wood')
-        mesh('墙外树冠',[(a+r,b,c),(a,b+r,c),(a-r,b,c),(a,b-r,c),(a,b,c+r*.77),(a,b,c-r*.52)],
-             [(i,(i+1)%4,4) for i in range(4)]+[((i+1)%4,i,5) for i in range(4)],'leaf')
+if FOLIAGE_POLISH:
+    helper=R/'tools/zunyi-foliage.py'
+    exec(compile(helper.read_text(encoding='utf-8-sig'),str(helper),'exec'))
+    verify_bounds('老槐树盘根',lambda: foliage_tree(*xy(94.75,47.45)))
+    assembly_bounds['花台填土']=[(12.82,14.68),(-18.38,-16.52),(.33,.40)]
+    verify_overlap('老槐树盘根','花台填土')
+    points=bucket[group,'bark'][0]
+    roots=[p for p in points if p[2]<.4]
+    assert all(12.60 <= p[0] <= 14.90 and -18.60 <= p[1] <= -16.30 for p in roots)
+    assert sum(len(face)-2 for key,(verts,faces) in bucket.items() if key[1] in ('bark','twig') for face in faces)<=4500
+    foliage_outside()
+else:
+    zy_tree(*xy(94.75,47.45))
+    # A few silhouettes behind the walls break the roofline without adding outbuildings.
+    for index,(x,y,z) in enumerate(((72,17.8,5.4),(98,17.85,5.6),(103.15,28,5.3),(103.12,54,5.5))):
+        cx,cy=xy(x,y)
+        rng=random.Random(index+303)
+        beam('墙边细树干',(cx,cy,-.02),(cx,cy,z),.20,.20,'wood')
+        for _ in range(5):
+            a,b,c=cx+rng.uniform(-1.6,1.6),cy+rng.uniform(-.56,.56),z+rng.uniform(-.46,.7)
+            r=rng.uniform(.78,1.32)
+            beam('树冠支枝',(cx,cy,z-.80),(a,b,c),.085,.085,'wood')
+            mesh('墙外树冠',[(a+r,b,c),(a,b+r,c),(a-r,b,c),(a,b-r,c),(a,b,c+r*.77),(a,b,c-r*.52)],
+                 [(i,(i+1)%4,4) for i in range(4)]+[((i+1)%4,i,5) for i in range(4)],'leaf')
 for y in (38,49.8):
     block('前院排水明沟',71.6,y,23,.115,-.014,.003,'wood')
     block('沟沿',71.6,y+.115,23,.08,-.012,.019,'stone')

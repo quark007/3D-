@@ -86,6 +86,34 @@ if ARCH_POLISH:
     glass_bs.inputs['Emission Strength'].default_value=.35
     brick=next(n for n in materials['brick'].node_tree.nodes if n.type=='NORMAL_MAP')
     brick.inputs['Strength'].default_value=1.28
+FOLIAGE_POLISH=globals().get('FOLIAGE_POLISH',False)
+if FOLIAGE_POLISH:
+    bark,bs=material('bark',(.22,.18,.14))
+    for suffix,slot in [('Diffuse','Base Color'),('nor_gl','Normal'),('Rough','Roughness')]:
+        tex=bark.node_tree.nodes.new('ShaderNodeTexImage')
+        tex.image=bpy.data.images.load(str(raw/'textures'/('chinese_hackberry_bark_'+suffix+'.jpg')))
+        tex.image.colorspace_settings.name='sRGB' if suffix=='Diffuse' else 'Non-Color'
+        tex.image.pack()
+        if suffix=='nor_gl':
+            norm=bark.node_tree.nodes.new('ShaderNodeNormalMap')
+            norm.inputs['Strength'].default_value=1.15
+            bark.node_tree.links.new(tex.outputs['Color'],norm.inputs['Color'])
+            bark.node_tree.links.new(norm.outputs[0],bs.inputs[slot])
+        else: bark.node_tree.links.new(tex.outputs['Color'],bs.inputs[slot])
+    for key,filename in [('twig','zunyi-winter-twigs.png'),('crown','zunyi-distant-crowns.png')]:
+        mat,bs=material(key,(.25,.21,.16))
+        tex=mat.node_tree.nodes.new('ShaderNodeTexImage')
+        tex.image=bpy.data.images.load(str(raw/'textures'/filename))
+        # Pack RGBA into PNG for core glTF, independent of the source WebP.
+        tex.image.file_format='PNG'
+        tex.image.pack()
+        mat.node_tree.links.new(tex.outputs['Color'],bs.inputs['Base Color'])
+        test=mat.node_tree.nodes.new('ShaderNodeMath')
+        test.operation='GREATER_THAN'
+        test.inputs[1].default_value=.45
+        mat.node_tree.links.new(tex.outputs['Alpha'],test.inputs[0])
+        mat.node_tree.links.new(test.outputs[0],bs.inputs['Alpha'])
+        mat.use_backface_culling=False
 for k,c in [('glass',(.13,.23,.21)),('leaf',(.11,.16,.073))]:material(k,c)
 bucket=defaultdict(lambda:[[],[]])
 group='landmark'
@@ -120,6 +148,10 @@ def flush():
             u,v=[(1,2),(0,2),(0,1)][axis]
             for li in p.loop_indices:
                 co=me.vertices[me.loops[li].vertex_index].co
+                if mat in ('twig','crown'):
+                    index=me.loops[li].vertex_index%9
+                    uv.data[li].uv=(index%3/2,index//3/2)
+                    continue
                 uv.data[li].uv=(co[u]/1.04,co[v]/(.80 if v==2 else 1.04)) if mat=='brick' and ARCH_POLISH else (co[u]/2.4,co[v]/2.4)
         objects.append(ob)
     bucket.clear()

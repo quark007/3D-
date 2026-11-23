@@ -21,10 +21,11 @@ R = Path(__file__).resolve().parents[1]
 master = R/'assets/clean-kit/zunyi/zunyi_street_master.blend'
 target = R/'changzheng/assets/scenes/zunyi-realscan'
 source_master = Path(sys.argv[sys.argv.index('--') + 1]) if '--' in sys.argv else master
-if os.environ.get('ZUNYI_ARCH_POLISH'):
+foliage=bool(os.environ.get('ZUNYI_FOLIAGE_POLISH'))
+if os.environ.get('ZUNYI_ARCH_POLISH') or foliage:
     import tempfile
     staging=tempfile.TemporaryDirectory(prefix='zunyi-arch-')
-    scope={'ROOT':str(R),'ARCH_POLISH':True,'BUILD_TEMP':staging.name}
+    scope={'ROOT':str(R),'ARCH_POLISH':True,'FOLIAGE_POLISH':foliage,'BUILD_TEMP':staging.name}
     for name in ('build-zunyi.py','assemble-zunyi-compound.py'):
         file=R/'tools'/name
         exec(compile(file.read_text(encoding='utf-8-sig'),str(file),'exec'),scope)
@@ -35,7 +36,7 @@ else:
     scene = dest.scenes[0]
 bpy.context.window.scene = scene
 original = [o for o in scene.objects if o.type == 'MESH']
-assert len(original) == (8 if os.environ.get('ZUNYI_ARCH_POLISH') else 7), 'Use the unbaked RC master as the source'
+assert len(original) == (10 if foliage else 8 if os.environ.get('ZUNYI_ARCH_POLISH') else 7), 'Use the unbaked RC master as the source'
 
 layout_source = (R/'changzheng/march-world/scenes/chapter-03.js').read_text(encoding='utf8')
 layout = json.loads(re.search(r'/\* compound-layout \*/ (.*?) /\* end-compound-layout \*/', layout_source, re.S)[1])
@@ -249,7 +250,7 @@ bake_ao([stone],'Zunyi paving AO')
 bake_ao(walls,'Zunyi buildings AO')
 
 bpy.ops.export_scene.gltf(filepath=str(target/'zunyi_street.baked.glb'),export_format='GLB',
-    use_active_scene=True,export_image_format='JPEG',export_jpeg_quality=78,export_draco_mesh_compression_enable=True,
+    use_active_scene=True,export_image_format='AUTO' if foliage else 'JPEG',export_jpeg_quality=78,export_draco_mesh_compression_enable=True,
     export_draco_mesh_compression_level=6,export_animations=False)
 
 # Author the same low wall dampness in Blender after exporting the original PBR

@@ -2,37 +2,9 @@
   'use strict';
   const M = window.CZMarchWorld._;
 
-  // Bake the January sky and the actual roofline from the courtyard once.
-  function bakeCourtyardEnvironment(T, renderer, street, point) {
-    const capture = new T.Scene();
-    const dome = new T.SphereGeometry(90, 32, 24);
-    const material = new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide });
-    const top = new T.Color('#8e9ca8'), horizon = new T.Color('#c4c8c4'), base = new T.Color('#3a3d3c');
-    const colors = [], color = new T.Color();
-    const positions = dome.attributes.position;
-    for (let i = 0; i < positions.count; i++) {
-      const altitude = positions.getY(i) / 90;
-      color.copy(horizon).lerp(altitude > 0 ? top : base, Math.min(1, Math.abs(altitude) * 2));
-      colors.push(color.r, color.g, color.b);
-    }
-    dome.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
-    const sky = new T.Mesh(dome, material);
-    sky.position.copy(point);
-    const generator = new T.PMREMGenerator(renderer);
-    capture.add(sky, new T.HemisphereLight('#d5e0ea', '#777268', 2), street);
-    try {
-      return generator.fromScene(capture, 0, .1, 100, { size: 64, position: point });
-    } finally {
-      capture.remove(street);
-      dome.dispose();
-      material.dispose();
-      generator.dispose();
-    }
-  }
-
   function shadeCourtyardMaterial(mat, floorHeight) {
     const stone = mat.name.startsWith('ZY_stone');
-    const wall = /^(ZY_brick|ZY_plaster)/.test(mat.name);
+    const wall = /^(ZY_brick|ZY_plaster|ZY_bark)/.test(mat.name);
     if (mat.aoMap) mat.aoMapIntensity = .64;
     if (!stone && !wall && !mat.name.startsWith('ZY_glass')) return;
     mat.onBeforeCompile = shader => {
@@ -80,7 +52,7 @@
     mat.customProgramCacheKey = () => stone ? 'zunyi-wet-stone' : wall ? 'zunyi-damp-masonry' : 'zunyi-upper-windows';
   }
 
-  function winterWeather(T, root, settings, onSurface, world) {
+  function winterWeather(T, root, settings, onSurface, world, grassTexture) {
     const group = new T.Group();
     group.name = 'zunyi-winter-weather';
     root.add(group);
@@ -92,31 +64,6 @@
       group.add(mesh);
       return mesh;
     };
-    const noise = `
-      float hashCloud(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
-      float cloud(vec2 p) {
-        vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
-        return mix(mix(hashCloud(i), hashCloud(i+vec2(1,0)),f.x),
-                   mix(hashCloud(i+vec2(0,1)), hashCloud(i+vec2(1,1)),f.x),f.y);
-      }`;
-    const sky = make(new T.SphereGeometry(125, 24, 14), new T.ShaderMaterial({
-      side: T.BackSide, depthWrite: false, fog: false,
-      vertexShader: 'varying vec3 dome; void main(){dome=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-      fragmentShader: noise + `
-        varying vec3 dome;
-        void main(){
-          vec3 dir=normalize(dome);
-          float height=smoothstep(-.05,.52,dir.y);
-          vec2 p=dir.xz/(.26+abs(dir.y))*3.5;
-          float bands=.67*cloud(p)+.24*cloud(p*2.07)+.09*cloud(p*4.2);
-          float breaks=smoothstep(.34,.74,bands)*mix(.32,1.,height);
-          vec3 color=mix(vec3(.48,.56,.61),vec3(.15,.23,.31),height);
-          color=mix(color,vec3(.69,.75,.76),breaks*.86);
-          gl_FragColor=vec4(color,1.);
-          #include <colorspace_fragment>
-        }`
-    }));
-    sky.renderOrder = -10;
     let seed = 1935;
     const rand = () => ((seed = (Math.imul(1664525, seed) + 1013904223) >>> 0) / 4294967296);
     const rainData = new Float32Array(settings.count * 6);
@@ -152,9 +99,57 @@
       light.position.copy(onSurface(x,y,h));
       group.add(light);
     }
+    const grassGeometry = new T.BufferGeometry();
+    const grassPositions = [], grassUV = [], grassColors = [], grassIndices = [];
+    for (let plane = 0; plane < 2; plane++) {
+      const offset = plane * 4;
+      for (const [u,v] of [[0,0],[1,0],[1,1],[0,1]]) {
+        const side = u - .5, shade = .43 + v * .57;
+        grassPositions.push(plane ? 0 : side, v, plane ? side : 0);
+        grassUV.push(u,v); grassColors.push(shade,shade,shade);
+      }
+      grassIndices.push(offset,offset+1,offset+2,offset,offset+2,offset+3);
+    }
+    grassGeometry.setAttribute('position',new T.Float32BufferAttribute(grassPositions,3));
+    grassGeometry.setAttribute('uv',new T.Float32BufferAttribute(grassUV,2));
+    grassGeometry.setAttribute('color',new T.Float32BufferAttribute(grassColors,3));
+    grassGeometry.setIndex(grassIndices);
+    const wind = { value: 0 };
+    const grassMaterial = new T.MeshBasicMaterial({
+      map:grassTexture, vertexColors:true, alphaTest:.45, side:T.DoubleSide
+    });
+    grassMaterial.onBeforeCompile=shader=>{
+      shader.uniforms.grassTime=wind;
+      shader.vertexShader='uniform float grassTime;\n'+shader.vertexShader.replace('#include <begin_vertex>',`
+        #include <begin_vertex>
+        vec2 root=instanceMatrix[3].xz;
+        transformed.x+=sin(grassTime*1.15+root.x*.9+root.y*.43)*position.y*position.y*.086;`);
+    };
+    const grass=new T.InstancedMesh(grassGeometry,grassMaterial,84);
+    group.add(grass);
+    const dummy=new T.Object3D();
+    for(let i=0;i<84;i++){
+      let x,y,h=0;
+      if(i<23){
+        x=94.17+rand()*1.16;y=46.85+rand()*1.20;h=.392;
+      }else if(i<42){
+        if(i%2){x=93.48+rand()*.075;y=46.38+rand()*2.14;}
+        else{x=93.67+rand()*2.13;y=48.66+rand()*.11;}
+      }else if(i<64){
+        x=103.29-rand()*.11;y=20+rand()*43;
+      }else{
+        x=(i%2?54.17:60.81)+rand()*.09;y=24+rand()*36;
+        if(y>40.9&&y<45.0)y+=6;
+      }
+      dummy.position.copy(onSurface(x,y,h-.007));
+      dummy.rotation.y=rand()*Math.PI;
+      dummy.scale.set(.21+rand()*.31,.14+rand()*.20,.21+rand()*.31);
+      dummy.updateMatrix();grass.setMatrixAt(i,dummy.matrix);
+    }
+    grass.instanceMatrix.needsUpdate=true;
     return {
       update(t,player,camera){
-        sky.position.copy(camera.position);
+        wind.value=t;
         for(let i=0;i<seeds.length;i++){
           const [a,b,c,len]=seeds[i];
           const x=player.x+((a+t*.64+22)%44+44)%44-22;
@@ -178,6 +173,7 @@
       },
       dispose(){
         group.removeFromParent();
+        grass.dispose();grassGeometry.dispose();grassMaterial.dispose();
         for(const {geometry,material} of materials){geometry.dispose();material.dispose();}
       }
     };
@@ -192,11 +188,14 @@
     const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel);
     const cinematic = logicalScene.sceneId === 'chapter-3/scene-zunyi';
     let reflectionTarget = null;
+    let winterSky = null, winterGrass = null;
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
     function releaseResources() {
       const geometries = new Set(), mats = new Set(), textures = new Set(), images = new Set();
       reflectionTarget?.dispose();
+      winterSky?.dispose();
+      winterGrass?.dispose();
       assets?.collect(geometries, mats, textures);
       for (const mat of materials.values()) mats.add(mat);
       worldRoot?.traverse(object => {
@@ -260,16 +259,38 @@
       const [x, y] = logicalScene.streetModel.origin;
       street.position.copy(toWorld(x, y, terrain.support(x, y) + .04));
       street.name = 'zunyi-realscan';
-      if (cinematic) {
-        reflectionTarget = bakeCourtyardEnvironment(T, renderer, street, onSurface(81, 41, 1.2));
+      if (cinematic && logicalScene.winterRain?.sky) {
+        const load = new T.TextureLoader();
+        const textures = await Promise.allSettled([
+          load.loadAsync(logicalScene.winterRain.sky),
+          load.loadAsync(logicalScene.winterRain.grass)
+        ]);
+        [winterSky,winterGrass] = textures.map(t => t.status==='fulfilled' ? t.value : null);
+        if (options.signal?.aborted || !winterSky || !winterGrass) {
+          winterSky?.dispose(); winterGrass?.dispose();
+          throw textures.find(t=>t.status==='rejected')?.reason ?? new DOMException('Aborted','AbortError');
+        }
+        winterSky.colorSpace = winterGrass.colorSpace = T.SRGBColorSpace;
+        winterSky.mapping = T.EquirectangularReflectionMapping;
+        scene.background = winterSky;
+        scene.backgroundIntensity = .93;
+        scene.fog.color.set('#899399');
+        const generator = new T.PMREMGenerator(renderer);
+        try { reflectionTarget = generator.fromEquirectangular(winterSky); }
+        finally { generator.dispose(); }
         scene.environment = reflectionTarget.texture;
-        scene.environmentIntensity = logicalScene.winterRain ? .95 : .78;
+        scene.environmentIntensity = .98;
       }
       street.traverse(node => {
         if (!node.isMesh) return;
         node.receiveShadow = true;
         if (cinematic) {
-          node.castShadow = true;
+          const foliage = /^(ZY_twig|ZY_crown)/.test(node.material.name);
+          node.castShadow = !foliage;
+          if (foliage) {
+            node.material.alphaTest = .45;
+            node.material.side = T.DoubleSide;
+          }
           shadeCourtyardMaterial(node.material, street.position.y);
         }
       });
@@ -1507,7 +1528,7 @@
       markers.set(anchor.anchorId, ring);
     }
 
-    const weather = street && logicalScene.winterRain ? winterWeather(T, scene, logicalScene.winterRain, onSurface, world) : null;
+    const weather = street && logicalScene.winterRain ? winterWeather(T, scene, logicalScene.winterRain, onSurface, world, winterGrass) : null;
     let particles = null;
     if (logicalScene.ambient?.kind) {
       const count = 420;

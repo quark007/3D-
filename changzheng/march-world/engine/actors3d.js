@@ -191,8 +191,11 @@
         playerActor.root.position.y += player.jumpHeight;
         play(playerActor, player.airborne && playerActor.actions.has('Jump') ? 'Jump' :
           player.running && playerActor.actions.has('Run') ? 'Run' : player.moving ? 'Walk' : 'Idle');
-        playerActor.mixer.timeScale = player.airborne || !player.moving ? 1 :
-          player.speed / (player.running && playerActor.actions.has('Run') ? 6.5 : 1.8);
+        if (playerActor.current) {
+          const strideRate = player.speed / (player.running && playerActor.actions.has('Run') ? 6.5 : 1.8);
+          playerActor.current.timeScale = player.airborne || !player.moving ? 1 :
+            player.reversing ? -strideRate : strideRate;
+        }
         const localActors = new Map();
         if (logicalScene.streetModel) {
           for (const anchor of anchors) {

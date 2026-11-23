@@ -90,7 +90,7 @@
     const FOCUS_HEIGHT = 1.52, MIN_CAM_DIST = 1.1;
     const BASE_DISTANCE = 4.2, SHOULDER = .35, SPRINT_OFFSET = .8;
     let yaw = 0, pitch = .22, boom = BASE_DISTANCE;
-    let viewYaw = 0;
+    let viewYaw = 0, followingRoute = false;
     let intro = null;
     let introOverlay = null;
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
@@ -1422,12 +1422,21 @@
     const portraitScale = () => mobile && innerWidth < innerHeight ? 1.18 : 1;
     function follow(player, dt) {
       if (intro || graphicsLost) return;
+      if (player.navigating) followingRoute = true;
+      else if (player.moving) followingRoute = false;
+      if (followingRoute && player.routeHeading != null) {
+        const delta = player.routeHeading - yaw;
+        const turn = Math.atan2(Math.sin(delta), Math.cos(delta));
+        yaw += turn * (1 - Math.exp(-dt * 12));
+        if (!player.navigating && Math.abs(turn) < .002) followingRoute = false;
+      }
       const distance = (BASE_DISTANCE + (player.running ? SPRINT_OFFSET : 0)) * portraitScale();
       boom = T.MathUtils.lerp(boom, distance, 1 - Math.exp(-dt * 7));
       const target = onSurface(player.x, player.y, FOCUS_HEIGHT + player.jumpHeight * .45);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
       placeCamera(followTarget, dt);
+      player.faceCamera(viewYaw);
     }
 
     function finishIntro(result) {
@@ -1461,6 +1470,7 @@
       cameraDistance = 0;
       followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
       placeCamera(followTarget, 0);
+      player.faceCamera(viewYaw);
     }
 
     function playIntro(player) {
@@ -1503,10 +1513,13 @@
       initializeCamera,
       adjustCamera(dx, dy = 0) {
         if (intro || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
-        const nextYaw = yaw + dx * .004;
+        const player = logicalScene.focusActor;
+        if (!player?.navigating) followingRoute = false;
+        const nextYaw = player?.navigating ? yaw : yaw + dx * .004;
         yaw = Math.atan2(Math.sin(nextYaw), Math.cos(nextYaw));
         pitch = T.MathUtils.clamp(pitch + dy * .004, -.35, .75);
         placeCamera(followTarget, 0);
+        player?.faceCamera(viewYaw);
       },
       cameraRelativeMovement({ x, y }) {
         const sin = Math.sin(viewYaw), cos = Math.cos(viewYaw);

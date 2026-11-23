@@ -73,7 +73,7 @@
   on(container, 'pointerdown', e => {
     if (!state.enabled || ownUI(e) || tap || (e.button !== 0 && (e.button !== 2 || !lookCanvas))) return;
     if (locked()) {
-      if (e.button === 0) {
+      if (e.button === 0 && e.ctrlKey) {
         const rect = lookCanvas.getBoundingClientRect();
         clickGround(rect.left + rect.width / 2, rect.top + rect.height / 2);
       }

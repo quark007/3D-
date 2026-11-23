@@ -4,7 +4,7 @@
   const NS = window.CZMarchWorld = window.CZMarchWorld || {};
   const M = NS._ = NS._ || {};
   const WALK_SPEED = 1.8, SPEED = 4, RUN_SPEED = 6.5;
-  const RAMP_TIME = .15, TURN_SPEED = 11;
+  const RAMP_TIME = .15, TURN_SPEED = 11, REVERSE_SCALE = .75;
   const JUMP_DURATION = .64;
   const JUMP_HEIGHT = .76;
   const RADIUS = 0.62;       /* 碰撞半径 */
@@ -23,7 +23,7 @@
       x: spawn && Number.isFinite(spawn.x) ? spawn.x : scene.spawn.x,
       y: spawn && Number.isFinite(spawn.y) ? spawn.y : scene.spawn.y,
       facing: normFacing(spawn && spawn.facing != null ? spawn.facing : scene.spawn.facing),
-      moving: false, running: false, speed: 0, momentum: 0, releaseSpeed: 0, dx: 0, dy: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION
+      moving: false, running: false, speed: 0, reversing: false, routeHeading: null, momentum: 0, releaseSpeed: 0, dx: 0, dy: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION
     };
     if (!M.path.walkableAt(grid, p.x, p.y, RADIUS)) { const s = scene.spawn; p.x = s.x; p.y = s.y; }
 
@@ -49,6 +49,10 @@
       get x() { return p.x; }, get y() { return p.y; }, get facing() { return p.facing; },
       get moving() { return p.moving; },
       get running() { return p.running; },
+      get navigating() { return Boolean(p.path); },
+      get routeHeading() { return p.routeHeading; },
+      get reversing() { return p.moving && p.reversing; },
+      faceCamera(yaw) { p.facing = yaw; },
       get speed() { return p.speed; },
       get airborne() { return p.jumpTime < JUMP_DURATION; },
       get jumpHeight() {
@@ -61,17 +65,17 @@
         p.path = null;
       },
       setPos(x, y, facing) { p.x = x; p.y = y; if (facing != null) p.facing = normFacing(facing); this.stop(); p.jumpTime = JUMP_DURATION; },
-      moveTo(path) { p.path = path; p.pathI = 0; },
+      moveTo(path) { p.path = path; p.pathI = 0; p.routeHeading = null; },
       stopPath() { p.path = null; },
-      stop() { p.path = null; p.releaseSpeed = p.momentum = p.speed = 0; p.moving = p.running = false; },
-      advance(dt, vec, run = false, walk = false) {
+      stop() { p.path = null; p.releaseSpeed = p.momentum = p.speed = 0; p.moving = p.running = p.reversing = false; },
+      advance(dt, vec, run = false, walk = false, cameraInput) {
         p.accumulator = Math.min(.1, p.accumulator + Math.max(0, dt));
         while (p.accumulator + 1e-9 >= 1/60) {
-          this.update(1/60, vec, run, walk);
+          this.update(1/60, vec, run, walk, cameraInput);
           p.accumulator -= 1/60;
         }
       },
-      update(dt, vec, run = false, walk = false) {
+      update(dt, vec, run = false, walk = false, cameraInput) {
         p.jumpTime = Math.min(JUMP_DURATION, p.jumpTime + dt);
         let x = vec?.x || 0, y = vec?.y || 0;
         let amount = Math.min(1, Math.hypot(x, y));
@@ -92,8 +96,9 @@
         if (amount) {
           const length = Math.hypot(x, y);
           p.dx = x / length; p.dy = y / length;
+          p.reversing = !p.path && cameraInput > 0;
         }
-        const gait = run ? RUN_SPEED : walk ? WALK_SPEED : SPEED;
+        const gait = (run ? RUN_SPEED : walk ? WALK_SPEED : SPEED) * (p.reversing ? REVERSE_SCALE : 1);
         const target = amount * (p.path ? SPEED : gait);
         const ramp = (target ? Math.max(p.momentum, target) : p.releaseSpeed || SPEED) * dt / RAMP_TIME;
         p.momentum += Math.sign(target - p.momentum) * Math.min(Math.abs(target - p.momentum), ramp);
@@ -104,13 +109,15 @@
         const dx = p.x - lastX, dy = p.y - lastY;
         p.speed = Math.hypot(dx, dy) / dt;
         p.moving = p.speed > .001;
-        p.running = p.speed > SPEED + .05;
-        if (p.moving) {
+        p.running = !p.reversing && p.speed > SPEED + .05;
+        if (p.moving && p.path) p.routeHeading = Math.atan2(dy, dx);
+        if (p.moving && cameraInput == null) {
           const delta = Math.atan2(dy, dx) - p.facing;
           const turn = Math.atan2(Math.sin(delta), Math.cos(delta));
           p.facing += Math.sign(turn) * Math.min(Math.abs(turn), TURN_SPEED * dt);
           p.facing = Math.atan2(Math.sin(p.facing), Math.cos(p.facing));
-        } else if (step && p.path) this.stop();
+        }
+        if (!p.moving && step && p.path) this.stop();
         p.t += dt * (p.moving ? p.speed / WALK_SPEED : 1);
       },
       draw(ctx, cam) {

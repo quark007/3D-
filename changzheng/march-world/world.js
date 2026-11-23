@@ -118,8 +118,10 @@
       input.setEnabled(!paused);
       if (!paused) {
         const movement = input.vector();
-        const direction = view.cameraRelativeMovement?.(movement) ?? movement;
-        player.advance(dt, direction, input.wantsRun?.(), input.wantsWalk?.());
+        const cameraRelative = Boolean(view.cameraRelativeMovement);
+        const direction = cameraRelative ? view.cameraRelativeMovement(movement) : movement;
+        player.advance(dt, direction, input.wantsRun?.(), input.wantsWalk?.(),
+          cameraRelative ? movement.y : undefined);
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);

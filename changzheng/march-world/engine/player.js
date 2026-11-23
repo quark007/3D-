@@ -126,7 +126,7 @@
         const dir = dir4(p.facing), set = frames[dir];
         const list = p.moving ? set.walk : set.idle;
         const frame = Math.floor(p.t * (p.moving ? 9 : 2.2)) % list.length;
-        const img = list[frame];
+        const img = list[p.moving && p.reversing ? list.length - 1 - frame : frame];
         const w = 38 * s, h = 40 * s;
         const lifted = M.proj.project(cam, p.x, p.y, this.jumpHeight);
         /* 贴地阴影 */
@@ -140,5 +140,5 @@
     };
   }
 
-  M.player = { create, SPEED, RADIUS, ROLES, JUMP_DURATION };
+  M.player = { create, WALK_SPEED, SPEED, RUN_SPEED, RADIUS, ROLES, JUMP_DURATION };
 })();

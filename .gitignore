@@ -1,0 +1,10 @@
+*.bak
+Thumbs.db
+.DS_Store
+# quick-patch 已由 quick-patch.zip 收录，避免重复入库
+/quick-patch/
+/tools/quick/
+
+# 原始交接模型留在工作区外。
+/npc建模.zip
+/npc-full-integration-*/

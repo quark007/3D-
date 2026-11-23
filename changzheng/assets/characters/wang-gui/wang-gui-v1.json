@@ -1,0 +1,36 @@
+{
+  "role": "wang_gui",
+  "ageYears": 40,
+  "source": "assets/models-v03/char_soldier.glb",
+  "sourceSha256": "f0dd36b340626ddbcb460506aed3cb02457cd231d34ff9ad861b78a8f54a7039",
+  "asset": "assets/characters/wang-gui/wang-gui-v1.glb",
+  "sha256": "359560586f1d94b9a800f10efcbaf14394ee73445f8779e07140505589f2778e",
+  "bytes": 10818056,
+  "joints": 32,
+  "animations": [
+    "CarryWalk",
+    "Idle",
+    "Row",
+    "Talk",
+    "Walk"
+  ],
+  "morphTargets": [
+    "jawOpen",
+    "smile",
+    "eyeBlinkLeft",
+    "browDownLeft",
+    "eyeBlinkRight",
+    "browDownRight",
+    "visemeA",
+    "visemeI",
+    "visemeU",
+    "visemeO",
+    "visemeE",
+    "visemeM"
+  ],
+  "textures": {
+    "skin": 1024,
+    "clothing": 2048
+  },
+  "sourceAssetTerms": "User-supplied v03 asset; no new license claim"
+}

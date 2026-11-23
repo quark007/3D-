@@ -234,7 +234,7 @@
     worldRoot = new T.Group();
     scene.add(worldRoot);
     const cam = { viewW: 0, viewH: 0, zoom: 12.5 };
-    const stats = { frames: 0, renderMs: 0, dpr: 1, adaptive: false, backend: 'three', artReady: false, propsReady: false, unsupportedProps: [], environment: environment.terrain };
+    const stats = { frames: 0, renderMs: 0, dpr: 1, adaptive: false, backend: 'three', propsReady: false, unsupportedProps: [], environment: environment.terrain };
     const world = logicalScene.world;
     const toWorld = (x, y, height = 0) => new T.Vector3(x - world.w / 2, height, y - world.h / 2);
     const props = logicalScene.props.map(alignedProp);

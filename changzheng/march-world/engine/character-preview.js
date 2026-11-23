@@ -12,13 +12,20 @@ let canvas = document.getElementById('portrait');
 const characters = new Map([
   ['he-wen', { name: '何文', detail: '指导员 · 1.78 m', path: '/assets/characters/he-wen/he-wen-web.glb' }],
   ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }],
-  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', path: '/assets/characters/logistics/logistics-web.glb' }]
+  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', path: '/assets/characters/logistics/logistics-web.glb' }],
+  ['chen-xiaoman', { name: '陈小满', detail: '青年战士 · 1.67 m', height: 1.67, path: '/assets/characters/chen-xiaoman/chen-xiaoman-web.glb' }],
+  ['medic', { name: '卫生员', detail: '随队救护 · 1.61 m', height: 1.61, path: '/assets/characters/medic/medic-web.glb' }],
+  ['boatman', { name: '船工', detail: '渡口船工 · 1.74 m', height: 1.74, path: '/assets/characters/boatman/boatman-web.glb' }],
+  ['guide', { name: '向导', detail: '沿途领路人 · 1.68 m', height: 1.68, path: '/assets/characters/guide/guide-web.glb' }],
+  ['civilian-farmer', { name: '老乡（男）', detail: '第 1 章群众 · 1.63 m', height: 1.63, path: '/assets/characters/civilian-farmer/civilian-farmer-web.glb' }],
+  ['civilian-woman', { name: '老乡（女）', detail: '第 11 章群众 · 1.63 m', height: 1.63, path: '/assets/characters/civilian-woman/civilian-woman-web.glb' }]
 ]);
 const url = new URL(location.href);
 const requestedCharacter = url.searchParams.get('char');
 const characterId = characters.has(requestedCharacter) ? requestedCharacter : 'he-wen';
 const character = characters.get(characterId);
 const characterSelect = document.getElementById('character');
+for (const [id, entry] of characters) characterSelect.add(new Option(entry.name, id));
 characterSelect.value = characterId;
 characterSelect.addEventListener('change', () => {
   url.searchParams.set('char', characterSelect.value);
@@ -149,14 +156,132 @@ scene.add(floor);
 const materials = new Map();
 const clay = new T.MeshStandardMaterial({ color: '#a6a69f', roughness: 0.85 });
 const skinUniformSets = [];
+function createPreintegratedSkinLut() {
+  const size = 64;
+  const data = new Uint8Array(size * size * 4);
+  const widths = [1.35, 0.9, 0.6];
+  for (let y = 0; y < size; y++) {
+    const roughness = y / (size - 1);
+    for (let x = 0; x < size; x++) {
+      const theta = Math.acos(Math.max(-1, Math.min(1, (x / (size - 1)) * 2 - 1)));
+      const offset = (y * size + x) * 4;
+      for (let channel = 0; channel < 3; channel++) {
+        const sigma = (0.07 + roughness * 0.23) * widths[channel];
+        let sum = 0, norm = 0;
+        for (let i = 0; i < 24; i++) {
+          const angle = -Math.PI * 0.5 + (i + 0.5) / 24 * Math.PI;
+          const weight = Math.exp(-0.5 * (angle / sigma) ** 2);
+          sum += Math.max(0, Math.cos(theta + angle)) * weight;
+          norm += weight;
+        }
+        data[offset + channel] = Math.round(255 * (norm > 0 ? sum / norm : 0));
+      }
+      data[offset + 3] = 255;
+    }
+  }
+  const texture = new T.DataTexture(data, size, size, T.RGBAFormat, T.UnsignedByteType);
+  texture.name = 'HeWen_PreintegratedSkinLUT';
+  texture.minFilter = T.LinearFilter;
+  texture.magFilter = T.LinearFilter;
+  texture.wrapS = T.ClampToEdgeWrapping;
+  texture.wrapT = T.ClampToEdgeWrapping;
+  texture.colorSpace = T.NoColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+const skinLut = createPreintegratedSkinLut();
+const physicalMaterials = new Map();
+function ensurePhysicalMaterial(mat) {
+  if (mat.isMeshPhysicalMaterial) return mat;
+  if (physicalMaterials.has(mat)) return physicalMaterials.get(mat);
+  const physical = new T.MeshPhysicalMaterial();
+  for (const key of [
+    'name', 'map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'alphaMap', 'emissiveMap', 'envMap',
+    'roughness', 'metalness', 'aoMapIntensity', 'emissiveIntensity', 'envMapIntensity', 'alphaTest', 'transparent',
+    'opacity', 'side', 'depthWrite', 'depthTest', 'vertexColors', 'flatShading', 'blending', 'toneMapped'
+  ]) if (mat[key] !== undefined) physical[key] = mat[key];
+  physical.color.copy(mat.color);
+  physical.emissive.copy(mat.emissive);
+  if (mat.normalScale) physical.normalScale.copy(mat.normalScale);
+  physical.userData = { ...mat.userData };
+  physicalMaterials.set(mat, physical);
+  return physical;
+}
+function refineHair(mat) {
+  mat.transparent = false;
+  mat.opacity = 1;
+  mat.alphaTest = 0.35;
+  mat.depthWrite = true;
+  mat.alphaToCoverage = backend === 'webgpu' || !!renderer.getContext().getContextAttributes().antialias;
+  mat.blending = T.NormalBlending;
+  const keyDir = { value: new T.Vector3(0, 0, 1) };
+  if (backend === 'webgpu') {
+    const { Fn, vec3, uniform, positionViewDirection, normalView, normalize, dot, clamp, pow, max, sqrt } = TSL;
+    const direction = uniform(keyDir.value);
+    mat.emissiveNode = Fn(() => {
+      const guide = vec3(0.15, 1.0, -0.2);
+      const tangent = normalize(guide.sub(normalView.mul(dot(guide, normalView))));
+      const view = normalize(positionViewDirection);
+      const light = normalize(direction);
+      const half = normalize(light.add(view));
+      const wrap = clamp(dot(normalView, light).mul(0.5).add(0.5), 0, 1);
+      const primaryT = normalize(tangent.add(normalView.mul(0.1)));
+      const secondaryT = normalize(tangent.sub(normalView.mul(0.1)));
+      const primaryDot = dot(primaryT, half);
+      const secondaryDot = dot(secondaryT, half);
+      const primary = pow(sqrt(max(0, primaryDot.mul(primaryDot).oneMinus())), 90).mul(0.22);
+      const secondary = pow(sqrt(max(0, secondaryDot.mul(secondaryDot).oneMinus())), 28).mul(0.10);
+      return vec3(0.90, 0.82, 0.68).mul(primary).add(vec3(0.12, 0.08, 0.045).mul(secondary)).mul(wrap);
+    })();
+  } else {
+    mat.onBeforeCompile = shader => {
+      shader.uniforms.uHwHairKeyDir = keyDir;
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vHwHairTangent;')
+        .replace('#include <skinnormal_vertex>', `#include <skinnormal_vertex>
+vec3 hwHairGuide = vec3(0.15, 1.0, -0.2);
+vec3 hwHairTangent = hwHairGuide - objectNormal * dot(hwHairGuide, objectNormal);
+vHwHairTangent = normalize(normalMatrix * hwHairTangent);`);
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vHwHairTangent;\nuniform vec3 uHwHairKeyDir;')
+        .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+vec3 hwHairT = normalize(vHwHairTangent);
+vec3 hwHairV = normalize(vViewPosition);
+vec3 hwHairL = normalize(uHwHairKeyDir);
+vec3 hwHairH = normalize(hwHairL + hwHairV);
+float hwHairWrap = clamp(dot(normal, hwHairL) * 0.5 + 0.5, 0.0, 1.0);
+vec3 hwHairPrimaryT = normalize(hwHairT + normal * 0.1);
+vec3 hwHairSecondaryT = normalize(hwHairT - normal * 0.1);
+float hwHairPrimaryDot = dot(hwHairPrimaryT, hwHairH);
+float hwHairSecondaryDot = dot(hwHairSecondaryT, hwHairH);
+float hwHairPrimary = pow(sqrt(max(0.0, 1.0 - hwHairPrimaryDot * hwHairPrimaryDot)), 90.0) * 0.22;
+float hwHairSecondary = pow(sqrt(max(0.0, 1.0 - hwHairSecondaryDot * hwHairSecondaryDot)), 28.0) * 0.10;
+reflectedLight.directSpecular += (vec3(0.90, 0.82, 0.68) * hwHairPrimary + diffuseColor.rgb * hwHairSecondary) * hwHairWrap;`);
+    };
+    mat.customProgramCacheKey = () => `hewen-kajiya-${mat.name}`;
+  }
+  mat.needsUpdate = true;
+  skinUniformSets.push({ uHwKeyDir: keyDir });
+}
 function refineSkin(mat, frame) {
+  mat.roughness = mat.roughnessMap ? 1.0 : 0.54;
+  mat.metalness = 0;
+  mat.clearcoat = 0.03;
+  mat.clearcoatRoughness = 0.32;
+  mat.sheen = 0;
+  mat.normalScale?.set(0.6, 0.6);
+  if (mat.normalMap) {
+    mat.normalMap.repeat.set(1, 1);
+    mat.normalMap.wrapS = T.RepeatWrapping;
+    mat.normalMap.wrapT = T.RepeatWrapping;
+  }
   if (backend === 'webgpu') refineSkinTSL(mat, frame);
   else refineSkinGLSL(mat, frame);
 }
 function refineSkinTSL(mat, frame) {
   const { Fn, vec2, vec3, vec4, float, uniform, positionGeometry, texture, normalMap,
     mix, clamp, smoothstep, exp, sin, pow, max, abs, distance, dot,
-    positionViewDirection, transformedNormalView } = TSL;
+    positionViewDirection, transformedNormalView, uv } = TSL;
   const meters = value => vec3(...value).div(frame.unit);
   const eye = meters(frame.eye), brow = meters(frame.brow), nose = meters(frame.nose);
   const mouth = meters(frame.mouth), chin = meters(frame.chin), hairline = meters(frame.hairline);
@@ -243,14 +368,22 @@ function refineSkinTSL(mat, frame) {
   const pore1 = sin(hwP.x.mul(5200).add(sin(hwP.z.mul(4300)).mul(1.8)));
   const pore2 = sin(hwP.z.mul(5700).add(sin(hwP.x.mul(3900)).mul(2.1)));
   const poreMask = hwFace.mul(0.7).add(0.3).mul(0.035);
-  mat.normalNode = normalMap(texture(mat.normalMap), vec2(mat.normalScale?.x ?? 1, mat.normalScale?.y ?? 1))
+  const macroNormal = normalMap(texture(mat.normalMap), vec2(0.6, 0.6));
+  const microNormal = normalMap(texture(mat.normalMap, uv().mul(30)), vec2(0.25, 0.25));
+  mat.normalNode = macroNormal.add(microNormal.sub(transformedNormalView))
     .add(vec3(pore1, pore2, 0).mul(poreMask)).normalize();
-  mat.roughnessNode = clamp(texture(mat.roughnessMap).g.sub(hwOil.mul(0.16)).add(hwBeard.mul(0.05)).add(hwHand.mul(0.04)), 0.24, 0.92);
+  const hwRoughness = clamp(texture(mat.roughnessMap).g.sub(hwOil.mul(0.10)).add(hwBeard.mul(0.035)).add(hwHand.mul(0.025)), 0.45, 0.60);
+  mat.roughnessNode = hwRoughness;
   const scatterLight = keyDir.add(transformedNormalView.mul(0.35)).normalize();
   const back = pow(clamp(dot(positionViewDirection, scatterLight.negate()), 0, 1), 3);
   const wrap = clamp(dot(transformedNormalView, keyDir.normalize()).add(0.45).div(1.45), 0, 1);
-  mat.emissiveNode = albedo.rgb.mul(vec3(0.42, 0.12, 0.07)).mul(back.mul(0.75).add(wrap.mul(0.16))).mul(hwFace)
-    .add(albedo.rgb.mul(vec3(0.55, 0.16, 0.10)).mul(back).mul(hwThin).mul(1.6));
+  const hwAo = mat.aoMap ? texture(mat.aoMap).r : float(1.0);
+  const hwThickness = clamp(hwAo.oneMinus().mul(0.65).add(hwThin.mul(0.6)), 0.04, 1.0);
+  const hwNdl = dot(transformedNormalView, keyDir.normalize());
+  const hwLutUv = vec2(clamp(hwNdl.mul(0.5).add(0.5), 0, 1), clamp(hwRoughness.mul(0.75).add(hwThin.mul(0.25)), 0, 1));
+  const hwPreintegrated = texture(skinLut, hwLutUv).r;
+  mat.emissiveNode = albedo.rgb.mul(vec3(hwPreintegrated, 0, 0))
+    .mul(back.mul(hwThickness).mul(0.35).add(wrap.mul(0.035).mul(hwFace)));
   mat.needsUpdate = true;
   skinUniformSets.push({ uHwKeyDir: keyDir });
 }
@@ -270,7 +403,8 @@ function refineSkinGLSL(mat, frame) {
     uHwHandL: { value: meters(frame.handL) },
     uHwHandR: { value: meters(frame.handR) },
     uHwSocketX: { value: frame.socketX / frame.unit },
-    uHwKeyDir: { value: new T.Vector3(0, 0, 1) }
+    uHwKeyDir: { value: new T.Vector3(0, 0, 1) },
+    uHwSkinLut: { value: skinLut }
   };
   mat.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, uniforms);
@@ -294,6 +428,11 @@ uniform vec3 uHwHandL;
 uniform vec3 uHwHandR;
 uniform float uHwSocketX;
 uniform vec3 uHwKeyDir;
+uniform sampler2D uHwSkinLut;
+vec3 hwPreintegratedSkin(float ndl, float roughness, float curvature) {
+  vec2 lutUv = vec2(clamp(ndl * 0.5 + 0.5, 0.0, 1.0), clamp(roughness * 0.75 + curvature * 0.25, 0.0, 1.0));
+  return texture2D(uHwSkinLut, lutUv).rgb;
+}
 float hwGauss(float value, float center, float width) {
   float t = (value - center) / width;
   return exp(-t * t);
@@ -361,12 +500,20 @@ float hwHandVessels = pow(max(0.0, sin(hwP.x * 700.0 + sin(hwP.z * 500.0) * 2.0)
 float hwKnuckle = pow(max(0.0, sin(hwP.z * 1500.0 + sin(hwP.x * 900.0) * 3.0)), 10.0) * hwHand * 0.4;
 diffuseColor.rgb *= 1.0 - hwHandVessels * vec3(0.010, 0.045, 0.055) - hwKnuckle * 0.04;`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+#ifdef USE_NORMALMAP_TANGENTSPACE
+vec3 hwMicro = texture2D(normalMap, vNormalMapUv * 30.0).xyz * 2.0 - 1.0;
+normal = normalize(normal + tbn * vec3(hwMicro.xy * 0.25, 0.0));
+#endif
 vec2 hwPoreUv = vec2(hwP.x, hwP.z);
 float hwP1 = sin(hwPoreUv.x * 5200.0 + sin(hwPoreUv.y * 4300.0) * 1.8);
 float hwP2 = sin(hwPoreUv.y * 5700.0 + sin(hwPoreUv.x * 3900.0) * 2.1);
-normal = normalize(normal + vec3(hwP1, hwP2, 0.0) * 0.035 * (hwFace * 0.7 + 0.3));`)
+normal = normalize(normal + vec3(hwP1, hwP2, 0.0) * 0.012 * (hwFace * 0.7 + 0.3));`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-roughnessFactor = clamp(roughnessFactor - hwOil * 0.16 + hwBeard * 0.05 + hwHand * 0.04, 0.24, 0.92);`)
+roughnessFactor = clamp(roughnessFactor - hwOil * 0.10 + hwBeard * 0.035 + hwHand * 0.025, 0.45, 0.60);`)
+      .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+float hwCurvature = clamp(length(fwidth(normal)) * 8.0, 0.0, 1.0);
+vec3 hwPreintegrated = hwPreintegratedSkin(dot(normal, normalize(uHwKeyDir)), roughnessFactor, hwCurvature);
+reflectedLight.directDiffuse = mix(reflectedLight.directDiffuse, diffuseColor.rgb * hwPreintegrated * 1.35, hwFace * 0.30);`)
       .replace('#include <opaque_fragment>', `vec3 hwView = normalize(vViewPosition);
 vec3 hwScatterLight = normalize(uHwKeyDir + normal * 0.35);
 float hwBack = pow(clamp(dot(hwView, -hwScatterLight), 0.0, 1.0), 3.0);
@@ -375,11 +522,16 @@ float hwNostril = hwGauss(abs(hwP.x), uHwSocketX * 0.40, 0.008) * hwGauss(hwP.z,
 float hwEar = smoothstep(uHwSocketX * 1.75, uHwSocketX * 2.15, abs(hwP.x))
   * hwGauss(hwP.z, uHwEye.z - 0.010, 0.030) * hwHead;
 float hwThin = clamp(hwNostril + hwEar * 0.8, 0.0, 1.0);
-outgoingLight += diffuseColor.rgb * vec3(0.42, 0.12, 0.07) * (hwBack * 0.75 + hwWrap * 0.16) * hwFace;
-outgoingLight += diffuseColor.rgb * vec3(0.55, 0.16, 0.10) * hwBack * hwThin * 1.6;
+float hwAo = 1.0;
+#ifdef USE_AOMAP
+hwAo = texture2D(aoMap, vAoMapUv).r;
+#endif
+float hwThickness = clamp((1.0 - hwAo) * 0.65 + hwThin * 0.6, 0.04, 1.0);
+outgoingLight.r += diffuseColor.r * hwPreintegrated.r * hwBack * hwThickness * 0.35;
+outgoingLight.r += diffuseColor.r * hwPreintegrated.r * hwWrap * 0.035 * hwFace;
 #include <opaque_fragment>`);
   };
-  mat.customProgramCacheKey = () => 'hewen-skin-v4';
+  mat.customProgramCacheKey = () => 'hewen-skin-preintegrated-v6';
   mat.needsUpdate = true;
   skinUniformSets.push(uniforms);
 }
@@ -402,7 +554,7 @@ observer.observe(stage);
 
 function setView(view) {
   const portraitDistance = camera.aspect < 0.7 ? 1.6 : 1.05;
-  const target = new T.Vector3(0, view === 'body' ? 0.92 : characterId === 'wang-gui' ? 1.51 : 1.6, 0);
+  const target = new T.Vector3(0, view === 'body' ? 0.92 : character.height ? character.height - .14 : characterId === 'wang-gui' ? 1.51 : 1.6, 0);
   const angle = ({ front: 0, quarter: Math.PI / 5, profile: Math.PI / 2, body: Math.PI / 10 })[view];
   const distance = view === 'body' ? (camera.aspect < 0.7 ? 3.7 : 3.2) : portraitDistance;
   controls.target.copy(target);
@@ -487,6 +639,16 @@ try {
   model.name = characterId;
   const box = new T.Box3().setFromObject(model);
   model.position.y -= box.min.y;
+  // 王贵：做旧与面部年龄感（皱纹、胡茬、泥渍、褶皱），与游戏内同一个模块。只支持 WebGL，WebGPU 下请加 &renderer=webgl
+  if (characterId === 'wang-gui') {
+    if (backend === 'webgpu') console.info('[人物做旧] WebGPU 预览下不生效，请在地址后加 &renderer=webgl 查看');
+    else {
+      try {
+        if (!window.CZMarchWorld?._?.characterWeathering) await import('./character-weathering.js');
+        window.CZMarchWorld._.characterWeathering.apply(T, model, 'wang_gui');
+      } catch (error) { console.warn('[人物做旧] 预览中加载失败', error); }
+    }
+  }
   const stats = { meshes: 0, triangles: 0, skinnedMeshes: 0, bones: 0, expressions: [], animations: source.animations.map(clip => clip.name) };
   const boneSet = new Set();
   const keys = new Set();
@@ -499,14 +661,64 @@ try {
       for (const bone of node.skeleton.bones) boneSet.add(bone);
     }
     for (const key of Object.keys(node.morphTargetDictionary || {})) keys.add(key);
-    materials.set(node, node.material);
     node.castShadow = true;
     node.receiveShadow = true;
     node.frustumCulled = false;
-    for (const mat of Array.isArray(node.material) ? node.material : [node.material]) {
+    const materialList = Array.isArray(node.material) ? node.material : [node.material];
+    for (let index = 0; index < materialList.length; index++) {
+      let mat = materialList[index];
       mat.envMapIntensity = node.name === 'HeWen_Eyes' ? 0.85 : (/Hair/i.test(node.name) ? 0.62 : 0.42);
-      if (node.name === 'HeWen_Skin' && node.userData.skinFrame) refineSkin(mat, node.userData.skinFrame);
-      if (/Hair|Eyebrow/i.test(node.name) && !/Strands/i.test(node.name)) {
+      if (characterId === 'he-wen') {
+        if (/^(HeWen_SkinPBR|HeWen_TunicCotton|HeWen_WornCotton|HeWen_WornLeatherBelt)$/.test(mat.name)) {
+          mat = ensurePhysicalMaterial(mat);
+          materialList[index] = mat;
+        }
+        const maxAnisotropy = backend === 'webgl' ? renderer.capabilities.getMaxAnisotropy() : 16;
+        for (const value of Object.values(mat)) if (value?.isTexture) value.anisotropy = maxAnisotropy;
+        const thinSheet = /^(HeWen_HairStrandDark|HeWen_HairStrandLight|HeWen_BrowStrandHair|HeWen_LashHair|HeWen_Skin\.eyebrow001|HeWen_Skin\.short04|HeWen_TrimFlap|HeWen_TearLine)$/.test(mat.name);
+        mat.side = thinSheet ? T.DoubleSide : T.FrontSide;
+        mat.envMapIntensity = node.name === 'HeWen_Eyes' ? 0.85 : (/Hair/i.test(node.name) ? 0.62 : 0.42);
+        if (/^(HeWen_SkinPBR|HeWen_Skin\.teeth_base|HeWen_Skin\.tongue01)$/.test(mat.name)) {
+          mat.transparent = false;
+          mat.opacity = 1;
+          mat.alphaTest = 0;
+          mat.depthWrite = true;
+          mat.blending = T.NormalBlending;
+        }
+        if (mat.name === 'HeWen_Skin.eyebrow001') {
+          mat.alphaTest = 0.25;
+          mat.transparent = false;
+          mat.depthWrite = true;
+          mat.alphaToCoverage = backend === 'webgpu' || !!renderer.getContext().getContextAttributes().antialias;
+        }
+        if (mat.name === 'HeWen_Skin.short04') {
+          mat.alphaTest = 0.35;
+          mat.transparent = false;
+          mat.depthWrite = true;
+          mat.alphaToCoverage = backend === 'webgpu' || !!renderer.getContext().getContextAttributes().antialias;
+          if (mat.isMeshPhysicalMaterial) {
+            mat.anisotropy = Math.max(mat.anisotropy || 0, 0.30);
+            mat.anisotropyRotation = Math.PI * 0.5;
+          }
+        }
+        if (/^(HeWen_HairStrandDark|HeWen_HairStrandLight|HeWen_BrowStrandHair|HeWen_LashHair)$/.test(mat.name)) refineHair(mat);
+        if (/^(HeWen_TunicCotton|HeWen_WornCotton)$/.test(mat.name)) {
+          mat.sheen = 0.35;
+          mat.sheenRoughness = 0.6;
+          mat.sheenColor.set('#fff1dc');
+        }
+        if (mat.name === 'HeWen_WornLeatherBelt') {
+          mat.clearcoat = 0.15;
+          mat.clearcoatRoughness = 0.38;
+        }
+        if (/^(HeWen_DullBuckle|HeWen_MatteButtons)$/.test(mat.name)) {
+          mat.metalness = 1;
+          mat.roughness = Math.min(Math.max(mat.roughness || 0.42, 0.28), 0.58);
+          mat.envMap = environment.texture;
+          mat.envMapIntensity = 0.95;
+        }
+        mat.needsUpdate = true;
+      } else if (/Hair|Eyebrow/i.test(node.name) && !/Strands/i.test(node.name)) {
         mat.alphaTest = 0.3;
         mat.transparent = false;
         mat.depthWrite = true;
@@ -516,6 +728,7 @@ try {
           mat.anisotropyRotation = Math.PI * 0.5;
         }
       }
+      if (node.name === 'HeWen_Skin' && node.userData.skinFrame) refineSkin(mat, node.userData.skinFrame);
       if (node.name === 'HeWen_Eyes') {
         if (backend === 'webgpu') {
           const { texture, vec3, clamp, dot, positionViewDirection, transformedNormalView } = TSL;
@@ -534,6 +747,8 @@ outgoingLight += diffuseColor.rgb * vec3(0.20, 0.06, 0.04) * (1.0 - hwEyeWrap) *
         }
       }
     }
+    node.material = Array.isArray(node.material) ? materialList : materialList[0];
+    materials.set(node, node.material);
   });
   stats.bones = boneSet.size;
   stats.expressions = [...keys];
@@ -705,6 +920,7 @@ window.addEventListener('pagehide', () => {
   for (const geometry of geometries) geometry.dispose();
   for (const texture of textures) texture.dispose();
   environment.dispose();
+  skinLut.dispose();
   gtao?.dispose();
   composer?.dispose();
   renderPipeline?.dispose();

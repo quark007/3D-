@@ -1,0 +1,182 @@
+{
+  "passed": true,
+  "checks": [
+    "Three.js scene mounts with shoulder camera and captured actor animation state",
+    "Real keyboard jog accelerates to 4m/s, coasts on release and drives Walk cadence from actual speed",
+    "C toggles the 1.5m/s walking gait without changing collision coordinates",
+    "Shift reaches 7m/s, smoothly pulls the shoulder camera back and returns to normal distance after stopping",
+    "Right click pointer lock rotates both yaw and pitch; Escape releases the mouse",
+    "Pausing clears residual speed and releases pointer lock for dialogue UI",
+    "Left-click pathfinding remains available and brakes to a stable destination"
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "visualApproval": false,
+  "optionalFallbacks": [
+    {
+      "url": "http://127.0.0.1:8082/assets/characters/wang-gui/wang-gui-lod.glb",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8082/assets/characters/wang-gui/wang-gui-lod.glb",
+      "status": 404
+    },
+    {
+      "url": "http://127.0.0.1:8082/assets/characters/wang-gui/wang-gui-lod.glb",
+      "status": 404
+    }
+  ],
+  "normal": {
+    "earlySpeed": 2.999999999999999,
+    "topSpeed": 4,
+    "coast": 0.3100000000000023,
+    "animation": {
+      "action": "Walk",
+      "speed": 4,
+      "moveWeight": 1,
+      "idleWeight": 0,
+      "walkWeight": 1,
+      "timeScale": 1.8181818181818181
+    }
+  },
+  "walking": {
+    "x": 19.72528488293635,
+    "y": 54.55832488249914,
+    "facing": 2.6664403674901704,
+    "speed": 1.4999999999999998,
+    "moving": true,
+    "walking": true,
+    "running": false,
+    "backing": false,
+    "animation": {
+      "action": "Walk",
+      "speed": 1.4999999999999998,
+      "moveWeight": 1,
+      "idleWeight": 0,
+      "walkWeight": 1,
+      "timeScale": 0.6818181818181817
+    },
+    "camera": {
+      "frames": 42,
+      "renderMs": 75.5,
+      "dpr": 1,
+      "adaptive": false,
+      "backend": "three",
+      "artReady": false,
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "village",
+      "landform": "于都河阶·蓝调夜渡",
+      "terrainVertices": 42840,
+      "terrainMin": -2.4000000953674316,
+      "terrainMax": 6.09227180480957,
+      "cameraMode": "shoulder",
+      "orbitYaw": 2.589,
+      "orbitPitch": 0.362,
+      "cameraSpeed": 1.5,
+      "cameraSpeedScale": 1,
+      "cameraDistance": 7.866,
+      "cameraOccluded": false,
+      "drawCalls": 125,
+      "triangles": 488998,
+      "cacheEntries": 12
+    },
+    "pointerLocked": false
+  },
+  "sprinting": {
+    "x": 14.917869985240436,
+    "y": 53.28849672518723,
+    "facing": 3.4214653440210223,
+    "speed": 7,
+    "moving": true,
+    "walking": false,
+    "running": true,
+    "backing": false,
+    "animation": {
+      "action": "Walk",
+      "speed": 7,
+      "moveWeight": 1,
+      "idleWeight": 0,
+      "walkWeight": 1,
+      "timeScale": 3.1818181818181817
+    },
+    "camera": {
+      "frames": 63,
+      "renderMs": 78.4,
+      "dpr": 0.92,
+      "adaptive": true,
+      "backend": "three",
+      "artReady": false,
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "village",
+      "landform": "于都河阶·蓝调夜渡",
+      "terrainVertices": 42840,
+      "terrainMin": -2.4000000953674316,
+      "terrainMax": 6.09227180480957,
+      "cameraMode": "shoulder",
+      "orbitYaw": 2.12,
+      "orbitPitch": 0.362,
+      "cameraSpeed": 7,
+      "cameraSpeedScale": 1.173,
+      "cameraDistance": 9.101,
+      "cameraOccluded": false,
+      "drawCalls": 88,
+      "triangles": 434158,
+      "cacheEntries": 12
+    },
+    "pointerLocked": false
+  },
+  "freeLook": {
+    "before": {
+      "frames": 108,
+      "renderMs": 114,
+      "dpr": 0.75,
+      "adaptive": true,
+      "backend": "three",
+      "artReady": false,
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "village",
+      "landform": "于都河阶·蓝调夜渡",
+      "terrainVertices": 42840,
+      "terrainMin": -2.4000000953674316,
+      "terrainMax": 6.09227180480957,
+      "cameraMode": "shoulder",
+      "orbitYaw": 2.12,
+      "orbitPitch": 0.362,
+      "cameraSpeed": 0,
+      "cameraSpeedScale": 1,
+      "cameraDistance": 7.866,
+      "cameraOccluded": false,
+      "drawCalls": 82,
+      "triangles": 416595,
+      "cacheEntries": 12
+    },
+    "after": {
+      "frames": 113,
+      "renderMs": 33.1,
+      "dpr": 0.75,
+      "adaptive": true,
+      "backend": "three",
+      "artReady": false,
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "village",
+      "landform": "于都河阶·蓝调夜渡",
+      "terrainVertices": 42840,
+      "terrainMin": -2.4000000953674316,
+      "terrainMax": 6.09227180480957,
+      "cameraMode": "shoulder",
+      "orbitYaw": 1.607,
+      "orbitPitch": 0.571,
+      "cameraSpeed": 0,
+      "cameraSpeedScale": 1,
+      "cameraDistance": 6.075,
+      "cameraOccluded": true,
+      "drawCalls": 63,
+      "triangles": 341322,
+      "cacheEntries": 12
+    }
+  }
+}

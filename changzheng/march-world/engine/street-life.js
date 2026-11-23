@@ -79,7 +79,15 @@
     notice.width = 128; notice.height = 160;
     const ctx = notice.getContext('2d');
     ctx.fillStyle = '#52483a'; ctx.fillRect(0, 0, 128, 160);
-    ctx.fillStyle = '#a99b7c'; ctx.fillRect(11, 10, 106, 139);
+    ctx.fillStyle = '#b1a081'; ctx.fillRect(11, 10, 106, 139);
+    const grain = n => { const v = Math.sin(n * 87.17) * 42379.23; return v - Math.floor(v); };
+    for (let i = 0; i < 620; i++) {
+      const x = 11 + grain(i * 5 + 1) * 103, y = 10 + grain(i * 5 + 2) * 136;
+      ctx.fillStyle = i % 4 ? 'rgba(81,57,32,.09)' : 'rgba(227,212,164,.17)';
+      ctx.fillRect(x, y, 1 + grain(i * 5 + 3) * 5, 1 + grain(i * 5 + 4) * 2);
+    }
+    ctx.strokeStyle = 'rgba(53,42,31,.42)';
+    ctx.strokeRect(11, 10, 106, 139);
     ctx.fillStyle = '#493e31'; ctx.textAlign = 'center'; ctx.font = '21px serif';
     ctx.fillText('告 示', 64, 39);
     ctx.font = '13px serif';
@@ -87,7 +95,7 @@
     const paper = new T.CanvasTexture(notice);
     paper.colorSpace = T.SRGBColorSpace;
     const board = new T.Mesh(new T.PlaneGeometry(.72, .9), new T.MeshStandardMaterial({ map: paper, roughness: .96 }));
-    board.position.copy(onSurface(70.19, 43, 1.52));
+    board.position.copy(onSurface(70.199, 43, 1.506));
     board.rotation.y = Math.PI / 2;
     batches.add(board);
 

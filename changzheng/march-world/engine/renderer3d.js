@@ -32,13 +32,15 @@
 
   function shadeCourtyardMaterial(mat, floorHeight) {
     const stone = mat.name.startsWith('ZY_stone');
-    if (!stone && !mat.name.startsWith('ZY_glass')) return;
+    const wall = /^(ZY_brick|ZY_plaster)/.test(mat.name);
+    if (mat.aoMap) mat.aoMapIntensity = .64;
+    if (!stone && !wall && !mat.name.startsWith('ZY_glass')) return;
     mat.onBeforeCompile = shader => {
       shader.uniforms.floorHeight = { value: floorHeight };
       shader.vertexShader = 'varying vec3 vCourtyardPos;\n' + shader.vertexShader.replace(
         '#include <begin_vertex>', '#include <begin_vertex>\nvCourtyardPos = (modelMatrix * vec4(position, 1.0)).xyz;');
       shader.fragmentShader = 'varying vec3 vCourtyardPos;\nuniform float floorHeight;\n' + shader.fragmentShader;
-      if (stone) {
+      if (stone || wall) {
         // World-space noise crosses the paving UV seams. Elevated stonework stays matte.
         shader.fragmentShader = `
           float wetHash(vec2 p) {
@@ -56,8 +58,16 @@
           #include <roughnessmap_fragment>
           vec2 p = vCourtyardPos.xz;
           float paving = 1.0 - smoothstep(.045, .10, abs(vCourtyardPos.y-floorHeight));
-          float wet = paving * smoothstep(.43, .71, .72*wetNoise(p*.42)+.28*wetNoise(p*1.37));
-          roughnessFactor = mix(roughnessFactor, mix(.79, .19, wet), paving);
+          float stainNoise = wetNoise(p*1.65 + vCourtyardPos.yy*.8);
+          float baseDamp = 1.0 - smoothstep(.04, .75, max(0.,vCourtyardPos.y-floorHeight));
+          float damp = baseDamp * smoothstep(.20, .67, stainNoise) * ${stone ? '(1.0 - paving)' : '1.0'};
+          float moss = damp * smoothstep(.61, .84, stainNoise);
+          diffuseColor.rgb *= mix(vec3(1.), vec3(.57,.61,.55), damp*.8);
+          diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb*vec3(.69,.91,.54), moss*.56);
+          roughnessFactor *= 1.0 - damp * .075;
+          diffuseColor.rgb *= 1.0 + .20 * baseDamp * smoothstep(.68, .80, stainNoise);
+          float wet = ${stone ? 'paving' : '0.0'} * smoothstep(.43, .71, .72*wetNoise(p*.42)+.28*wetNoise(p*1.37));
+          roughnessFactor = mix(roughnessFactor, mix(.79, .19, wet), ${stone ? "paving" : "0.0"});
           diffuseColor.rgb *= mix(vec3(1.), vec3(.63,.68,.73), wet);
         `).replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\nreflectedLight.indirectSpecular *= mix(1.0, 1.65, wet);');
       } else {
@@ -67,7 +77,110 @@
         `);
       }
     };
-    mat.customProgramCacheKey = () => stone ? 'zunyi-wet-stone' : 'zunyi-upper-windows';
+    mat.customProgramCacheKey = () => stone ? 'zunyi-wet-stone' : wall ? 'zunyi-damp-masonry' : 'zunyi-upper-windows';
+  }
+
+  function winterWeather(T, root, settings, onSurface, world) {
+    const group = new T.Group();
+    group.name = 'zunyi-winter-weather';
+    root.add(group);
+    const materials = [];
+    const make = (geometry, material, Type = T.Mesh) => {
+      materials.push({ geometry, material });
+      const mesh = new Type(geometry, material);
+      mesh.frustumCulled = false;
+      group.add(mesh);
+      return mesh;
+    };
+    const noise = `
+      float hashCloud(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float cloud(vec2 p) {
+        vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+        return mix(mix(hashCloud(i), hashCloud(i+vec2(1,0)),f.x),
+                   mix(hashCloud(i+vec2(0,1)), hashCloud(i+vec2(1,1)),f.x),f.y);
+      }`;
+    const sky = make(new T.SphereGeometry(125, 24, 14), new T.ShaderMaterial({
+      side: T.BackSide, depthWrite: false, fog: false,
+      vertexShader: 'varying vec3 dome; void main(){dome=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+      fragmentShader: noise + `
+        varying vec3 dome;
+        void main(){
+          vec3 dir=normalize(dome);
+          float height=smoothstep(-.05,.52,dir.y);
+          vec2 p=dir.xz/(.26+abs(dir.y))*3.5;
+          float bands=.67*cloud(p)+.24*cloud(p*2.07)+.09*cloud(p*4.2);
+          float breaks=smoothstep(.34,.74,bands)*mix(.32,1.,height);
+          vec3 color=mix(vec3(.48,.56,.61),vec3(.15,.23,.31),height);
+          color=mix(color,vec3(.69,.75,.76),breaks*.86);
+          gl_FragColor=vec4(color,1.);
+          #include <colorspace_fragment>
+        }`
+    }));
+    sky.renderOrder = -10;
+    let seed = 1935;
+    const rand = () => ((seed = (Math.imul(1664525, seed) + 1013904223) >>> 0) / 4294967296);
+    const rainData = new Float32Array(settings.count * 6);
+    const seeds = Array.from({ length: settings.count }, () => [rand()*44-22, rand()*14, rand()*44-22, .10+rand()*.24]);
+    const rainGeo = new T.BufferGeometry();
+    rainGeo.setAttribute('position', new T.BufferAttribute(rainData, 3).setUsage(T.DynamicDrawUsage));
+    const rain = make(rainGeo,new T.LineBasicMaterial({ color: '#c7d9df', transparent: true, opacity: .24, depthWrite: false }),T.LineSegments);
+    rain.renderOrder=5;
+    const fogGeo=new T.BufferGeometry();
+    const fogPositions=new Float32Array(settings.mist.length*12), uv=[], indices=[];
+    for(let i=0; i<settings.mist.length; i++){
+      uv.push(0,0,1,0,1,1,0,1);
+      indices.push(i*4,i*4+1,i*4+2,i*4,i*4+2,i*4+3);
+    }
+    fogGeo.setAttribute('position',new T.BufferAttribute(fogPositions,3).setUsage(T.DynamicDrawUsage));
+    fogGeo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
+    fogGeo.setIndex(indices);
+    const fog=make(fogGeo,new T.ShaderMaterial({
+      side:T.DoubleSide,transparent:true,depthWrite:false,
+      vertexShader:'varying vec2 uvMist; void main(){uvMist=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+      fragmentShader:`
+        varying vec2 uvMist;
+        void main(){
+          vec2 p=uvMist*2.-1.;
+          float fade=1.-smoothstep(.08,1.,dot(p,p));
+          gl_FragColor=vec4(.53,.63,.68,.093*fade*fade);
+          #include <colorspace_fragment>
+        }`
+    }));
+    fog.renderOrder=4;
+    for(const [x,y,h,power,reach] of settings.lights){
+      const light=new T.PointLight('#ffc183',power,reach,2);
+      light.position.copy(onSurface(x,y,h));
+      group.add(light);
+    }
+    return {
+      update(t,player,camera){
+        sky.position.copy(camera.position);
+        for(let i=0;i<seeds.length;i++){
+          const [a,b,c,len]=seeds[i];
+          const x=player.x+((a+t*.64+22)%44+44)%44-22;
+          const z=player.y+c, height=((b-t*6.8)%14+14)%14;
+          const inside=settings.shelter.some(([sx,sz,w,d])=>x>=sx&&x<=sx+w&&z>=sz&&z<=sz+d);
+          const k=i*6, y=height+1, wx=x-world.w/2, wz=z-world.h/2;
+          rainData[k]=wx; rainData[k+1]=y; rainData[k+2]=wz;
+          const streak=inside&&height<4?0:len;
+          rainData[k+3]=wx-streak*.176; rainData[k+4]=y+streak; rainData[k+5]=wz;
+        }
+        rainGeo.attributes.position.needsUpdate=true;
+        const yaw=Math.atan2(camera.matrixWorld.elements[2],camera.matrixWorld.elements[0]);
+        settings.mist.forEach(([x,y,h,w,v],i)=>{
+          const cx=x-world.w/2+Math.sin(t*.12+i)*1.05, cz=y-world.h/2+Math.cos(t*.075+i)*.7;
+          for(let j=0;j<4;j++){
+            const side=j===0||j===3?-1:1;
+            fogPositions.set([cx+Math.cos(yaw)*w*.5*side,h+(j<2?0:v),cz+Math.sin(yaw)*w*.5*side],i*12+j*3);
+          }
+        });
+        fogGeo.attributes.position.needsUpdate=true;
+      },
+      dispose(){
+        group.removeFromParent();
+        for(const {geometry,material} of materials){geometry.dispose();material.dispose();}
+      }
+    };
   }
 
   async function create(container, logicalScene, options = {}) {
@@ -150,7 +263,7 @@
       if (cinematic) {
         reflectionTarget = bakeCourtyardEnvironment(T, renderer, street, onSurface(81, 41, 1.2));
         scene.environment = reflectionTarget.texture;
-        scene.environmentIntensity = .78;
+        scene.environmentIntensity = logicalScene.winterRain ? .95 : .78;
       }
       street.traverse(node => {
         if (!node.isMesh) return;
@@ -1344,7 +1457,7 @@
       grass.count = count; grass.name = 'march-wetland-grass'; grass.castShadow = true; grass.receiveShadow = true; worldRoot.add(grass);
     }
 
-    const hemi = new T.HemisphereLight(staging.fill, cinematic ? '#716759' : '#514b3f', staging.ambient);
+    const hemi = new T.HemisphereLight(staging.fill, cinematic ? '#716759' : '#514b3f', staging.ambient * (logicalScene.winterRain ? 1.29 : 1));
     scene.add(hemi);
     const sun = new T.DirectionalLight(staging.key, staging.power);
     sun.position.set(-45, 75, 35);
@@ -1383,8 +1496,8 @@
     }
     scene.add(sun, sun.target);
 
-    const ringGeometry = new T.RingGeometry(0.65, 0.85, 32);
-    const ringMaterial = new T.MeshBasicMaterial({ color: '#e8c87a', transparent: true, opacity: 0.72, side: T.DoubleSide, depthWrite: false });
+    const ringGeometry = new T.RingGeometry(0.65, logicalScene.winterRain ? .72 : .85, 32);
+    const ringMaterial = new T.MeshBasicMaterial({ color: logicalScene.winterRain ? '#ceb582' : '#e8c87a', transparent: true, opacity: logicalScene.winterRain ? .40 : .72, side: T.DoubleSide, depthWrite: false });
     for (const anchor of logicalScene.anchors) {
       const ring = new T.Mesh(ringGeometry, ringMaterial);
       ring.rotation.x = -Math.PI / 2;
@@ -1394,6 +1507,7 @@
       markers.set(anchor.anchorId, ring);
     }
 
+    const weather = street && logicalScene.winterRain ? winterWeather(T, scene, logicalScene.winterRain, onSurface, world) : null;
     let particles = null;
     if (logicalScene.ambient?.kind) {
       const count = 420;
@@ -1670,6 +1784,7 @@
         canvas.removeEventListener('webglcontextlost', contextLost);
         actors?.dispose();
         streetLife?.dispose();
+        weather?.dispose();
         releaseResources();
         sun.shadow.dispose();
         introOverlay?.remove();
@@ -1749,6 +1864,7 @@
         }
         positions.needsUpdate = true;
       }
+      if (weather && logicalScene.focusActor) weather.update(time, logicalScene.focusActor, camera);
       renderer.render(scene, camera);
       stats.frames++;
       stats.drawCalls = renderer.info.render.calls;

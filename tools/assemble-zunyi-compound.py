@@ -49,7 +49,9 @@ def wing(name,western_front=False):
     x,y,w,d,h=barriers[name]
     eave=h-1.32
     block('石基',x,y,w,d,-.03,.25,'stone')
-    block(name,x+.09,y+.09,w-.18,d-.18,.24,eave,'plaster' if '房' in name else 'brick')
+    faced_wing=ARCH_POLISH and d>w
+    if not faced_wing:
+        block(name,x+.09,y+.09,w-.18,d-.18,.24,eave,'plaster' if '房' in name else 'brick')
     cx,cy=xy(x+w/2,y+d/2)
     if d>w:
         rotated_west(name+'瓦顶',cx,cy,lambda: zy_roof(0,0,d/2+.28,w/2+.30,eave-.012,h))
@@ -59,14 +61,35 @@ def wing(name,western_front=False):
     if d>w:
         side=-1 if western_front or '东' in name else 1
         face=x if side<0 else x+w
+        if faced_wing:
+            panel=min(2.35,d/bays-(.36 if faced_wing else .26))
+            sign=-side
+            center=xy(face,y+d/2)
+            def front_skin():
+                pockets=[((i+.5)*d/bays-d/2-panel/2-.055,(i+.5)*d/bays-d/2+panel/2+.055,.24,2.76)
+                    for i in range(bays)]
+                if side>0: pockets=[(-right,-left,lo,hi) for left,right,lo,hi in pockets]
+                recessed_wall(-d/2+.09,d/2-.09,0,w-.09,.24,eave,pockets,'brick' if western_front else 'plaster')
+            if side<0:
+                rotated_west(name+'凹口',*center,front_skin)
+            else:
+                global group
+                old=group
+                group=name+'凹口'
+                front_skin()
+                group=old
+                for key in [key for key in bucket if key[0]==name+'凹口']:
+                    verts,faces=bucket.pop(key)
+                    mesh(name,[(center[0]-v,center[1]+u,z) for u,v,z in verts], faces,key[1])
+            face+=sign*.30
         for i in range(bays):
             yy=y+(i+.5)*d/bays
-            panel=min(2.35,d/bays-.26)
+            panel=min(2.35,d/bays-(.36 if faced_wing else .26))
             block('铺面排门' if western_front else '厢房门窗',face-.085,yy-panel/2,.18,panel,.24,2.71,'wood')
             for j in range(1,7):
-                block('木板接缝',face-.108,yy-panel/2+j*panel/7,.226,.038,.23,2.71,'brick')
+                block('木板接缝',face-.108,yy-panel/2+j*panel/7,.226,.038,.23,2.71,'wood' if faced_wing else 'brick')
             for z in (.38,2.61,3.12):
-                block('横枋',face-.14,yy-panel/2-.17,.28,panel+.34,z,z+.11,'wood')
+                block('横枋',face-(.055 if faced_wing else .14),yy-panel/2-.17,.11 if faced_wing else .28,panel+.34,z,z+.11,'wood')
         if name=='东侧厨房及楼上警卫用房':
             wx,wy=xy(x,y+d/2)
             rotated_west('警卫用房上层窗',wx,wy,lambda: zy_window(0,0,4.05,1.42,1.22))

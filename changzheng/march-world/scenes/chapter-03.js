@@ -45,7 +45,7 @@
   K.define({
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
-    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30], actorRange: 13 },
+    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb?v=winter-architecture', origin: [81, 30], actorRange: 13 },
     // Stone mesh dimensions in the Blender assembly, converted to logical X east / Y south.
     stepSurfaces: [
       [59, 41.485, 10, 3.03, .014],
@@ -127,6 +127,12 @@
 
       a('exit', 'exit', '继续下一站', 57, 60)
     ],
-    ambient: { kind: 'mist' }
+    winterRain: {
+      count: 768,
+      shelter: [[61.02, 41.48, 2.26, 3.04], [68.1, 32.9, 25.8, 3.25]],
+      mist: [[93,47,1.25,12,1.6], [96,49,.8,11,1.3], [78,36.5,1.6,13,1.1], [88,37,1.2,14,1.3],
+        [72,19,2.8,20,2.5], [98,19,3.3,17,2.2], [65,56,2,13,1.8], [100,53,2.3,14,2.5]],
+      lights: [[81,35.5,2.37,19,6.4], [85,34.25,6.03,17,5.4]]
+    }
   });
 })();

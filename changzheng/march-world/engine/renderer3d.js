@@ -2,6 +2,183 @@
   'use strict';
   const M = window.CZMarchWorld._;
 
+  function shadeCourtyardMaterial(mat, floorHeight) {
+    const stone = mat.name.startsWith('ZY_stone');
+    const wall = /^(ZY_brick|ZY_plaster|ZY_bark)/.test(mat.name);
+    if (mat.aoMap) mat.aoMapIntensity = .64;
+    if (!stone && !wall && !mat.name.startsWith('ZY_glass')) return;
+    mat.onBeforeCompile = shader => {
+      shader.uniforms.floorHeight = { value: floorHeight };
+      shader.vertexShader = 'varying vec3 vCourtyardPos;\n' + shader.vertexShader.replace(
+        '#include <begin_vertex>', '#include <begin_vertex>\nvCourtyardPos = (modelMatrix * vec4(position, 1.0)).xyz;');
+      shader.fragmentShader = 'varying vec3 vCourtyardPos;\nuniform float floorHeight;\n' + shader.fragmentShader;
+      if (stone || wall) {
+        // World-space noise crosses the paving UV seams. Elevated stonework stays matte.
+        shader.fragmentShader = `
+          float wetHash(vec2 p) {
+            vec3 h = fract(vec3(p.xyx) * .1031);
+            h += dot(h, h.yzx + 33.33);
+            return fract((h.x + h.y) * h.z);
+          }
+          float wetNoise(vec2 p) {
+            vec2 i = floor(p), f = fract(p);
+            f = f*f*(3.0-2.0*f);
+            return mix(mix(wetHash(i), wetHash(i+vec2(1,0)), f.x),
+                       mix(wetHash(i+vec2(0,1)), wetHash(i+1.0), f.x), f.y);
+          }
+        ` + shader.fragmentShader.replace('#include <roughnessmap_fragment>', `
+          #include <roughnessmap_fragment>
+          vec2 p = vCourtyardPos.xz;
+          float paving = 1.0 - smoothstep(.045, .10, abs(vCourtyardPos.y-floorHeight));
+          float stainNoise = wetNoise(p*1.65 + vCourtyardPos.yy*.8);
+          float baseDamp = 1.0 - smoothstep(.04, .75, max(0.,vCourtyardPos.y-floorHeight));
+          float damp = baseDamp * smoothstep(.20, .67, stainNoise) * ${stone ? '(1.0 - paving)' : '1.0'};
+          float moss = damp * smoothstep(.61, .84, stainNoise);
+          diffuseColor.rgb *= mix(vec3(1.), vec3(.57,.61,.55), damp*.8);
+          diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb*vec3(.69,.91,.54), moss*.56);
+          roughnessFactor *= 1.0 - damp * .075;
+          diffuseColor.rgb *= 1.0 + .20 * baseDamp * smoothstep(.68, .80, stainNoise);
+          float wet = ${stone ? 'paving' : '0.0'} * smoothstep(.43, .71, .72*wetNoise(p*.42)+.28*wetNoise(p*1.37));
+          roughnessFactor = mix(roughnessFactor, mix(.79, .19, wet), ${stone ? "paving" : "0.0"});
+          diffuseColor.rgb *= mix(vec3(1.), vec3(.63,.68,.73), wet);
+        `).replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\nreflectedLight.indirectSpecular *= mix(1.0, 1.65, wet);');
+      } else {
+        shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', `
+          #include <emissivemap_fragment>
+          totalEmissiveRadiance += vec3(.28,.139,.041) * smoothstep(3.8,4.3,vCourtyardPos.y-floorHeight);
+        `);
+      }
+    };
+    mat.customProgramCacheKey = () => stone ? 'zunyi-wet-stone' : wall ? 'zunyi-damp-masonry' : 'zunyi-upper-windows';
+  }
+
+  function winterWeather(T, root, settings, onSurface, world, grassTexture) {
+    const group = new T.Group();
+    group.name = 'zunyi-winter-weather';
+    root.add(group);
+    const materials = [];
+    const make = (geometry, material, Type = T.Mesh) => {
+      materials.push({ geometry, material });
+      const mesh = new Type(geometry, material);
+      mesh.frustumCulled = false;
+      group.add(mesh);
+      return mesh;
+    };
+    let seed = 1935;
+    const rand = () => ((seed = (Math.imul(1664525, seed) + 1013904223) >>> 0) / 4294967296);
+    const rainData = new Float32Array(settings.count * 6);
+    const seeds = Array.from({ length: settings.count }, () => [rand()*44-22, rand()*14, rand()*44-22, .10+rand()*.24]);
+    const rainGeo = new T.BufferGeometry();
+    rainGeo.setAttribute('position', new T.BufferAttribute(rainData, 3).setUsage(T.DynamicDrawUsage));
+    const rain = make(rainGeo,new T.LineBasicMaterial({ color: '#c7d9df', transparent: true, opacity: .24, depthWrite: false }),T.LineSegments);
+    rain.renderOrder=5;
+    const fogGeo=new T.BufferGeometry();
+    const fogPositions=new Float32Array(settings.mist.length*12), uv=[], indices=[];
+    for(let i=0; i<settings.mist.length; i++){
+      uv.push(0,0,1,0,1,1,0,1);
+      indices.push(i*4,i*4+1,i*4+2,i*4,i*4+2,i*4+3);
+    }
+    fogGeo.setAttribute('position',new T.BufferAttribute(fogPositions,3).setUsage(T.DynamicDrawUsage));
+    fogGeo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
+    fogGeo.setIndex(indices);
+    const fog=make(fogGeo,new T.ShaderMaterial({
+      side:T.DoubleSide,transparent:true,depthWrite:false,
+      vertexShader:'varying vec2 uvMist; void main(){uvMist=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+      fragmentShader:`
+        varying vec2 uvMist;
+        void main(){
+          vec2 p=uvMist*2.-1.;
+          float fade=1.-smoothstep(.08,1.,dot(p,p));
+          gl_FragColor=vec4(.53,.63,.68,.093*fade*fade);
+          #include <colorspace_fragment>
+        }`
+    }));
+    fog.renderOrder=4;
+    for(const [x,y,h,power,reach] of settings.lights){
+      const light=new T.PointLight('#ffc183',power,reach,2);
+      light.position.copy(onSurface(x,y,h));
+      group.add(light);
+    }
+    const grassGeometry = new T.BufferGeometry();
+    const grassPositions = [], grassUV = [], grassColors = [], grassIndices = [];
+    for (let plane = 0; plane < 2; plane++) {
+      const offset = plane * 4;
+      for (const [u,v] of [[0,0],[1,0],[1,1],[0,1]]) {
+        const side = u - .5, shade = .43 + v * .57;
+        grassPositions.push(plane ? 0 : side, v, plane ? side : 0);
+        grassUV.push(u,v); grassColors.push(shade,shade,shade);
+      }
+      grassIndices.push(offset,offset+1,offset+2,offset,offset+2,offset+3);
+    }
+    grassGeometry.setAttribute('position',new T.Float32BufferAttribute(grassPositions,3));
+    grassGeometry.setAttribute('uv',new T.Float32BufferAttribute(grassUV,2));
+    grassGeometry.setAttribute('color',new T.Float32BufferAttribute(grassColors,3));
+    grassGeometry.setIndex(grassIndices);
+    const wind = { value: 0 };
+    const grassMaterial = new T.MeshBasicMaterial({
+      map:grassTexture, vertexColors:true, alphaTest:.45, side:T.DoubleSide
+    });
+    grassMaterial.onBeforeCompile=shader=>{
+      shader.uniforms.grassTime=wind;
+      shader.vertexShader='uniform float grassTime;\n'+shader.vertexShader.replace('#include <begin_vertex>',`
+        #include <begin_vertex>
+        vec2 root=instanceMatrix[3].xz;
+        transformed.x+=sin(grassTime*1.15+root.x*.9+root.y*.43)*position.y*position.y*.086;`);
+    };
+    const grass=new T.InstancedMesh(grassGeometry,grassMaterial,84);
+    group.add(grass);
+    const dummy=new T.Object3D();
+    for(let i=0;i<84;i++){
+      let x,y,h=0;
+      if(i<23){
+        x=94.17+rand()*1.16;y=46.85+rand()*1.20;h=.392;
+      }else if(i<42){
+        if(i%2){x=93.48+rand()*.075;y=46.38+rand()*2.14;}
+        else{x=93.67+rand()*2.13;y=48.66+rand()*.11;}
+      }else if(i<64){
+        x=103.29-rand()*.11;y=20+rand()*43;
+      }else{
+        x=(i%2?54.17:60.81)+rand()*.09;y=24+rand()*36;
+        if(y>40.9&&y<45.0)y+=6;
+      }
+      dummy.position.copy(onSurface(x,y,h-.007));
+      dummy.rotation.y=rand()*Math.PI;
+      dummy.scale.set(.21+rand()*.31,.14+rand()*.20,.21+rand()*.31);
+      dummy.updateMatrix();grass.setMatrixAt(i,dummy.matrix);
+    }
+    grass.instanceMatrix.needsUpdate=true;
+    return {
+      update(t,player,camera){
+        wind.value=t;
+        for(let i=0;i<seeds.length;i++){
+          const [a,b,c,len]=seeds[i];
+          const x=player.x+((a+t*.64+22)%44+44)%44-22;
+          const z=player.y+c, height=((b-t*6.8)%14+14)%14;
+          const inside=settings.shelter.some(([sx,sz,w,d])=>x>=sx&&x<=sx+w&&z>=sz&&z<=sz+d);
+          const k=i*6, y=height+1, wx=x-world.w/2, wz=z-world.h/2;
+          rainData[k]=wx; rainData[k+1]=y; rainData[k+2]=wz;
+          const streak=inside&&height<4?0:len;
+          rainData[k+3]=wx-streak*.176; rainData[k+4]=y+streak; rainData[k+5]=wz;
+        }
+        rainGeo.attributes.position.needsUpdate=true;
+        const yaw=Math.atan2(camera.matrixWorld.elements[2],camera.matrixWorld.elements[0]);
+        settings.mist.forEach(([x,y,h,w,v],i)=>{
+          const cx=x-world.w/2+Math.sin(t*.12+i)*1.05, cz=y-world.h/2+Math.cos(t*.075+i)*.7;
+          for(let j=0;j<4;j++){
+            const side=j===0||j===3?-1:1;
+            fogPositions.set([cx+Math.cos(yaw)*w*.5*side,h+(j<2?0:v),cz+Math.sin(yaw)*w*.5*side],i*12+j*3);
+          }
+        });
+        fogGeo.attributes.position.needsUpdate=true;
+      },
+      dispose(){
+        group.removeFromParent();
+        grass.dispose();grassGeometry.dispose();grassMaterial.dispose();
+        for(const {geometry,material} of materials){geometry.dispose();material.dispose();}
+      }
+    };
+  }
+
   async function create(container, logicalScene, options = {}) {
     const T = await import('three');
     if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -9,10 +186,16 @@
     const snowy = environment.terrain === 'snow';
     const staging = M.visual3d.staging(logicalScene);
     const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel);
+    const cinematic = logicalScene.sceneId === 'chapter-3/scene-zunyi';
+    let reflectionTarget = null;
+    let winterSky = null, winterGrass = null;
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
     function releaseResources() {
       const geometries = new Set(), mats = new Set(), textures = new Set(), images = new Set();
+      reflectionTarget?.dispose();
+      winterSky?.dispose();
+      winterGrass?.dispose();
       assets?.collect(geometries, mats, textures);
       for (const mat of materials.values()) mats.add(mat);
       worldRoot?.traverse(object => {
@@ -46,7 +229,7 @@
 
     const scene = new T.Scene();
     scene.background = new T.Color(staging.sky);
-    scene.fog = new T.Fog(staging.fog, environment.fogNear, environment.fogFar);
+    scene.fog = cinematic ? new T.FogExp2(staging.fog, .011) : new T.Fog(staging.fog, environment.fogNear, environment.fogFar);
     const camera = new T.PerspectiveCamera(52, 1, 0.1, 650);
     worldRoot = new T.Group();
     scene.add(worldRoot);
@@ -56,495 +239,63 @@
     const toWorld = (x, y, height = 0) => new T.Vector3(x - world.w / 2, height, y - world.h / 2);
     const props = logicalScene.props.map(alignedProp);
     const terrain = M.visual3d.terrain(logicalScene, props);
-    const surfaceHeight = terrain.support;
+    const steps = logicalScene.stepSurfaces;
+    const surfaceHeight = (x, y) => {
+      const base = terrain.support(x, y);
+      if (!steps || !assets.models.street) return base;
+      // A narrow approach band lets the stance rise before the leading foot reaches each nosing.
+      let rise = .009;
+      for (const [sx, sy, w, h, z] of steps) {
+        const edge = Math.max(sx - x, x - sx - w, sy - y, y - sy - h);
+        if (edge <= .16) rise = Math.max(rise, z * (1 - T.MathUtils.smoothstep(edge, 0, .16)));
+      }
+      return base + .04 + rise;
+    };
     const onSurface = (x, y, offset = 0) => toWorld(x, y, surfaceHeight(x, y) + offset);
     const pickSurfaces = [];
-    const street = assets?.models?.street;
+    const street = assets.models.street;
+    const mergeGeometries = street ? (await import('three/addons/utils/BufferGeometryUtils.js')).mergeGeometries : null;
     if (street) {
       const [x, y] = logicalScene.streetModel.origin;
-      street.position.copy(onSurface(x, y, .04));
+      street.position.copy(toWorld(x, y, terrain.support(x, y) + .04));
       street.name = 'zunyi-realscan';
-      // 街景氛围：渐变天穹 + 与地平线同色的雾，远处房屋自然融进雾里，不再是"白盒子贴在灰幕上"
-      const SKY = { zenith: '#8b9da7', horizon: '#c4cac3', ground: '#a7a596' };
-      scene.fog.color.set(SKY.horizon);
-      scene.fog.near = 28; scene.fog.far = 210;
-      scene.background = new T.Color(SKY.horizon);
-      const skyGeometry = radius => {
-        const geometry = new T.SphereGeometry(radius, 32, 16), positions = geometry.attributes.position, colors = [];
-        const zenith = new T.Color(SKY.zenith), horizon = new T.Color(SKY.horizon), below = new T.Color(SKY.ground), c = new T.Color();
-        for (let i = 0; i < positions.count; i++) {
-          const h = positions.getY(i) / radius;
-          if (h >= 0) c.copy(horizon).lerp(zenith, Math.pow(h, .55));
-          else c.copy(horizon).lerp(below, Math.min(1, -h * 4));
-          colors.push(c.r, c.g, c.b);
+      if (cinematic && logicalScene.winterRain?.sky) {
+        const load = new T.TextureLoader();
+        const textures = await Promise.allSettled([
+          load.loadAsync(logicalScene.winterRain.sky),
+          load.loadAsync(logicalScene.winterRain.grass)
+        ]);
+        [winterSky,winterGrass] = textures.map(t => t.status==='fulfilled' ? t.value : null);
+        if (options.signal?.aborted || !winterSky || !winterGrass) {
+          winterSky?.dispose(); winterGrass?.dispose();
+          throw textures.find(t=>t.status==='rejected')?.reason ?? new DOMException('Aborted','AbortError');
         }
-        geometry.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
-        return geometry;
-      };
-      // 天穹半径 520 < 相机远裁剪面 650（地图半径约 100），不用每帧跟随相机
-      const sky = new T.Mesh(skyGeometry(520), new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide, fog: false, depthWrite: false }));
-      sky.name = 'zunyi-sky'; sky.renderOrder = -1; sky.frustumCulled = false;
-      worldRoot.add(sky);
-      // 用同一片天空生成环境光照，暗部（木立面、檐下）不再死黑，玻璃能映出天色
-      let envTexture = null;
-      try {
-        const pmrem = new T.PMREMGenerator(renderer), envScene = new T.Scene();
-        const envSky = new T.Mesh(skyGeometry(40), new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide }));
-        envScene.add(envSky);
-        envTexture = pmrem.fromScene(envScene, .02).texture;
-        pmrem.dispose(); envSky.geometry.dispose(); envSky.material.dispose();
-      } catch (error) { console.warn('[zunyi] 环境光照生成失败，回退为无环境贴图', error); }
-      street.userData.envTexture = envTexture;
-
-      // ---- 贴图去重复：石板路、青砖、灰瓦、白灰墙（只改街景模型的这四种材质）----
-      // 原贴图每 2.4m 平铺一次，路面、墙面、屋面都能看出整齐的格子。按贴图结构分三种做法：
-      //  free   石板、白灰墙：Inigo Quilez「texture repetition」方法 3，低频噪声决定每片区域的贴图偏移，
-      //         相邻两种偏移按颜色差做窄过渡，接缝顺着石缝走
-      //  grid   灰瓦：瓦垄每张贴图 16 列、10 行（频谱实测），偏移取 (1/16, 1/10) 的整数倍，瓦垄和瓦口始终对齐
-      //  course 青砖：每张贴图 12 层砖，但每层砖块数 8~9 不等（扫描贴图不规整），任何区域过渡都会切出半块砖。
-      //         改为每层砖整层随机错开（竖向按整层、横向任意），并且每层每约 4.8m 换一段，断点各层错开
-      //  plank  木板：竖向板，每张贴图 9 块，板缝位置实测（宽度 109~117px，不完全等距，所以按实测位置分块）。
-      //         每块板随机换成贴图里的另一块、上下随机错开，约每 4.8m 换一段（断口看起来就是木板接头）
-      // 颜色、法线、粗糙度共用同一组偏移和权重。之后按世界坐标叠大尺度变化：路面深浅/潮湿斑，
-      // 墙根返潮、雨水竖向污痕，屋面深浅和青苔斑。关闭对比：localStorage.cz_zunyi_notile = '0' 后刷新
-      const NOTILE_PROFILES = {
-        stone:   { mode: 0, region: .9, guide: .1, edge: [.4, .6], macro: 0 },
-        plaster: { mode: 0, region: .7, guide: .1, edge: [.35, .65], macro: 2 },
-        roof:    { mode: 1, region: .8, guide: .3, edge: [.42, .58], q: [1 / 16, 1 / 10], macro: 3 },
-        brick:   { mode: 2, courses: 12, phase: .0017, cell: .5, macro: 1 },
-        wood:    { mode: 3, cell: .5, macro: 4, seams: [0.060547, 0.166992, 0.279297, 0.393555, 0.503906, 0.616211, 0.728516, 0.840820, 0.951172, 1.060547] }
-      };
-      const glslFloat = value => Number(value).toFixed(6);
-      const NOTILE_PARS = `
-varying vec3 czWorldPos;
-vec2 czOffA = vec2( 0.0 ), czOffB = vec2( 0.0 ), czDx = vec2( 0.0 ), czDy = vec2( 0.0 );
-float czF = 0.0, czMix = 0.0, czWet = 1.0, czTone = 0.5;
-float czHash( vec2 p ) { p = fract( p * vec2( 123.34, 456.21 ) ); p += dot( p, p + 45.32 ); return fract( p.x * p.y ); }
-float czNoise( vec2 p ) {
-  vec2 i = floor( p ), f = fract( p ), u = f * f * ( 3.0 - 2.0 * f );
-  return mix( mix( czHash( i ), czHash( i + vec2( 1.0, 0.0 ) ), u.x ), mix( czHash( i + vec2( 0.0, 1.0 ) ), czHash( i + vec2( 1.0, 1.0 ) ), u.x ), u.y );
-}
-void czNoTileSetup( vec2 uv ) {
-  czDx = dFdx( uv ); czDy = dFdy( uv );   // 用未偏移 UV 的导数采样，偏移跳变处不会出现 mipmap 接缝
-#if CZ_MODE == 2
-  float course = floor( ( uv.y - CZ_PHASE ) * CZ_COURSES );
-  float segment = floor( uv.x * CZ_CELL + czHash( vec2( course, 91.7 ) ) );
-  vec2 key = vec2( course, segment );
-  czOffA = vec2( czHash( key + vec2( 17.0, 3.0 ) ), floor( czHash( key + vec2( 53.0, 11.0 ) ) * CZ_COURSES ) / CZ_COURSES );
-  czOffB = czOffA; czF = 0.0; czMix = 0.0;
-#elif CZ_MODE == 3
-  // 板缝表 CZ_SEAMS：贴图里 9 块板的左边界（第 10 个是下一张贴图第 1 块的左边界）
-  float ux = uv.x - CZ_SEAMS[ 0 ], tile = floor( ux ), fu = ux - tile;
-  int j = 0;
-  for ( int k = 1; k < 9; k ++ ) if ( fu >= CZ_SEAMS[ k ] - CZ_SEAMS[ 0 ] ) j = k;
-  float j0 = CZ_SEAMS[ j ] - CZ_SEAMS[ 0 ], j1 = CZ_SEAMS[ j + 1 ] - CZ_SEAMS[ 0 ];
-  float plank = tile * 9.0 + float( j );
-  float segment = floor( uv.y * CZ_CELL + czHash( vec2( plank, 13.1 ) ) );
-  int s = int( floor( czHash( vec2( plank + 5.0, segment + 1.0 ) ) * 8.999 ) );
-  float t = ( fu - j0 ) / ( j1 - j0 );
-  float srcU = CZ_SEAMS[ s ] + t * ( CZ_SEAMS[ s + 1 ] - CZ_SEAMS[ s ] );
-  czOffA = vec2( srcU - uv.x, czHash( vec2( plank + 29.0, segment + 7.0 ) ) );
-  czOffB = czOffA; czF = 0.0; czMix = 0.0;
-  czTone = czHash( vec2( plank + 41.0, segment + 2.0 ) );
-#else
-  float l = czNoise( uv * CZ_REGION ) * 8.0, ia = floor( l );
-  czF = l - ia;
-  czOffA = sin( vec2( 3.0, 7.0 ) * ia );
-  czOffB = sin( vec2( 3.0, 7.0 ) * ( ia + 1.0 ) );
-  #if CZ_MODE == 1
-  czOffA = floor( czOffA / CZ_Q ) * CZ_Q;
-  czOffB = floor( czOffB / CZ_Q ) * CZ_Q;
-  #endif
-  czMix = smoothstep( CZ_EDGE0, CZ_EDGE1, czF );
-#endif
-}
-vec4 czNoTile( sampler2D tex, vec2 uv ) {
-#if CZ_MODE >= 2
-  return textureGrad( tex, uv + czOffA, czDx, czDy );
-#else
-  return mix( textureGrad( tex, uv + czOffA, czDx, czDy ), textureGrad( tex, uv + czOffB, czDx, czDy ), czMix );
-#endif
-}
-vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
-#if CZ_MODE >= 2
-  return textureGrad( tex, uv + czOffA, czDx, czDy );
-#else
-  vec4 a = textureGrad( tex, uv + czOffA, czDx, czDy ), b = textureGrad( tex, uv + czOffB, czDx, czDy );
-  czMix = smoothstep( CZ_EDGE0, CZ_EDGE1, czF - CZ_GUIDE * dot( a.rgb - b.rgb, vec3( 1.0 ) ) );
-  return mix( a, b, czMix );
-#endif
-}`;
-      const NOTILE_MACRO = `
-{
-  vec3 cw = czWorldPos;
-#if CZ_MACRO == 0
-  float broad = czNoise( cw.xz * 0.07 ) * 0.65 + czNoise( cw.xz * 0.23 ) * 0.35;
-  float warm = smoothstep( 0.5, 0.85, czNoise( cw.xz * 0.05 + 5.1 ) ) * 0.6;
-  float wet = smoothstep( 0.62, 0.8, czNoise( cw.xz * 0.11 + 17.3 ) );
-  diffuseColor.rgb *= mix( 0.84, 1.1, broad );
-  diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * vec3( 1.05, 0.99, 0.9 ), warm );
-  diffuseColor.rgb *= 1.0 - 0.16 * wet;
-  czWet = 1.0 - 0.3 * wet;   // 潮湿处更光滑，阴天里会有一点反光
-#elif CZ_MACRO == 3
-  float broad = czNoise( cw.xz * 0.09 + 2.3 ) * 0.7 + czNoise( cw.xz * 0.31 ) * 0.3;
-  float moss = smoothstep( 0.6, 0.84, czNoise( cw.xz * 0.16 + 3.7 ) );
-  diffuseColor.rgb *= mix( 0.86, 1.08, broad );
-  diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * vec3( 0.82, 0.93, 0.72 ), moss * 0.7 );
-#elif CZ_MACRO == 4
-  // 木作：每块板深浅不一；每间铺面整体色调不同（沿街开间宽 4m，分界在逻辑 x = 21 + 4k，即世界 x = 4k - 59），
-  // 部分铺面日晒褪成灰褐，越往上越明显；墙根 0.6m 内溅水发暗
-  float h = cw.y - CZ_BASE_Y;
-  float bay = floor( ( cw.x + 59.0 ) / 4.0 ), side = step( 1.5, cw.z );
-  float bayTone = czHash( vec2( bay, side * 7.0 + 3.0 ) );
-  diffuseColor.rgb *= ( 0.86 + 0.26 * czTone ) * ( 0.88 + 0.22 * bayTone );
-  float grey = dot( diffuseColor.rgb, vec3( 0.2126, 0.7152, 0.0722 ) );
-  float bleach = smoothstep( 0.55, 0.95, bayTone ) * 0.35 + smoothstep( 1.5, 4.5, h ) * 0.12;
-  diffuseColor.rgb = mix( diffuseColor.rgb, vec3( grey ) * vec3( 1.06, 1.02, 0.95 ) * 1.08, bleach );
-  diffuseColor.rgb *= 1.0 - 0.22 * ( 1.0 - smoothstep( 0.05, 0.6, h ) );
-#else
-  // 墙面：沿墙方向用 x+z，竖向压扁，得到横向成片、竖向拉长的变化
-  vec2 wall = vec2( cw.x + cw.z, cw.y );
-  float h = cw.y - CZ_BASE_Y;
-  float broad = czNoise( wall * vec2( 0.16, 0.1 ) ) * 0.7 + czNoise( wall * vec2( 0.5, 0.3 ) ) * 0.3;
-  float damp = 1.0 - smoothstep( 0.05, CZ_DAMP_H, h );                    // 墙根返潮
-  float streak = smoothstep( 0.55, 0.9, czNoise( wall * vec2( 2.6, 0.12 ) + 7.1 ) ); // 雨水竖向污痕
-  diffuseColor.rgb *= mix( CZ_BROAD_LO, CZ_BROAD_HI, broad );
-  diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * vec3( 0.78, 0.82, 0.74 ), damp * CZ_DAMP );
-  diffuseColor.rgb *= 1.0 - CZ_STREAK * streak * smoothstep( 0.4, 1.6, h );
-#endif
-}`;
-      const noTileEnabled = (() => { try { return localStorage.getItem('cz_zunyi_notile') !== '0'; } catch { return true; } })();
-      const noTileApplied = [];
-      const antiTile = (mat, kind) => {
-        const p = NOTILE_PROFILES[kind];
-        if (!p || !noTileEnabled || !mat.map || mat.userData.czNoTile) return false;
-        const C = T.ShaderChunk;
-        const mapChunk = C.map_fragment?.includes('texture2D( map, vMapUv )') ? C.map_fragment.replace('texture2D( map, vMapUv )', 'czNoTileMap( map, vMapUv )') : null;
-        if (!mapChunk) { console.warn('[zunyi] 当前 three.js 的 map_fragment 结构不同，贴图去重复已跳过'); return false; }
-        const roughChunk = C.roughnessmap_fragment.replace('texture2D( roughnessMap, vRoughnessMapUv )', 'czNoTile( roughnessMap, vRoughnessMapUv )');
-        const normalChunk = C.normal_fragment_maps.split('texture2D( normalMap, vNormalMapUv )').join('czNoTile( normalMap, vNormalMapUv )');
-        const wallTune = kind === 'plaster' ? { lo: .86, hi: 1.05, damp: .55, dampH: 1.1, streak: .14 } : { lo: .88, hi: 1.08, damp: .35, dampH: .8, streak: .08 };
-        const defines = [
-          ['CZ_MODE', p.mode], ['CZ_MACRO', p.macro],
-          ['CZ_REGION', glslFloat(p.region ?? .9)], ['CZ_GUIDE', glslFloat(p.guide ?? .1)],
-          ['CZ_EDGE0', glslFloat(p.edge?.[0] ?? .4)], ['CZ_EDGE1', glslFloat(p.edge?.[1] ?? .6)],
-          ['CZ_Q', `vec2( ${glslFloat(p.q?.[0] ?? 1)}, ${glslFloat(p.q?.[1] ?? 1)} )`],
-          ['CZ_COURSES', glslFloat(p.courses ?? 1)], ['CZ_PHASE', glslFloat(p.phase ?? 0)], ['CZ_CELL', glslFloat(p.cell ?? 1)],
-          ['CZ_BASE_Y', glslFloat(street.position.y)],
-          ['CZ_BROAD_LO', glslFloat(wallTune.lo)], ['CZ_BROAD_HI', glslFloat(wallTune.hi)],
-          ['CZ_DAMP', glslFloat(wallTune.damp)], ['CZ_DAMP_H', glslFloat(wallTune.dampH)], ['CZ_STREAK', glslFloat(wallTune.streak)]
-        ].map(([name, value]) => `#define ${name} ${value}`).join('\n')
-          + (p.seams ? `\nconst float CZ_SEAMS[ ${p.seams.length} ] = float[ ${p.seams.length} ]( ${p.seams.map(glslFloat).join(', ')} );` : '');
-        mat.userData.czNoTile = kind;
-        mat.onBeforeCompile = shader => {
-          shader.vertexShader = shader.vertexShader
-            .replace('#include <common>', '#include <common>\nvarying vec3 czWorldPos;')
-            .replace('#include <project_vertex>', `#include <project_vertex>
-{
-  vec4 czP = vec4( transformed, 1.0 );
-  #ifdef USE_BATCHING
-  czP = batchingMatrix * czP;
-  #endif
-  #ifdef USE_INSTANCING
-  czP = instanceMatrix * czP;
-  #endif
-  czWorldPos = ( modelMatrix * czP ).xyz;
-}`);
-          shader.fragmentShader = shader.fragmentShader
-            .replace('#include <common>', '#include <common>\n' + defines + '\n' + NOTILE_PARS)
-            .replace('#include <map_fragment>', '#ifdef USE_MAP\nczNoTileSetup( vMapUv );\n#endif\n' + mapChunk + '\n' + NOTILE_MACRO)
-            .replace('#include <roughnessmap_fragment>', roughChunk + '\nroughnessFactor *= czWet;')
-            .replace('#include <normal_fragment_maps>', normalChunk);
-        };
-        mat.customProgramCacheKey = () => 'cz-zunyi-notile-' + kind + '-v3';
-        noTileApplied.push(kind);
-        return true;
-      };
-      stats.stoneNoTile = false;
-      const tuned = new Set();
+        winterSky.colorSpace = winterGrass.colorSpace = T.SRGBColorSpace;
+        winterSky.mapping = T.EquirectangularReflectionMapping;
+        scene.background = winterSky;
+        scene.backgroundIntensity = .93;
+        scene.fog.color.set('#899399');
+        const generator = new T.PMREMGenerator(renderer);
+        try { reflectionTarget = generator.fromEquirectangular(winterSky); }
+        finally { generator.dispose(); }
+        scene.environment = reflectionTarget.texture;
+        scene.environmentIntensity = .98;
+      }
       street.traverse(node => {
         if (!node.isMesh) return;
         node.receiveShadow = true;
-        for (const mat of Array.isArray(node.material) ? node.material : [node.material]) {
-          if (!mat) continue;
-          const name = mat.name || '';
-          // 贴地的接触阴影片、告示纸、小草不投影，其余房屋和道具投影
-          if (!/contact|notice|grass/i.test(name)) node.castShadow = true;
-          if (tuned.has(mat)) continue;
-          tuned.add(mat);
-          if (envTexture && 'envMap' in mat) { mat.envMap = envTexture; mat.envMapIntensity = .55; }
-          if (/glass/i.test(name)) { mat.roughness = .18; mat.envMapIntensity = 1.1; mat.color.multiplyScalar(.7); }
-          if (/stone/i.test(name) && mat.normalScale) mat.normalScale.multiplyScalar(1.25);   // 石板缝更清楚
-          const tileKind = /stone/i.test(name) ? 'stone' : /brick/i.test(name) ? 'brick' : /roof/i.test(name) ? 'roof' : /plaster/i.test(name) ? 'plaster' : /wood/i.test(name) ? 'wood' : null;
-          if (tileKind && antiTile(mat, tileKind) && tileKind === 'stone') stats.stoneNoTile = true;
-          mat.needsUpdate = true;
+        if (cinematic) {
+          const foliage = /^(ZY_twig|ZY_crown)/.test(node.material.name);
+          node.castShadow = !foliage;
+          if (foliage) {
+            node.material.alphaTest = .45;
+            node.material.side = T.DoubleSide;
+          }
+          shadeCourtyardMaterial(node.material, street.position.y);
         }
       });
-      stats.noTile = noTileApplied.slice();
       worldRoot.add(street);
-      // 原来加载街景后整个关掉阴影，房子不投影、街面没有明暗，画面发平。桌面端重新打开，移动端保持关闭
-      renderer.shadowMap.enabled = !mobile;
-      stats.streetShadows = !mobile;
-    }
-
-    // ---- 街市生活：摊位、招幌（静态，按材质合并成 4 个网格）。只在街景章节且配置了 streetLife 时生成 ----
-    const STALL_DIRS = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
-    // 摊位局部坐标 → 逻辑坐标：lx 沿摊位宽度，lz 朝摊位正面（街道一侧）
-    function stallPoint(s, lx, lz) {
-      const f = STALL_DIRS[s.face] || STALL_DIRS.s, r = [f[1], -f[0]];
-      return [s.x + r[0] * lx + f[0] * lz, s.y + r[1] * lx + f[1] * lz];
-    }
-    const STEAM_AT = { tea: [-.98, .05, .82], food: [-.62, 0, .86] };   // [lx, lz, 高度]，与下方炉灶、锅的位置一致
-    if (street && logicalScene.streetLife) {
-      try { buildStreetLife(logicalScene.streetLife); }
-      catch (error) { console.warn('[zunyi] 街市装饰生成失败，已跳过', error); }
-    }
-    function buildStreetLife(life) {
-      let seed = 1935;
-      const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-      const parts = { wood: [], paint: [], cloth: [], sign: [] };
-      const BOX = new T.BoxGeometry(1, 1, 1), CYL = new T.CylinderGeometry(1, 1, 1, 10), BALL = new T.SphereGeometry(1, 10, 7), CONE = new T.ConeGeometry(1, 1, 14, 1, true);
-      const m4 = new T.Matrix4(), q = new T.Quaternion(), euler = new T.Euler(), size = new T.Vector3(), at3 = new T.Vector3(), tint = new T.Color();
-      function colorize(geometry, color) {
-        tint.set(color);
-        const count = geometry.attributes.position.count, colors = new Float32Array(count * 3);
-        for (let i = 0; i < count; i++) { colors[i * 3] = tint.r; colors[i * 3 + 1] = tint.g; colors[i * 3 + 2] = tint.b; }
-        geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
-        return geometry;
-      }
-      // x,y 为逻辑坐标，h 为世界高度；bucket 为 wood / paint / cloth
-      function add(bucket, base, color, x, y, h, yaw, sx, sy, sz, rx = 0) {
-        const geometry = base.clone();
-        geometry.applyMatrix4(m4.compose(at3.set(x - world.w / 2, h, y - world.h / 2), q.setFromEuler(euler.set(rx, yaw, 0)), size.set(sx, sy, sz)));
-        if (bucket !== 'wood') colorize(geometry, color);
-        parts[bucket].push(geometry);
-      }
-      function frame(s) {
-        const f = STALL_DIRS[s.face] || STALL_DIRS.s, r = [f[1], -f[0]];
-        const g0 = surfaceHeight(s.x, s.y), yaw = Math.atan2(-r[1], r[0]);
-        const P = (lx, lz) => stallPoint(s, lx, lz);
-        return {
-          g0,
-          box: (bucket, color, lx, lz, h, sx, sy, sz, rx = 0) => add(bucket, BOX, color, ...P(lx, lz), g0 + h, yaw, sx, sy, sz, rx),
-          cyl: (bucket, color, lx, lz, h, radius, height) => add(bucket, CYL, color, ...P(lx, lz), g0 + h, yaw, radius, height, radius),
-          ball: (bucket, color, lx, lz, h, rx, ry = rx, rz = rx) => add(bucket, BALL, color, ...P(lx, lz), g0 + h, yaw, rx, ry, rz),
-          cone: (color, lx, lz, h, radius, height) => add('cloth', CONE, color, ...P(lx, lz), g0 + h, yaw, radius, height, radius),
-          P
-        };
-      }
-      function table(F, w, d, h = .78, ox = 0) {
-        F.box('wood', null, ox, 0, h, w, .05, d);
-        for (const sx of [-1, 1]) for (const sz of [-1, 1]) F.box('wood', null, ox + sx * (w / 2 - .07), sz * (d / 2 - .07), (h - .03) / 2, .06, h - .03, .06);
-      }
-      // 布篷：后高前低、中间微垂，前沿有一道垂边；四根竹竿
-      function awning(F, s, color, w = s.w + .3) {
-        const back = -s.d / 2 - .05, front = s.d / 2 + .4, hb = 2.36, hf = 2.04;
-        for (const side of [-1, 1]) {
-          F.cyl('paint', '#8a7a4e', side * w / 2, back, hb / 2, .022, hb);
-          F.cyl('paint', '#8a7a4e', side * w / 2, front, hf / 2, .022, hf);
-        }
-        const us = 7, rows = [0, .34, .67, 1, 'flap'], positions = [], uvs = [], index = [];
-        rows.forEach((row, j) => {
-          const t = row === 'flap' ? 1 : row, v = back + (front - back) * t;
-          for (let i = 0; i < us; i++) {
-            const u = -w / 2 + w * i / (us - 1);
-            const sag = .07 * Math.sin(Math.PI * i / (us - 1)) * Math.sin(Math.PI * Math.min(t, 1)) ;
-            const h = hb + (hf - hb) * t - sag - (row === 'flap' ? .2 : 0) + .015;
-            const [x, y] = F.P(u, v);
-            positions.push(x - world.w / 2, F.g0 + h, y - world.h / 2); uvs.push(i / (us - 1), j / (rows.length - 1));
-          }
-        });
-        for (let j = 0; j < rows.length - 1; j++) for (let i = 0; i < us - 1; i++) {
-          const a = j * us + i, b = a + 1, c = a + us, d = c + 1;
-          index.push(a, c, b, b, c, d);
-        }
-        const geometry = new T.BufferGeometry();
-        geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
-        geometry.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2));
-        geometry.setIndex(index); geometry.computeVertexNormals();
-        parts.cloth.push(colorize(geometry, color));
-      }
-      function umbrella(F, lx, lz, color) {
-        F.cyl('wood', null, lx, lz, 1.02, .02, 2.04);
-        F.cone(color, lx, lz, 2.06 + .19, 1.05, .38);
-      }
-      const pick = list => list[Math.floor(rnd() * list.length)];
-      const BUILD = {
-        produce(F, s) {
-          table(F, s.w, s.d);
-          const heaps = [['#6f8a46', .1, 5], ['#c0702c', .06, 8], ['#8a2a1c', .045, 10]];
-          heaps.forEach(([color, radius, count], i) => {
-            const lx = (i - 1) * s.w * .3;
-            F.cyl('paint', '#8a6a3c', lx, 0, .88, .23, .13);
-            for (let k = 0; k < count; k++) F.ball('paint', color, lx + (rnd() - .5) * .26, (rnd() - .5) * .26, .95 + rnd() * .05, radius * (.85 + rnd() * .3));
-          });
-          for (const lx of [-.45, .45]) { F.cyl('paint', '#7d6036', lx, 0, .15, .24, .3); for (let k = 0; k < 3; k++) F.ball('paint', '#6f8a46', lx + (rnd() - .5) * .2, (rnd() - .5) * .2, .34, .14); }
-          awning(F, s, '#4a5a6c');
-        },
-        sandals(F, s) {
-          table(F, s.w * .5, s.d, .7, -s.w * .25);
-          for (let k = 0; k < 8; k++) F.box('paint', '#b39a5e', -s.w * .25 + (rnd() - .5) * .7, (rnd() - .5) * .5, .74 + k * .012, .1, .025, .26);
-          for (const side of [-1, 1]) F.box('wood', null, s.w * .22 + side * .55, -.15, .85, .05, 1.7, .05);
-          for (const h of [.95, 1.3, 1.65]) {
-            F.box('wood', null, s.w * .22, -.15, h, 1.16, .03, .03);
-            for (let k = 0; k < 5; k++) F.box('paint', pick(['#b39a5e', '#a38a50', '#c2a96a']), s.w * .22 - .44 + k * .22, -.13, h - .14, .09, .25, .02);
-          }
-        },
-        tea(F, s) {
-          table(F, 1.0, .82, .76, .35);
-          for (const lz of [-.52, .52]) {
-            F.box('wood', null, .35, lz, .42, 1.0, .05, .2);
-            for (const side of [-1, 1]) F.box('wood', null, .35 + side * .42, lz, .2, .05, .4, .16);
-          }
-          F.ball('paint', '#3b3430', .35, 0, .86, .1, .085, .1);
-          for (let k = 0; k < 4; k++) F.cyl('paint', '#d3cbb8', .05 + k * .2, (k % 2 ? .22 : -.22), .8, .045, .035);
-          F.cyl('paint', '#6b5646', STEAM_AT.tea[0], STEAM_AT.tea[1], .27, .22, .54);
-          F.ball('paint', '#2f2c2a', STEAM_AT.tea[0], STEAM_AT.tea[1], .64, .14, .12, .14);
-          awning(F, s, '#7d7466');
-        },
-        pottery(F, s) {
-          F.box('paint', '#a8925f', 0, 0, .008, s.w, .016, s.d);
-          const slots = [-.85, -.42, 0, .42, .85];
-          slots.forEach((lx, i) => {
-            const lz = (i % 2 ? .18 : -.15);
-            if (i % 3 === 0) { F.ball('paint', '#5b4130', lx, lz, .3, .24, .29, .24); F.cyl('paint', '#4d372a', lx, lz, .62, .11, .08); }
-            else if (i % 3 === 1) F.cyl('paint', pick(['#6e4e36', '#7d5a3e']), lx, lz, .18, .15, .36);
-            else for (let k = 0; k < 3; k++) F.cyl('paint', '#7c6a55', lx, lz, .035 + k * .055, .15 - k * .012, .05);
-          });
-          umbrella(F, s.w / 2 - .15, -.25, '#a2723e');
-        },
-        cloth(F, s) {
-          table(F, s.w, s.d);
-          const colors = ['#2f3d55', '#46566b', '#c9bd9f', '#7b7d78', '#6b4f3a', '#3b4a63'];
-          for (const lx of [-s.w / 3, 0, s.w / 3]) {
-            const n = 3 + Math.floor(rnd() * 2);
-            for (let k = 0; k < n; k++) F.box('paint', pick(colors), lx + (rnd() - .5) * .05, (rnd() - .5) * .08, .86 + k * .095, .46, .09, .32);
-          }
-          awning(F, s, '#8b6f4e');
-        },
-        food(F, s) {
-          for (const side of [-1, 1]) F.box('wood', null, side * .62, 0, .31, .5, .62, .42);
-          F.box('wood', null, 0, -.05, 1.0, 1.9, .05, .05);
-          for (const side of [-1, 1]) F.box('wood', null, side * .62, -.05, .82, .03, .34, .03);
-          F.cyl('paint', '#2e2b28', STEAM_AT.food[0], STEAM_AT.food[1], .71, .2, .18);
-          for (let k = 0; k < 6; k++) F.cyl('paint', '#d3cbb8', .52 + (k % 3) * .1, (k < 3 ? -.08 : .1), .66 + (k % 2) * .03, .05, .03);
-          for (const lx of [-.9, .9]) F.cyl('paint', '#6b5038', lx, .42, .16, .13, .32);
-          umbrella(F, 0, -.32, '#9a5a32');
-        },
-        grain(F, s) {
-          for (let k = 0; k < 4; k++) {
-            const lx = (k - 1.5) * s.w * .24;
-            F.ball('paint', k % 2 ? '#b8a47c' : '#a8946c', lx, -.05, .36, .27, .36, .25);
-            F.cyl('paint', pick(['#e7dfc9', '#c9a24a', '#d8cfb4']), lx, -.05, .7, .19, .04);
-          }
-          F.box('wood', null, .2, .32, .1, .28, .2, .28);
-          awning(F, s, '#8b8a7e');
-        },
-        herbs(F, s) {
-          table(F, s.w, s.d);
-          for (const lx of [-s.w / 3, 0, s.w / 3]) {
-            F.cyl('paint', '#a6874e', lx, 0, .82, .29, .035);
-            F.ball('paint', pick(['#6e6a3a', '#7a4e32', '#5a4a30']), lx, 0, .85, .21, .05, .21);
-          }
-          for (let k = 0; k < 5; k++) F.ball('paint', pick(['#5c5a34', '#6e5a3a']), -s.w / 2 + .2 + k * (s.w - .4) / 4, s.d / 2 + .3, 1.72, .07, .13, .07);
-          awning(F, s, '#5a4c3e');
-        }
-      };
-      for (const s of life.stalls || []) BUILD[s.kind]?.(frame(s), s);
-
-      // 招幌：竖向木牌 / 布幌，垂直于墙面挂在铺面立柱上，两面都能正读
-      const signs = (life.signs || []).slice(0, 16);
-      if (signs.length) {
-        const CELL_W = 128, CELL_H = 448, COLS = 8, atlas = document.createElement('canvas');
-        atlas.width = atlas.height = 1024;
-        const ctx = atlas.getContext('2d');
-        const FONT = '"KaiTi","STKaiti","Kaiti SC","SimSun","Songti SC","Noto Serif CJK SC",serif';
-        const STYLES = { dark: ['#2b211b', '#5a4330', '#d2ae63'], light: ['#b79f78', '#5b4632', '#2a1d16'], flag: ['#d8ccb0', '#2f2620', '#2a1d16'] };
-        signs.forEach((sign, i) => {
-          const x0 = (i % COLS) * CELL_W, y0 = Math.floor(i / COLS) * CELL_H, [bg, edge, ink] = STYLES[sign.style] || STYLES.dark;
-          ctx.fillStyle = edge; ctx.fillRect(x0, y0, CELL_W, CELL_H);
-          ctx.fillStyle = bg; ctx.fillRect(x0 + 9, y0 + 9, CELL_W - 18, CELL_H - 18);
-          for (let k = 0; k < 320; k++) { ctx.fillStyle = `rgba(0,0,0,${(rnd() * .09).toFixed(3)})`; ctx.fillRect(x0 + 9 + rnd() * (CELL_W - 18), y0 + 9 + rnd() * (CELL_H - 18), 1 + rnd() * 4, 1); }
-          const chars = [...sign.text], fontSize = chars.length === 1 ? 104 : chars.length === 2 ? 92 : 80;
-          ctx.fillStyle = ink; ctx.font = `bold ${fontSize}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          const step = Math.min(fontSize * 1.14, (CELL_H - 60) / chars.length);
-          chars.forEach((ch, k) => ctx.fillText(ch, x0 + CELL_W / 2, y0 + CELL_H / 2 + (k - (chars.length - 1) / 2) * step));
-        });
-        const base = street.position.y, W = .4, H = 1.3;
-        signs.forEach((sign, i) => {
-          const u0 = (i % COLS) * CELL_W / 1024, u1 = u0 + CELL_W / 1024;
-          const vTop = 1 - Math.floor(i / COLS) * CELL_H / 1024, vBottom = vTop - CELL_H / 1024;
-          const flag = sign.style === 'flag', out = flag ? .3 : .22;
-          const centerY = sign.front + sign.face * (out + W / 2), centerH = base + (flag ? 2.62 : 2.7);
-          const wx = sign.x - world.w / 2, wz = centerY - world.h / 2;
-          for (const side of [1, -1]) {
-            const plane = new T.PlaneGeometry(W, H);
-            const uv = plane.attributes.uv;
-            for (let k = 0; k < uv.count; k++) uv.setXY(k, u0 + uv.getX(k) * (u1 - u0), vBottom + uv.getY(k) * (vTop - vBottom));
-            plane.rotateY(side * Math.PI / 2);
-            plane.translate(wx + side * (flag ? .004 : .026), centerH, wz);
-            parts.sign.push(plane);
-          }
-          if (!flag) add('paint', BOX, '#3a2b20', sign.x, centerY, centerH, 0, .05, H + .04, W + .04);
-          // 挑杆：从墙内 0.1m 伸出到牌外 0.15m，墙面位置有误差也不会悬空
-          const armOut = out + W + .15, armMid = sign.front + sign.face * (armOut - .1) / 2;
-          add('wood', BOX, null, sign.x, armMid, base + 3.42, 0, .06, .07, armOut + .1);
-          const top = centerH + H / 2, cord = base + 3.42 - top;
-          for (const t of [.12, W - .12]) add('paint', BOX, '#2a221c', sign.x, sign.front + sign.face * (out + t), top + cord / 2, 0, .012, cord, .012);
-          if (flag) add('wood', BOX, null, sign.x, centerY, top + .02, 0, .03, .03, W + .06);
-          if (sign.lantern) {
-            const ly = sign.front + sign.face * (armOut - .05);
-            add('paint', CYL, '#2a221c', sign.x, ly, base + 3.3, 0, .005, .24, .005);
-            add('paint', BALL, '#a8321f', sign.x, ly, base + 3.02, 0, .17, .22, .17);
-            add('paint', CYL, '#2a221c', sign.x, ly, base + 3.25, 0, .07, .04, .07);
-            add('paint', CYL, '#2a221c', sign.x, ly, base + 2.79, 0, .07, .04, .07);
-          }
-        });
-        var signTexture = new T.CanvasTexture(atlas);
-        signTexture.colorSpace = T.SRGBColorSpace; signTexture.anisotropy = 4;
-      }
-      for (const g of [BOX, CYL, BALL, CONE]) g.dispose();
-
-      function merge(list) {
-        let vertices = 0, indices = 0;
-        for (const g of list) { vertices += g.attributes.position.count; indices += g.index ? g.index.count : g.attributes.position.count; }
-        const names = Object.keys(list[0].attributes).filter(name => list.every(g => g.attributes[name]));
-        const arrays = {}, index = new Uint32Array(indices);
-        for (const name of names) arrays[name] = new Float32Array(vertices * list[0].attributes[name].itemSize);
-        let vo = 0, io = 0;
-        for (const g of list) {
-          for (const name of names) arrays[name].set(g.attributes[name].array, vo * g.attributes[name].itemSize);
-          const count = g.attributes.position.count;
-          if (g.index) for (let i = 0; i < g.index.count; i++) index[io++] = g.index.getX(i) + vo;
-          else for (let i = 0; i < count; i++) index[io++] = vo + i;
-          vo += count; g.dispose();
-        }
-        const out = new T.BufferGeometry();
-        for (const name of names) out.setAttribute(name, new T.BufferAttribute(arrays[name], list[0].attributes[name].itemSize));
-        out.setIndex(new T.BufferAttribute(index, 1));
-        out.computeBoundingSphere();
-        return out;
-      }
-      let woodMaterial = null;
-      street.traverse(node => { if (!woodMaterial && node.isMesh) for (const m of [].concat(node.material)) if (/wood/i.test(m?.name || '')) { woodMaterial = m; break; } });
-      const env = street.userData.envTexture || null;
-      const lifeMaterials = {
-        wood: woodMaterial || new T.MeshStandardMaterial({ color: '#6b5038', roughness: .86 }),
-        paint: new T.MeshStandardMaterial({ vertexColors: true, roughness: .86, envMap: env, envMapIntensity: .55 }),
-        cloth: new T.MeshStandardMaterial({ vertexColors: true, roughness: .95, side: T.DoubleSide, envMap: env, envMapIntensity: .45 }),
-        sign: new T.MeshStandardMaterial({ map: signTexture || null, roughness: .78, envMap: env, envMapIntensity: .4 })
-      };
-      let triangles = 0;
-      for (const [key, list] of Object.entries(parts)) {
-        if (!list.length) continue;
-        const object = new T.Mesh(merge(list), lifeMaterials[key]);
-        object.name = 'zunyi-life-' + key;
-        object.castShadow = key !== 'sign'; object.receiveShadow = true;
-        triangles += object.geometry.index.count / 3;
-        worldRoot.add(object);
-      }
-      for (const [key, mat] of Object.entries(lifeMaterials)) if (!parts[key].length && mat !== woodMaterial) mat.dispose();
-      stats.streetLife = { stalls: (life.stalls || []).length, signs: signs.length, triangles: Math.round(triangles) };
+      renderer.shadowMap.enabled = cinematic;
     }
     stats.landform = staging.name;
     stats.terrainVertices = terrain.heights.length;
@@ -558,29 +309,29 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     guideLine.frustumCulled = false;
     worldRoot.add(guideLine);
     let guideRoute = null;
-    let actors = null;
+    let actors = null, streetLife;
     let dead = false;
     let raf = 0;
     let last = 0;
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
-    let focus = null;
-    let orbitYaw = 0, orbitTarget = 0, orbitPitch = 0, orbitPitchTarget = 0, movementYaw = null, locomotionScale = 1;
+    const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_TPS_DIST = .5, WALL_MARGIN = .27;
+    const BASE_DISTANCE = 4.2, SHOULDER = .35, SPRINT_OFFSET = .8;
+    let yaw = 0, pitch = .22, boom = BASE_DISTANCE;
+    let viewYaw = 0, followingRoute = false;
+    let freeLookActive = false, freeLookYawOffset = 0, lockedBodyYaw = 0;
+    const wrapAngle = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
+    const isOrbiting = () => freeLookActive || freeLookYawOffset !== 0;
+    function setFreeLook(active) {
+      if (intro || freeLookActive === active) return;
+      freeLookActive = active;
+      if (active) {
+        if (!freeLookYawOffset) lockedBodyYaw = logicalScene.focusActor?.facing ?? yaw;
+        followingRoute = false;
+      }
+    }
     let intro = null;
     let introOverlay = null;
-    const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_CAM_DIST = 1.1;
-    // 肩后机位：缩短通用场景距离；街景保留前方街道视野。鼠标可同时控制水平与俯仰。
-    const STREET_CAM = { distance: 6.2, pitch: .32, focusScale: 1.12, lookAhead: 1.8, alignRate: 1.6, alignMaxAngle: 1.3, manualHold: 2.5, fov: 50 };
-    const BASE_HEADING = Math.atan2(staging.offset[0], staging.offset[2]);
-    const BASE_DISTANCE = street ? STREET_CAM.distance : Math.hypot(...staging.offset) * .68;
-    const BASE_PITCH = street ? STREET_CAM.pitch : Math.atan2(staging.offset[1], Math.hypot(staging.offset[0], staging.offset[2]));
-    orbitPitch = orbitPitchTarget = BASE_PITCH;
-    const wrapAngle = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
-    const behindYaw = facing => wrapAngle(Math.atan2(-Math.cos(facing), -Math.sin(facing)) - BASE_HEADING);
-    const lookAhead = new T.Vector3(), lookAheadGoal = new T.Vector3();
-    let followCamReady = false, lastManualLook = -Infinity;
-    stats.cameraMode = 'shoulder';
-    if (street) { camera.fov = STREET_CAM.fov; camera.updateProjectionMatrix(); stats.streetCamera = true; }
     let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
     let graphicsLost = false;
 
@@ -701,12 +452,14 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       geometry.setIndex(indices); geometry.computeVertexNormals();
       return geometry;
     }
+    // Use the scanned forest floor as a single continuous substrate. Grassy
+    // edges, worn tracks and contact shadows share its material and draw call.
     function zunyiGroundColors(geometry) {
       const positions = geometry.attributes.position;
       const colors = [];
       const clay = new T.Color('#c1b19c'), gravel = new T.Color('#9e9a8c');
       const grass = new T.Color('#8caa73'), shade = new T.Color();
-      const footprints = (logicalScene.streetBlocked || []).flatMap(({rect}) => rect ? [rect] : []);
+      const footprints = logicalScene.streetBlocked.flatMap(({rect}) => rect ? [rect] : []);
       for (let i = 0; i < positions.count; i++) {
         const x = positions.getX(i) + world.w / 2, y = positions.getZ(i) + world.h / 2;
         const roadY = 58 - Math.max(0, x - 40) * .05;
@@ -734,13 +487,16 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       snowy ? snowSurface() : assets ? (street ? surface('earth', '#e4dad0', 2.2, .72) : surface('earth', environment.groundTint, 3, .8)) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
     );
     ground.name = 'march-pbr-ground';
-    if (street) {
+    const compoundPaving = Boolean(street && logicalScene.strictPlayable);
+    // Keep the invisible plane available to picking so clicks outside can clamp.
+    ground.visible = !compoundPaving;
+    if (street && !compoundPaving) {
       ground.material.vertexColors = true;
       zunyiGroundColors(ground.geometry);
     }
     ground.castShadow = false;
     pickSurfaces.push(ground);
-    if (assets) {
+    if (assets && !compoundPaving) {
       const divisor = street ? 6 : 3;
       const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2,
         Math.ceil(terrain.cols / divisor) * 3, Math.ceil(terrain.rows / divisor) * 3);
@@ -752,6 +508,17 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
         if (Math.abs(x) > world.w / 2 || Math.abs(z) > world.h / 2) indices.push(...triangle);
       }
       geometry.setIndex(indices);
+      if (street) {
+        for (let i = 0; i < positions.count; i++) {
+          const x = positions.getX(i), z = positions.getZ(i);
+          const outside = Math.max(Math.abs(x) - world.w / 2, Math.abs(z) - world.h / 2);
+          const shoulder = T.MathUtils.smoothstep(outside, 8, 40);
+          const rise = 2.2 + 1.1 * Math.sin(x * .062) + .7 * Math.cos(z * .09);
+          positions.setY(i, positions.getY(i) + shoulder * rise);
+        }
+        geometry.computeVertexNormals();
+        zunyiGroundColors(geometry);
+      }
       const outskirts = mesh(geometry, ground.material);
       outskirts.name = 'march-terrain-outskirts';
       outskirts.castShadow = false;
@@ -766,7 +533,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     featherContext.fillRect(0, 0, 128, 128);
     const feather = new T.CanvasTexture(featherCanvas);
     feather.channel = 1;
-    for (const patch of logicalScene.terrain?.patches || []) {
+    for (const patch of (logicalScene.terrain?.patches || []).slice(street ? 2 : 0)) {
       const left = Math.max(0, Math.floor((patch.x - patch.rx) / terrain.dx)), right = Math.min(terrain.cols, Math.ceil((patch.x + patch.rx) / terrain.dx));
       const top = Math.max(0, Math.floor((patch.y - patch.ry) / terrain.dy)), bottom = Math.min(terrain.rows, Math.ceil((patch.y + patch.ry) / terrain.dy));
       const geometry = terrainPatch((right - left) * terrain.dx, (bottom - top) * terrain.dy, (left + right) * terrain.dx / 2, (top + bottom) * terrain.dy / 2, right - left, bottom - top, .018);
@@ -871,7 +638,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       const object = mesh(geometry, roadMaterial);
       object.castShadow = false;
     }
-    for (const road of logicalScene.terrain?.roads || []) roadRibbon(road);
+    for (const road of (logicalScene.terrain?.roads || []).slice(street ? 1 : 0)) roadRibbon(road);
 
     function groupAt(prop, height = 0) {
       const group = new T.Group();
@@ -1509,6 +1276,29 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       } else {
         stats.unsupportedProps.push(prop.type);
       }
+      if (street && ['lantern', 'table'].includes(prop.type)) {
+        const batches = new Map();
+        for (const child of group.children) {
+          if (!child.isMesh) continue;
+          if (!batches.has(child.material)) batches.set(child.material, []);
+          batches.get(child.material).push(child);
+        }
+        for (const [mat, parts] of batches) {
+          if (parts.length < 2) continue;
+          const geometries = parts.map(part => {
+            part.updateMatrix();
+            return part.geometry.clone().applyMatrix4(part.matrix);
+          });
+          const combined = mergeGeometries(geometries);
+          geometries.forEach(geometry => geometry.dispose());
+          if (!combined) continue;
+          for (const part of parts) {
+            group.remove(part);
+            part.geometry.dispose();
+          }
+          mesh(combined, mat, 0, 0, 0, group);
+        }
+      }
     }
 
     function alignedProp(original) {
@@ -1539,6 +1329,11 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     }
 
     for (const prop of props) {
+      if (street && ['house', 'houseWood', 'stoneWall', 'tree', 'pine', 'cliff'].includes(prop.type)) continue;
+      if (street && prop.type === 'table' && prop.x === 84 && prop.y === 42) {
+        simpleProp({ ...prop, x: 82.5, w: 1.65, h: 1.55 });
+        continue;
+      }
       if (prop.type === 'house') house(prop);
       else if (prop.type === 'houseWood') house(prop, true);
       else if (prop.type === 'tree') tree(prop);
@@ -1559,7 +1354,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     }
     stats.propsReady = stats.unsupportedProps.length === 0;
 
-    if (environment.vegetation) {
+    if (!street && environment.vegetation) {
       for (const prop of logicalScene.props.filter(p => p.type === 'tree')) {
         for (let i = 0; i < 3; i++) {
           const angle = i * 2.1 + prop.seed;
@@ -1568,9 +1363,9 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       }
     }
 
-    for (let side = 0; side < 3; side++) {
+    for (let side = 0; !compoundPaving && side < 3; side++) {
       const span = (side ? world.h : world.w) * 2.5;
-      const hills = new T.PlaneGeometry(span, 150, 160, 64);
+      const hills = new T.PlaneGeometry(span, 150, street ? 16 : 160, street ? 5 : 64);
       hills.rotateX(-Math.PI / 2);
       const positions = hills.attributes.position;
       for (let i = 0; i < positions.count; i++) {
@@ -1599,7 +1394,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       }
     }
 
-    for (const [index, cliff] of (logicalScene.terrain?.cliffs || []).entries()) {
+    for (const [index, cliff] of (street ? [] : logicalScene.terrain?.cliffs || []).entries()) {
       const curve = new T.CatmullRomCurve3(cliff.pts.map(([x, y]) => toWorld(x, y)), false, 'centripetal');
       const length = curve.getLength(), steps = Math.ceil(length / .8), rows = 12;
       const points = curve.getSpacedPoints(steps), vertices = [], indices = [];
@@ -1643,16 +1438,16 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
     worldRoot.updateMatrixWorld(true);
     const cameraObstacles = worldRoot.children.filter(object => object === ground || /^(march-prop-|march-cliff-line-)/.test(object.name)).map(object => ({ object, bounds: new T.Box3().setFromObject(object) }));
     if (street) {
-      for (const { rect, cameraHeight = 7.6 } of logicalScene.streetBlocked || []) {
-        if (!rect) continue;
+      for (const { rect, cameraHeight = 7.6, cameraMinHeight = 0 } of [...logicalScene.streetBlocked, ...(logicalScene.cameraBlocked || [])]) {
+        if (!rect || cameraHeight < 1.1) continue;
         const [x, y, w, h] = rect;
-        const min = onSurface(x, y);
-        const max = new T.Vector3(min.x + w, min.y + cameraHeight, min.z + h);
+        const min = toWorld(x, y, terrain.support(x, y) + cameraMinHeight);
+        const max = new T.Vector3(min.x + w, min.y + cameraHeight - cameraMinHeight, min.z + h);
         cameraObstacles.push({ bounds: new T.Box3(min, max) });
       }
     }
     const cameraRay = new T.Raycaster(), cameraDirection = new T.Vector3(), rayOrigin = new T.Vector3(), cameraRight = new T.Vector3();
-    let cameraDistance = 0;
+    let cameraDistance = null;
 
     if (environment.terrain === 'wetland') {
       const blade = new T.BufferGeometry();
@@ -1683,22 +1478,47 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       grass.count = count; grass.name = 'march-wetland-grass'; grass.castShadow = true; grass.receiveShadow = true; worldRoot.add(grass);
     }
 
-    const hemi = new T.HemisphereLight(staging.fill, '#514b3f', staging.ambient);
+    const hemi = new T.HemisphereLight(staging.fill, cinematic ? '#716759' : '#514b3f', staging.ambient * (logicalScene.winterRain ? 1.29 : 1));
     scene.add(hemi);
     const sun = new T.DirectionalLight(staging.key, staging.power);
     sun.position.set(-45, 75, 35);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    const extent = assets ? 24 : 85;
+    const shadowSize = cinematic ? (mobile ? 512 : 1024) : 2048;
+    sun.shadow.mapSize.set(shadowSize, shadowSize);
+    const extent = cinematic ? 39 : assets ? 24 : 85;
+    if (cinematic) {
+      sun.target.position.copy(onSurface(79, 42));
+      sun.position.copy(sun.target.position).add(new T.Vector3(...staging.sun));
+    }
     Object.assign(sun.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, near: 1, far: 230 });
     sun.shadow.bias = -.00015;
-    sun.shadow.normalBias = .025;
+    sun.shadow.normalBias = cinematic ? .042 : .025;
     sun.shadow.radius = 2;
     sun.shadow.camera.updateProjectionMatrix();
+    if (cinematic && street) {
+      // Bake only the compound. A separate 1px pass keeps actor geometry out of
+      // the cache and the first playable frame inside the triangle budget.
+      const casters = new T.Scene();
+      const bakeCamera = new T.OrthographicCamera(-1, 1, 1, -1, .1, 1);
+      bakeCamera.position.y = 100;
+      const target = new T.WebGLRenderTarget(1, 1);
+      const previous = renderer.getRenderTarget();
+      casters.add(street, sun, sun.target);
+      renderer.shadowMap.autoUpdate = false;
+      renderer.shadowMap.needsUpdate = true;
+      try {
+        renderer.setRenderTarget(target);
+        renderer.render(casters, bakeCamera);
+      } finally {
+        renderer.setRenderTarget(previous);
+        target.dispose();
+        worldRoot.add(street);
+      }
+    }
     scene.add(sun, sun.target);
 
-    const ringGeometry = new T.RingGeometry(0.65, 0.85, 32);
-    const ringMaterial = new T.MeshBasicMaterial({ color: '#e8c87a', transparent: true, opacity: 0.72, side: T.DoubleSide, depthWrite: false });
+    const ringGeometry = new T.RingGeometry(0.65, logicalScene.winterRain ? .72 : .85, 32);
+    const ringMaterial = new T.MeshBasicMaterial({ color: logicalScene.winterRain ? '#ceb582' : '#e8c87a', transparent: true, opacity: logicalScene.winterRain ? .40 : .72, side: T.DoubleSide, depthWrite: false });
     for (const anchor of logicalScene.anchors) {
       const ring = new T.Mesh(ringGeometry, ringMaterial);
       ring.rotation.x = -Math.PI / 2;
@@ -1708,6 +1528,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       markers.set(anchor.anchorId, ring);
     }
 
+    const weather = street && logicalScene.winterRain ? winterWeather(T, scene, logicalScene.winterRain, onSurface, world, winterGrass) : null;
     let particles = null;
     if (logicalScene.ambient?.kind) {
       const count = 420;
@@ -1726,20 +1547,13 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       worldRoot.add(particles);
     }
 
-    // 街景：原有炊烟点与新模型对不上所以关掉；改为在茶摊炉子、小吃摊锅上冒热气
-    const steamSources = (logicalScene.streetLife?.stalls || []).filter(stall => STEAM_AT[stall.kind]).map(stall => {
-      const [lx, lz, h] = STEAM_AT[stall.kind], [x, y] = stallPoint(stall, lx, lz);
-      return { x, y, steam: true, h };
-    });
-    for (const source of street ? steamSources : logicalScene.ambient?.smokes || []) {
+    for (const source of street ? [] : logicalScene.ambient?.smokes || []) {
       const geometry = new T.BufferGeometry(), positions = new Float32Array(24 * 3);
       for (let i = 0; i < 24; i++) { positions[i * 3] = Math.sin(i * 2.4) * .22; positions[i * 3 + 1] = i * .2; positions[i * 3 + 2] = Math.cos(i * 2.4) * .22; }
       geometry.setAttribute('position', new T.BufferAttribute(positions, 3));
       const texture = feather.clone(); texture.channel = 0;
       const smoke = new T.Points(geometry, new T.PointsMaterial({ color: '#aaa99e', alphaMap: texture, size: 1.8, transparent: true, opacity: .12, depthWrite: false }));
-      smoke.position.copy(onSurface(source.x, source.y, source.h ?? .8));
-      if (source.steam) { smoke.material.color.set('#ece8de'); smoke.material.size = 1.05; smoke.material.opacity = .13; smoke.scale.set(.55, .4, .55); smoke.name = 'zunyi-steam'; }
-      worldRoot.add(smoke); smokeColumns.push(smoke);
+      smoke.position.copy(onSurface(source.x, source.y, .8)); worldRoot.add(smoke); smokeColumns.push(smoke);
     }
 
     function resize() {
@@ -1789,116 +1603,105 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       guideLine.computeLineDistances();
     }
 
-    function cameraPosition(target, scale = 1) {
-      if (camera.aspect < .8) scale *= 1.18;
-      const heading = BASE_HEADING + orbitYaw, distance = BASE_DISTANCE * scale;
-      const horizontal = Math.cos(orbitPitch) * distance;
-      return target.clone().add(new T.Vector3(Math.sin(heading) * horizontal, Math.sin(orbitPitch) * distance, Math.cos(heading) * horizontal));
+    function cameraPosition(target, distance = boom) {
+      if (staging.inspectionOffset) return target.clone().add(new T.Vector3(...staging.inspectionOffset));
+      const horizontal = Math.cos(pitch) * distance;
+      return target.clone().add(new T.Vector3(
+        -Math.cos(yaw) * horizontal - Math.sin(yaw) * SHOULDER,
+        Math.sin(pitch) * distance,
+        -Math.sin(yaw) * horizontal + Math.cos(yaw) * SHOULDER
+      ));
     }
 
-    function clearDistance(target, direction, fullDistance) {
-      cameraRight.set(direction.z, 0, -direction.x).normalize();
-      let distance = fullDistance;
-      for (const offset of [-.28, 0, .28]) {
-        rayOrigin.copy(target).addScaledVector(cameraRight, offset);
-        cameraRay.set(rayOrigin, direction); cameraRay.far = fullDistance + .3;
-        for (const { object, bounds } of cameraObstacles) {
-          if (object && object !== ground && bounds.max.y < target.y - .15) continue;
-          if (!cameraRay.ray.intersectsBox(bounds)) continue;
-          if (!object) {
-            const point = cameraRay.ray.intersectBox(bounds, new T.Vector3());
-            if (point) {
-              const hitDistance = point.distanceTo(rayOrigin);
-              if (hitDistance > .15) distance = Math.min(distance, hitDistance - .4);
-            }
-            continue;
+    const cameraUp = new T.Vector3(), shoulderOrigin = new T.Vector3(), hitPoint = new T.Vector3();
+    const viewDirection = new T.Vector3(), lookPoint = new T.Vector3();
+    // Probe the center and the four sides of the near plane.
+    const cameraSamples = [[0, 0], [-.12, 0], [.12, 0], [0, -.12], [0, .12],
+      [-.12, -.12], [.12, -.12], [-.12, .12], [.12, .12]];
+
+    function cameraClearance(origin, direction, length, margin, focusHeight) {
+      let clear = length;
+      cameraRay.set(origin, direction);
+      cameraRay.far = length + margin;
+      for (const { object, bounds } of cameraObstacles) {
+        if (object && object !== ground && bounds.max.y <= focusHeight - .25) continue;
+        if (!cameraRay.ray.intersectsBox(bounds)) continue;
+        if (!object) {
+          if (bounds.containsPoint(origin)) return 0;
+          if (cameraRay.ray.intersectBox(bounds, hitPoint)) {
+            clear = Math.min(clear, origin.distanceTo(hitPoint) - margin);
           }
-          const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
-          if (hit) distance = Math.min(distance, hit.distance - .4);
+        } else {
+          const hit = cameraRay.intersectObject(object, true).find(hit => hit.object === ground || hit.object.castShadow);
+          if (hit) clear = Math.min(clear, hit.distance - margin);
         }
       }
-      return distance;
+      return Math.max(0, clear);
     }
 
-    function placeCamera(target, scale, dt) {
-      cameraDirection.copy(cameraPosition(target, scale)).sub(target);
-      const fullDistance = cameraDirection.length();
-      cameraDirection.normalize();
-      let distance = clearDistance(target, cameraDirection, fullDistance);
-      if (distance < Math.min(fullDistance * .45, 3.5)) {
-        const heading = Math.atan2(cameraDirection.x, cameraDirection.z);
-        const elevation = Math.asin(cameraDirection.y);
-        const candidate = new T.Vector3();
-        for (const lift of [.28, .52]) {
-          const pitch = Math.min(Math.PI / 2, elevation + lift);
-          for (const yaw of [0, .45, -.45, .85, -.85]) {
-            candidate.set(Math.sin(heading + yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(heading + yaw) * Math.cos(pitch));
-            const clearance = clearDistance(target, candidate, fullDistance);
-            if (clearance > distance) {
-              cameraDirection.copy(candidate);
-              distance = clearance;
-            }
-            if (distance >= fullDistance) break;
-          }
-          if (distance >= fullDistance) break;
-        }
+    function placeCamera(target, dt) {
+      const inspection = staging.inspectionOffset;
+      if (inspection) cameraDirection.set(...inspection).normalize();
+      else {
+        const orbitYaw = yaw + freeLookYawOffset;
+        cameraDirection.set(-Math.cos(orbitYaw) * Math.cos(pitch), Math.sin(pitch), -Math.sin(orbitYaw) * Math.cos(pitch));
       }
-      distance = Math.max(MIN_CAM_DIST, distance);
-      const change = (distance - cameraDistance) * (1 - Math.exp(-dt * 8));
-      cameraDistance = cameraDistance ? cameraDistance + Math.min(.31, change) : distance;
-      camera.position.copy(target).addScaledVector(cameraDirection, cameraDistance);
-      camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + .4);
-      camera.lookAt(target);
+      const fullDistance = inspection ? Math.hypot(...inspection) : boom;
+      cameraRight.set(cameraDirection.z, 0, -cameraDirection.x).normalize();
+      cameraUp.crossVectors(cameraDirection, cameraRight).normalize();
+      // Fit the shoulder offset before casting the arm. The view remains parallel to the arm.
+      const shoulder = inspection ? 0 : cameraClearance(target, cameraRight, SHOULDER, WALL_MARGIN, target.y);
+      shoulderOrigin.copy(target).addScaledVector(cameraRight, shoulder);
+      let targetDist = fullDistance;
+      for (const [side, up] of cameraSamples) {
+        rayOrigin.copy(shoulderOrigin).addScaledVector(cameraRight, side).addScaledVector(cameraUp, up);
+        targetDist = Math.min(targetDist, cameraClearance(rayOrigin, cameraDirection, fullDistance, WALL_MARGIN, target.y));
+      }
+      // A wall always wins, even if the safe limit is shorter than the normal minimum.
+      if (cameraDistance == null || targetDist < cameraDistance) cameraDistance = targetDist;
+      else cameraDistance = T.MathUtils.lerp(cameraDistance, targetDist, 1 - Math.exp(-dt * 5.5));
+      cameraDistance = T.MathUtils.clamp(cameraDistance, Math.min(MIN_TPS_DIST, targetDist), targetDist);
+      camera.position.copy(shoulderOrigin).addScaledVector(cameraDirection, cameraDistance);
+      camera.lookAt(lookPoint.copy(camera.position).addScaledVector(cameraDirection, -1));
       camera.updateMatrixWorld();
+      camera.getWorldDirection(viewDirection);
+      viewYaw = Math.atan2(viewDirection.z, viewDirection.x);
+      stats.orbitYaw = +viewYaw.toFixed(3);
+      stats.cameraPitch = +Math.asin(-viewDirection.y).toFixed(3);
+      stats.cameraBoom = +boom.toFixed(3);
       stats.cameraDistance = +cameraDistance.toFixed(3);
-      stats.cameraOccluded = distance < fullDistance - .01;
+      stats.cameraOccluded = targetDist < fullDistance - .01;
     }
 
-    // 肩后跟随：移动时缓慢回到人物身后；掉头、横移和刚手动观察后不强行甩镜头。
-    function alignFollowCamera(player, dt) {
-      if (!Number.isFinite(player?.facing)) return;
-      const desired = behindYaw(player.facing);
-      if (!followCamReady) { orbitTarget = orbitYaw = desired; followCamReady = true; return; }
-      if (!player.moving || performance.now() - lastManualLook < STREET_CAM.manualHold * 1000) return;
-      const delta = wrapAngle(desired - orbitTarget);
-      if (Math.abs(delta) < STREET_CAM.alignMaxAngle) orbitTarget += delta * (1 - Math.exp(-dt * STREET_CAM.alignRate));
-    }
-
+    const portraitScale = () => mobile && innerWidth < innerHeight ? 1.18 : 1;
     function follow(player, dt) {
       if (intro || graphicsLost) return;
-      if (player.moving) focus = null;
-      alignFollowCamera(player, dt);
-      orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-14 * dt));
-      orbitPitch = T.MathUtils.lerp(orbitPitch, orbitPitchTarget, 1 - Math.exp(-14 * dt));
-      stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
-      stats.orbitPitch = +orbitPitch.toFixed(3);
-      const sprintAmount = Math.max(0, Math.min(1, ((player.speed || 0) - M.player.SPEED) / (M.player.RUN_SPEED - M.player.SPEED)));
-      locomotionScale += (1 + sprintAmount * .2 - locomotionScale) * (1 - Math.exp(-dt * 4));
-      stats.cameraSpeed = +(player.speed || 0).toFixed(3);
-      stats.cameraSpeedScale = +locomotionScale.toFixed(3);
-      const target = focus ? onSurface(focus.px, focus.py, FOCUS_HEIGHT).lerp(onSurface(focus.x, focus.y, FOCUS_HEIGHT), .5) : onSurface(player.x, player.y, FOCUS_HEIGHT);
-      if (street) {
-        // 走路时镜头看向人物前方 1.8m，前方街道多露一些；停下或对话时平滑回到人物身上
-        const ahead = !focus && player.moving && Number.isFinite(player.facing) ? STREET_CAM.lookAhead : 0;
-        lookAheadGoal.set(Math.cos(player.facing || 0) * ahead, 0, Math.sin(player.facing || 0) * ahead);
-        lookAhead.lerp(lookAheadGoal, 1 - Math.exp(-dt * 2.5));
-        target.add(lookAhead);
+      if (!freeLookActive && freeLookYawOffset) {
+        freeLookYawOffset *= Math.exp(-dt * 22);
+        if (Math.abs(freeLookYawOffset) < .012) freeLookYawOffset = 0;
       }
+      if (player.navigating) followingRoute = true;
+      else if (player.moving) followingRoute = false;
+      if (!isOrbiting() && followingRoute && player.routeHeading != null) {
+        const delta = player.routeHeading - yaw;
+        const turn = Math.atan2(Math.sin(delta), Math.cos(delta));
+        yaw += turn * (1 - Math.exp(-dt * 12));
+        if (!player.navigating && Math.abs(turn) < .002) followingRoute = false;
+      }
+      const distance = (BASE_DISTANCE + (player.running ? SPRINT_OFFSET : 0)) * portraitScale();
+      boom = T.MathUtils.lerp(boom, distance, 1 - Math.exp(-dt * 7));
+      const target = onSurface(player.x, player.y, FOCUS_HEIGHT + player.jumpHeight * .45);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
-      followTarget.lerp(target, blend);
-      placeCamera(followTarget, focus ? (street ? STREET_CAM.focusScale : 1.35) : locomotionScale, dt);
-    }
-
-    function frameTarget(player, target) {
-      if (assets && Math.hypot(player.x - target.x, player.y - target.y) > 8) return;
-      focus = { px: player.x, py: player.y, x: target.x, y: target.y };
+      followTarget.set(target.x, T.MathUtils.lerp(followTarget.y, target.y, blend), target.z);
+      placeCamera(followTarget, dt);
+      player.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
     }
 
     function finishIntro(result) {
       if (!intro) return;
       const resolve = intro.resolve;
       followTarget.copy(onSurface(intro.player.x, intro.player.y, FOCUS_HEIGHT));
-      cameraDistance = 0;
+      cameraDistance = null;
       intro = null;
       introOverlay?.remove();
       introOverlay = null;
@@ -1919,8 +1722,18 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       if (progress >= 1) finishIntro('completed');
     }
 
+    function initializeCamera(player) {
+      yaw = viewYaw = player.facing;
+      freeLookActive = false;
+      freeLookYawOffset = 0;
+      boom = BASE_DISTANCE * portraitScale();
+      cameraDistance = null;
+      followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
+      placeCamera(followTarget, 0);
+      player.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
+    }
+
     function playIntro(player) {
-      alignFollowCamera(player, 0);   // 开场镜头的落点就在人物身后，结束时不跳机位
       const cfg = M.visual3d.intro(logicalScene);
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve('reduced-motion');
       introOverlay = document.createElement('div');
@@ -1955,26 +1768,29 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       project,
       unproject,
       follow,
-      frameTarget,
       drawGuide,
       playIntro,
-      adjustCamera(dx, dy) {
-        if (intro || (!Number.isFinite(dx) && !Number.isFinite(dy))) return;
-        lastManualLook = performance.now();
-        if (Number.isFinite(dx)) orbitTarget -= dx * .006;
-        if (Number.isFinite(dy)) orbitPitchTarget = Math.max(-.08, Math.min(.85, orbitPitchTarget + dy * .004));
-        movementYaw = null;
+      initializeCamera,
+      setFreeLook,
+      adjustCamera(dx, dy = 0) {
+        if (intro || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
+        const player = logicalScene.focusActor;
+        if (!player?.navigating) followingRoute = false;
+        if (freeLookActive) freeLookYawOffset = wrapAngle(freeLookYawOffset + dx * .004);
+        else if (!player?.navigating) {
+          yaw = wrapAngle(yaw + dx * .004);
+          if (freeLookYawOffset) lockedBodyYaw = yaw;
+        }
+        pitch = T.MathUtils.clamp(pitch + dy * .004, -.35, .75);
+        placeCamera(followTarget, 0);
+        player?.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
       },
       cameraRelativeMovement({ x, y }) {
-        if (!x && !y) {
-          movementYaw = null;
-          return { x, y };
-        }
-        movementYaw ??= Math.atan2(staging.offset[0], staging.offset[2]) + orbitYaw;
-        const sin = Math.sin(movementYaw), cos = Math.cos(movementYaw);
-        return { x: x * cos + y * sin, y: y * cos - x * sin };
+        const heading = isOrbiting() ? lockedBodyYaw : viewYaw;
+        const sin = Math.sin(heading), cos = Math.cos(heading);
+        return { x: -x * sin - y * cos, y: x * cos - y * sin };
       },
-      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + (player.jumpHeight || 0)); },
+      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + player.jumpHeight); },
       surfaceHeight,
       groundHeight: terrain.height,
       resize,
@@ -1988,6 +1804,8 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
         options.signal?.removeEventListener('abort', abort);
         canvas.removeEventListener('webglcontextlost', contextLost);
         actors?.dispose();
+        streetLife?.dispose();
+        weather?.dispose();
         releaseResources();
         sun.shadow.dispose();
         introOverlay?.remove();
@@ -2022,14 +1840,16 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       camera.updateMatrixWorld();
       logicalScene.tick?.(dt);
       if (logicalScene.focusActor) {
-        actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight);
-        if (assets) {
+        actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight, intro || staging.inspectionOffset ? Infinity : (cameraDistance ?? Infinity));
+        if (assets && !cinematic) {
           const p = logicalScene.focusActor;
           sun.target.position.copy(onSurface(p.x, p.y));
           sun.position.copy(sun.target.position).add(new T.Vector3(...staging.sun));
           sun.target.updateMatrixWorld();
         }
       }
+      if (streetLife && logicalScene.focusActor)
+        streetLife.update(logicalScene.pausedDim ? 0 : dt, logicalScene.focusActor, camera);
       const time = ts * .001;
       for (const fire of fires) {
         fire.material.uniforms.time.value = time;
@@ -2065,6 +1885,7 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
         }
         positions.needsUpdate = true;
       }
+      if (weather && logicalScene.focusActor) weather.update(time, logicalScene.focusActor, camera);
       renderer.render(scene, camera);
       stats.frames++;
       stats.drawCalls = renderer.info.render.calls;
@@ -2079,6 +1900,8 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       }
     }
 
+    if (street && logicalScene.streetLife)
+      streetLife = M.streetLife.create(T, logicalScene, container, scene, onSurface, cam, cameraObstacles);
     actors = await M.actors3d.create(T, logicalScene, scene, options.signal, options.roleId);
     if (options.signal?.aborted || graphicsLost) {
       actors.dispose();

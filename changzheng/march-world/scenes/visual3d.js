@@ -165,7 +165,7 @@
   const staging = {
     1: { name: '于都河阶·蓝调夜渡', sky: '#34465e', fog: '#7a8997', fill: '#b3c5e1', key: '#bdcfee', power: 1.6, ambient: 1.3, exposure: 1.25, offset: [6, 4.1, 9], sun: [-24, 32, -18], shots: [[118, 111, 18, 94, 92, 1], [75, 78, 11, 52, 54, 2]] },
     2: { name: '湘江坡地·转运清点', sky: '#86969f', fog: '#b4bdba', fill: '#cfdae2', key: '#dce0d5', power: 2.1, ambient: 1.4, exposure: 1.12, offset: [-6, 4.4, 9], sun: [-32, 36, 16], shots: [[35, 18, 22, 85, 77, 0], [107, 70, 14, 110, 47, 1]] },
-    3: { name: '遵义坡街·层院木廊', sky: '#9faeb0', fog: '#c1c9c3', fill: '#d4dfe0', key: '#f4e9d0', power: 2.2, ambient: 1.3, exposure: 1.12, offset: [7, 4.1, 8], sun: [-28, 42, 18], shots: [[64, 76, 19, 85, 42, 3], [110, 62, 12, 85, 42, 3]] },
+    3: { name: '柏辉章公馆与子尹路', sky: '#9aa6ae', fog: '#9aa6ae', fill: '#cad9e7', key: '#efdfc9', power: 2.05, ambient: 1.16, exposure: 1.03, offset: [7, 4.1, 8], sun: [-34, 32, 23], shots: [[104, 71, 42, 79, 43, 3], [91, 51, 11, 81, 31, 4]] },
     4: { name: '赤水曲谷·双渡机动', sky: '#a2b3b6', fog: '#c5c8b6', fill: '#c7d9db', key: '#f9d7ab', power: 2.7, ambient: 1.25, exposure: 1.13, offset: [-6, 4.8, 9], sun: [-32, 40, -18], shots: [[19, 75, 26, 55, 55, 1], [152, 112, 23, 135, 86, 1]] },
     5: { name: '皎平渡·干热阶崖', sky: '#b8c0be', fog: '#d4c7aa', fill: '#d4dad6', key: '#ffe3b4', power: 3.3, ambient: 1.1, exposure: 1.08, offset: [7, 4.4, 8], sun: [-22, 53, 12], shots: [[52, 41, 26, 100, 84, 0], [162, 55, 15, 144, 32, 3]] },
     6: { name: '安顺场·冲积石滩', sky: '#94aeb6', fog: '#bdcbc6', fill: '#c0d7e1', key: '#f2e4c6', power: 2.6, ambient: 1.35, exposure: 1.14, offset: [6, 4.5, 9], sun: [25, 37, -20], shots: [[116, 105, 19, 90, 76, 0], [30, 56, 13, 56, 41, 2]] },

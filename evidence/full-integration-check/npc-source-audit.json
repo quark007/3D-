@@ -1,0 +1,1458 @@
+[
+  {
+    "path": "后勤协作员\\base_basic_pbr.glb",
+    "bytes": 48934160,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        5539685
+      ],
+      [
+        "image/png",
+        [
+          4096,
+          4096
+        ],
+        15877538
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2619729
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "d947b1f2-7f7e-4183-8fd4-889a7823fec8",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "后勤协作员\\base_basic_shaded.glb",
+    "bytes": 40825456,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          4096,
+          4096
+        ],
+        15928576
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "d947b1f2-7f7e-4183-8fd4-889a7823fec8",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "向导\\base_basic_pbr.glb",
+    "bytes": 53290096,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        5361454
+      ],
+      [
+        "image/png",
+        [
+          4096,
+          4096
+        ],
+        14613630
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2359089
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "1d4cbe41-6aaf-47a7-971e-03767f467025",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "向导\\base_basic_shaded.glb",
+    "bytes": 47590660,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          4096,
+          4096
+        ],
+        16635063
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "1d4cbe41-6aaf-47a7-971e-03767f467025",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "女农民群众\\base_basic_pbr.glb",
+    "bytes": 32870276,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        5026857
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4282648
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2310496
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "955ec3f4-a9cc-4294-b603-c9ad0400a9e9",
+        104
+      ],
+      [
+        "cdaa0137-ef1d-453a-8c6d-a57cb57bd945",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "女农民群众\\base_basic_shaded.glb",
+    "bytes": 25680280,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4430327
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "955ec3f4-a9cc-4294-b603-c9ad0400a9e9",
+        104
+      ],
+      [
+        "cdaa0137-ef1d-453a-8c6d-a57cb57bd945",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "女卫生员\\animations_1\\base_basic_pbr.glb",
+    "bytes": 41528156,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4675611
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4476131
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2616324
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "208940b9-0ab8-498d-a201-3ff86dcb551d",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "女卫生员\\animations_1\\base_basic_shaded.glb",
+    "bytes": 34349060,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4589286
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "208940b9-0ab8-498d-a201-3ff86dcb551d",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "女卫生员\\animations_2\\base_basic_pbr.glb",
+    "bytes": 41628872,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4675611
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4476131
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2616324
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "human_000013",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "女卫生员\\animations_2\\base_basic_shaded.glb",
+    "bytes": 34449772,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4589286
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "human_000013",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "男农民群众\\base_basic_pbr.glb",
+    "bytes": 37489240,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4470661
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4694220
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2430034
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "349048ff-52bb-4527-8715-bb47097c8929",
+        104
+      ],
+      [
+        "78b2b254-2e79-41df-9cc2-cf6d1c34a344",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "男农民群众\\base_basic_shaded.glb",
+    "bytes": 30446572,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4552572
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "349048ff-52bb-4527-8715-bb47097c8929",
+        104
+      ],
+      [
+        "78b2b254-2e79-41df-9cc2-cf6d1c34a344",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "船工\\base_basic_pbr.glb",
+    "bytes": 53904524,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4733228
+      ],
+      [
+        "image/png",
+        [
+          4096,
+          4096
+        ],
+        14739021
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2334383
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "72ee2e6d-e062-4bcd-9bf8-87550499b342",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "船工\\base_basic_shaded.glb",
+    "bytes": 48166772,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          4096,
+          4096
+        ],
+        16069197
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "72ee2e6d-e062-4bcd-9bf8-87550499b342",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "陈小满\\base_basic_pbr.glb",
+    "bytes": 39534336,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        5100974
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4474618
+      ],
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        2420665
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "2f1de7bd-957c-4023-981d-833d62d4e5bb",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  },
+  {
+    "path": "陈小满\\base_basic_shaded.glb",
+    "bytes": 32262008,
+    "triangles": 300000,
+    "meshes": 1,
+    "primitives": 1,
+    "materials": 1,
+    "images": [
+      [
+        "image/png",
+        [
+          2048,
+          2048
+        ],
+        4724254
+      ]
+    ],
+    "bones": [
+      [
+        "Hips",
+        "Spine",
+        "Spine1",
+        "Spine2",
+        "Neck",
+        "Head",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ]
+    ],
+    "animations": [
+      [
+        "2f1de7bd-957c-4023-981d-833d62d4e5bb",
+        104
+      ]
+    ],
+    "morphs": 0,
+    "extensions": null
+  }
+]

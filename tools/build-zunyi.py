@@ -45,12 +45,12 @@ def processed(source,key,kind):
         px[:,:3]=(.55*px[:,:3]+.45*lum[:,None])*({'wood':[.67,.52,.40],'roof':[.76,.80,.80],'stone':[.80,.84,.83]}.get(key,[.85,.86,.84]))*(.89+.11*hv[::4,None])
         bpy.data.images.remove(hmap)
     else:
-        low,high=(.45,.65) if key=='stone' else (.78,.92)
+        low,high=(.45,.65) if key=='stone' else (.78,.90) if key=='brick' and globals().get('ARCH_POLISH') else (.78,.92)
         px[:,:3]=low+(high-low)*px[:,:3]
     im.pixels.foreach_set(values)
     # Write raw RGB without view transform; load JPEG as normal color / data.
     im.file_format='JPEG'
-    dest=out/(key+'_'+kind+'.jpg')
+    dest=(out if not globals().get('ARCH_POLISH') else Path(BUILD_TEMP))/(key+'_'+kind+'.jpg')
     im.filepath_raw=str(dest)
     im.save()
     bpy.data.images.remove(im)
@@ -70,6 +70,50 @@ for key,prefix in [('stone','road_'),('brick','wall_dark'),('plaster','wall_plas
             m.node_tree.links.new(n.outputs[0],bs.inputs['Normal'])
         else:
             m.node_tree.links.new(t.outputs['Color'],bs.inputs['Base Color' if kind=='diffuse' else 'Roughness'])
+ARCH_POLISH=globals().get('ARCH_POLISH',False)
+if ARCH_POLISH:
+    trim,trim_bs=material('trim',(.48,.465,.395))
+    plaster=materials['plaster']
+    normal_tex=next(n for n in plaster.node_tree.nodes if n.type=='TEX_IMAGE' and 'normal' in n.image.name)
+    tex=trim.node_tree.nodes.new('ShaderNodeTexImage')
+    tex.image=normal_tex.image
+    norm=trim.node_tree.nodes.new('ShaderNodeNormalMap')
+    norm.inputs['Strength'].default_value=.52
+    trim.node_tree.links.new(tex.outputs['Color'],norm.inputs['Color'])
+    trim.node_tree.links.new(norm.outputs[0],trim_bs.inputs['Normal'])
+    amber,glass_bs=material('amber',(.23,.102,.027))
+    glass_bs.inputs['Emission Color'].default_value=(.82,.395,.091,1)
+    glass_bs.inputs['Emission Strength'].default_value=.35
+    brick=next(n for n in materials['brick'].node_tree.nodes if n.type=='NORMAL_MAP')
+    brick.inputs['Strength'].default_value=1.28
+FOLIAGE_POLISH=globals().get('FOLIAGE_POLISH',False)
+if FOLIAGE_POLISH:
+    bark,bs=material('bark',(.22,.18,.14))
+    for suffix,slot in [('Diffuse','Base Color'),('nor_gl','Normal'),('Rough','Roughness')]:
+        tex=bark.node_tree.nodes.new('ShaderNodeTexImage')
+        tex.image=bpy.data.images.load(str(raw/'textures'/('chinese_hackberry_bark_'+suffix+'.jpg')))
+        tex.image.colorspace_settings.name='sRGB' if suffix=='Diffuse' else 'Non-Color'
+        tex.image.pack()
+        if suffix=='nor_gl':
+            norm=bark.node_tree.nodes.new('ShaderNodeNormalMap')
+            norm.inputs['Strength'].default_value=1.15
+            bark.node_tree.links.new(tex.outputs['Color'],norm.inputs['Color'])
+            bark.node_tree.links.new(norm.outputs[0],bs.inputs[slot])
+        else: bark.node_tree.links.new(tex.outputs['Color'],bs.inputs[slot])
+    for key,filename in [('twig','zunyi-winter-twigs.png'),('crown','zunyi-distant-crowns.png')]:
+        mat,bs=material(key,(.25,.21,.16))
+        tex=mat.node_tree.nodes.new('ShaderNodeTexImage')
+        tex.image=bpy.data.images.load(str(raw/'textures'/filename))
+        # Pack RGBA into PNG for core glTF, independent of the source WebP.
+        tex.image.file_format='PNG'
+        tex.image.pack()
+        mat.node_tree.links.new(tex.outputs['Color'],bs.inputs['Base Color'])
+        test=mat.node_tree.nodes.new('ShaderNodeMath')
+        test.operation='GREATER_THAN'
+        test.inputs[1].default_value=.45
+        mat.node_tree.links.new(tex.outputs['Alpha'],test.inputs[0])
+        mat.node_tree.links.new(test.outputs[0],bs.inputs['Alpha'])
+        mat.use_backface_culling=False
 for k,c in [('glass',(.13,.23,.21)),('leaf',(.11,.16,.073))]:material(k,c)
 bucket=defaultdict(lambda:[[],[]])
 group='landmark'
@@ -79,6 +123,14 @@ def mesh(name,verts,faces,mat):
 cube_faces=[(3,2,1,0),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
 def box(name,center,size,mat):
     a,b,c=[s/2 for s in size]
+    if globals().get('ARCH_POLISH') and name in ('洞口外墙','内墙','柱座','浅灰柱头','灰塑柱础线','灰塑腰线滴水','石脚','瓦压顶'):
+        # Chamfer only long exposed edges of the section; retain the exact outer bounds.
+        h=min(.016,a*.18,b*.18)
+        corners=[(-a+h,-b),(a-h,-b),(a,-b+h),(a,b-h),(a-h,b),(-a+h,b),(-a,b-h),(-a,-b+h)]
+        points=[(center[0]+x,center[1]+y,center[2]+z) for z in (-c,c) for x,y in corners]
+        mesh(name,points,[tuple(range(7,-1,-1)),tuple(range(8,16))]+
+             [(i,(i+1)%8,(i+1)%8+8,i+8) for i in range(8)],mat)
+        return
     mesh(name,[(center[0]+x,center[1]+y,center[2]+z) for x,y,z in [(-a,-b,-c),(a,-b,-c),(a,b,-c),(-a,b,-c),(-a,-b,c),(a,-b,c),(a,b,c),(-a,b,c)]],cube_faces,mat)
 def beam(name,start,end,width,depth,mat):
     a,b=Vector(start),Vector(end); d=(b-a).normalized()
@@ -96,7 +148,11 @@ def flush():
             u,v=[(1,2),(0,2),(0,1)][axis]
             for li in p.loop_indices:
                 co=me.vertices[me.loops[li].vertex_index].co
-                uv.data[li].uv=(co[u]/2.4,co[v]/2.4)
+                if mat in ('twig','crown'):
+                    index=me.loops[li].vertex_index%9
+                    uv.data[li].uv=(index%3/2,index//3/2)
+                    continue
+                uv.data[li].uv=(co[u]/1.04,co[v]/(.80 if v==2 else 1.04)) if mat=='brick' and ARCH_POLISH else (co[u]/2.4,co[v]/2.4)
         objects.append(ob)
     bucket.clear()
     return objects

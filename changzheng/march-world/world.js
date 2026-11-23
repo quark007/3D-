@@ -70,9 +70,10 @@
     if (token !== mountSeq || !view) { view?.dispose(); return false; }
     const project = (x, y, height) => view.project ? view.project(x, y, height) : M.proj.project(view.cam, x, y, height);
     const unproject = (sx, sy) => view.unproject ? view.unproject(sx, sy) : M.proj.unproject(view.cam, sx, sy);
-    const grid = M.path.buildGrid(view.streetActive ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
+    const grid = M.path.buildGrid(view.streetActive && !scene.strictPlayable ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
     const player = M.player.create(scene, grid, opts.spawn,roleId);
     const pin=document.createElement('div');pin.className='czmw-player-pin86';pin.dataset.role=player.roleId;pin.setAttribute('role','img');pin.setAttribute('aria-label','你的位置 · '+player.roleName);const roleLabel=document.createElement('span');roleLabel.textContent='你 · '+player.roleShort;pin.append(roleLabel,document.createElement('i'));container.append(pin);
+    view.initializeCamera?.(player);
     scene.focusActor=player;const anchorsMod = M.anchors.create(scene, container);
     scene.anchorEntities=anchorsMod.anchors;
     const ambient = M.ambient.create(scene, view);
@@ -81,6 +82,7 @@
     const session = { container, scene, grid, view, player,pin,guidePin, guide:null, route:[],routeAt:0, routeCell:'', anchorsMod, ambient, chapterId, sceneId, dead: false, lastNear: null };
 
     /* 输入 */
+    const settingsPause = Symbol('movement settings');
     const input = M.input.create(container, {
       onInteract() {
         if (pauses.size || session.dead) return;
@@ -101,6 +103,9 @@
       },
       onDir() { player.stopPath(); },
       onJump() { if (!pauses.size) player.jump(); },
+      lookCanvas: view.adjustCamera ? view.canvas : null,
+      onSettings(open) { if (open) pause(settingsPause); else resume(settingsPause); },
+      onFreeLook(active) { view.setFreeLook?.(active); },
       onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;
@@ -116,9 +121,10 @@
       input.setEnabled(!paused);
       if (!paused) {
         const movement = input.vector();
-        const backward = input.wantsBack?.(movement);
-        const direction = view.cameraRelativeMovement?.(movement) ?? movement;
-        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward, input.wantsWalk?.());
+        const cameraRelative = Boolean(view.cameraRelativeMovement);
+        const direction = cameraRelative ? view.cameraRelativeMovement(movement) : movement;
+        player.advance(dt, direction, input.wantsRun?.(), input.wantsWalk?.(),
+          cameraRelative ? movement.y : undefined);
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
@@ -156,6 +162,7 @@
       previous.onGraphicsLost = null;
       view = M.view.wrapCanvas(M.renderer.create(container, scene));
       session.view = view;
+      input.disableCamera?.();
       previous.dispose();
     };
     live = session;
@@ -172,6 +179,7 @@
   }
 
   function dispatchInteract(session, anchorId) {
+    session.input.unlock?.();
     window.dispatchEvent(new CustomEvent('czmarch:interact', {
       detail: { chapterId: session.chapterId, sceneId: session.sceneId, anchorId }
     }));
@@ -187,13 +195,13 @@
   }
 
   function pause(reason) {
-    const r = String(reason || 'default');
+    const r = typeof reason === 'symbol' ? reason : String(reason || 'default');
     if (!live || live.dead) return; /* 未挂载时暂停是安全空操作 */
     pauses.add(r);
-    live.input.setEnabled(false);live.player.stopPath();live.player.halt?.();
+    live.input.setEnabled(false);live.player.stop();
   }
   function resume(reason) {
-    pauses.delete(String(reason || 'default'));
+    pauses.delete(typeof reason === 'symbol' ? reason : String(reason || 'default'));
     if(live&&!live.dead&&!pauses.size)live.input.setEnabled(true);
   }
   function applyState(viewState) {

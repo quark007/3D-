@@ -1,0 +1,549 @@
+{
+  "errors": [
+    [
+      "he-wen",
+      "warn",
+      "THREE.WebGLProgram: Program Info Log: (860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero"
+    ],
+    [
+      "he-wen",
+      "warn",
+      "THREE.WebGLProgram: Program Info Log: (860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero\n(860,26-118): warning X4008: floating point division by zero"
+    ],
+    [
+      "he-wen",
+      "warn",
+      "THREE.WebGLProgram: Program Info Log: (934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero"
+    ],
+    [
+      "he-wen",
+      "warn",
+      "THREE.WebGLProgram: Program Info Log: (934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero\n(934,26-118): warning X4008: floating point division by zero"
+    ]
+  ],
+  "previews": {
+    "he-wen": {
+      "meshes": 42,
+      "triangles": 29139,
+      "skinnedMeshes": 42,
+      "bones": 53,
+      "expressions": [
+        "eyeBlinkLeft",
+        "eyeBlinkRight",
+        "browDownLeft",
+        "browDownRight",
+        "eyeWideLeft",
+        "eyeWideRight",
+        "jawOpen",
+        "smile",
+        "browInnerUpLeft",
+        "browInnerUpRight",
+        "visemeI",
+        "visemeU",
+        "visemeO",
+        "visemeE",
+        "visemeM",
+        "browUpLeft",
+        "browUpRight"
+      ],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.7825855514029296,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "wang-gui": {
+      "meshes": 67,
+      "triangles": 29879,
+      "skinnedMeshes": 67,
+      "bones": 53,
+      "expressions": [
+        "eyeBlinkLeft",
+        "eyeBlinkRight",
+        "jawOpen"
+      ],
+      "animations": [
+        "Talk",
+        "Idle",
+        "Walk"
+      ],
+      "heightMeters": 1.7001014413499038,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "logistics": {
+      "meshes": 1,
+      "triangles": 11500,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.7300113818870542,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "chen-xiaoman": {
+      "meshes": 1,
+      "triangles": 9000,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.669999802704166,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "medic": {
+      "meshes": 1,
+      "triangles": 11500,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.6100000478897531,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "boatman": {
+      "meshes": 1,
+      "triangles": 11500,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.740002586209701,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "guide": {
+      "meshes": 1,
+      "triangles": 11500,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.6797054323930696,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "civilian-farmer": {
+      "meshes": 1,
+      "triangles": 11500,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.630003809630161,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    },
+    "civilian-woman": {
+      "meshes": 1,
+      "triangles": 11500,
+      "skinnedMeshes": 1,
+      "bones": 52,
+      "expressions": [],
+      "animations": [
+        "Idle",
+        "Talk"
+      ],
+      "heightMeters": 1.630006357345447,
+      "backend": "webgl",
+      "options": [
+        "he-wen",
+        "wang-gui",
+        "logistics",
+        "chen-xiaoman",
+        "medic",
+        "boatman",
+        "guide",
+        "civilian-farmer",
+        "civilian-woman"
+      ]
+    }
+  },
+  "game": {
+    "desktop": [
+      {
+        "fps": 155.31561462101575,
+        "draws": 54,
+        "triangles": 71142,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 57,
+          "y": 30,
+          "facing": "s"
+        }
+      },
+      {
+        "fps": 117.53993874911207,
+        "draws": 75,
+        "triangles": 98640,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 83,
+          "y": 44,
+          "facing": "n"
+        }
+      },
+      {
+        "fps": 125.33200531580522,
+        "draws": 81,
+        "triangles": 101626,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 91,
+          "y": 47,
+          "facing": "w"
+        }
+      },
+      {
+        "fps": 165.35105941496732,
+        "draws": 30,
+        "triangles": 72310,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 57,
+          "y": 55,
+          "facing": "n"
+        }
+      },
+      {
+        "fps": 163.7845028316073,
+        "draws": 70,
+        "triangles": 86884,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 81,
+          "y": 37.4,
+          "facing": "n"
+        }
+      }
+    ],
+    "mobile": [
+      {
+        "fps": 165.44728965254671,
+        "draws": 52,
+        "triangles": 70816,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 57,
+          "y": 30,
+          "facing": "s"
+        }
+      },
+      {
+        "fps": 165.43353561568838,
+        "draws": 73,
+        "triangles": 98512,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 83,
+          "y": 44,
+          "facing": "n"
+        }
+      },
+      {
+        "fps": 165.50232867598143,
+        "draws": 82,
+        "triangles": 101678,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 91,
+          "y": 47,
+          "facing": "w"
+        }
+      },
+      {
+        "fps": 154.6006150715885,
+        "draws": 28,
+        "triangles": 71984,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 57,
+          "y": 55,
+          "facing": "n"
+        }
+      },
+      {
+        "fps": 165.44728965582615,
+        "draws": 70,
+        "triangles": 86884,
+        "backend": "three",
+        "dpr": 1,
+        "spawn": {
+          "x": 81,
+          "y": 37.4,
+          "facing": "n"
+        }
+      }
+    ]
+  },
+  "chapters": {
+    "1": {
+      "fps": 34.08814219723974,
+      "draws": 701,
+      "triangles": 1046196,
+      "backend": "three",
+      "dpr": 1
+    },
+    "2": {
+      "fps": 116.45569621307496,
+      "draws": 343,
+      "triangles": 644185,
+      "backend": "three",
+      "dpr": 1
+    },
+    "3": {
+      "fps": 166.44993498565344,
+      "draws": 54,
+      "triangles": 71142,
+      "backend": "three",
+      "dpr": 1
+    },
+    "4": {
+      "fps": 88.35758836032596,
+      "draws": 560,
+      "triangles": 839064,
+      "backend": "three",
+      "dpr": 1
+    },
+    "5": {
+      "fps": 38.13882532764826,
+      "draws": 267,
+      "triangles": 787416,
+      "backend": "three",
+      "dpr": 1
+    },
+    "6": {
+      "fps": 34.508257331990585,
+      "draws": 850,
+      "triangles": 1078976,
+      "backend": "three",
+      "dpr": 1
+    },
+    "7": {
+      "fps": 38.92060197558847,
+      "draws": 608,
+      "triangles": 1425673,
+      "backend": "three",
+      "dpr": 1
+    },
+    "8": {
+      "fps": 38.839979285344675,
+      "draws": 394,
+      "triangles": 667688,
+      "backend": "three",
+      "dpr": 1
+    },
+    "9": {
+      "fps": 104.03120937248451,
+      "draws": 497,
+      "triangles": 853452,
+      "backend": "three",
+      "dpr": 1
+    },
+    "10": {
+      "fps": 44.61942257357421,
+      "draws": 557,
+      "triangles": 730010,
+      "backend": "three",
+      "dpr": 1
+    },
+    "11": {
+      "fps": 35.76903423498567,
+      "draws": 611,
+      "triangles": 669061,
+      "backend": "three",
+      "dpr": 1
+    },
+    "12": {
+      "fps": 34.12137460692268,
+      "draws": 776,
+      "triangles": 893835,
+      "backend": "three",
+      "dpr": 1
+    }
+  },
+  "actors": {
+    "he_wen": {
+      "url": "/assets/characters/he-wen/he-wen-zunyi.glb",
+      "foot": 1.049,
+      "ground": 1.049,
+      "yawError": 0
+    },
+    "wang_gui": {
+      "url": "/assets/characters/wang-gui/wang-gui-zunyi.glb",
+      "foot": 1.049,
+      "ground": 1.049,
+      "yawError": 0
+    },
+    "logistics": {
+      "url": "/assets/characters/logistics/logistics-field-web.glb",
+      "foot": 1.049,
+      "ground": 1.049,
+      "yawError": 0
+    },
+    "chen-xiaoman": {
+      "url": "/assets/characters/chen-xiaoman/chen-xiaoman-web.glb",
+      "foot": 1.049,
+      "ground": 1.049,
+      "yawError": 0
+    },
+    "medic": {
+      "url": "/assets/characters/medic/medic-web.glb",
+      "foot": 3.599,
+      "ground": 3.604,
+      "yawError": 0
+    },
+    "boatman": {
+      "url": "/assets/characters/boatman/boatman-web.glb",
+      "foot": 12.728,
+      "ground": 12.728,
+      "yawError": -0.19
+    },
+    "guide": {
+      "url": "/assets/characters/guide/guide-web.glb",
+      "foot": 0.239,
+      "ground": 0.238,
+      "yawError": -0.19
+    },
+    "civilian-farmer": {
+      "url": "/assets/characters/civilian-farmer/civilian-farmer-web.glb",
+      "foot": 3.09,
+      "ground": 3.09,
+      "yawError": -0.18
+    },
+    "civilian-woman": {
+      "url": "/assets/characters/civilian-woman/civilian-woman-web.glb",
+      "foot": 12.918,
+      "ground": 12.918,
+      "yawError": 0
+    },
+    "liaison": {
+      "url": "/assets/models-v03/char_soldier.glb",
+      "foot": 1.049,
+      "ground": 1.049,
+      "yawError": 0
+    }
+  },
+  "canvas": {
+    "backend": "canvas",
+    "snapshot": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 57,
+      "y": 30,
+      "facing": 1.571
+    }
+  }
+}

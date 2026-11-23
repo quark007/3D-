@@ -11,13 +11,21 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 let canvas = document.getElementById('portrait');
 const characters = new Map([
   ['he-wen', { name: '何文', detail: '指导员 · 1.78 m', path: '/assets/characters/he-wen/he-wen-web.glb' }],
-  ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }]
+  ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }],
+  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', height: 1.73, path: '/assets/characters/logistics/logistics-field-web.glb' }],
+  ['chen-xiaoman', { name: '陈小满', detail: '青年战士 · 1.67 m', height: 1.67, path: '/assets/characters/chen-xiaoman/chen-xiaoman-web.glb' }],
+  ['medic', { name: '卫生员', detail: '随队救护 · 1.61 m', height: 1.61, path: '/assets/characters/medic/medic-web.glb' }],
+  ['boatman', { name: '船工', detail: '渡口船工 · 1.74 m', height: 1.74, path: '/assets/characters/boatman/boatman-web.glb' }],
+  ['guide', { name: '向导', detail: '沿途领路人 · 1.68 m', height: 1.68, path: '/assets/characters/guide/guide-web.glb' }],
+  ['civilian-farmer', { name: '老乡（男）', detail: '第 1 章群众 · 1.63 m', height: 1.63, path: '/assets/characters/civilian-farmer/civilian-farmer-web.glb' }],
+  ['civilian-woman', { name: '老乡（女）', detail: '第 11 章群众 · 1.63 m', height: 1.63, path: '/assets/characters/civilian-woman/civilian-woman-web.glb' }]
 ]);
 const url = new URL(location.href);
 const requestedCharacter = url.searchParams.get('char');
 const characterId = characters.has(requestedCharacter) ? requestedCharacter : 'he-wen';
 const character = characters.get(characterId);
 const characterSelect = document.getElementById('character');
+for (const [id, entry] of characters) characterSelect.add(new Option(entry.name, id));
 characterSelect.value = characterId;
 characterSelect.addEventListener('change', () => {
   url.searchParams.set('char', characterSelect.value);
@@ -546,7 +554,7 @@ observer.observe(stage);
 
 function setView(view) {
   const portraitDistance = camera.aspect < 0.7 ? 1.6 : 1.05;
-  const target = new T.Vector3(0, view === 'body' ? 0.92 : characterId === 'wang-gui' ? 1.51 : 1.6, 0);
+  const target = new T.Vector3(0, view === 'body' ? 0.92 : character.height ? character.height - .14 : characterId === 'wang-gui' ? 1.51 : 1.6, 0);
   const angle = ({ front: 0, quarter: Math.PI / 5, profile: Math.PI / 2, body: Math.PI / 10 })[view];
   const distance = view === 'body' ? (camera.aspect < 0.7 ? 3.7 : 3.2) : portraitDistance;
   controls.target.copy(target);

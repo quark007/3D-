@@ -1987,9 +1987,15 @@ vec4 czNoTileMap( sampler2D tex, vec2 uv ) {
       const shot = data => ({ eye: onSurface(data[0], data[1], data[2]), look: onSurface(data[3], data[4], data[5]) });
       const first = shot(staging.shots[0]), second = shot(staging.shots[1]);
       const local = progress < .58 ? progress / .58 : (progress - .58) / .42, eased = local * local * (3 - 2 * local);
-      camera.position.copy(progress < .58 ? first.eye.lerp(second.eye, eased) : second.eye.lerp(cameraPosition(playerPoint), eased));
+      // 第一人称时开场镜头直接收到眼睛高度，结束时不再跳一次机位
+      const heading = BASE_HEADING + orbitYaw;
+      const settle = viewMode === 'first' ? onSurface(intro.player.x, intro.player.y, FIRST_CAM.eye) : cameraPosition(playerPoint);
+      const settleLook = viewMode === 'first'
+        ? onSurface(intro.player.x - Math.sin(heading) * 5, intro.player.y - Math.cos(heading) * 5, FIRST_CAM.eye)
+        : playerPoint;
+      camera.position.copy(progress < .58 ? first.eye.lerp(second.eye, eased) : second.eye.lerp(settle, eased));
       camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + 1.5);
-      camera.lookAt(progress < .58 ? first.look.lerp(second.look, eased) : second.look.lerp(playerPoint, eased));
+      camera.lookAt(progress < .58 ? first.look.lerp(second.look, eased) : second.look.lerp(settleLook, eased));
       if (progress >= 1) finishIntro('completed');
     }
 

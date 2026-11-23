@@ -9,9 +9,9 @@
     "viewMode": "first",
     "cameraMode": "first",
     "cameraDistance": 0,
-    "frames": 1,
+    "frames": 2,
     "triangles": 356819,
-    "renderMs": 4013.1,
+    "renderMs": 552.4,
     "pinHidden": true
   },
   "third": {
@@ -24,9 +24,9 @@
     "viewMode": "third",
     "cameraMode": "shoulder",
     "cameraDistance": 7.941,
-    "frames": 151,
+    "frames": 136,
     "triangles": 368339,
-    "renderMs": 7.5,
+    "renderMs": 26.1,
     "pinHidden": false
   },
   "back": {
@@ -39,15 +39,15 @@
     "viewMode": "first",
     "cameraMode": "first",
     "cameraDistance": 0,
-    "frames": 327,
+    "frames": 292,
     "triangles": 356819,
-    "renderMs": 4.9,
+    "renderMs": 7.2,
     "pinHidden": true
   },
   "look": {
     "yawBefore": 0,
-    "yawAfter": -0.197,
-    "delta": -0.197
+    "yawAfter": -0.198,
+    "delta": -0.198
   },
   "moved": {
     "before": {
@@ -55,16 +55,16 @@
       "sceneId": "chapter-2/scene-xiangjiang",
       "x": 24,
       "y": 16,
-      "facing": -0.786
+      "facing": -0.785
     },
     "after": {
       "chapterId": 2,
       "sceneId": "chapter-2/scene-xiangjiang",
-      "x": 33.1,
-      "y": 15.9,
+      "x": 33.57,
+      "y": 15.89,
       "facing": -0.011
     },
-    "distance": 9.1
+    "distance": 9.57
   },
   "walked": {
     "button": {
@@ -76,9 +76,9 @@
     "viewMode": "first",
     "cameraMode": "first",
     "cameraDistance": 0,
-    "frames": 384,
-    "triangles": 944208,
-    "renderMs": 22.7,
+    "frames": 357,
+    "triangles": 945846,
+    "renderMs": 20.1,
     "pinHidden": true
   },
   "errors": []

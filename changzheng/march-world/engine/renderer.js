@@ -58,7 +58,8 @@
 
   const ro=new ResizeObserver(resize);ro.observe(container);resize();
 
-  if (!scene.proceduralArt) M.painter.prepareArt().then(ready=>{if(ready&&!dead){backdrop=M.painter.paintBackdrop(scene);for(const p of props)p.spr=M.painter.spriteFor(p,scene.palette);stats.artReady=true;stats.propsReady=M.painter.propsReady;}});
+  // This checkout ships procedural Canvas art. Scenes with the optional atlas can opt in.
+  if (scene.useCanvasAtlas) M.painter.prepareArt().then(ready=>{if(ready&&!dead){backdrop=M.painter.paintBackdrop(scene);for(const p of props)p.spr=M.painter.spriteFor(p,scene.palette);stats.artReady=true;stats.propsReady=M.painter.propsReady;}});
 
   let framed=false,composed=false;function compose(f){const width=cam.viewW-100,height=Math.max(100,cam.viewH-140);const fit=Math.min(width/(Math.abs(f.px-f.x)+12),height/(Math.abs(f.py-f.y)*M.proj.PITCH+12));cam.zoom=Math.max(5.5,Math.min(cam.zoom,fit));cam.x=(f.px+f.x)/2;cam.y=(f.py+f.y)/2-3;M.proj.clampCamera(cam,scene.world);}function frameTarget(player,target){if(composed)return;composed=true;frameFocus={px:player.x,py:player.y,x:target.x,y:target.y};compose(frameFocus);framed=true;}function follow(target,dt){if(composed&&!target.moving)return;if(target.moving)frameFocus=null;if(!framed){cam.x=target.x;cam.y=target.y-6;framed=true;}const k=1-Math.pow(.002,dt);cam.x+=(target.x-cam.x)*k;cam.y+=(target.y-6-cam.y)*k;M.proj.clampCamera(cam,scene.world);}
 

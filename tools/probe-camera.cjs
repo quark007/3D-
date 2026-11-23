@@ -100,7 +100,7 @@ function findEdge() {
       /* 实测：站在锚点北侧 4m（桌面与正房之间）必现遮挡收缩；南侧不触发。 */
       const spawn = shot ? { x: shot.x, y: shot.y, facing: 'n' } : anchor ? { x: anchor.x + spawnOffset[0], y: anchor.y + spawnOffset[1], facing: 'n' } : null;
       const staging = W._.visual3d.staging;
-      if (shot) W._.visual3d.staging = scene => ({ ...staging(scene), offset: shot.offset });
+      if (shot) W._.visual3d.staging = scene => ({ ...staging(scene), inspectionOffset: shot.offset });
       try {
         await W.mount(document.getElementById('world'), {
           chapterId: chapter, sceneId: scene.sceneId, spawn, anchors: scene.anchors

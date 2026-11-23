@@ -48,7 +48,6 @@
     streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb', origin: [81, 30], actorRange: 13 },
     streetBlocked: walls,
     strictPlayable: true,
-    proceduralArt: true,
     cameraBlocked: [{ ...K.blockedRect(61.02, 41.485, 2.26, 3.03), cameraMinHeight: 3.62, cameraHeight: 5.46 }],
     spawn: { x: 57, y: 30, facing: 's' },
     palette: {

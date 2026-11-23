@@ -73,6 +73,7 @@
     const grid = M.path.buildGrid(view.streetActive && !scene.strictPlayable ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
     const player = M.player.create(scene, grid, opts.spawn,roleId);
     const pin=document.createElement('div');pin.className='czmw-player-pin86';pin.dataset.role=player.roleId;pin.setAttribute('role','img');pin.setAttribute('aria-label','你的位置 · '+player.roleName);const roleLabel=document.createElement('span');roleLabel.textContent='你 · '+player.roleShort;pin.append(roleLabel,document.createElement('i'));container.append(pin);
+    view.initializeCamera?.(player);
     scene.focusActor=player;const anchorsMod = M.anchors.create(scene, container);
     scene.anchorEntities=anchorsMod.anchors;
     const ambient = M.ambient.create(scene, view);
@@ -101,7 +102,8 @@
       },
       onDir() { player.stopPath(); },
       onJump() { if (!pauses.size) player.jump(); },
-      onLook(dx) { if (!pauses.size) view.adjustCamera?.(dx); }
+      lookCanvas: view.adjustCamera ? view.canvas : null,
+      onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;
 
@@ -116,9 +118,8 @@
       input.setEnabled(!paused);
       if (!paused) {
         const movement = input.vector();
-        const backward = input.wantsBack?.(movement);
         const direction = view.cameraRelativeMovement?.(movement) ?? movement;
-        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward);
+        player.advance(dt, direction, input.wantsRun?.(), input.wantsWalk?.());
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
       const near = anchorsMod.update(player.x, player.y, paused);
@@ -190,7 +191,7 @@
     const r = String(reason || 'default');
     if (!live || live.dead) return; /* 未挂载时暂停是安全空操作 */
     pauses.add(r);
-    live.input.setEnabled(false);live.player.stopPath();
+    live.input.setEnabled(false);live.player.stop();
   }
   function resume(reason) {
     pauses.delete(String(reason || 'default'));

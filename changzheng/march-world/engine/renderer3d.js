@@ -87,11 +87,13 @@
     let last = 0;
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
-    let focus = null;
-    let orbitYaw = 0, orbitTarget = 0, movementYaw = null;
+    const FOCUS_HEIGHT = 1.52, MIN_CAM_DIST = 1.1;
+    const BASE_DISTANCE = 4.2, SHOULDER = .35, SPRINT_OFFSET = .8;
+    let yaw = 0, pitch = .22, boom = BASE_DISTANCE;
+    let viewYaw = 0;
     let intro = null;
     let introOverlay = null;
-    let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, 1.05);
+    let followTarget = onSurface(logicalScene.spawn.x, logicalScene.spawn.y, FOCUS_HEIGHT);
     let graphicsLost = false;
 
     function material(color, roughness = 0.9, metalness = 0) {
@@ -1198,7 +1200,7 @@
     const cameraObstacles = worldRoot.children.filter(object => object === ground || /^(march-prop-|march-cliff-line-)/.test(object.name)).map(object => ({ object, bounds: new T.Box3().setFromObject(object) }));
     if (street) {
       for (const { rect, cameraHeight = 7.6, cameraMinHeight = 0 } of [...logicalScene.streetBlocked, ...(logicalScene.cameraBlocked || [])]) {
-        if (!rect) continue;
+        if (!rect || cameraHeight < 1.1) continue;
         const [x, y, w, h] = rect;
         const min = onSurface(x, y, cameraMinHeight);
         const max = new T.Vector3(min.x + w, min.y + cameraHeight - cameraMinHeight, min.z + h);
@@ -1336,10 +1338,14 @@
       guideLine.computeLineDistances();
     }
 
-    function cameraPosition(target, scale = 1) {
-      const offset = new T.Vector3(...staging.offset);
-      offset.applyAxisAngle(new T.Vector3(0, 1, 0), orbitYaw);
-      return target.clone().add(offset.multiplyScalar(scale));
+    function cameraPosition(target, distance = boom) {
+      if (staging.inspectionOffset) return target.clone().add(new T.Vector3(...staging.inspectionOffset));
+      const horizontal = Math.cos(pitch) * distance;
+      return target.clone().add(new T.Vector3(
+        -Math.cos(yaw) * horizontal - Math.sin(yaw) * SHOULDER,
+        Math.sin(pitch) * distance,
+        -Math.sin(yaw) * horizontal + Math.cos(yaw) * SHOULDER
+      ));
     }
 
     function unobstructedDistance(target, fullDistance) {
@@ -1354,33 +1360,34 @@
             const point = cameraRay.ray.intersectBox(bounds, new T.Vector3());
             if (point) {
               const hitDistance = point.distanceTo(rayOrigin);
-              if (hitDistance > .15) distance = Math.min(distance, Math.max(.35, hitDistance - .4));
+              if (hitDistance > .15) distance = Math.min(distance, Math.max(.1, hitDistance - .4));
             }
             continue;
           }
-          const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
-          if (hit) distance = Math.min(distance, Math.max(.35, hit.distance - .4));
+          const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || (hit.object.castShadow && bounds.max.y > target.y - .25)) && hit.distance > .15);
+          if (hit) distance = Math.min(distance, Math.max(.1, hit.distance - .4));
         }
       }
       return distance;
     }
 
     const cameraUp = new T.Vector3(0, 1, 0), alternateDirection = new T.Vector3(), bestDirection = new T.Vector3();
-    const alternateAngles = [Math.PI / 2, -Math.PI / 2, Math.PI, Math.PI / 4, -Math.PI / 4];
-    function placeCamera(target, scale, dt) {
-      const desired = cameraPosition(target, scale);
+    const alternateAngles = [Math.PI / 2, -Math.PI / 2, Math.PI, Math.PI / 4, -Math.PI / 4, 0];
+    function placeCamera(target, dt) {
+      const desired = cameraPosition(target);
       alternateDirection.copy(desired).sub(target);
       let fullDistance = alternateDirection.length();
       cameraDirection.copy(alternateDirection).normalize();
       let distance = unobstructedDistance(target, fullDistance);
       // The compound has a narrow roofed gate. If the normal orbit is blocked,
       // look along the passage before bringing the camera in toward the player.
-      if (street && logicalScene.strictPlayable && distance < 3.5) {
+      if (distance < MIN_CAM_DIST || (street && logicalScene.strictPlayable && distance < 2.4)) {
         bestDirection.copy(cameraDirection);
         const alternateDistance = Math.min(fullDistance, 6);
         for (const angle of alternateAngles) {
           cameraDirection.copy(alternateDirection);
-          cameraDirection.y = Math.min(cameraDirection.y, Math.hypot(cameraDirection.x, cameraDirection.z) * .3);
+          const horizontal = Math.hypot(cameraDirection.x, cameraDirection.z);
+          cameraDirection.y = angle ? Math.min(cameraDirection.y, horizontal * .3) : horizontal * 2;
           cameraDirection.applyAxisAngle(cameraUp, angle).normalize();
           const clear = unobstructedDistance(target, alternateDistance);
           if (clear <= distance + .12) continue;
@@ -1391,35 +1398,42 @@
         }
         cameraDirection.copy(bestDirection);
       }
-      cameraDistance = !cameraDistance || distance < cameraDistance ? distance : T.MathUtils.lerp(cameraDistance, distance, 1 - Math.exp(-dt * 6));
-      camera.position.copy(target).addScaledVector(cameraDirection, cameraDistance);
+      // Contract and recover with damping. The ray-tested distance remains a hard cap.
+      if (distance >= MIN_CAM_DIST && cameraDistance < MIN_CAM_DIST) cameraDistance = MIN_CAM_DIST;
+      cameraDistance = dt && cameraDistance ? T.MathUtils.lerp(cameraDistance, distance,
+        1 - Math.exp(-dt * (distance < cameraDistance ? 24 : 7))) : distance;
+      const safeDistance = Math.min(cameraDistance, distance);
+      camera.position.copy(target).addScaledVector(cameraDirection, safeDistance);
       camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + .4);
-      camera.lookAt(target);
+      const shoulder = !staging.inspectionOffset && cameraDirection.dot(alternateDirection.normalize()) > .999
+        ? SHOULDER * safeDistance / fullDistance : 0;
+      camera.lookAt(lookPoint.copy(target).addScaledVector(cameraSide.set(-Math.sin(yaw), 0, Math.cos(yaw)), shoulder));
       camera.updateMatrixWorld();
-      stats.cameraDistance = +cameraDistance.toFixed(3);
+      camera.getWorldDirection(viewDirection);
+      viewYaw = Math.atan2(viewDirection.z, viewDirection.x);
+      stats.orbitYaw = +viewYaw.toFixed(3);
+      stats.cameraPitch = +pitch.toFixed(3);
+      stats.cameraBoom = +boom.toFixed(3);
+      stats.cameraDistance = +safeDistance.toFixed(3);
       stats.cameraOccluded = distance < fullDistance - .01;
     }
 
+    const viewDirection = new T.Vector3(), lookPoint = new T.Vector3(), cameraSide = new T.Vector3();
+    const portraitScale = () => mobile && innerWidth < innerHeight ? 1.18 : 1;
     function follow(player, dt) {
       if (intro || graphicsLost) return;
-      if (player.moving) focus = null;
-      orbitYaw = T.MathUtils.lerp(orbitYaw, orbitTarget, 1 - Math.exp(-14 * dt));
-      stats.orbitYaw = +Math.atan2(Math.sin(orbitYaw), Math.cos(orbitYaw)).toFixed(3);
-      const target = focus ? onSurface(focus.px, focus.py, 1).lerp(onSurface(focus.x, focus.y, 1), .5) : onSurface(player.x, player.y, 1.05);
+      const distance = (BASE_DISTANCE + (player.running ? SPRINT_OFFSET : 0)) * portraitScale();
+      boom = T.MathUtils.lerp(boom, distance, 1 - Math.exp(-dt * 7));
+      const target = onSurface(player.x, player.y, FOCUS_HEIGHT + player.jumpHeight * .45);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.lerp(target, blend);
-      placeCamera(followTarget, focus ? 1.35 : 1, dt);
-    }
-
-    function frameTarget(player, target) {
-      if (assets && Math.hypot(player.x - target.x, player.y - target.y) > 8) return;
-      focus = { px: player.x, py: player.y, x: target.x, y: target.y };
+      placeCamera(followTarget, dt);
     }
 
     function finishIntro(result) {
       if (!intro) return;
       const resolve = intro.resolve;
-      followTarget.copy(onSurface(intro.player.x, intro.player.y, 1.05));
+      followTarget.copy(onSurface(intro.player.x, intro.player.y, FOCUS_HEIGHT));
       cameraDistance = 0;
       intro = null;
       introOverlay?.remove();
@@ -1431,7 +1445,7 @@
       if (!intro) return;
       intro.elapsed += dt;
       const progress = Math.min(1, intro.elapsed / intro.duration);
-      const playerPoint = onSurface(intro.player.x, intro.player.y, 1.05);
+      const playerPoint = onSurface(intro.player.x, intro.player.y, FOCUS_HEIGHT);
       const shot = data => ({ eye: onSurface(data[0], data[1], data[2]), look: onSurface(data[3], data[4], data[5]) });
       const first = shot(staging.shots[0]), second = shot(staging.shots[1]);
       const local = progress < .58 ? progress / .58 : (progress - .58) / .42, eased = local * local * (3 - 2 * local);
@@ -1439,6 +1453,14 @@
       camera.position.y = Math.max(camera.position.y, terrain.height(camera.position.x + world.w / 2, camera.position.z + world.h / 2) + 1.5);
       camera.lookAt(progress < .58 ? first.look.lerp(second.look, eased) : second.look.lerp(playerPoint, eased));
       if (progress >= 1) finishIntro('completed');
+    }
+
+    function initializeCamera(player) {
+      yaw = viewYaw = player.facing;
+      boom = BASE_DISTANCE * portraitScale();
+      cameraDistance = 0;
+      followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
+      placeCamera(followTarget, 0);
     }
 
     function playIntro(player) {
@@ -1476,23 +1498,19 @@
       project,
       unproject,
       follow,
-      frameTarget,
       drawGuide,
       playIntro,
-      adjustCamera(dx) {
-        if (!intro && Number.isFinite(dx)) {
-          orbitTarget -= dx * .006;
-          movementYaw = null;
-        }
+      initializeCamera,
+      adjustCamera(dx, dy = 0) {
+        if (intro || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
+        const nextYaw = yaw + dx * .004;
+        yaw = Math.atan2(Math.sin(nextYaw), Math.cos(nextYaw));
+        pitch = T.MathUtils.clamp(pitch + dy * .004, -.35, .75);
+        placeCamera(followTarget, 0);
       },
       cameraRelativeMovement({ x, y }) {
-        if (!x && !y) {
-          movementYaw = null;
-          return { x, y };
-        }
-        movementYaw ??= Math.atan2(staging.offset[0], staging.offset[2]) + orbitYaw;
-        const sin = Math.sin(movementYaw), cos = Math.cos(movementYaw);
-        return { x: x * cos + y * sin, y: y * cos - x * sin };
+        const sin = Math.sin(viewYaw), cos = Math.cos(viewYaw);
+        return { x: -x * sin - y * cos, y: x * cos - y * sin };
       },
       headPoint(player) { return project(player.x, player.y, 2.15 + player.jumpHeight); },
       surfaceHeight,

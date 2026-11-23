@@ -27,13 +27,14 @@
   on(hand,'click',()=>{handed=handed==='left'?'right':'left';layout();try{localStorage.setItem('cz_march_hand90',handed);}catch{}});
   on(size,'click',()=>{large=!large;layout();try{localStorage.setItem('cz_march_large90',large?'1':'0');}catch{}});
   on(toggle,'click',()=>{shown=!shown;layout();reset();});
-  const hint=document.createElement('small');hint.textContent='点地面寻路 · WASD / ↑↓←→';hint.className='czmw-control-hint86';settings.append(switcher,hand,size,toggle);panel.append(stick,pad,hint);container.append(settings);layout();hint.textContent=touch?'拖动摇杆或点地面前往':'点地面前往 · 方向键移动 · E 交谈';
+  const hint=document.createElement('small');hint.textContent='点地面寻路 · WASD / ↑↓←→';hint.className='czmw-control-hint86';settings.append(switcher,hand,size,toggle);panel.append(stick,pad,hint);container.append(settings);layout();hint.textContent=touch?'拖动摇杆或点地面前往':'方向键移动 · E 交谈';
   const action=document.createElement('button');action.type='button';action.className='czmw-act';action.dataset.czmwUi='true';action.hidden=true;action.textContent='交互';container.append(panel,action);
   on(action,'click',()=>{if(state.enabled)hooks.onInteract?.();});
-  let joyId=null,tap=null,shiftHeld=false,touchRun=false;
+  let joyId=null,tap=null,shiftHeld=false,altHeld=false,touchRun=false;
+  const lookCanvas = hooks.lookCanvas;
   const center=()=>{touchRun=false;state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
-  const reset=()=>{shiftHeld=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
-  function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往'):'点地面前往 · 方向键移动 · E 交谈';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
+  const reset=()=>{shiftHeld=altHeld=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
+  function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往'):'方向键移动 · E 交谈';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
   const updateJoy=e=>{const r=stick.getBoundingClientRect(),radius=Math.max(1,Math.min(r.width,r.height)*.34);let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);touchRun=e.pointerType==='touch'&&y<0&&l>=radius*1.25;if(l>radius){x*=radius/l;y*=radius/l;}if(l<radius*.13)x=y=0;state.joy={x:x/radius,y:y/radius};knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;if(x||y)hooks.onDir?.();};
   on(stick,'pointerdown',e=>{if(!state.enabled||e.button!==0||joyId!==null)return;e.preventDefault();e.stopPropagation();joyId=e.pointerId;stick.setPointerCapture?.(e.pointerId);captures.set(e.pointerId,stick);hooks.onDir?.();updateJoy(e);});
   on(stick,'pointermove',e=>{if(e.pointerId===joyId&&state.enabled){e.preventDefault();e.stopPropagation();updateJoy(e);}});
@@ -43,7 +44,7 @@
   on(window,'focusin',e=>{if(isEditing(e))reset();});
   on(window,'keydown',e=>{
     if(!state.enabled || isEditing(e) || e.ctrlKey || e.metaKey)return;
-    shiftHeld=e.shiftKey;
+    shiftHeld=e.shiftKey;altHeld=e.altKey;
     if(map[e.code]) {
       e.preventDefault();
       if(!e.repeat){keys.add(e.code);hooks.onDir?.();}
@@ -52,25 +53,61 @@
       if(e.code==='KeyE' || e.code==='Enter'){e.preventDefault();hooks.onInteract?.();}
     }
   });
-  on(window,'keyup',e=>{shiftHeld=e.shiftKey;keys.delete(e.code);});
+  on(window,'keyup',e=>{shiftHeld=e.shiftKey;altHeld=e.altKey;keys.delete(e.code);});
   on(window,'blur',reset);
   on(document,'visibilitychange',()=>{if(document.hidden)reset();});
-  on(container,'pointermove',e=>{
-    if(!state.enabled || ownUI(e))return;
-    if(e.pointerType==='mouse' && e.altKey) {
-      hooks.onLook?.(e.movementX);
-    } else if(e.pointerType==='touch' && tap?.id===e.pointerId) {
-      if(!tap.dragged && Math.hypot(e.clientX-tap.x,e.clientY-tap.y)<8)return;
-      const dx=e.clientX-(tap.lastX??tap.x);
-      tap.dragged=true;
-      tap.lastX=e.clientX;
-      hooks.onLook?.(dx);
-    }
+  const locked = () => Boolean(lookCanvas && document.pointerLockElement === lookCanvas);
+  const unlock = () => { if (locked()) document.exitPointerLock(); };
+  const clickGround = (x, y) => {
+    const rect = container.getBoundingClientRect();
+    hooks.onTap?.(x - rect.left, y - rect.top);
+  };
+  const cancelDrag = () => { tap = null; };
+  on(document, 'pointerlockchange', cancelDrag);
+  on(document, 'mousemove', e => {
+    if (state.enabled && locked()) hooks.onLook?.(e.movementX, e.movementY);
   });
-  on(container,'pointerdown',e=>{if(!state.enabled||e.button!==0||ownUI(e)||e.isPrimary===false)return;tap={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now()};});
-  on(container,'pointerup',e=>{const start=tap;tap=null;if(!start||start.dragged||start.id!==e.pointerId||!state.enabled||ownUI(e))return;if(Math.hypot(e.clientX-start.x,e.clientY-start.y)<8&&performance.now()-start.time<500){const r=container.getBoundingClientRect();hooks.onTap?.(e.clientX-r.left,e.clientY-r.top);}});on(container,'pointercancel',()=>tap=null);
+  on(container, 'contextmenu', e => {
+    if (lookCanvas && e.target === lookCanvas) e.preventDefault();
+  });
+  on(container, 'pointerdown', e => {
+    if (!state.enabled || ownUI(e) || tap || (e.button !== 0 && (e.button !== 2 || !lookCanvas))) return;
+    if (locked()) {
+      if (e.button === 0) {
+        const rect = lookCanvas.getBoundingClientRect();
+        clickGround(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      }
+      return;
+    }
+    const surface = lookCanvas && e.target === lookCanvas;
+    tap = { id: e.pointerId, x: e.clientX, y: e.clientY, surface, time: performance.now() };
+    if (surface) lookCanvas.setPointerCapture?.(e.pointerId);
+  });
+  on(container, 'pointermove', e => {
+    if (!state.enabled || locked() || !tap?.surface || tap.id !== e.pointerId) return;
+    if (!tap.dragged && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 5) return;
+    hooks.onLook?.(e.clientX - (tap.lastX ?? tap.x), e.clientY - (tap.lastY ?? tap.y));
+    tap.dragged = true;
+    tap.lastX = e.clientX;
+    tap.lastY = e.clientY;
+  });
+  on(container, 'pointerup', e => {
+    if (tap?.id !== e.pointerId) return;
+    const start = tap;
+    cancelDrag();
+    if (!state.enabled || ownUI(e) || start.dragged || e.button !== 0 ||
+        Math.hypot(e.clientX - start.x, e.clientY - start.y) >= 8 || performance.now() - start.time >= 500) return;
+    const navigate = () => {
+      if (state.enabled && lookCanvas?.isConnected) clickGround(e.clientX, e.clientY);
+    };
+    if (start.surface && e.pointerType === 'mouse' && !e.ctrlKey && lookCanvas.requestPointerLock) {
+      try { lookCanvas.requestPointerLock()?.catch(navigate); } catch { navigate(); }
+    } else clickGround(e.clientX, e.clientY);
+  });
+  on(container, 'pointercancel', e => { if (tap?.id === e.pointerId) cancelDrag(); });
+  on(container, 'lostpointercapture', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   setMode(mode);
-  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...held.values()]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+state.joy.x,y=Number(dirs.has('s'))-Number(dirs.has('n'))+state.joy.y;const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,wantsBack:movement=>movement.y>0,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v)reset();panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){reset();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();}};
+  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,wantsWalk:()=>altHeld,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();}};
  }
  M.controls86={create};
 })();

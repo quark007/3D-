@@ -15,7 +15,7 @@
       roam: { speed: 1.35, hurrySpeed: 2.5, pace: 2.4, paceAway: 9 } },
     chen_xiaoman: { height: 1.67, glbUrl: '/assets/characters/chen-xiaoman/chen-xiaoman-web.glb', grounded: true },
     medic_1: { height: 1.61, glbUrl: '/assets/characters/medic/medic-web.glb', grounded: true },
-    logistics_1: { glbUrl: '/assets/characters/logistics/logistics-web.glb', zunyiUrl: '/assets/characters/logistics/logistics-zunyi.glb', height: 1.73, scaleBias: 1, idle: 'Idle' },
+    logistics_1: { glbUrl: '/assets/characters/logistics/logistics-field-web.glb', height: 1.73, grounded: true },
     liaison_1: { height: 1.65 },
     boatman_1: { height: 1.74, glbUrl: '/assets/characters/boatman/boatman-web.glb', grounded: true },
     guide_1: { height: 1.68, glbUrl: '/assets/characters/guide/guide-web.glb', grounded: true },

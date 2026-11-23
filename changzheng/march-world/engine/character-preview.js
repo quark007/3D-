@@ -12,7 +12,7 @@ let canvas = document.getElementById('portrait');
 const characters = new Map([
   ['he-wen', { name: '何文', detail: '指导员 · 1.78 m', path: '/assets/characters/he-wen/he-wen-web.glb' }],
   ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }],
-  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', path: '/assets/characters/logistics/logistics-web.glb' }],
+  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', height: 1.73, path: '/assets/characters/logistics/logistics-field-web.glb' }],
   ['chen-xiaoman', { name: '陈小满', detail: '青年战士 · 1.67 m', height: 1.67, path: '/assets/characters/chen-xiaoman/chen-xiaoman-web.glb' }],
   ['medic', { name: '卫生员', detail: '随队救护 · 1.61 m', height: 1.61, path: '/assets/characters/medic/medic-web.glb' }],
   ['boatman', { name: '船工', detail: '渡口船工 · 1.74 m', height: 1.74, path: '/assets/characters/boatman/boatman-web.glb' }],

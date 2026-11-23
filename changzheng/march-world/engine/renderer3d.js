@@ -181,7 +181,7 @@
     let last = 0;
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
-    const FOCUS_HEIGHT = 1.52, MIN_TPS_DIST = .5, WALL_MARGIN = .27;
+    const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_TPS_DIST = .5, WALL_MARGIN = .27;
     const BASE_DISTANCE = 4.2, SHOULDER = .35, SPRINT_OFFSET = .8;
     let yaw = 0, pitch = .22, boom = BASE_DISTANCE;
     let viewYaw = 0, followingRoute = false;
@@ -1655,7 +1655,7 @@
         const sin = Math.sin(heading), cos = Math.cos(heading);
         return { x: -x * sin - y * cos, y: x * cos - y * sin };
       },
-      headPoint(player) { return project(player.x, player.y, 2.15 + player.jumpHeight); },
+      headPoint(player) { return project(player.x, player.y, HEAD_POINT_HEIGHT + player.jumpHeight); },
       surfaceHeight,
       groundHeight: terrain.height,
       resize,

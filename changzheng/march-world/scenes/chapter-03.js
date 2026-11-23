@@ -100,13 +100,13 @@
       a('dialogue-03-01-narrator', 'npc', '到达遵义、说明身份 · 解说旁白', 57, 33),
       a('dialogue-03-01-he_wen', 'npc', '到达遵义、说明身份 · 指导员何文', 57, 37),
 
-      a('dialogue-03-05-wang_gui', 'npc', '等候与战友交谈 · 老班长王贵', 57, 47),
+      a('dialogue-03-05-wang_gui', 'npc', '等候与战友交谈 · 老班长王贵', 82, 43),
       a('dialogue-03-05-chen_xiaoman', 'npc', '等候与战友交谈 · 青年战士陈小满', 57, 52),
       a('legacy-drag-1', 'task', '情报梳理', 57, 56),
 
       a('dialogue-03-02-liaison_1', 'npc', '接收、分类、核对资料 · 交通联络员', 80, 44),
       a('dialogue-03-03-he_wen', 'npc', '情报互相矛盾 · 指导员何文', 85, 44),
-      a('dialogue-03-03-liaison_1', 'npc', '情报互相矛盾 · 交通联络员', 88, 42),
+      a('dialogue-03-03-liaison_1', 'npc', '情报互相矛盾 · 交通联络员', 89, 40),
       a('main-task', 'task', '核对资料 · 保障传递', 83, 47),
       a('legacy-choice-1', 'task', '资料核对', 78, 47),
       a('game-zunyi', 'task', '遵义会议 · 抉择二十分钟', 90, 40),
@@ -117,7 +117,7 @@
       a('game-poem', 'task', '娄山关诗卷', 97, 42),
       a('hero-meihu64', 'task', '半条被子 · 红军坟', 72, 46),
 
-      a('dialogue-03-04-logistics_1', 'npc', '自定义基层保障方案 · 后勤协作员', 88, 54),
+      a('dialogue-03-04-logistics_1', 'npc', '自定义基层保障方案 · 后勤协作员', 87.5, 43),
       a('dialogue-03-04-he_wen', 'npc', '自定义基层保障方案 · 指导员何文', 90, 56),
       a('workshop-circuit', 'task', '战地电台 · 断线重连', 85, 56),
 

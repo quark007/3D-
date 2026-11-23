@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>何文 · 独立人物制作样板</title>
+<title>独立人物预览</title>
 <link rel="icon" href="data:,">
 <script type="importmap">{"imports":{"three":"../assets/webgpu40/vendor/three/build/three.module.js","three/webgpu":"../assets/webgpu40/vendor/three/build/three.webgpu.js","three/tsl":"../assets/webgpu40/vendor/three/build/three.tsl.js","three/addons/":"../assets/webgpu40/vendor/three/jsm/"}}</script>
 <style>
@@ -11,8 +11,8 @@
 </style>
 </head>
 <body>
-<header><h1>何文 · 独立人物制作样板</h1><span>约27岁 / 虚构指导员 / 尚未视觉验收</span><a href="preview.html?3d=1&amp;chapter=chapter-1%2Fscene-ruijin">返回第一章场景</a></header>
-<main><canvas id="portrait" aria-label="可拖动旋转的何文三维模型"></canvas><div id="status" role="status">正在加载真实三维模型与贴图……</div></main>
+<header><h1 id="character-title">独立人物预览</h1><span id="character-detail"></span><label>角色<select id="character"><option value="he-wen">何文</option><option value="wang-gui">王贵</option><option value="logistics">后勤</option></select></label><a href="preview.html?3d=1&amp;chapter=chapter-1%2Fscene-ruijin">返回第一章场景</a></header>
+<main><canvas id="portrait" aria-label="可拖动旋转的三维人物模型"></canvas><div id="status" role="status">正在加载真实三维模型与贴图……</div></main>
 <footer>
 <div class="controls">
 <button data-view="front" disabled>正面</button><button data-view="quarter" disabled>四分之三</button><button data-view="profile" disabled>侧面</button><button data-view="body" disabled>全身</button>
@@ -23,7 +23,7 @@
 <label>皱眉<input id="brow" type="range" min="0" max="1" step="0.01" value="0" disabled></label>
 <label>微笑<input id="smile" type="range" min="0" max="1" step="0.01" value="0" disabled></label>
 </div>
-<p>拖动旋转，滚轮或双指缩放。此页不写游戏存档，不代表最终写实质量；皮肤微法线与透光为程序近似，非真人扫描。已加入立领、肩袢、贴合帽徽、自动眨眼、眉毛发丝与睫毛、缝线门襟、呼吸与注视微动，服装历史版型仍需完善。渲染为 WebGPU / WebGL2 双后端自适应（可用 ?renderer=webgpu 或 ?renderer=webgl 强制）。</p>
+<p>拖动旋转，滚轮或双指缩放。可用 ?renderer=webgpu 或 ?renderer=webgl 指定渲染后端。</p>
 </footer>
 <script type="module" src="engine/character-preview.js"></script>
 </body>

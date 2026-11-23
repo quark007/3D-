@@ -473,8 +473,8 @@
           "anchorId": "chapter-3/anchor-dialogue-03-05-wang_gui",
           "kind": "npc",
           "label": "等候与战友交谈 · 老班长王贵",
-          "x": 57,
-          "y": 47
+          "x": 82,
+          "y": 43
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-05-chen_xiaoman",
@@ -508,8 +508,8 @@
           "anchorId": "chapter-3/anchor-dialogue-03-03-liaison_1",
           "kind": "npc",
           "label": "情报互相矛盾 · 交通联络员",
-          "x": 88,
-          "y": 42
+          "x": 89,
+          "y": 40
         },
         {
           "anchorId": "chapter-3/anchor-main-task",
@@ -571,8 +571,8 @@
           "anchorId": "chapter-3/anchor-dialogue-03-04-logistics_1",
           "kind": "npc",
           "label": "自定义基层保障方案 · 后勤协作员",
-          "x": 88,
-          "y": 54
+          "x": 87.5,
+          "y": 43
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-04-he_wen",

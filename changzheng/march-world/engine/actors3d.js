@@ -10,10 +10,10 @@
   const DEFAULT_HEIGHT = 1.76;
   const CHARACTER_PROFILES = {
     he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-web.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
-    wang_gui: { height: 1.70 },
+    wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', height: 1.70, scaleBias: 1, idle: 'Idle' },
     chen_xiaoman: { height: 1.67 },
     medic_1: { height: 1.61 },
-    logistics_1: { height: 1.73 },
+    logistics_1: { glbUrl: '/assets/characters/logistics/logistics-web.glb', height: 1.73, scaleBias: 1, idle: 'Idle' },
     liaison_1: { height: 1.65 },
     boatman_1: { height: 1.74 },
     guide_1: { height: 1.68 },
@@ -60,8 +60,10 @@
       import('three/addons/utils/SkeletonUtils.js')
     ]);
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const npcUrl = profile => logicalScene.streetLife && profile?.glbUrl
+      ? profile.glbUrl.replace('-web.glb', '-zunyi.glb') : profile?.glbUrl;
     const independentUrls = new Set(logicalScene.anchors.filter(hasModel)
-      .map(anchor => CHARACTER_PROFILES[npcKey(anchor)]?.glbUrl).filter(Boolean));
+      .map(anchor => npcUrl(CHARACTER_PROFILES[npcKey(anchor)])).filter(Boolean));
     const loaded = new Map();
     const urls = new Set([...Object.values(paths), ...independentUrls]);
     const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
@@ -93,7 +95,8 @@
     window.addEventListener('czmarch:interact', focusDialogue);
 
     function makeActor(role, height, profile = {}, style = {}, anchor) {
-      const independent = loaded.get(profile.glbUrl);
+      const url = npcUrl(profile);
+      const independent = loaded.get(url);
       const source = independent || loaded.get(paths[role]);
       const materials = new Map();
       function tint(material) {
@@ -107,7 +110,9 @@
         return materials.get(material);
       }
       const model = skeleton.clone(source.scene);
-      const bounds = new T.Box3().setFromObject(model);
+      // Use posed vertices for independent rigs whose armature bounds include their bind pose.
+      if (independent) model.updateMatrixWorld(true);
+      const bounds = new T.Box3().setFromObject(model, Boolean(independent));
       const size = bounds.getSize(new T.Vector3());
       const center = bounds.getCenter(new T.Vector3());
       const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);
@@ -124,7 +129,7 @@
       root.name = 'march-actor-' + role;
       if (anchor) {
         root.userData.anchorId = anchor.anchorId;
-        root.userData.modelUrl = independent ? profile.glbUrl : paths[role];
+        root.userData.modelUrl = independent ? url : paths[role];
       }
       root.add(model);
       parent.add(root);
@@ -241,7 +246,9 @@
           for (const anchor of anchors) {
             if (!hasModel(anchor) || !visibleAnchor(anchor, anchors)) continue;
             const distance = Math.hypot(anchor.x - player.x, anchor.y - player.y);
-            const score = distance - (anchor.anchorId === dialogueAnchorId ? 100 : 0);
+            bounds.center.set(anchor.x - logicalScene.world.w / 2, surfaceHeight(anchor.x, anchor.y) + 1, anchor.y - logicalScene.world.h / 2);
+            const score = distance + (frustum.intersectsSphere(bounds) ? 0 : 30) -
+              (anchor.anchorId === dialogueAnchorId ? 100 : 0);
             const key = npcKey(anchor);
             if (distance < (logicalScene.streetModel.actorRange ?? 18) && score < (localActors.get(key)?.score ?? Infinity)) localActors.set(key, { anchor, score });
           }

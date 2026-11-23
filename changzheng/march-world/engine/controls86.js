@@ -3,7 +3,7 @@
  'use strict';const M=window.CZMarchWorld._;
  function create(container,hooks){
   let mode='joystick';try{if(localStorage.getItem('cz_march_control86')==='directions')mode='directions';}catch{}
-  const keys=new Set(),held=new Map(),captures=new Map(),listeners=[],state={enabled:true,joy:{x:0,y:0}},map={KeyW:'n',ArrowUp:'n',KeyS:'s',ArrowDown:'s',KeyA:'w',ArrowLeft:'w',KeyD:'e',ArrowRight:'e'};
+  const keys=new Set(),polledKeys=new Set(),pendingTaps=new Set(),tapTokens=new Map(),held=new Map(),captures=new Map(),listeners=[],state={enabled:true,joy:{x:0,y:0}},map={KeyW:'n',ArrowUp:'n',KeyS:'s',ArrowDown:'s',KeyA:'w',ArrowLeft:'w',KeyD:'e',ArrowRight:'e'};
   const on=(node,type,fn,opts)=>{node.addEventListener(type,fn,opts);listeners.push(()=>node.removeEventListener(type,fn,opts));};
   const panel=document.createElement('section');panel.className='czmw-controls86';panel.dataset.czmwUi='true';panel.setAttribute('aria-label','角色移动控制');
   const switcher=document.createElement('div');switcher.className='czmw-switch86';switcher.setAttribute('role','group');switcher.setAttribute('aria-label','选择移动方式');
@@ -52,7 +52,7 @@
   const unlock=()=>{if(locked())document.exitPointerLock?.();};
   const lock=()=>{if(!finePointer||locked())return;try{const request=container.requestPointerLock();request?.catch?.(()=>{});}catch{}};
   const center=()=>{touchRun=false;state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
-  const reset=()=>{shiftHeld=false;walkToggle=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
+  const reset=()=>{shiftHeld=false;walkToggle=false;keys.clear();polledKeys.clear();pendingTaps.clear();tapTokens.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
   function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往 · 左上角切换人称'):'右键锁定视角 · 单击寻路 · WASD 移动 · C 步行 · Shift 冲刺 · V 切换人称';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
   const updateJoy=e=>{const r=stick.getBoundingClientRect(),radius=Math.max(1,Math.min(r.width,r.height)*.34);let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y);touchRun=e.pointerType==='touch'&&y<0&&l>=radius*1.25;if(l>radius){x*=radius/l;y*=radius/l;}if(l<radius*.13)x=y=0;state.joy={x:x/radius,y:y/radius};knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;if(x||y)hooks.onDir?.();};
   on(stick,'pointerdown',e=>{if(!state.enabled||e.button!==0||joyId!==null)return;e.preventDefault();e.stopPropagation();joyId=e.pointerId;stick.setPointerCapture?.(e.pointerId);captures.set(e.pointerId,stick);hooks.onDir?.();updateJoy(e);});
@@ -69,13 +69,21 @@
     if(e.code==='KeyC'&&!e.repeat&&!ownUI(e)){walkToggle=!walkToggle;e.preventDefault();return;}
     if(map[e.code]) {
       e.preventDefault();
-      if(!e.repeat){keys.add(e.code);hooks.onDir?.();}
+      if(!e.repeat){pendingTaps.delete(e.code);tapTokens.delete(e.code);polledKeys.delete(e.code);keys.add(e.code);hooks.onDir?.();}
     } else if(!ownUI(e) && !e.altKey && !e.repeat) {
       if(e.code==='Space' && hooks.onJump){e.preventDefault();hooks.onJump();}
       if(e.code==='KeyE' || e.code==='Enter'){e.preventDefault();hooks.onInteract?.();}
     }
   });
-  on(window,'keyup',e=>{shiftHeld=e.shiftKey;keys.delete(e.code);});
+  on(window,'keyup',e=>{
+    shiftHeld=e.shiftKey;
+    const sampled=polledKeys.has(e.code);keys.delete(e.code);polledKeys.delete(e.code);
+    /* 长任务会把 keydown/keyup 压到两个渲染帧之间：未采样过的方向保留一帧，避免整次输入被吞。 */
+    if(map[e.code]&&!sampled){
+      const token=(tapTokens.get(e.code)||0)+1;tapTokens.set(e.code,token);pendingTaps.add(e.code);
+      requestAnimationFrame(()=>{if(tapTokens.get(e.code)===token){pendingTaps.delete(e.code);tapTokens.delete(e.code);}});
+    }
+  });
   on(window,'blur',reset);
   on(document,'visibilitychange',()=>{if(document.hidden)reset();});
   on(document,'pointerlockchange',()=>{tap=null;});
@@ -101,8 +109,8 @@
   on(container,'pointerup',e=>{if(locked()){tap=null;return;}const start=tap;tap=null;if(!start||start.dragged||start.id!==e.pointerId||!state.enabled||ownUI(e))return;if(Math.hypot(e.clientX-start.x,e.clientY-start.y)<8&&performance.now()-start.time<500){const r=container.getBoundingClientRect();hooks.onTap?.(e.clientX-r.left,e.clientY-r.top);}});on(container,'pointercancel',()=>tap=null);
   setMode(mode);
   return {
-   vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...held.values()]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+state.joy.x,y=Number(dirs.has('s'))-Number(dirs.has('n'))+state.joy.y;const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},
-   hasKeyboard:()=>keys.size>0,wantsBack:movement=>movement.y>0,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),wantsWalk:()=>walkToggle,pointerLocked:locked,
+   vector(){if(!state.enabled)return {x:0,y:0};const codes=new Set([...keys,...pendingTaps]),dirs=new Set([...Array.from(codes,k=>map[k]),...held.values()]);for(const code of keys)polledKeys.add(code);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+state.joy.x,y=Number(dirs.has('s'))-Number(dirs.has('n'))+state.joy.y;const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},
+   hasKeyboard:()=>keys.size+pendingTaps.size>0,wantsBack:movement=>movement.y>0,wantsRun:()=>shiftHeld||(!keys.size&&!pendingTaps.size&&touchRun),wantsWalk:()=>walkToggle,pointerLocked:locked,
    showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},
    setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},
    isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,syncViewMode:syncView,

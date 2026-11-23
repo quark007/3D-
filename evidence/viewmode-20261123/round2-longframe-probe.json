@@ -1,0 +1,76 @@
+{
+  "samples": [],
+  "errors": [],
+  "longFrameProbe": {
+    "before": {
+      "x": 16,
+      "y": 58,
+      "facing": -2.29,
+      "moving": false,
+      "running": false,
+      "walking": false,
+      "speed": 0,
+      "vector": {
+        "x": 0,
+        "y": 0
+      },
+      "hasKeyboard": false,
+      "viewMode": "first",
+      "cameraMode": "first",
+      "cameraDistance": 0,
+      "orbitYaw": 0,
+      "frames": 42,
+      "activeElement": "world",
+      "worldFocused": true
+    },
+    "after": {
+      "x": 15.99,
+      "y": 57.98,
+      "facing": -2.29,
+      "moving": false,
+      "running": false,
+      "walking": false,
+      "speed": 0,
+      "vector": {
+        "x": 0,
+        "y": 0
+      },
+      "hasKeyboard": false,
+      "viewMode": "first",
+      "cameraMode": "first",
+      "cameraDistance": 0,
+      "orbitYaw": 0,
+      "frames": 57,
+      "activeElement": "world",
+      "worldFocused": true
+    },
+    "distance": 0.022,
+    "frameDelta": 15,
+    "keys": [
+      {
+        "type": "keydown",
+        "code": "KeyW",
+        "at": 36535.3,
+        "target": "world",
+        "defaultPrevented": false
+      },
+      {
+        "type": "keyup",
+        "code": "KeyW",
+        "at": 40070.6,
+        "target": "world",
+        "defaultPrevented": false
+      }
+    ],
+    "block": {
+      "start": 36568,
+      "end": 40068.4
+    }
+  },
+  "summary": {
+    "firstPerson": [],
+    "allKeyboardEventsArrived": true,
+    "allWorldFocused": true,
+    "modesMatched": true
+  }
+}

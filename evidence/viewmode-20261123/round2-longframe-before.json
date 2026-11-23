@@ -1,0 +1,15 @@
+{
+  "phase": "before-fix",
+  "source": "CZ_STRESS_ONLY=1 node tools/viewmode_round2_diag.cjs 8082",
+  "longFrameProbe": {
+    "before": { "x": 16, "y": 58, "speed": 0, "frames": 8, "activeElement": "world", "worldFocused": true, "viewMode": "first", "cameraMode": "first", "cameraDistance": 0 },
+    "after": { "x": 16, "y": 58, "speed": 0, "frames": 14, "activeElement": "world", "worldFocused": true, "viewMode": "first", "cameraMode": "first", "cameraDistance": 0 },
+    "distance": 0,
+    "frameDelta": 6,
+    "keys": [
+      { "type": "keydown", "code": "KeyW", "at": 70615.3, "target": "world" },
+      { "type": "keyup", "code": "KeyW", "at": 74153.7, "target": "world" }
+    ],
+    "block": { "start": 70652.9, "end": 74153.1, "requestedMs": 3500, "keyHeldMs": 2600 }
+  }
+}

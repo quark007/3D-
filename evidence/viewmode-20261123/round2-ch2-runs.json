@@ -1,0 +1,9 @@
+{
+  "historical": { "distance": 9.57, "yawDelta": -0.198, "after": { "x": 33.57, "y": 15.89 }, "backFrames": 292, "walkedFrames": 357 },
+  "postFixRuns": [
+    { "run": 1, "distance": 9.21, "yawDelta": -0.473, "after": { "x": 33.21, "y": 15.88 }, "backFrames": 364, "walkedFrames": 413, "errors": [] },
+    { "run": 2, "distance": 9.27, "yawDelta": -0.345, "after": { "x": 33.27, "y": 15.88 }, "backFrames": 276, "walkedFrames": 328, "errors": [] },
+    { "run": 3, "distance": 9.11, "yawDelta": -0.345, "after": { "x": 33.11, "y": 15.9 }, "backFrames": 356, "walkedFrames": 411, "errors": [] }
+  ],
+  "note": "同一 yaw=-0.345 的两次结果仍相差 0.16m；历史与本轮 yaw 和帧数不同，绝对距离不可直接视为同一运动路径。最终 round2/ch2/chapter-2-verify.json 保留第 3 次原样结果。"
+}

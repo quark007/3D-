@@ -1,0 +1,85 @@
+{
+  "first": {
+    "button": {
+      "text": "第一人称",
+      "mode": "first",
+      "hidden": false,
+      "checked": "true"
+    },
+    "viewMode": "first",
+    "cameraMode": "first",
+    "cameraDistance": 0,
+    "frames": 1,
+    "triangles": 129668,
+    "renderMs": 15439.9,
+    "pinHidden": true
+  },
+  "third": {
+    "button": {
+      "text": "第三人称",
+      "mode": "third",
+      "hidden": false,
+      "checked": "false"
+    },
+    "viewMode": "third",
+    "cameraMode": "shoulder",
+    "cameraDistance": 6.2,
+    "frames": 109,
+    "triangles": 180881,
+    "renderMs": 1127.8,
+    "pinHidden": false
+  },
+  "back": {
+    "button": {
+      "text": "第一人称",
+      "mode": "first",
+      "hidden": false,
+      "checked": "true"
+    },
+    "viewMode": "first",
+    "cameraMode": "first",
+    "cameraDistance": 0,
+    "frames": 236,
+    "triangles": 130134,
+    "renderMs": 29.5,
+    "pinHidden": true
+  },
+  "look": {
+    "yawBefore": 0,
+    "yawAfter": -0.776,
+    "delta": -0.776
+  },
+  "moved": {
+    "before": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 16,
+      "y": 58,
+      "facing": -1.514
+    },
+    "after": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 18.46,
+      "y": 48.48,
+      "facing": -1.318
+    },
+    "distance": 9.83
+  },
+  "walked": {
+    "button": {
+      "text": "第一人称",
+      "mode": "first",
+      "hidden": false,
+      "checked": "true"
+    },
+    "viewMode": "first",
+    "cameraMode": "first",
+    "cameraDistance": 0,
+    "frames": 392,
+    "triangles": 233675,
+    "renderMs": 15.5,
+    "pinHidden": true
+  },
+  "errors": []
+}

@@ -1,0 +1,1310 @@
+{
+  "samples": [
+    {
+      "label": "(16,58)-n",
+      "spawn": {
+        "x": 16,
+        "y": 58
+      },
+      "requestedFacing": "n",
+      "mode": "first",
+      "before": {
+        "x": 16,
+        "y": 58,
+        "facing": -1.589,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.715,
+        "frames": 110,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 16,
+        "y": 47.9,
+        "facing": -1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 267,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 16,
+        "y": 47.46,
+        "facing": -1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.3,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 274,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 16,
+        "y": 47.1,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 294,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 39873.6,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 42605.1,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 10.54,
+      "frameDelta": 164
+    },
+    {
+      "label": "(16,58)-e",
+      "spawn": {
+        "x": 16,
+        "y": 58
+      },
+      "requestedFacing": "e",
+      "mode": "first",
+      "before": {
+        "x": 16,
+        "y": 58,
+        "facing": -0.051,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.263,
+        "frames": 314,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 17.57,
+        "y": 58,
+        "facing": 0,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 327,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 17.96,
+        "y": 58,
+        "facing": 0,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.767,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 329,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 18.44,
+        "y": 58,
+        "facing": 0,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 335,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 57092.6,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 72499.6,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 1.96,
+      "frameDelta": 15
+    },
+    {
+      "label": "(16,58)-s",
+      "spawn": {
+        "x": 16,
+        "y": 58
+      },
+      "requestedFacing": "s",
+      "mode": "first",
+      "before": {
+        "x": 16,
+        "y": 58,
+        "facing": 1.556,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.435,
+        "frames": 371,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 16,
+        "y": 66.57,
+        "facing": 1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 518,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 16,
+        "y": 66.9,
+        "facing": 1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.767,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 521,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 16,
+        "y": 67.37,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 530,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 74502.9,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 77170.6,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 8.9,
+      "frameDelta": 150
+    },
+    {
+      "label": "(32,58)-n",
+      "spawn": {
+        "x": 32,
+        "y": 58
+      },
+      "requestedFacing": "n",
+      "mode": "first",
+      "before": {
+        "x": 32,
+        "y": 58,
+        "facing": -1.6,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.695,
+        "frames": 582,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 32,
+        "y": 52.62,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 691,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 32,
+        "y": 52.62,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 694,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 32,
+        "y": 52.62,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 727,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 78540.3,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 81193.1,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 5.38,
+      "frameDelta": 112
+    },
+    {
+      "label": "(32,58)-e",
+      "spawn": {
+        "x": 32,
+        "y": 58
+      },
+      "requestedFacing": "e",
+      "mode": "first",
+      "before": {
+        "x": 32,
+        "y": 58,
+        "facing": 0,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 760,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 40.83,
+        "y": 58,
+        "facing": 0,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 821,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 40.96,
+        "y": 58,
+        "facing": 0,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.533,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 822,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 41.37,
+        "y": 58,
+        "facing": 0,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 829,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 83063.1,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 85810.7,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 8.96,
+      "frameDelta": 62
+    },
+    {
+      "label": "(32,58)-s",
+      "spawn": {
+        "x": 32,
+        "y": 58
+      },
+      "requestedFacing": "s",
+      "mode": "first",
+      "before": {
+        "x": 32,
+        "y": 58,
+        "facing": 1.538,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.443,
+        "frames": 846,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 32,
+        "y": 67.43,
+        "facing": 1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 975,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 32,
+        "y": 68.62,
+        "facing": 1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.533,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 988,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 32,
+        "y": 69.04,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 1005,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 86760.8,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 89743.7,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 10.62,
+      "frameDelta": 142
+    },
+    {
+      "label": "(50,58)-n",
+      "spawn": {
+        "x": 50,
+        "y": 58
+      },
+      "requestedFacing": "n",
+      "mode": "first",
+      "before": {
+        "x": 50,
+        "y": 58,
+        "facing": -1.57,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 1028,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 50,
+        "y": 52.62,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 1160,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 50,
+        "y": 52.62,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 1165,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 50,
+        "y": 52.62,
+        "facing": -1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -0.719,
+        "frames": 1175,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 90816.8,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 93570.4,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 5.38,
+      "frameDelta": 137
+    },
+    {
+      "label": "(50,58)-e",
+      "spawn": {
+        "x": 50,
+        "y": 58
+      },
+      "requestedFacing": "e",
+      "mode": "first",
+      "before": {
+        "x": 50,
+        "y": 58,
+        "facing": -0.015,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.28,
+        "frames": 1200,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 58.23,
+        "y": 58,
+        "facing": 0,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 1267,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 58.49,
+        "y": 58,
+        "facing": 0,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.533,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 1269,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 58.9,
+        "y": 58,
+        "facing": 0,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": -2.29,
+        "frames": 1282,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 94421.6,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 97070.2,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 8.49,
+      "frameDelta": 69
+    },
+    {
+      "label": "(50,58)-s",
+      "spawn": {
+        "x": 50,
+        "y": 58
+      },
+      "requestedFacing": "s",
+      "mode": "first",
+      "before": {
+        "x": 50,
+        "y": 58,
+        "facing": 1.543,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.445,
+        "frames": 1298,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 50,
+        "y": 62.56,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 1453,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 50,
+        "y": 62.56,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 1456,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 50,
+        "y": 62.56,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "first",
+        "cameraMode": "first",
+        "cameraDistance": 0,
+        "orbitYaw": 2.423,
+        "frames": 1464,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 98007.4,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 100936.3,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 4.56,
+      "frameDelta": 158
+    },
+    {
+      "label": "third-person-control",
+      "spawn": {
+        "x": 16,
+        "y": 58
+      },
+      "requestedFacing": "n",
+      "mode": "third",
+      "before": {
+        "x": 16,
+        "y": 58,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "third",
+        "cameraMode": "shoulder",
+        "cameraDistance": 6.2,
+        "orbitYaw": 2.423,
+        "frames": 1502,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "during": {
+        "x": 16,
+        "y": 65.1,
+        "facing": 1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 4,
+        "vector": {
+          "x": 0,
+          "y": -1
+        },
+        "hasKeyboard": true,
+        "viewMode": "third",
+        "cameraMode": "shoulder",
+        "cameraDistance": 6.188,
+        "orbitYaw": 2.423,
+        "frames": 1590,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "after": {
+        "x": 16,
+        "y": 65.22,
+        "facing": 1.571,
+        "moving": true,
+        "running": false,
+        "walking": false,
+        "speed": 3.533,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "third",
+        "cameraMode": "shoulder",
+        "cameraDistance": 6.191,
+        "orbitYaw": 2.423,
+        "frames": 1592,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "stopped": {
+        "x": 16,
+        "y": 65.64,
+        "facing": 1.571,
+        "moving": false,
+        "running": false,
+        "walking": false,
+        "speed": 0,
+        "vector": {
+          "x": 0,
+          "y": 0
+        },
+        "hasKeyboard": false,
+        "viewMode": "third",
+        "cameraMode": "shoulder",
+        "cameraDistance": 6.199,
+        "orbitYaw": 2.423,
+        "frames": 1606,
+        "activeElement": "world",
+        "worldFocused": true
+      },
+      "keys": [
+        {
+          "type": "keydown",
+          "code": "KeyV",
+          "at": 101437.7,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyV",
+          "at": 101500.2,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keydown",
+          "code": "KeyW",
+          "at": 101950.8,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": 0
+          },
+          "hasKeyboard": false
+        },
+        {
+          "type": "keyup",
+          "code": "KeyW",
+          "at": 104642.2,
+          "target": "world",
+          "defaultPrevented": false,
+          "vector": {
+            "x": 0,
+            "y": -1
+          },
+          "hasKeyboard": true
+        }
+      ],
+      "distance": 7.22,
+      "frameDelta": 90
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "firstPerson": [
+      {
+        "label": "(16,58)-n",
+        "distance": 10.54,
+        "speed": 4,
+        "frames": 164,
+        "worldFocused": true
+      },
+      {
+        "label": "(16,58)-e",
+        "distance": 1.96,
+        "speed": 4,
+        "frames": 15,
+        "worldFocused": true
+      },
+      {
+        "label": "(16,58)-s",
+        "distance": 8.9,
+        "speed": 4,
+        "frames": 150,
+        "worldFocused": true
+      },
+      {
+        "label": "(32,58)-n",
+        "distance": 5.38,
+        "speed": 0,
+        "frames": 112,
+        "worldFocused": true
+      },
+      {
+        "label": "(32,58)-e",
+        "distance": 8.96,
+        "speed": 4,
+        "frames": 62,
+        "worldFocused": true
+      },
+      {
+        "label": "(32,58)-s",
+        "distance": 10.62,
+        "speed": 4,
+        "frames": 142,
+        "worldFocused": true
+      },
+      {
+        "label": "(50,58)-n",
+        "distance": 5.38,
+        "speed": 0,
+        "frames": 137,
+        "worldFocused": true
+      },
+      {
+        "label": "(50,58)-e",
+        "distance": 8.49,
+        "speed": 4,
+        "frames": 69,
+        "worldFocused": true
+      },
+      {
+        "label": "(50,58)-s",
+        "distance": 4.56,
+        "speed": 0,
+        "frames": 158,
+        "worldFocused": true
+      }
+    ],
+    "thirdPersonDistance": 7.22,
+    "allKeyboardEventsArrived": true,
+    "allWorldFocused": true,
+    "modesMatched": true
+  }
+}

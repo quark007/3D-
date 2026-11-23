@@ -82,6 +82,7 @@
     const session = { container, scene, grid, view, player,pin,guidePin, guide:null, route:[],routeAt:0, routeCell:'', anchorsMod, ambient, chapterId, sceneId, dead: false, lastNear: null };
 
     /* 输入 */
+    const settingsPause = Symbol('movement settings');
     const input = M.input.create(container, {
       onInteract() {
         if (pauses.size || session.dead) return;
@@ -103,6 +104,7 @@
       onDir() { player.stopPath(); },
       onJump() { if (!pauses.size) player.jump(); },
       lookCanvas: view.adjustCamera ? view.canvas : null,
+      onSettings(open) { if (open) pause(settingsPause); else resume(settingsPause); },
       onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;
@@ -159,6 +161,7 @@
       previous.onGraphicsLost = null;
       view = M.view.wrapCanvas(M.renderer.create(container, scene));
       session.view = view;
+      input.disableCamera?.();
       previous.dispose();
     };
     live = session;
@@ -175,6 +178,7 @@
   }
 
   function dispatchInteract(session, anchorId) {
+    session.input.unlock?.();
     window.dispatchEvent(new CustomEvent('czmarch:interact', {
       detail: { chapterId: session.chapterId, sceneId: session.sceneId, anchorId }
     }));
@@ -190,13 +194,13 @@
   }
 
   function pause(reason) {
-    const r = String(reason || 'default');
+    const r = typeof reason === 'symbol' ? reason : String(reason || 'default');
     if (!live || live.dead) return; /* 未挂载时暂停是安全空操作 */
     pauses.add(r);
     live.input.setEnabled(false);live.player.stop();
   }
   function resume(reason) {
-    pauses.delete(String(reason || 'default'));
+    pauses.delete(typeof reason === 'symbol' ? reason : String(reason || 'default'));
     if(live&&!live.dead&&!pauses.size)live.input.setEnabled(true);
   }
   function applyState(viewState) {

@@ -31,7 +31,16 @@
   const action=document.createElement('button');action.type='button';action.className='czmw-act';action.dataset.czmwUi='true';action.hidden=true;action.textContent='交互';container.append(panel,action);
   on(action,'click',()=>{if(state.enabled)hooks.onInteract?.();});
   let joyId=null,tap=null,shiftHeld=false,altHeld=false,touchRun=false;
-  const lookCanvas = hooks.lookCanvas;
+  let lookCanvas = hooks.lookCanvas;
+  const desktop = () => Boolean(lookCanvas && !touch);
+  let wasLocked = false, programmaticUnlock = false;
+  const sensitivityKey = 'cz_march_mouse_sensitivity';
+  let sensitivity = 1;
+  try { sensitivity = Math.max(.25, Math.min(2.5, Number(localStorage.getItem(sensitivityKey)) || 1)); } catch {}
+  const look = (dx, dy, pointerType) => {
+    const scale = pointerType === 'mouse' ? sensitivity : 1;
+    hooks.onLook?.(dx * scale, dy * scale);
+  };
   const center=()=>{touchRun=false;state.joy={x:0,y:0};knob.style.transform='translate(-50%,-50%)';};
   const reset=()=>{shiftHeld=altHeld=false;keys.clear();held.clear();for(const[id,node]of captures){try{node.releasePointerCapture?.(id);}catch{}}captures.clear();joyId=null;center();tap=null;};
   function setMode(value){mode=value==='directions'?'directions':'joystick';hint.textContent=touch?(mode==='directions'?'按方向按钮或点地面前往':'拖动摇杆或点地面前往'):'方向键移动 · E 交谈';reset();hooks.onDir?.();stick.hidden=mode!=='joystick';pad.hidden=mode!=='directions';for(const [id,b]of Object.entries(buttons))b.setAttribute('aria-pressed',String(id===mode));try{localStorage.setItem('cz_march_control86',mode);}catch{}}
@@ -43,6 +52,15 @@
   const isEditing = e => e.target?.closest?.('input,textarea,select,[contenteditable]');
   on(window,'focusin',e=>{if(isEditing(e))reset();});
   on(window,'keydown',e=>{
+    if (e.code === 'Escape' && desktop()) {
+      if (e.repeat) return;
+      if (dialog.open || state.enabled) {
+        e.preventDefault();
+        if (dialog.open) closeSettings();
+        else openSettings();
+      }
+      return;
+    }
     if(!state.enabled || isEditing(e) || e.ctrlKey || e.metaKey)return;
     shiftHeld=e.shiftKey;altHeld=e.altKey;
     if(map[e.code]) {
@@ -57,15 +75,101 @@
   on(window,'blur',reset);
   on(document,'visibilitychange',()=>{if(document.hidden)reset();});
   const locked = () => Boolean(lookCanvas && document.pointerLockElement === lookCanvas);
-  const unlock = () => { if (locked()) document.exitPointerLock(); };
+  const unlock = () => {
+    if (!locked()) return;
+    programmaticUnlock = true;
+    document.exitPointerLock();
+  };
+  function requestLock() {
+    if (!desktop() || !state.enabled || dialog.open || !lookCanvas.requestPointerLock) return;
+    try {
+      lookCanvas.requestPointerLock()?.catch(() => {});
+    } catch { /* Right-button drag remains usable when the host denies lock. */ }
+  }
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'czmw-pause';
+  dialog.dataset.czmwUi = 'true';
+  dialog.setAttribute('aria-label', '移动设置');
+  const title = document.createElement('h2');
+  title.textContent = '移动设置';
+  const resume = document.createElement('button');
+  resume.type = 'button';
+  resume.className = 'czmw-resume';
+  resume.textContent = '继续游戏';
+  const label = document.createElement('label');
+  label.className = 'czmw-sensitivity';
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = '.25'; slider.max = '2.5'; slider.step = '.05'; slider.value = String(sensitivity);
+  const value = document.createElement('output');
+  const showSensitivity = () => { value.textContent = Math.round(sensitivity * 100) + '%'; };
+  showSensitivity();
+  label.append('鼠标视角灵敏度', value, slider);
+  on(slider, 'input', () => {
+    sensitivity = slider.valueAsNumber;
+    showSensitivity();
+    try { localStorage.setItem(sensitivityKey, String(sensitivity)); } catch {}
+  });
+  const shortcuts = document.createElement('p');
+  shortcuts.textContent = 'WASD 移动 · Shift 冲刺 · Alt 慢走 · E 交互 · 左键锁定视角 · Esc 设置 · Ctrl + 点击寻路';
+  const touchOptions = document.createElement('div');
+  touchOptions.className = 'czmw-touch-options';
+  dialog.append(title, resume, label, shortcuts, touchOptions);
+  const sound = document.querySelector('#settingsPanel input[data-key="sound"]');
+  if (sound) {
+    const soundButton = document.createElement('button');
+    soundButton.type = 'button';
+    const syncSound = () => {
+      soundButton.textContent = sound.checked ? '音效：开' : '音效：关';
+      soundButton.setAttribute('aria-pressed', String(sound.checked));
+    };
+    syncSound();
+    on(sound, 'change', syncSound);
+    on(soundButton, 'click', () => sound.click());
+    dialog.append(soundButton);
+  }
+  container.append(dialog);
+  function openSettings() {
+    if (!desktop() || !state.enabled || dialog.open) return;
+    touchOptions.append(switcher, hand, size, toggle);
+    dialog.showModal();
+    hooks.onSettings?.(true);
+    resume.focus();
+  }
+  function closeSettings(relock = false) {
+    if (!dialog.open) return;
+    dialog.close();
+    settings.append(switcher, hand, size, toggle);
+    hooks.onSettings?.(false);
+    if (relock) requestLock();
+  }
+  on(resume, 'click', () => closeSettings(true));
+  on(dialog, 'cancel', e => { e.preventDefault(); closeSettings(); });
+  on(summary, 'click', e => {
+    if (!desktop()) return;
+    e.preventDefault();
+    openSettings();
+  });
   const clickGround = (x, y) => {
     const rect = container.getBoundingClientRect();
     hooks.onTap?.(x - rect.left, y - rect.top);
   };
   const cancelDrag = () => { tap = null; };
-  on(document, 'pointerlockchange', cancelDrag);
+  on(document, 'pointerlockchange', () => {
+    cancelDrag();
+    const previouslyLocked = wasLocked;
+    wasLocked = locked();
+    if (wasLocked && !state.enabled) {
+      unlock();
+    } else if (previouslyLocked && !wasLocked) {
+      const userReleased = !programmaticUnlock && !document.pointerLockElement;
+      programmaticUnlock = false;
+      if (userReleased) openSettings();
+    }
+  });
   on(document, 'mousemove', e => {
-    if (state.enabled && locked()) hooks.onLook?.(e.movementX, e.movementY);
+    if (state.enabled && locked()) look(e.movementX, e.movementY, 'mouse');
   });
   on(container, 'contextmenu', e => {
     if (lookCanvas && e.target === lookCanvas) e.preventDefault();
@@ -80,13 +184,17 @@
       return;
     }
     const surface = lookCanvas && e.target === lookCanvas;
+    if (surface && desktop() && e.pointerType === 'mouse' && e.button === 0 && !e.ctrlKey) {
+      requestLock();
+      return;
+    }
     tap = { id: e.pointerId, x: e.clientX, y: e.clientY, surface, time: performance.now() };
     if (surface) lookCanvas.setPointerCapture?.(e.pointerId);
   });
   on(container, 'pointermove', e => {
     if (!state.enabled || locked() || !tap?.surface || tap.id !== e.pointerId) return;
     if (!tap.dragged && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 5) return;
-    hooks.onLook?.(e.clientX - (tap.lastX ?? tap.x), e.clientY - (tap.lastY ?? tap.y));
+    look(e.clientX - (tap.lastX ?? tap.x), e.clientY - (tap.lastY ?? tap.y), e.pointerType);
     tap.dragged = true;
     tap.lastX = e.clientX;
     tap.lastY = e.clientY;
@@ -97,17 +205,12 @@
     cancelDrag();
     if (!state.enabled || ownUI(e) || start.dragged || e.button !== 0 ||
         Math.hypot(e.clientX - start.x, e.clientY - start.y) >= 8 || performance.now() - start.time >= 500) return;
-    const navigate = () => {
-      if (state.enabled && lookCanvas?.isConnected) clickGround(e.clientX, e.clientY);
-    };
-    if (start.surface && e.pointerType === 'mouse' && !e.ctrlKey && lookCanvas.requestPointerLock) {
-      try { lookCanvas.requestPointerLock()?.catch(navigate); } catch { navigate(); }
-    } else clickGround(e.clientX, e.clientY);
+    clickGround(e.clientX, e.clientY);
   });
   on(container, 'pointercancel', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   on(container, 'lostpointercapture', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   setMode(mode);
-  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,wantsWalk:()=>altHeld,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());panel.remove();settings.remove();action.remove();}};
+  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,unlock,disableCamera(){unlock();closeSettings();lookCanvas=null;},wantsWalk:()=>altHeld,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());dialog.remove();panel.remove();settings.remove();action.remove();}};
  }
  M.controls86={create};
 })();

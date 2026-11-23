@@ -70,7 +70,7 @@
     if (token !== mountSeq || !view) { view?.dispose(); return false; }
     const project = (x, y, height) => view.project ? view.project(x, y, height) : M.proj.project(view.cam, x, y, height);
     const unproject = (sx, sy) => view.unproject ? view.unproject(sx, sy) : M.proj.unproject(view.cam, sx, sy);
-    const grid = M.path.buildGrid(view.streetActive ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
+    const grid = M.path.buildGrid(view.streetActive && !scene.strictPlayable ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
     const player = M.player.create(scene, grid, opts.spawn,roleId);
     const pin=document.createElement('div');pin.className='czmw-player-pin86';pin.dataset.role=player.roleId;pin.setAttribute('role','img');pin.setAttribute('aria-label','你的位置 · '+player.roleName);const roleLabel=document.createElement('span');roleLabel.textContent='你 · '+player.roleShort;pin.append(roleLabel,document.createElement('i'));container.append(pin);
     scene.focusActor=player;const anchorsMod = M.anchors.create(scene, container);

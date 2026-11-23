@@ -72,14 +72,14 @@
       update(dt, vec, run = false, backward = false) {
         p.jumpTime = Math.min(JUMP_DURATION, p.jumpTime + dt);
         const backing = !p.path && backward;
-        let vx = 0, vy = 0;
+        let vx = 0, vy = 0, waypointDistance = Infinity;
         if (p.path) { /* 点击移动沿路径 */
           const t = p.path[p.pathI];
           if (!t) { p.path = null; }
           else {
             const dx = t.x - p.x, dy = t.y - p.y, d = Math.hypot(dx, dy);
-            if (d < 0.35) { p.pathI++; if (p.pathI >= p.path.length) p.path = null; }
-            else { vx = dx / d; vy = dy / d; }
+            if (d < (grid.clearance ? .04 : .35)) { p.pathI++; if (p.pathI >= p.path.length) p.path = null; }
+            else { vx = dx / d; vy = dy / d; if (grid.clearance) waypointDistance = d; }
           }
         } else if (vec && backing) {
           // Backward input stays relative to the actor, including diagonal steps.
@@ -93,9 +93,17 @@
         if (p.moving) {
           if (!p.backing) p.facing = Math.atan2(vy, vx);
           const speed = p.backing ? BACKWARD_SPEED : p.running ? RUN_SPEED : SPEED;
-          tryMove(p.x + vx * speed * dt, p.y + vy * speed * dt);
+          const lastX = p.x, lastY = p.y;
+          const step = Math.min(speed * dt, waypointDistance);
+          tryMove(p.x + vx * step, p.y + vy * step);
           /* 被墙挡住时取消寻路，避免顶着墙走 */
-          if (p.path && !M.path.walkableAt(grid, p.x + vx * 0.7, p.y + vy * 0.7, RADIUS) && !M.path.walkableAt(grid, p.x + vx * 0.7, p.y, RADIUS) && !M.path.walkableAt(grid, p.x, p.y + vy * 0.7, RADIUS)) p.path = null;
+          if (p.path) {
+            const stuck = grid.clearance ? p.x === lastX && p.y === lastY :
+              !M.path.walkableAt(grid, p.x + vx * 0.7, p.y + vy * 0.7, RADIUS) &&
+              !M.path.walkableAt(grid, p.x + vx * 0.7, p.y, RADIUS) &&
+              !M.path.walkableAt(grid, p.x, p.y + vy * 0.7, RADIUS);
+            if (stuck) p.path = null;
+          }
         }
         p.t += dt * (p.running ? 1.5 : p.backing ? .8 : 1);
       },

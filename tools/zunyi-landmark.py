@@ -87,24 +87,33 @@ def zy_tree(x,y):
     for i in range(6):branch(trunk,math.tau*i/6,2.0,.22,4)
 
 
-def build_landmark(gate=(-2,-20),tree=(-12,-11)):
+def round_column(x,y,z,height,bottom_radius,top_radius,material):
+    sides=14
+    points=[(x+radius*math.cos(i*math.tau/sides),y+radius*math.sin(i*math.tau/sides),h)
+        for h,radius in ((z,bottom_radius),(z+height,top_radius)) for i in range(sides)]
+    faces=[(i,(i+1)%sides,(i+1)%sides+sides,i+sides) for i in range(sides)]
+    mesh('圆柱',points,faces+[tuple(reversed(range(sides))),tuple(range(sides,2*sides))],material)
+
+
+def build_landmark(gate=(-2,-20),tree=(-12,-11), bays=8):
     # Floor -> plinth -> shafts -> capitals -> springers -> ring -> cornice -> roof.
     box('主楼台基',(0,0,.23),(25.75,12,.46),'stone')
     box('主楼外墙',(0,1.45,4.03),(25.3,9.0,7.18),'plaster')
     box('北翼墙身',(8.7,8.1,3.82),(7.65,5.7,7.65),'plaster')
     zy_roof(8.7,8.1,4.42,3.42,7.62,9.54)
-    spacing=25.2/8
+    spacing=25.2/bays
     for floor in range(2):
         base=.46+3.57*floor
         box('廊面',(0,-4.51,base-.095),(25.75,3.04,.2),'stone')
-        for i in range(9):
-            x=(i-4)*spacing
-            box('青砖柱',(x,-5.62,base+1.1),(.47,.54,2.21),'brick')
+        for i in range(bays+1):
+            x=(i-bays/2)*spacing
+            round_column(x,-5.62,base+.225,1.84,.255,.235,'brick')
             box('柱座',(x,-5.62,base+.15),(.64,.68,.3),'stone')
-            box('柱头',(x,-5.62,base+2.08),(.61,.69,.2),'brick')
-            if i==8: continue
+            round_column(x,-5.62,base+1.94,.16,.28,.34,'plaster')
+            box('浅灰柱头',(x,-5.62,base+2.12),(.61,.66,.13),'plaster')
+            if i==bays: continue
             c=x+spacing/2
-            zy_arc('廊拱',c,-5.62,base+2.1,(spacing-.47)/2,.15,.52,base+3.57)
+            zy_arc('廊拱',c,-5.62,base+1.95,(spacing-.47)/2,.15,.52,base+3.57)
             box('柱顶填墙',(x,-5.62,base+2.85),(.48,.52,1.47),'brick')
             if not floor and i in (3,4):
                 box('板门',(c,-3.08,base+1.27),(1.65,.13,2.54),'wood')
@@ -114,18 +123,20 @@ def build_landmark(gate=(-2,-20),tree=(-12,-11)):
                 for z in (.22,.91):box('廊栏',(c,-5.65,base+z),(spacing-.44,.13,.11),'wood')
                 for j in range(1,10):
                     box('栏芯',(x+.20+j*(spacing-.40)/10,-5.65,base+.57),(.065,.08,.72),'wood')
-        box('右边券肩',(4*spacing,-5.62,base+2.85),(.48,.52,1.47),'brick')
+        box('右边券肩',(bays/2*spacing,-5.62,base+2.85),(.48,.52,1.47),'brick')
         box('腰线',(0,-5.65,base+3.52),(25.74,.69,.15),'plaster')
     zy_roof(0,0,13.55,6.68,7.66,11.88)
     for j in range(3):
         height=(3-j)*.145
         box('石阶',(0,-6.18-.35*j,height/2),(6.3,.38,height),'stone')
-    gx,gy=gate
-    for s in (-1,1):
-        box('门楼墩',(gx+s*2.12,gy,2.25),(1.20,1.44,4.5),'brick')
-        box('门楼柱础',(gx+s*2.15,gy,.26),(1.27,1.62,.52),'stone')
-        box('门楼翼墙',(gx+s*5.45,gy,1.52),(5.5,.46,3.04),'brick')
-        zy_roof(gx+s*5.45,gy,2.81,.47,3.02,3.34)
-    zy_arc('门楼券',gx,gy,2.3,1.52,.22,1.42,4.50)
-    zy_roof(gx,gy,3.12,1.37,4.47,5.67)
-    zy_tree(*tree)
+    if gate is not None:
+        gx,gy=gate
+        for s in (-1,1):
+            box('门楼墩',(gx+s*2.12,gy,2.25),(1.20,1.44,4.5),'brick')
+            box('门楼柱础',(gx+s*2.15,gy,.26),(1.27,1.62,.52),'stone')
+            box('门楼翼墙',(gx+s*5.45,gy,1.52),(5.5,.46,3.04),'brick')
+            zy_roof(gx+s*5.45,gy,2.81,.47,3.02,3.34)
+        zy_arc('门楼券',gx,gy,2.3,1.52,.22,1.42,4.50)
+        zy_roof(gx,gy,3.12,1.37,4.47,5.67)
+    if tree is not None:
+        zy_tree(*tree)

@@ -246,13 +246,16 @@
       snowy ? snowSurface() : assets ? (street ? surface('earth', '#e4dad0', 2.2, .72) : surface('earth', environment.groundTint, 3, .8)) : new T.MeshStandardMaterial({ map: groundTexture(), roughness: 0.98, metalness: 0 })
     );
     ground.name = 'march-pbr-ground';
-    if (street) {
+    const compoundPaving = Boolean(street && logicalScene.strictPlayable);
+    // Keep the invisible plane available to picking so clicks outside can clamp.
+    ground.visible = !compoundPaving;
+    if (street && !compoundPaving) {
       ground.material.vertexColors = true;
       zunyiGroundColors(ground.geometry);
     }
     ground.castShadow = false;
     pickSurfaces.push(ground);
-    if (assets) {
+    if (assets && !compoundPaving) {
       const divisor = street ? 6 : 3;
       const geometry = terrainPatch(world.w * 3, world.h * 3, world.w / 2, world.h / 2,
         Math.ceil(terrain.cols / divisor) * 3, Math.ceil(terrain.rows / divisor) * 3);
@@ -1119,7 +1122,7 @@
       }
     }
 
-    for (let side = 0; side < 3; side++) {
+    for (let side = 0; !compoundPaving && side < 3; side++) {
       const span = (side ? world.h : world.w) * 2.5;
       const hills = new T.PlaneGeometry(span, 150, street ? 16 : 160, street ? 5 : 64);
       hills.rotateX(-Math.PI / 2);
@@ -1194,11 +1197,11 @@
     worldRoot.updateMatrixWorld(true);
     const cameraObstacles = worldRoot.children.filter(object => object === ground || /^(march-prop-|march-cliff-line-)/.test(object.name)).map(object => ({ object, bounds: new T.Box3().setFromObject(object) }));
     if (street) {
-      for (const { rect, cameraHeight = 7.6 } of logicalScene.streetBlocked) {
+      for (const { rect, cameraHeight = 7.6, cameraMinHeight = 0 } of [...logicalScene.streetBlocked, ...(logicalScene.cameraBlocked || [])]) {
         if (!rect) continue;
         const [x, y, w, h] = rect;
-        const min = onSurface(x, y);
-        const max = new T.Vector3(min.x + w, min.y + cameraHeight, min.z + h);
+        const min = onSurface(x, y, cameraMinHeight);
+        const max = new T.Vector3(min.x + w, min.y + cameraHeight - cameraMinHeight, min.z + h);
         cameraObstacles.push({ bounds: new T.Box3(min, max) });
       }
     }
@@ -1339,10 +1342,7 @@
       return target.clone().add(offset.multiplyScalar(scale));
     }
 
-    function placeCamera(target, scale, dt) {
-      const desired = cameraPosition(target, scale);
-      cameraDirection.copy(desired).sub(target);
-      const fullDistance = cameraDirection.length();
+    function unobstructedDistance(target, fullDistance) {
       cameraDirection.normalize(); cameraRight.set(cameraDirection.z, 0, -cameraDirection.x).normalize();
       let distance = fullDistance;
       for (const offset of [-.28, 0, .28]) {
@@ -1361,6 +1361,35 @@
           const hit = cameraRay.intersectObject(object, true).find(hit => (hit.object === ground || hit.object.castShadow) && hit.distance > .15);
           if (hit) distance = Math.min(distance, Math.max(.35, hit.distance - .4));
         }
+      }
+      return distance;
+    }
+
+    const cameraUp = new T.Vector3(0, 1, 0), alternateDirection = new T.Vector3(), bestDirection = new T.Vector3();
+    const alternateAngles = [Math.PI / 2, -Math.PI / 2, Math.PI, Math.PI / 4, -Math.PI / 4];
+    function placeCamera(target, scale, dt) {
+      const desired = cameraPosition(target, scale);
+      alternateDirection.copy(desired).sub(target);
+      let fullDistance = alternateDirection.length();
+      cameraDirection.copy(alternateDirection).normalize();
+      let distance = unobstructedDistance(target, fullDistance);
+      // The compound has a narrow roofed gate. If the normal orbit is blocked,
+      // look along the passage before bringing the camera in toward the player.
+      if (street && logicalScene.strictPlayable && distance < 3.5) {
+        bestDirection.copy(cameraDirection);
+        const alternateDistance = Math.min(fullDistance, 6);
+        for (const angle of alternateAngles) {
+          cameraDirection.copy(alternateDirection);
+          cameraDirection.y = Math.min(cameraDirection.y, Math.hypot(cameraDirection.x, cameraDirection.z) * .3);
+          cameraDirection.applyAxisAngle(cameraUp, angle).normalize();
+          const clear = unobstructedDistance(target, alternateDistance);
+          if (clear <= distance + .12) continue;
+          distance = clear;
+          fullDistance = alternateDistance;
+          bestDirection.copy(cameraDirection);
+          if (clear >= alternateDistance - .01) break;
+        }
+        cameraDirection.copy(bestDirection);
       }
       cameraDistance = !cameraDistance || distance < cameraDistance ? distance : T.MathUtils.lerp(cameraDistance, distance, 1 - Math.exp(-dt * 6));
       camera.position.copy(target).addScaledVector(cameraDirection, cameraDistance);

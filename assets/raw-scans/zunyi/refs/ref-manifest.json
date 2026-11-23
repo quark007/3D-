@@ -1,0 +1,98 @@
+{
+  "files": [
+    {
+      "filename": "aerial_01_main_roof.jpg",
+      "sourceUrl": "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2021nzt/20210420fdbnl_2329/hsjy/202105/t20210511_391697.html",
+      "imageUrl": "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2021nzt/20210420fdbnl_2329/hsjy/202105/W020210511554461454030.jpg",
+      "width": 900,
+      "height": 600,
+      "sha256": "d02bf875fa0f47b857eb0f0c33f089d1e5e36fd8c6e6bb9b51cd5564ca2dcb48",
+      "kind": "photo",
+      "description": "主楼斜俯拍。可辨青瓦歇山顶、屋脊与老虎窗、连续两层拱廊、东侧槐树和相邻白灰辅房。远处为现代城市背景。"
+    },
+    {
+      "filename": "aerial_02_main_and_court.jpg",
+      "sourceUrl": "https://www.cqnews.net/web/content_1539534598842191872.html",
+      "imageUrl": "https://res.cqhlw.cn/contentcloud/1/REPRINT/MEDIA/PICTURE/2026/8/19/6be7c9969f2b4d85b98b615801b47bd0_wh800x533.jpg",
+      "width": 800,
+      "height": 533,
+      "sha256": "43d2d4a3dc7bade8389b397380adb0558d3fbea50ef58d89e809c268fda5a003",
+      "kind": "photo",
+      "description": "修缮期无人机斜俯拍。可对照主楼正立面、青石院坪、花台、白灰围墙转角和贴邻房屋朝向。现代绿化与游客设施仅作排除参考。"
+    },
+    {
+      "filename": "main_facade_01_low_angle.jpg",
+      "sourceUrl": "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2021nzt/20210420fdbnl_2329/hsjy/202105/t20210511_391697.html",
+      "imageUrl": "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2021nzt/20210420fdbnl_2329/hsjy/202105/W020210511554461284603.jpg",
+      "width": 900,
+      "height": 600,
+      "sha256": "29780802b2909c5bda7df21de97834e2c5e8edda805c733ff970a4b8602381a8",
+      "kind": "photo",
+      "description": "贴地斜视。可对照两层券拱、青砖圆柱、白色柱头线脚、栗色木栏杆和转角廊；水中倒影不用于量测。"
+    },
+    {
+      "filename": "main_facade_02_corner.jpg",
+      "sourceUrl": "https://www.cqnews.net/web/content_1539534598842191872.html",
+      "imageUrl": "https://res.cqhlw.cn/contentcloud/1/REPRINT/MEDIA/PICTURE/2026/8/19/162368bdf6ff4fdbb5741c013696d5eb_wh800x534.jpg",
+      "width": 800,
+      "height": 534,
+      "sha256": "4ec55ed5072799c2f86c8d8ede24666a4ce419120ebe0953c0040455ac9e6a21",
+      "kind": "photo",
+      "description": "主楼低角度侧正面。可辨屋檐下柱间关系、两层转角廊、台基、楼梯位置和紧邻白墙边界。"
+    },
+    {
+      "filename": "main_facade_03_arcade_detail.jpg",
+      "sourceUrl": "https://www.cqnews.net/web/content_1539534598842191872.html",
+      "imageUrl": "https://res.cqhlw.cn/contentcloud/1/REPRINT/MEDIA/PICTURE/2026/8/19/491d64c446cc460eb154a9391909443d_wh800x533.jpg",
+      "width": 800,
+      "height": 533,
+      "sha256": "dbbf280cd5731251a4a7f1e98aa1569fb6f515de42e05735887405eab904cc0d",
+      "kind": "photo",
+      "description": "双层拱廊近景。可辨砖券砌缝、浅色柱头、菱形饰面、二层木栏杆与转角木楼梯。施工人员与设施不用于复原。"
+    },
+    {
+      "filename": "courtyard_01_street_gate.jpg",
+      "sourceUrl": "https://www.cqnews.net/web/content_1539534598842191872.html",
+      "imageUrl": "https://res.cqhlw.cn/contentcloud/1/REPRINT/MEDIA/PICTURE/2026/8/19/ea5bc1a924c3424f85288879cc50e92f_wh800x534.jpg",
+      "width": 800,
+      "height": 534,
+      "sha256": "f5cb740f2e4ede641341c3f37e6587c26b0bd06dc81eac8c478c2717733bed63",
+      "kind": "photo",
+      "description": "新华社记录修缮中的旧会址临街大门。可读入口与两侧连墙的相对比例，脚手架、遮护、现代绿化与 1964 年题匾不作 1935 年复原证据。"
+    },
+    {
+      "filename": "courtyard_02_locust_paving.jpg",
+      "sourceUrl": "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2021nzt/20210420fdbnl_2329/hsjy/202105/t20210511_391697.html",
+      "imageUrl": "https://www.moj.gov.cn/pub/sfbgw/zwgkztzl/2021nzt/20210420fdbnl_2329/hsjy/202105/W020210511554461953749.jpg",
+      "width": 900,
+      "height": 600,
+      "sha256": "f9a826c47e214baa95a34b30b23f2bc0e10949454ef77dc0ae0cce65949311ae",
+      "kind": "photo",
+      "description": "现存老槐树树皮与周边灰色铺石近景，适合材质参考。现时树干尺寸不能用于推定 1935 年树径。"
+    }
+  ],
+  "errors": [
+    {
+      "sourceUrl": "https://www.china.org.cn/chinese/2017-11/22/content_41929234_6.htm",
+      "error": "net::ERR_CERT_COMMON_NAME_INVALID at https://www.china.org.cn/chinese/2017-11/22/content_41929234_6.htm"
+    },
+    {
+      "sourceUrl": "https://gz.people.com.cn/n2/2024/1227/c222152-41089600.html",
+      "error": "net::ERR_CERT_COMMON_NAME_INVALID at https://gz.people.com.cn/n2/2024/1227/c222152-41089600.html"
+    },
+    {
+      "sourceUrl": "https://pic.people.com.cn/n1/2026/0929/c1016-40807361-2.html",
+      "error": "net::ERR_CERT_COMMON_NAME_INVALID at https://pic.people.com.cn/n1/2026/0929/c1016-40807361-2.html"
+    },
+    {
+      "sourceUrl": "https://360cn.net/cases/exhibition-07.html",
+      "error": "net::ERR_CONNECTION_RESET at https://360cn.net/cases/exhibition-07.html",
+      "pageTitle": "360cn.net"
+    },
+    {
+      "sourceUrl": "https://www.720yun.com/t/40vkzq2l7ry?scene_id=82279517",
+      "error": "Panorama requires an access password",
+      "pageTitle": "遵义会议纪念馆"
+    }
+  ]
+}

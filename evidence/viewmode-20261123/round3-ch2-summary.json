@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "historicalDistance": 9.57,
+  "calibration": { "yaw": -0.198, "target": -0.972, "frames": 65, "frameMs": 40, "keyHeldMs": 2600 },
+  "finalRuns": [
+    { "run": 10, "distance": 9.58, "frames": 65, "naturalLookDelta": -0.335, "after": { "x": 33.58, "y": 15.79 }, "errors": [], "failedRequests": [], "passed": true },
+    { "run": 11, "distance": 9.58, "frames": 65, "naturalLookDelta": -0.176, "after": { "x": 33.58, "y": 15.79 }, "errors": [], "failedRequests": [], "passed": true },
+    { "run": 12, "distance": 9.57, "frames": 65, "naturalLookDelta": -0.649, "after": { "x": 33.57, "y": 15.78 }, "errors": [], "failedRequests": [], "passed": true }
+  ],
+  "range": { "min": 9.57, "max": 9.58, "mean": 9.577 },
+  "chapter3Control": { "distance": 9.76, "lookDelta": -0.348, "viewMode": "first", "cameraMode": "first", "cameraDistance": 0, "errors": [] },
+  "productionFilesChanged": []
+}

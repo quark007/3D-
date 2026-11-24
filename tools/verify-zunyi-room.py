@@ -1,9 +1,10 @@
 """Browser acceptance against the running project server. Requires Playwright and Edge."""
-import json
+import json, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parents[1]
-out=root/"evidence/zunyi-full-integration"
+lookdev="--lookdev" in sys.argv
+out=root/"evidence"/("realism-upgrade" if lookdev else "zunyi-full-integration")
 url="http://127.0.0.1:8080/march-world/preview.html?chapter=chapter-3%2Fscene-zunyi"
 report={}
 def verify(browser,mobile):
@@ -14,6 +15,7 @@ def verify(browser,mobile):
     page.on("pageerror",lambda err:errors.append(str(err)))
     page.on("console",lambda msg:errors.append(msg.text) if msg.type=="error" else None)
     page.on("response",lambda r:requests.append([r.url.split("/")[-1],r.status]) if "meeting-room-web.glb" in r.url or "fps-arms-web.glb" in r.url or r.status>=400 else None)
+    page.add_init_script("performance.setResourceTimingBufferSize(2000)")
     page.goto(url+"&3d=1")
     page.wait_for_function("window.CZMarchWorld?.mounted")
     page.evaluate("""async()=>{const W=CZMarchWorld, mod=W._.renderer3d,create=mod.create;
@@ -25,6 +27,8 @@ def verify(browser,mobile):
     # Use the gameplay viewport for both screenshots and performance readings.
     page.add_style_tag(content="body{grid-template-rows:minmax(0,1fr)}body>header,body>footer{display:none}")
     E=page.evaluate
+    E("""()=>{window.peak={calls:0,triangles:0};function sample(){const s=v.stats;
+      peak.calls=Math.max(peak.calls,s.drawCalls||0);peak.triangles=Math.max(peak.triangles,s.triangles||0);requestAnimationFrame(sample);}sample()}""")
     wait=lambda expr:page.wait_for_function(expr,timeout=12000)
     def go(x,y):
         E("([x,y])=>pl.moveTo([{x,y}])",[x,y])
@@ -67,6 +71,11 @@ def verify(browser,mobile):
     data["uv1"]=E("""()=>{let ok=true;v.scene.getObjectByName('zunyi-meeting-room').traverse(o=>{if(o.isMesh){ok&&=!!o.geometry.attributes.uv1;for(const m of [].concat(o.material))if(m.aoMap)ok&&=m.aoMap.channel===1&&m.map.channel===1}});return ok}""")
     if not mobile:snap("01-enter-room-fps.png")
     else:snap("04-mobile-390-interior.png")
+    if lookdev:
+        go(82.46,27.18);go(82.46,28.18)
+        E("v.setCameraAngle(2.77,.43)");page.wait_for_timeout(350)
+        snap(("mobile-" if mobile else "")+"05-window-table-brazier.png")
+        go(82.46,27.18);go(81.1,27.18)
     data["insideHUDDriftPx"]=hud_turn()
     go(79.25,27.18)
     states=[]
@@ -76,6 +85,7 @@ def verify(browser,mobile):
         if mode=="run":page.keyboard.down("Shift")
         page.keyboard.down("w");page.wait_for_timeout(420)
         states.append(E("({arms:v.stats.armsState,speed:pl.speed,draws:v.stats.armsDrawCalls})"))
+        if lookdev and mode=="run":snap(("mobile-" if mobile else "")+"06-moving-hands.png")
         page.keyboard.up("w")
         if mode=="slow":page.keyboard.press("c")
         if mode=="run":page.keyboard.up("Shift")
@@ -87,9 +97,9 @@ def verify(browser,mobile):
     data["westWallStopX"]=E("pl.x")
     for x,y in [(79.25,27.18),(79.25,32.65),(82.46,32.65),(82.46,27.18),(81.1,27.18)]:go(x,y)
     data["lap"]=True
-    if not mobile:
+    if not mobile or lookdev:
         go(79.25,27.18);go(79.25,30)
-        E("v.setCameraAngle(.03,.04)");page.wait_for_timeout(180);snap("02-east-wall-clock-wardrobe.png")
+        E("v.setCameraAngle(.03,.04)");page.wait_for_timeout(180);snap(("mobile-" if mobile else "")+"02-east-wall-clock-wardrobe.png")
         go(79.25,27.18);go(81.1,27.18)
     cards=[]
     for key,x,y in [("Prop_MeetingTable",81.1,27.18),("Prop_CharcoalBrazier",81.1,27.18),("Prop_HangingLamp",81.1,27.18),("Prop_WallClock",82.46,30),("Prop_WardrobeMirror",82.46,31.04)]:
@@ -123,6 +133,14 @@ def verify(browser,mobile):
     assert all((x["geometries"],x["textures"])==(samples[0]["geometries"],samples[0]["textures"]) for x in samples)
     assert not errors and all(status<400 for _,status in requests)
     for k in ["outside","inside","card"]:assert data[k]["calls"]<=120 and data[k]["triangles"]<=120000
+    data["wholeRoutePeak"]=E("peak")
+    data["resources"]=E("""()=>{let r={};for(const e of performance.getEntriesByType('resource'))if(e.name.startsWith(location.origin+'/')){
+      const name=new URL(e.name).pathname;r[name]=Math.max(r[name]||0,e.encodedBodySize)}return r}""")
+    data["totalBytes"]=sum(data["resources"].values())
+    print("route",data["wholeRoutePeak"],"page bytes",data["totalBytes"],flush=True)
+    if lookdev:
+        assert data["uv1"] and data["totalBytes"]+len(page.content().encode())<=15000000
+        assert data["wholeRoutePeak"]["calls"]<=120 and data["wholeRoutePeak"]["triangles"]<=120000
     ctx.close()
     return data
 with sync_playwright() as p:

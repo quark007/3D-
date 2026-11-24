@@ -1,0 +1,108 @@
+{
+  "hands": {
+    "before": {
+      "bytes": 25616,
+      "triangles": 3000,
+      "nodes": [
+        "FPS_Arm_Right",
+        "FPS_Arm_Left"
+      ],
+      "materials": [
+        "MAT_FPS_WeatheredCottonAndSkin"
+      ],
+      "extensions": [
+        "KHR_draco_mesh_compression",
+        "KHR_materials_specular",
+        "EXT_texture_webp"
+      ]
+    },
+    "after": {
+      "bytes": 302172,
+      "triangles": 7366,
+      "nodes": [
+        "FPS_Arm_Left",
+        "FPS_Arm_Right"
+      ],
+      "materials": [
+        "Sun-exposed skin.001",
+        "Keratin nail plates.001",
+        "Washed field twill.001"
+      ],
+      "extensions": [
+        "KHR_draco_mesh_compression",
+        "EXT_texture_webp"
+      ]
+    }
+  },
+  "room": {
+    "before": {
+      "bytes": 1637320,
+      "triangles": 18406,
+      "nodes": [
+        "RoomShell",
+        "Door_Exit",
+        "Prop_WardrobeMirror",
+        "Prop_WardrobePlain",
+        "Prop_WallClock",
+        "Prop_MeetingTable",
+        "WritingSet",
+        "Prop_CharcoalBrazier",
+        "Prop_HangingLamp",
+        "FoldingChairs_20"
+      ],
+      "materials": [
+        "Web static",
+        "ZY rose glass.002",
+        "ZY winter glass.002",
+        "ZY straw glass.002",
+        "ZY silvered mirror.002",
+        "Web woven cane"
+      ],
+      "extensions": [
+        "KHR_draco_mesh_compression",
+        "KHR_materials_transmission",
+        "KHR_materials_ior",
+        "EXT_texture_webp"
+      ]
+    },
+    "after": {
+      "bytes": 1141728,
+      "triangles": 18406,
+      "nodes": [
+        "RoomShell",
+        "Door_Exit",
+        "Prop_WardrobeMirror",
+        "Prop_WardrobePlain",
+        "Prop_WallClock",
+        "Prop_MeetingTable",
+        "WritingSet",
+        "Prop_CharcoalBrazier",
+        "Prop_HangingLamp",
+        "FoldingChairs_20"
+      ],
+      "materials": [
+        "Web aged plaster",
+        "Web varnished floor",
+        "Web static",
+        "ZY rose glass.002",
+        "ZY winter glass.002",
+        "ZY straw glass.002",
+        "ZY tarnished brass.002",
+        "ZY silvered mirror.002",
+        "Web rubbed table",
+        "Web burnished edge",
+        "ZY cast iron.002",
+        "ZY banked coals.002",
+        "ZY milk glass.002",
+        "Web woven cane"
+      ],
+      "extensions": [
+        "KHR_draco_mesh_compression",
+        "KHR_materials_transmission",
+        "KHR_materials_ior",
+        "KHR_materials_clearcoat",
+        "EXT_texture_webp"
+      ]
+    }
+  }
+}

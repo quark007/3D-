@@ -6,11 +6,29 @@ from mathutils.bvhtree import BVHTree
 from itertools import combinations
 from contextlib import redirect_stdout
 root=Path(__file__).resolve().parents[1]
-ev=root/"evidence/ch3-meeting-room"
+ev=root/"evidence/realism-upgrade"
 dst=root/"changzheng/assets/scenes/zunyi-realscan"
 tmp=Path(tempfile.gettempdir())/"zunyi-meeting-cycles"
 tmp.mkdir(exist_ok=True)
 s=bpy.context.scene
+# Offset the cold emitter behind the mullions so their shadows reach the floor.
+west=s.objects["West overcast"]
+west.location=(-3.35,-.85,2.90)
+west.rotation_euler=(Vector((.75,.36,.35))-west.location).to_track_quat("-Z","Y").to_euler()
+west.data.size=1.18;west.data.energy=720;west.data.color=(.60,.76,1)
+bounce=s.objects["Window return"]
+bounce.location=(-2.26,-.23,2.06)
+bounce.rotation_euler=(Vector((1.4,-.2,.70))-bounce.location).to_track_quat("-Z","Y").to_euler()
+bounce.data.energy=155;bounce.data.size=2.05;bounce.data.color=(.60,.78,1)
+lamp=s.objects["Lamp glow"].data
+lamp.energy=83;lamp.color=(1,.455,.155);lamp.shadow_soft_size=.088
+if hasattr(lamp,"use_temperature"):
+    lamp.use_temperature=True;lamp.temperature=2700;lamp.color=(1,1,1)
+fire=s.objects["Embers"].data
+fire.energy=4.6;fire.color=(1,.115,.024)
+bg=next(n for n in s.world.node_tree.nodes if n.type=="BACKGROUND")
+bg.inputs["Strength"].default_value=.12
+s.cycles.max_bounces=6
 cam=s.objects["BrazierDetail"]
 cam.location=(-.09,1.955,.77)
 cam.rotation_euler=(Vector((-.17,1.05,.43))-cam.location).to_track_quat("-Z","Y").to_euler()
@@ -62,6 +80,12 @@ for o in objects:
     o.data=o.data.copy()
     if o.data.uv_layers.get("Lightmap"):o.data.uv_layers.remove(o.data.uv_layers["Lightmap"])
     mesh=o.data
+    if o.name=="RoomShell":
+        for poly in mesh.polygons:
+            if "oxblood boards" not in mesh.materials[poly.material_index].name:continue
+            for li in poly.loop_indices:
+                v=mesh.vertices[mesh.loops[li].vertex_index].co
+                mesh.uv_layers[0].data[li].uv=((v.x+2.30)/(4.60/26),v.y*.71)
     offsets[o]=len(uvs)
     off=len(verts)
     verts.extend(o.matrix_world@v.co for v in mesh.vertices)
@@ -121,7 +145,7 @@ for o in objects:o.hide_render=True
 s.collection.objects.link(proxy)
 proxy.select_set(True);bpy.context.view_layer.objects.active=proxy
 s.render.threads_mode="FIXED";s.render.threads=10
-s.cycles.samples=24
+s.cycles.samples=256
 s.render.bake.margin=3
 def bake(key,kind,passes=None):
     img=bpy.data.images.new(key,1024,1024,alpha=False)
@@ -134,8 +158,36 @@ def bake(key,kind,passes=None):
     bpy.ops.object.bake(**args)
     img.filepath_raw=str(tmp/(key+".png"));img.file_format="PNG";img.save()
     return img
+# Thin panes pass tinted shadow rays while frames retain full occlusion.
+for mat in mats:
+    if not any(k in mat.name for k in ("winter glass","rose glass","straw glass")):continue
+    nt=mat.node_tree;out=next(n for n in nt.nodes if n.type=="OUTPUT_MATERIAL")
+    source=out.inputs[0].links[0].from_socket
+    transparent=nt.nodes.new("ShaderNodeBsdfTransparent")
+    transparent.inputs[0].default_value=(*((.91,.42,.46) if "rose" in mat.name else (.93,.77,.43) if "straw" in mat.name else (.92,.96,1)),1)
+    mix=nt.nodes.new("ShaderNodeMixShader");rays=nt.nodes.new("ShaderNodeLightPath")
+    nt.links.new(rays.outputs["Is Shadow Ray"],mix.inputs[0]);nt.links.new(source,mix.inputs[1]);nt.links.new(transparent.outputs[0],mix.inputs[2]);nt.links.new(mix.outputs[0],out.inputs[0])
+# Staining follows the skirting, fading into the limewash above knee height.
+for mat in mats:
+    if "lime plaster" not in mat.name:continue
+    nt=mat.node_tree
+    p=next(n for n in nt.nodes if n.type=="BSDF_PRINCIPLED")
+    source=p.inputs["Base Color"].links[0].from_socket
+    coord=nt.nodes.new("ShaderNodeNewGeometry");xyz=nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(coord.outputs["Position"],xyz.inputs[0])
+    ramp=nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color=(.50,.44,.35,1)
+    ramp.color_ramp.elements[1].position=.56
+    nt.links.new(xyz.outputs["Z"],ramp.inputs[0])
+    mult=nt.nodes.new("ShaderNodeMixRGB");mult.blend_type="MULTIPLY";mult.inputs[0].default_value=.82
+    nt.links.new(source,mult.inputs[1]);nt.links.new(ramp.outputs[0],mult.inputs[2]);nt.links.new(mult.outputs[0],p.inputs["Base Color"])
 ao=bake("AO","AO")
 lit=bake("Diffuse","DIFFUSE",{"DIRECT","INDIRECT","COLOR"})
+for mat in mats:
+    nt=mat.node_tree;mix=next((n for n in nt.nodes if n.type=="MIX_SHADER"),None)
+    if mix:
+        out=next(n for n in nt.nodes if n.type=="OUTPUT_MATERIAL")
+        nt.links.new(mix.inputs[1].links[0].from_socket,out.inputs[0])
 # Restore transmissive panes, silver and cane normal in the web version.
 def webmat(name,rough,metal=0,with_normal=False):
     mat=bpy.data.materials.new("Web "+name);mat.use_nodes=True
@@ -149,13 +201,18 @@ def webmat(name,rough,metal=0,with_normal=False):
         v=nt.nodes.new("ShaderNodeUVMap");v.uv_map="UVMap";nt.links.new(v.outputs[0],t.inputs[0])
         n=nt.nodes.new("ShaderNodeNormalMap");nt.links.new(t.outputs[0],n.inputs["Color"]);nt.links.new(n.outputs[0],p.inputs["Normal"])
     return mat
-wood=webmat("static",.40)
+floor=webmat("varnished floor",1)
+plaster=webmat("aged plaster",.91)
+table=webmat("rubbed table",1)
+edge=webmat("burnished edge",.32)
+wood=webmat("static",.52)
 cane=webmat("woven cane",.66,with_normal=True)
 for o in objects:
     o.hide_render=False
     for i,mat in enumerate(o.data.materials):
-        if any(k in mat.name for k in ["winter glass","rose glass","straw glass","silvered mirror"]):continue
-        o.data.materials[i]=cane if "woven cane" in mat.name else wood
+        if any(k in mat.name for k in ["winter glass","rose glass","straw glass","silvered mirror","milk glass","banked coals","cast iron","tarnished brass"]):continue
+        layers={"woven cane":cane,"oxblood boards":floor,"lime plaster":plaster,"blackened table":table,"worn edges":edge}
+        o.data.materials[i]=next((m for label,m in layers.items() if label in mat.name),wood)
     slots=list(o.data.materials)
     unique=list(dict.fromkeys(slots))
     remap=[unique.index(slots[p.material_index]) for p in o.data.polygons]

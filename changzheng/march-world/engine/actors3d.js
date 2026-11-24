@@ -62,7 +62,7 @@
 
   const hasModel = anchor => anchor.kind === 'npc' && npcKey(anchor) !== 'narrator';
 
-  async function create(T, logicalScene, parent, signal) {
+  async function create(T, logicalScene, parent, signal, roleId='soldier') {
     const [{ GLTFLoader }, { DRACOLoader }, skeleton] = await Promise.all([
       import('three/addons/loaders/GLTFLoader.js'),
       import('three/addons/loaders/DRACOLoader.js'),
@@ -76,7 +76,11 @@
       ? import(new URL('character-weathering.js', SCRIPT_BASE).href).catch(error => console.warn('人物做旧模块不可用', error))
       : Promise.resolve();
     const loaded = new Map();
-    const urls = new Set([...Object.values(paths), ...independentUrls.keys()]);
+    const compact = logicalScene.sceneId === 'chapter-3/scene-zunyi';
+    const fallbackFor = anchor => paths[M.anchors.NPC_STYLES[npcKey(anchor)]?.role] || paths.soldier;
+    const baseUrls = compact ? [paths[roleId] || paths.soldier,
+      ...logicalScene.anchors.filter(a=>hasModel(a)&&!npcProfile(a)?.glbUrl).map(fallbackFor)] : Object.values(paths);
+    const urls = new Set([...baseUrls, ...independentUrls.keys()]);
     const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
     const results = await Promise.allSettled([...urls].map(async url => {
       try {
@@ -97,6 +101,13 @@
         console.warn(`独立人物模型回退：${full}`, error);
       }
     }));
+    if (compact && !signal?.aborted) {
+      const missing=new Set(logicalScene.anchors.filter(a=>hasModel(a)&&!loaded.has(npcUrl(npcProfile(a)||{}))).map(fallbackFor));
+      for (const url of missing) if(!loaded.has(url)) {
+        try { loaded.set(url,await loadModel(T,GLTFLoader,draco,url,signal)); }
+        catch(reason) { results.push({status:'rejected',reason}); }
+      }
+    }
     draco.dispose();
     const failure = results.find(result => result.status === 'rejected');
     if (failure || signal?.aborted) {

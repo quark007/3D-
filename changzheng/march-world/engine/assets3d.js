@@ -2,10 +2,10 @@
   'use strict';
   const M = window.CZMarchWorld._;
 
-  async function load(T, signal, streetModel) {
+  async function load(T, signal, streetModel, compoundOnly = false) {
     const textures = {}, models = {};
     const collect = (geometries, materials, maps) => {
-      for (const set of Object.values(textures)) for (const texture of Object.values(set)) maps.add(texture);
+      for (const set of Object.values(textures)) for (const texture of Object.values(set)) if (texture) maps.add(texture);
       for (const model of Object.values(models)) model.traverse(object => {
         if (object.geometry) geometries.add(object.geometry);
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
@@ -32,7 +32,7 @@
     signal?.throwIfAborted();
     const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
     const jobs = [];
-    for (const key of ['earth', 'wood', 'plaster', 'roof', 'rock']) {
+    for (const key of (compoundOnly ? [] : ['earth', 'wood', 'plaster', 'roof', 'rock'])) {
       textures[key] = {};
       for (const [channel, info] of Object.entries(manifest[key].maps)) jobs.push((async () => {
         const response = await fetch('/' + (info.webPath || info.path), { signal });
@@ -53,6 +53,7 @@
       fern: '/assets/models/fern_02/model.gltf',
       playerArms: '/assets/characters/player/fps-arms-web.glb'
     };
+    if (compoundOnly) for (const key of ['tree','rock','crate','fern']) delete sources[key];
     if (streetModel) sources.street = streetModel.url;
     for (const [key, url] of Object.entries(sources)) jobs.push((async () => {
       const response = await fetch(url, { signal });
@@ -84,6 +85,13 @@
       dispose();
       if (failed) throw failed.reason;
       signal.throwIfAborted();
+    }
+    if (compoundOnly) {
+      // The terrain mesh is used only for picking. The porch reuses the manor timber.
+      textures.earth = {};
+      let wood;
+      models.street.traverse(o=>{if(o.material?.name==='ZY_wood') wood=o.material;});
+      textures.wood = wood ? {diffuse:wood.map,normal:wood.normalMap,roughness:wood.roughnessMap} : {};
     }
     return { textures, models, collect };
   }

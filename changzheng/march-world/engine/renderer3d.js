@@ -194,12 +194,22 @@
     scene.environmentIntensity = worldScene.environmentIntensity;
     const arms = [left, right];
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    let phase = 0, breath = 0, walk = 0, run = 0, tuck = 0;
-    let yawSway = 0, pitchSway = 0, lastYaw, lastPitch;
+    let breath = 0, walk = 0, run = 0, tuck = 0;
+    let yawSway = 0, pitchSway = 0, yawVelocity = 0, pitchVelocity = 0, lastYaw, lastPitch, lastSpeed = 0;
+    const aim = new T.Vector3(), ember = new T.PointLight(0xff5922, 0, 3);
+    scene.add(ember,key.target);
+    key.castShadow = true;
+    key.shadow.mapSize.set(256,256);
+    Object.assign(key.shadow.camera,{left:-.67,right:.67,top:.67,bottom:-.67,near:.1,far:3});
+    key.shadow.camera.updateProjectionMatrix();
+    key.shadow.normalBias=.0008;
+    model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+    const cold=new T.Color(0xc6d8ec), warm=new T.Color(0xffd09e);
     const damp = (value, target, rate, dt) => T.MathUtils.lerp(value, target, 1 - Math.exp(-rate * dt));
     return {
-      hide() { lastYaw = lastPitch = undefined; },
-      draw(renderer, camera, player, yaw, pitch, clearance, dt) {
+      hide() { lastYaw = lastPitch = undefined; lastSpeed=yawVelocity=pitchVelocity=yawSway=pitchSway=0; },
+      dispose() { key.shadow.dispose(); },
+      draw(renderer, camera, player, yaw, pitch, clearance, dt, phase, roomLights) {
         if (eye.aspect !== camera.aspect || eye.fov !== camera.fov) {
           eye.aspect = camera.aspect;
           eye.fov = camera.fov;
@@ -214,12 +224,17 @@
         tuck = damp(tuck, 1 - T.MathUtils.smoothstep(clearance, .38, .74), 16, dt);
         breath += dt * 1.35;
         // Slow walk has noticeably slower/softer frequency; normal walk is brisk; sprint is high frequency
-        const phaseRate = (slowWalk ? 3.0 : 4.4) + pace * 6.0;
-        phase += dt * phaseRate * (player.reversing ? -.75 : 1);
-        const turn = lastYaw == null ? 0 : Math.atan2(Math.sin(yaw - lastYaw), Math.cos(yaw - lastYaw));
-        const tilt = lastPitch == null ? 0 : pitch - lastPitch;
-        yawSway = damp(yawSway, T.MathUtils.clamp(turn * 4, -.19, .19), 13, dt);
-        pitchSway = damp(pitchSway, T.MathUtils.clamp(tilt * 4, -.15, .15), 13, dt);
+        const turn = lastYaw == null ? 0 : T.MathUtils.euclideanModulo(yaw-lastYaw+Math.PI, 2*Math.PI)-Math.PI;
+        yawVelocity -= T.MathUtils.clamp(turn,-.6,.6)*3.1;
+        pitchVelocity -= T.MathUtils.clamp(pitch-(lastPitch ?? pitch),-.4,.4)*2.5;
+        pitchVelocity += (player.speed-lastSpeed)*.028;
+        lastSpeed=player.speed;
+        for (let time=dt; time>0; time-=1/120) {
+          const h=Math.min(time,1/120);
+          yawVelocity+=(-125*yawSway-16*yawVelocity)*h;
+          pitchVelocity+=(-115*pitchSway-15*pitchVelocity)*h;
+          yawSway+=yawVelocity*h; pitchSway+=pitchVelocity*h;
+        }
         lastYaw = yaw;
         lastPitch = pitch;
         const motion = reducedMotion.matches ? .27 : 1;
@@ -233,7 +248,7 @@
         // Base separation: wider in idle and landscape, tucked in during run
         const separation = (Math.min(.28, camera.aspect * .275) + .036 - run * .03) * (.88 + .12 * portrait);
         // Base Y: substantially sunk down, naturally drooping at sides
-        const baseY = -.187 - .023 * portrait + run * .068 + .002 * Math.sin(breath) - tuck * .03;
+        const baseY = -.187 - .023 * portrait + run * .025 + .002 * Math.sin(breath) - tuck * .03;
         const baseZ = -.215 - run * .02 + tuck * .038;
         // Hands rest at the lower corners and rise with the running gait.
         const baseRotX = -.33 + run * .24 + .0025 * Math.sin(breath) + tuck * .12 - pitchSway * .5 * motion;
@@ -250,7 +265,7 @@
           // Asymmetric natural forward-up vs backward-down swing:
           // Forward swing (step > 0): swings forward & up into lower FOV, slight inward arc
           const fwd = Math.max(0, step);
-          const fwdY = fwd * (walkSwing * .075 + runSwing * .08);
+          const fwdY = fwd * (walkSwing * .075 + runSwing * .042);
           const fwdRotX = fwd * (walkSwing * .30 + runSwing * .26);
           const fwdZ = -fwd * (walkSwing * .08 + runSwing * .08);
           const fwdInX = -side * fwd * (walkSwing * .015 + runSwing * .025);
@@ -263,26 +278,44 @@
           const backOutX = side * (-back) * (walkSwing * .01 + runSwing * .015);
 
           arm.position.set(
-            side * separation + fwdInX + backOutX,
-            baseY + fwdY + backY + side * .003,
-            baseZ + fwdZ + backZ + side * .006
+            side * (separation - (i===0?.047:.012)) + fwdInX + backOutX,
+            baseY + (i===0?.095:-.017) + fwdY + backY + side * .003,
+            baseZ + (i===0?-.065:.015) + fwdZ + backZ + side * .006
           );
           arm.rotation.set(
             baseRotX + fwdRotX + backRotX,
-            side * .055 - yawSway * .54 * motion,
-            side * (-.035 + run * .065) + yawSway * .22 * motion
+            side * .24 - yawSway * .54 * motion,
+            side * (.32 + run * .065) + yawSway * .22 * motion
           );
         }
         // Keep the stage's fill and sunlight direction in camera-local space.
         fill.position.copy(hemi.position).transformDirection(camera.matrixWorldInverse);
         key.position.copy(sun.position).sub(sun.target.position).transformDirection(camera.matrixWorldInverse);
+        scene.environment=worldScene.environment;
+        scene.environmentIntensity=roomLights?.visible ? .30 : .56;
+        const inside=!!roomLights?.visible;
+        fill.color.copy(cold);
+        fill.groundColor.set(inside ? 0x35251e : 0x515651);
+        fill.intensity=inside ? 1.17 : 1.22;
+        key.color.copy(inside ? warm : cold);key.intensity=inside ? 1.85 : 1.9;
+        if(inside){
+          aim.copy(roomLights.children[1].position).sub(camera.position).transformDirection(camera.matrixWorldInverse);
+          key.position.copy(aim);
+          ember.position.copy(roomLights.children[2].position).applyMatrix4(camera.matrixWorldInverse);
+        }
+        ember.intensity=inside ? .60 : 0;
+        key.target.position.set(0,-.13,-.33);key.position.add(key.target.position);
         const autoClear = renderer.autoClear;
+        // Refresh the small hand shadow without invalidating the courtyard shadow cache.
+        const updateShadows=renderer.shadowMap.needsUpdate;
+        renderer.shadowMap.needsUpdate=true;
         renderer.autoClear = false;
         try {
           renderer.clearDepth();
           renderer.render(scene, eye);
         } finally {
           renderer.autoClear = autoClear;
+          renderer.shadowMap.needsUpdate=updateShadows;
         }
         return run > .5 ? 'run' : walk > .28 ? 'walk' : 'idle';
       }
@@ -295,16 +328,16 @@
     const environment = M.visual3d.environment(logicalScene);
     const snowy = environment.terrain === 'snow';
     const staging = M.visual3d.staging(logicalScene);
-    const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel);
+    const assets = await M.assets3d.load(T, options.signal, logicalScene.streetModel, logicalScene.sceneId === 'chapter-3/scene-zunyi');
     const cinematic = logicalScene.sceneId === 'chapter-3/scene-zunyi';
-    let reflectionTarget = null;
+    let reflectionTarget = null, roomReflection = null;
     let winterSky = null, winterGrass = null;
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
     function releaseResources(root = worldRoot, fullScene = true) {
       const geometries = new Set(), mats = new Set(), textures = new Set(), images = new Set();
       if (fullScene) {
-        reflectionTarget?.dispose();
+        reflectionTarget?.dispose(); roomReflection?.dispose();
         winterSky?.dispose();
         winterGrass?.dispose();
         assets?.collect(geometries, mats, textures);
@@ -1894,10 +1927,12 @@
 
       indoorLightGroup = new T.Group();
       indoorLightGroup.name = 'zunyi-indoor-lights';
-      const indoorFill = new T.AmbientLight('#fff6e9', 2.65);
-      const lampLight = new T.PointLight('#ffc478', 2.0, 8.0, 1.8);
+      const indoorFill = new T.AmbientLight('#e4e8f0', 2.48);
+      const lampLight = new T.PointLight('#ffb375', 1.3, 6, 2);
       lampLight.position.copy(toWorld(81, 30, indoorFloorY + 2.5));
-      indoorLightGroup.add(indoorFill, lampLight);
+      const coal=new T.PointLight(0xff622e,.42,1.75,2);
+      coal.position.copy(roomCenters.get('Prop_CharcoalBrazier'));coal.position.y+=.14;
+      indoorLightGroup.add(indoorFill, lampLight,coal);
       worldRoot.add(indoorLightGroup);
       indoorLightGroup.visible = false;
 
@@ -1964,7 +1999,16 @@
         scene.fog = null;
         savedOutdoorBg = scene.background;
         scene.background = new T.Color('#a9b7c4');
-        if (indoorLightGroup) indoorLightGroup.visible = true;
+        camera.fov=59; camera.updateProjectionMatrix();
+        indoorLightGroup.visible=true;
+        if (!roomReflection) {
+          const generator=new T.PMREMGenerator(renderer);
+          try { roomReflection=generator.fromScene(scene,.025,.06,12,{size:64,position:toWorld(80.0,28.9,indoorFloorY+.56)}); }
+          finally { generator.dispose(); }
+        }
+        scene.environment=roomReflection.texture;
+        scene.environmentIntensity=.63;
+        renderer.toneMappingExposure=1.19;
 
         if (activeSession?.grid) {
           savedOutdoorClearance = activeSession.grid.clearance;
@@ -2005,6 +2049,10 @@
 
         scene.fog = savedOutdoorFog;
         scene.background = savedOutdoorBg;
+        scene.environment=reflectionTarget?.texture ?? null;
+        scene.environmentIntensity=.98;
+        camera.fov=52; camera.updateProjectionMatrix();
+        renderer.toneMappingExposure=staging.exposure;
 
         if (activeSession?.grid && savedOutdoorClearance) {
           activeSession.grid.clearance = savedOutdoorClearance;
@@ -2127,13 +2175,19 @@
       stats.cameraOccluded = occluded;
     }
 
+    let stepPhase=0, stepAmplitude=0;
+    const quietMotion=matchMedia('(prefers-reduced-motion: reduce)');
     function placeActiveCamera(dt) {
       if (cameraMode === 'fps') {
         // Both views share the same vertically smoothed terrain and stair sample.
         camera.position.copy(followTarget);
-        camera.position.y += EYE_HEIGHT - FOCUS_HEIGHT;
+        const speed=logicalScene.focusActor?.speed || 0;
+        stepAmplitude=T.MathUtils.damp(stepAmplitude,quietMotion.matches?0:Math.min(speed/4,1.35),12,dt);
+        stepPhase+=dt*(1.8+speed*1.55);
+        camera.position.y += EYE_HEIGHT - FOCUS_HEIGHT - .013*stepAmplitude*Math.cos(2*stepPhase);
         viewDirection.set(Math.cos(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.sin(yaw) * Math.cos(pitch));
         camera.lookAt(lookPoint.copy(camera.position).add(viewDirection));
+        camera.rotateZ(.005*stepAmplitude*Math.sin(stepPhase));
         updateCameraStats(0, false);
       } else {
         placeCamera(followTarget, dt);
@@ -2318,6 +2372,7 @@
         toastEl.remove();
         relicModal.remove();
         window.removeEventListener('keydown', modalKeyHandler, true);
+        arms?.dispose();
         actors?.dispose();
         streetLife?.dispose();
         weather?.dispose();
@@ -2412,7 +2467,7 @@
       const showArms = arms && player && cameraMode === 'fps' && !intro && !logicalScene.pausedDim;
       if (showArms) {
         const clearance = cameraClearance(camera.position, viewDirection, .78, .025, camera.position.y);
-        stats.armsState = arms.draw(renderer, camera, player, viewYaw, pitch, clearance, dt);
+        stats.armsState = arms.draw(renderer, camera, player, viewYaw, pitch, clearance, dt, stepPhase, indoorLightGroup);
       } else {
         arms?.hide();
         stats.armsState = null;

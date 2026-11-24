@@ -179,6 +179,74 @@
     };
   }
 
+  function createArms(T, model, worldScene, hemi, sun) {
+    const left = model?.getObjectByName('FPS_Arm_Left');
+    const right = model?.getObjectByName('FPS_Arm_Right');
+    if (!left || !right) return null;
+    const scene = new T.Scene();
+    const eye = new T.PerspectiveCamera(52, 1, .055, 2);
+    const fill = hemi.clone();
+    const key = new T.DirectionalLight(sun.color, sun.intensity * .76);
+    scene.add(eye, fill, key);
+    eye.add(model);
+    scene.environment = worldScene.environment;
+    scene.environmentIntensity = worldScene.environmentIntensity;
+    const arms = [left, right];
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let phase = 0, breath = 0, walk = 0, run = 0, tuck = 0;
+    let yawSway = 0, pitchSway = 0, lastYaw, lastPitch;
+    const damp = (value, target, rate, dt) => T.MathUtils.lerp(value, target, 1 - Math.exp(-rate * dt));
+    return {
+      hide() { lastYaw = lastPitch = undefined; },
+      draw(renderer, camera, player, yaw, pitch, clearance, dt) {
+        if (eye.aspect !== camera.aspect || eye.fov !== camera.fov) {
+          eye.aspect = camera.aspect;
+          eye.fov = camera.fov;
+          eye.updateProjectionMatrix();
+        }
+        const pace = T.MathUtils.clamp(player.speed / 6.5, 0, 1);
+        const targetRun = player.reversing ? 0 : T.MathUtils.smoothstep(player.speed, 4.1, 6.4);
+        const targetWalk = T.MathUtils.smoothstep(player.speed, .15, 1.8) * (1 - targetRun);
+        walk = damp(walk, targetWalk, 11, dt);
+        run = damp(run, targetRun, 11, dt);
+        tuck = damp(tuck, 1 - T.MathUtils.smoothstep(clearance, .38, .74), 16, dt);
+        breath += dt * 1.45;
+        phase += dt * (4.1 + pace * 6.4) * (player.reversing ? -.85 : 1);
+        const turn = lastYaw == null ? 0 : Math.atan2(Math.sin(yaw - lastYaw), Math.cos(yaw - lastYaw));
+        const tilt = lastPitch == null ? 0 : pitch - lastPitch;
+        yawSway = damp(yawSway, T.MathUtils.clamp(turn * 4, -.19, .19), 13, dt);
+        pitchSway = damp(pitchSway, T.MathUtils.clamp(tilt * 4, -.15, .15), 13, dt);
+        lastYaw = yaw;
+        lastPitch = pitch;
+        const motion = reducedMotion.matches ? .27 : 1;
+        const swing = (walk * (.028 + pace * .043) + run * .113) * (player.reversing ? .62 : 1) * motion;
+        const portrait = Math.min(1, camera.aspect / .78);
+        const separation = Math.min(.25, camera.aspect * .255);
+        for (let i = 0; i < arms.length; i++) {
+          const side = i * 2 - 1, step = Math.sin(phase) * side;
+          const arm = arms[i];
+          arm.scale.setScalar(.73 + .27 * portrait);
+          arm.position.set(side * (separation - run * .016 * portrait), -.227 - .03 * portrait + side * .005 + run * .025 + .003 * Math.sin(breath) + step * swing * .16 - tuck * .026,
+            -.174 + side * .008 - step * swing * .37 + tuck * .038);
+          arm.rotation.set(-.025 + step * swing * 1.10 - pitchSway * .53 * motion + tuck * .11,
+            side * .055 - yawSway * .56 * motion, side * (-.025 + run * .08) + yawSway * .22 * motion);
+        }
+        // Keep the stage's fill and sunlight direction in camera-local space.
+        fill.position.copy(hemi.position).transformDirection(camera.matrixWorldInverse);
+        key.position.copy(sun.position).sub(sun.target.position).transformDirection(camera.matrixWorldInverse);
+        const autoClear = renderer.autoClear;
+        renderer.autoClear = false;
+        try {
+          renderer.clearDepth();
+          renderer.render(scene, eye);
+        } finally {
+          renderer.autoClear = autoClear;
+        }
+        return run > .5 ? 'run' : walk > .28 ? 'walk' : 'idle';
+      }
+    };
+  }
+
   async function create(container, logicalScene, options = {}) {
     const T = await import('three');
     if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -1520,6 +1588,8 @@
       }
     }
     scene.add(sun, sun.target);
+    const arms = createArms(T, assets.models.playerArms, scene, hemi, sun);
+    renderer.info.autoReset = false;
 
     const ringGeometry = new T.RingGeometry(0.65, logicalScene.winterRain ? .72 : .85, 32);
     const ringMaterial = new T.MeshBasicMaterial({ color: logicalScene.winterRain ? '#ceb582' : '#e8c87a', transparent: true, opacity: logicalScene.winterRain ? .40 : .72, side: T.DoubleSide, depthWrite: false });
@@ -1937,9 +2007,21 @@
         positions.needsUpdate = true;
       }
       if (weather && logicalScene.focusActor) weather.update(time, logicalScene.focusActor, camera);
+      renderer.info.reset();
       renderer.render(scene, camera);
+      const worldDraws = renderer.info.render.calls;
+      const player = logicalScene.focusActor;
+      const showArms = arms && player && cameraMode === 'fps' && !intro && !logicalScene.pausedDim;
+      if (showArms) {
+        const clearance = cameraClearance(camera.position, viewDirection, .78, .025, camera.position.y);
+        stats.armsState = arms.draw(renderer, camera, player, viewYaw, pitch, clearance, dt);
+      } else {
+        arms?.hide();
+        stats.armsState = null;
+      }
       stats.frames++;
       stats.drawCalls = renderer.info.render.calls;
+      stats.armsDrawCalls = stats.drawCalls - worldDraws;
       stats.triangles = renderer.info.render.triangles;
       stats.renderMs = +(performance.now() - started).toFixed(2);
       if (stats.renderMs > 24) slow++; else slow = Math.max(0, slow - 1);

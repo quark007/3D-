@@ -50,7 +50,8 @@
       tree: '/assets/models/tree_small_02/tree-cinema.glb',
       rock: '/assets/models/rock_07/model.gltf',
       crate: '/assets/models/wooden_crate_01/model.gltf',
-      fern: '/assets/models/fern_02/model.gltf'
+      fern: '/assets/models/fern_02/model.gltf',
+      playerArms: '/assets/characters/player/fps-arms-web.glb'
     };
     if (streetModel) sources.street = streetModel.url;
     for (const [key, url] of Object.entries(sources)) jobs.push((async () => {
@@ -72,7 +73,10 @@
         }
       });
       signal?.throwIfAborted();
-    })());
+    })().catch(error => {
+      if (key !== 'playerArms' || signal?.aborted) throw error;
+      console.warn('第一人称双手加载失败', error);
+    }));
     const results = await Promise.allSettled(jobs);
     draco.dispose();
     const failed = results.find(result => result.status === 'rejected');

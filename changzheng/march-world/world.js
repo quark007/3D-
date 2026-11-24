@@ -139,7 +139,7 @@
         input.showAction(!!near, near ? (near.kind === 'npc' ? '交谈' : near.kind === 'exit' ? '前往' : '查看') : '交互');
       }
       view.follow(player, dt);
-      anchorsMod.layout(view.cam, scene.world.h, project);
+      anchorsMod.layout(view.cam, project, view.getCameraMode?.() === 'fps', near);
       if (!pin.hidden) {
         const head = view.headPoint ? view.headPoint(player) : player.headPoint(view.cam);
         const px = Math.round(head.x * 2) / 2 + 'px', py = Math.round(head.y * 2) / 2 + 'px';

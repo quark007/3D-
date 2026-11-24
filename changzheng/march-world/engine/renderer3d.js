@@ -148,6 +148,7 @@
     }
     grass.instanceMatrix.needsUpdate=true;
     return {
+      group,
       update(t,player,camera){
         wind.value=t;
         for(let i=0;i<seeds.length;i++){
@@ -205,13 +206,16 @@
           eye.updateProjectionMatrix();
         }
         const pace = T.MathUtils.clamp(player.speed / 6.5, 0, 1);
+        const slowWalk = player.speed <= 2.2;
         const targetRun = player.reversing ? 0 : T.MathUtils.smoothstep(player.speed, 4.1, 6.4);
         const targetWalk = T.MathUtils.smoothstep(player.speed, .15, 1.8) * (1 - targetRun);
         walk = damp(walk, targetWalk, 11, dt);
         run = damp(run, targetRun, 11, dt);
         tuck = damp(tuck, 1 - T.MathUtils.smoothstep(clearance, .38, .74), 16, dt);
-        breath += dt * 1.45;
-        phase += dt * (4.1 + pace * 6.4) * (player.reversing ? -.85 : 1);
+        breath += dt * 1.35;
+        // Slow walk has noticeably slower/softer frequency; normal walk is brisk; sprint is high frequency
+        const phaseRate = (slowWalk ? 3.0 : 4.4) + pace * 6.0;
+        phase += dt * phaseRate * (player.reversing ? -.75 : 1);
         const turn = lastYaw == null ? 0 : Math.atan2(Math.sin(yaw - lastYaw), Math.cos(yaw - lastYaw));
         const tilt = lastPitch == null ? 0 : pitch - lastPitch;
         yawSway = damp(yawSway, T.MathUtils.clamp(turn * 4, -.19, .19), 13, dt);
@@ -219,17 +223,55 @@
         lastYaw = yaw;
         lastPitch = pitch;
         const motion = reducedMotion.matches ? .27 : 1;
-        const swing = (walk * (.028 + pace * .043) + run * .113) * (player.reversing ? .62 : 1) * motion;
+        // Swing factors: slow walk gentler, S reverse walk significantly reduced amplitude
+        const speedScale = slowWalk ? .62 : 1;
+        const reverseScale = player.reversing ? .35 : 1;
+        const walkSwing = walk * speedScale * reverseScale * motion;
+        const runSwing = run * motion;
+
         const portrait = Math.min(1, camera.aspect / .78);
-        const separation = Math.min(.25, camera.aspect * .255);
+        // Base separation: wider in idle and landscape, tucked in during run
+        const separation = (Math.min(.28, camera.aspect * .275) + .036 - run * .03) * (.88 + .12 * portrait);
+        // Base Y: substantially sunk down, naturally drooping at sides
+        const baseY = -.280 - .025 * portrait + run * .068 + .002 * Math.sin(breath) - tuck * .03;
+        const baseZ = -.165 - run * .02 + tuck * .038;
+        // Base RotX: downward tilt (-0.42 rad = ~-24 deg downward pitch), raising up in run
+        const baseRotX = -.42 + run * .24 + .0025 * Math.sin(breath) + tuck * .12 - pitchSway * .5 * motion;
+
         for (let i = 0; i < arms.length; i++) {
-          const side = i * 2 - 1, step = Math.sin(phase) * side;
+          const side = i * 2 - 1;
+          // Exact 180° phase difference between left and right hands:
+          // Left hand: step = sin(phase)
+          // Right hand: step = sin(phase + PI) = -sin(phase)
+          const step = Math.sin(phase + (i === 0 ? 0 : Math.PI));
           const arm = arms[i];
           arm.scale.setScalar(.73 + .27 * portrait);
-          arm.position.set(side * (separation - run * .016 * portrait), -.227 - .03 * portrait + side * .005 + run * .025 + .003 * Math.sin(breath) + step * swing * .16 - tuck * .026,
-            -.174 + side * .008 - step * swing * .37 + tuck * .038);
-          arm.rotation.set(-.025 + step * swing * 1.10 - pitchSway * .53 * motion + tuck * .11,
-            side * .055 - yawSway * .56 * motion, side * (-.025 + run * .08) + yawSway * .22 * motion);
+
+          // Asymmetric natural forward-up vs backward-down swing:
+          // Forward swing (step > 0): swings forward & up into lower FOV, slight inward arc
+          const fwd = Math.max(0, step);
+          const fwdY = fwd * (walkSwing * .075 + runSwing * .08);
+          const fwdRotX = fwd * (walkSwing * .30 + runSwing * .26);
+          const fwdZ = -fwd * (walkSwing * .08 + runSwing * .08);
+          const fwdInX = -side * fwd * (walkSwing * .015 + runSwing * .025);
+
+          // Backward swing (step < 0): sinks deep below bottom edge of screen
+          const back = Math.min(0, step); // negative
+          const backY = back * (walkSwing * .045 + runSwing * .06);
+          const backRotX = back * (walkSwing * .14 + runSwing * .18);
+          const backZ = -back * (walkSwing * .04 + runSwing * .05);
+          const backOutX = side * (-back) * (walkSwing * .01 + runSwing * .015);
+
+          arm.position.set(
+            side * separation + fwdInX + backOutX,
+            baseY + fwdY + backY + side * .003,
+            baseZ + fwdZ + backZ + side * .006
+          );
+          arm.rotation.set(
+            baseRotX + fwdRotX + backRotX,
+            side * .055 - yawSway * .54 * motion,
+            side * (-.035 + run * .065) + yawSway * .22 * motion
+          );
         }
         // Keep the stage's fill and sunlight direction in camera-local space.
         fill.position.copy(hemi.position).transformDirection(camera.matrixWorldInverse);
@@ -308,7 +350,10 @@
     const props = logicalScene.props.map(alignedProp);
     const terrain = M.visual3d.terrain(logicalScene, props);
     const steps = logicalScene.stepSurfaces;
+    let isIndoors = false;
+    const indoorFloorY = 4.8;
     const surfaceHeight = (x, y) => {
+      if (cinematic && isIndoors) return indoorFloorY;
       const base = terrain.support(x, y);
       if (!steps || !assets.models.street) return base;
       // A narrow approach band lets the stance rise before the leading foot reaches each nosing.
@@ -1677,6 +1722,380 @@
       guideLine.computeLineDistances();
     }
 
+    /* 遵义二楼核心会议室管理与 5 处史实考据 */
+    const fadeCurtain = document.createElement('div');
+    fadeCurtain.className = 'czmw-fade-curtain';
+    container.append(fadeCurtain);
+
+    const toastEl = document.createElement('div');
+    toastEl.className = 'czmw-toast';
+    container.append(toastEl);
+    let toastTimer = 0;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('is-visible'), 3200);
+    }
+
+    const relicModal = document.createElement('div');
+    relicModal.className = 'czmw-relic-modal';
+    relicModal.hidden = true;
+    relicModal.innerHTML = `
+      <div class="czmw-relic-card" role="dialog" aria-modal="true">
+        <span class="czmw-relic-badge">史实考据</span>
+        <h3 class="czmw-relic-title"></h3>
+        <div class="czmw-relic-meta"></div>
+        <p class="czmw-relic-desc"></p>
+        <div class="czmw-relic-footer">
+          <span class="czmw-relic-hint">按 E 或 Esc 关闭</span>
+          <button class="czmw-relic-close" type="button">关闭</button>
+        </div>
+      </div>
+    `;
+    container.append(relicModal);
+
+    function openRelicModal(data) {
+      if (!data) return;
+      relicModal.querySelector('.czmw-relic-title').textContent = data.name;
+      relicModal.querySelector('.czmw-relic-meta').textContent = data.era;
+      relicModal.querySelector('.czmw-relic-desc').textContent = data.desc;
+      relicModal.hidden = false;
+      relicModal.classList.add('is-open');
+      if (window.CZMarchWorld) CZMarchWorld.pause('relic-modal');
+    }
+    function closeRelicModal() {
+      if (relicModal.hidden) return;
+      relicModal.classList.remove('is-open');
+      relicModal.hidden = true;
+      if (window.CZMarchWorld) CZMarchWorld.resume('relic-modal');
+    }
+    relicModal.querySelector('.czmw-relic-close').onclick = closeRelicModal;
+    relicModal.onclick = e => { if (e.target === relicModal) closeRelicModal(); };
+    const modalKeyHandler = e => {
+      if (!relicModal.hidden && (e.code === 'KeyE' || e.code === 'Escape')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeRelicModal();
+      }
+    };
+    window.addEventListener('keydown', modalKeyHandler, true);
+
+    const RELIC_DATA = {
+      Prop_MeetingTable: {
+        name: '板栗色长桌与二十人座次复原',
+        era: '1935年1月15日至17日 · 柏辉章公馆二楼',
+        desc: '这面长约3.3米、宽约1.1米的板栗色长桌，是遵义会议的核心见证。1935年1月15日至17日，中共中央政治局扩大会议在此举行，毛泽东、周恩来、朱德、张闻天、王稼祥、博古、李德等20人围坐于长桌周围。会议深入讨论了第五次反“围剿”以来的军事路线，确立了毛泽东同志在党中央和红军的领导地位，在极端危急的历史关头挽救了党、挽救了红军、挽救了中国革命。',
+        center: [80.84, 30.0, 5.2]
+      },
+      Prop_HangingLamp: {
+        name: '荷叶边盖洋吊灯',
+        era: '夜间会议核心光源 · 煤油挂灯',
+        desc: '悬挂于会议室天花中央的荷叶边玻璃盖洋吊灯，为中西合璧式煤油照明灯具。遵义会议的三天会期均在晚间至深夜举行，这盏煤油吊灯散发的柔和暖光，照亮了中央政治局同志激烈讨论的发言记录与决议草案，是长征生死转折时刻的照明见证。',
+        center: [81.0, 30.0, 7.4]
+      },
+      Prop_CharcoalBrazier: {
+        name: '长桌下取暖炭火盆',
+        era: '黔北隆冬严寒与会场实况',
+        desc: '1935年1月的贵州遵义正值数九隆冬，阴雨连绵，湿冷刺骨。为保障会议连续数小时的高强度讨论，长桌下方特置带架灰黑生铁炭火盆，盆内燃以木炭取暖。炭火余温伴随会议代表们通宵达旦地总结经验教训，生动再现了艰苦岁月中的真实会场风貌。',
+        center: [80.84, 28.7, 4.95]
+      },
+      Prop_WallClock: {
+        name: '东壁自鸣木壳机械摆钟',
+        era: '历史时刻的精准记录者',
+        desc: '高悬于会议室东壁板墙上的木壳机械摆钟，按历史原貌1:1复原。摆钟发条驱动、自鸣报时，见证了1935年1月15日晚会议开幕至17日深夜原则通过《中央关于反对敌人五次“围剿”的总结决议》的全部历史历程。',
+        center: [83.24, 30.06, 6.64]
+      },
+      Prop_WardrobeMirror: {
+        name: '穿衣镜壁柜与西壁彩玻窗',
+        era: '中西合璧黔北民居建筑肌理',
+        desc: '原会址主楼为黔军师长柏辉章公馆，二楼西侧客厅用作会议室。东侧板壁并排立有带全身穿衣镜的木质衣柜与双门暗柜；西侧整面开设有红绿彩绘玻璃方格采光窗，兼具二十世纪三十年代黔北传统木构与西式洋房装饰特色。',
+        center: [83.08, 31.26, 5.94]
+      }
+    };
+    const DOOR_EXIT_DATA = {
+      name: '二楼会议室出口',
+      center: [82.44, 26.86, 5.9]
+    };
+
+    let indoorRoomModel = null;
+    let indoorLightGroup = null;
+    let activeIndoorTarget = null;
+    let savedOutdoorClearance = null;
+    let savedOutdoorFog = null;
+    let savedOutdoorBg = null;
+
+    function updateIndoorRelicDetection(camera) {
+      if (!isIndoors) return;
+      const dir = new T.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      const camPos = camera.position;
+      let bestTarget = null, bestScore = -Infinity;
+
+      const doorPos = toWorld(DOOR_EXIT_DATA.center[0], DOOR_EXIT_DATA.center[1], DOOR_EXIT_DATA.center[2]);
+      const doorOffset = doorPos.clone().sub(camPos);
+      const doorDist = doorOffset.length();
+      doorOffset.normalize();
+      const doorDot = dir.dot(doorOffset);
+      if (doorDist <= 2.2 && (doorDist < 0.9 || doorDot >= 0.35)) {
+        bestTarget = { type: 'door', data: DOOR_EXIT_DATA };
+        bestScore = 100;
+      }
+
+      if (!bestTarget) {
+        for (const [key, relic] of Object.entries(RELIC_DATA)) {
+          const relicPos = toWorld(relic.center[0], relic.center[1], relic.center[2]);
+          const offset = relicPos.clone().sub(camPos);
+          const dist = offset.length();
+          if (dist > 3.4) continue;
+          offset.normalize();
+          const dot = dir.dot(offset);
+          if (dot >= 0.38) {
+            const score = dot / (dist + 0.3);
+            if (score > bestScore) {
+              bestScore = score;
+              bestTarget = { type: 'relic', key, data: relic };
+            }
+          }
+        }
+      }
+
+      activeIndoorTarget = bestTarget;
+      const fpsTip = container.querySelector('.czmw-fps-tip');
+      if (fpsTip) {
+        if (bestTarget) {
+          fpsTip.hidden = false;
+          const span = fpsTip.querySelector('span');
+          const b = fpsTip.querySelector('b');
+          if (bestTarget.type === 'door') {
+            if (span) span.textContent = '二楼会议室出口';
+            if (b) b.textContent = 'E 返回前院';
+          } else {
+            if (span) span.textContent = bestTarget.data.name;
+            if (b) b.textContent = 'E 查看考据';
+          }
+          fpsTip.classList.add('is-visible');
+        } else if (isIndoors) {
+          fpsTip.classList.remove('is-visible');
+        }
+      }
+    }
+
+    function createProceduralRoom() {
+      const root = new T.Group();
+      root.name = 'zunyi-meeting-room-proc';
+      const wallMat = new T.MeshStandardMaterial({ color: '#524538', roughness: 0.85 });
+      const woodMat = new T.MeshStandardMaterial({ color: '#3c291e', roughness: 0.65 });
+      const glassMat = new T.MeshStandardMaterial({ color: '#9cb5b5', roughness: 0.2, transparent: true, opacity: 0.75 });
+      const metalMat = new T.MeshStandardMaterial({ color: '#252321', roughness: 0.85 });
+
+      const shell = new T.Group(); shell.name = 'RoomShell';
+      const floor = new T.Mesh(new T.BoxGeometry(4.6, 0.1, 6.4), woodMat);
+      floor.position.set(0, -0.05, 0); floor.receiveShadow = true;
+      const ceiling = new T.Mesh(new T.BoxGeometry(4.6, 0.1, 6.4), wallMat);
+      ceiling.position.set(0, 3.45, 0);
+      const northWall = new T.Mesh(new T.BoxGeometry(4.6, 3.4, 0.1), wallMat);
+      northWall.position.set(0, 1.7, -3.2);
+      const southWall = new T.Mesh(new T.BoxGeometry(4.6, 3.4, 0.1), wallMat);
+      southWall.position.set(0, 1.7, 3.2);
+      const eastWall = new T.Mesh(new T.BoxGeometry(0.1, 3.4, 6.4), wallMat);
+      eastWall.position.set(2.3, 1.7, 0);
+      const westWall = new T.Mesh(new T.BoxGeometry(0.1, 3.4, 6.4), wallMat);
+      westWall.position.set(-2.3, 1.7, 0);
+      shell.add(floor, ceiling, northWall, southWall, eastWall, westWall);
+      root.add(shell);
+
+      const door = new T.Mesh(new T.BoxGeometry(1.0, 2.2, 0.12), woodMat);
+      door.name = 'Door_Exit';
+      door.position.set(1.44, 1.1, -3.14);
+      root.add(door);
+
+      const table = new T.Mesh(new T.BoxGeometry(1.14, 0.82, 3.3), woodMat);
+      table.name = 'Prop_MeetingTable';
+      table.position.set(-0.16, 0.41, 0);
+      table.castShadow = true; table.receiveShadow = true;
+      root.add(table);
+
+      const brazier = new T.Mesh(new T.CylinderGeometry(0.24, 0.28, 0.28, 16), metalMat);
+      brazier.name = 'Prop_CharcoalBrazier';
+      brazier.position.set(-0.16, 0.14, -1.3);
+      root.add(brazier);
+
+      const lamp = new T.Mesh(new T.CylinderGeometry(0.25, 0.35, 0.45, 16), glassMat);
+      lamp.name = 'Prop_HangingLamp';
+      lamp.position.set(0, 2.6, 0);
+      root.add(lamp);
+
+      const wardrobe = new T.Mesh(new T.BoxGeometry(0.42, 2.28, 1.16), woodMat);
+      wardrobe.name = 'Prop_WardrobeMirror';
+      wardrobe.position.set(2.08, 1.14, 1.26);
+      root.add(wardrobe);
+
+      const clock = new T.Mesh(new T.BoxGeometry(0.11, 0.50, 0.22), woodMat);
+      clock.name = 'Prop_WallClock';
+      clock.position.set(2.24, 1.84, 0.06);
+      root.add(clock);
+
+      return root;
+    }
+
+    async function getMeetingRoomModel() {
+      if (indoorRoomModel) return indoorRoomModel;
+      const url = '/assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb';
+      let resOk = false;
+      try {
+        const resp = await fetch(url, { method: 'HEAD' });
+        resOk = resp.ok;
+      } catch {}
+
+      const mockAllowed = window.__mockMeetingRoom || location.search.includes('mockRoom=1');
+      if (!resOk && !mockAllowed) {
+        showToast('二楼会议室模型烘焙中（待合并 assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb），已安全留于前院');
+        return null;
+      }
+
+      if (resOk) {
+        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+        const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
+        const loader = new GLTFLoader();
+        const draco = new DRACOLoader();
+        draco.setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/');
+        loader.setDRACOLoader(draco);
+        try {
+          const gltf = await loader.loadAsync(url);
+          indoorRoomModel = gltf.scene;
+        } finally {
+          draco.dispose();
+        }
+      } else {
+        indoorRoomModel = createProceduralRoom();
+      }
+
+      indoorRoomModel.name = 'zunyi-meeting-room';
+      indoorRoomModel.position.copy(toWorld(81, 30, indoorFloorY));
+      worldRoot.add(indoorRoomModel);
+
+      indoorLightGroup = new T.Group();
+      indoorLightGroup.name = 'zunyi-indoor-lights';
+      const indoorFill = new T.AmbientLight('#ffe4c4', 0.88);
+      const lampLight = new T.PointLight('#ffc478', 2.0, 8.0, 1.8);
+      lampLight.position.copy(toWorld(81, 30, indoorFloorY + 2.5));
+      indoorLightGroup.add(indoorFill, lampLight);
+      worldRoot.add(indoorLightGroup);
+
+      return indoorRoomModel;
+    }
+
+    let inTransition = false;
+    function fadeTransition(fn) {
+      if (inTransition) return Promise.resolve();
+      inTransition = true;
+      fadeCurtain.classList.add('is-active');
+      return new Promise(resolve => {
+        setTimeout(async () => {
+          try {
+            await fn();
+          } finally {
+            setTimeout(() => {
+              fadeCurtain.classList.remove('is-active');
+              setTimeout(() => {
+                inTransition = false;
+                resolve();
+              }, 300);
+            }, 50);
+          }
+        }, 300);
+      });
+    }
+
+    async function enterMeetingRoom(session) {
+      const activeSession = session || view?.session;
+      const model = await getMeetingRoomModel();
+      if (!model) return false;
+
+      await fadeTransition(() => {
+        isIndoors = true;
+        model.visible = true;
+        if (street) street.visible = false;
+        const weatherGroup = weather?.group || scene.getObjectByName('zunyi-winter-weather');
+        if (weatherGroup) weatherGroup.visible = false;
+        const peds = scene.getObjectByName('zunyi-pedestrians');
+        if (peds) peds.visible = false;
+
+        savedOutdoorFog = scene.fog;
+        scene.fog = null;
+        savedOutdoorBg = scene.background;
+        scene.background = new T.Color('#0f0d0b');
+        if (indoorLightGroup) indoorLightGroup.visible = true;
+
+        if (activeSession?.grid) {
+          savedOutdoorClearance = activeSession.grid.clearance;
+          activeSession.grid.clearance = (x, y, r = 0.62) => {
+            if (x - r < 78.7 || x + r > 83.3 || y - r < 26.8 || y + r > 33.2) return false;
+            if (x + r > 80.25 && x - r < 81.45 && y + r > 28.35 && y - r < 31.65) return false;
+            return true;
+          };
+        }
+
+        const player = logicalScene.focusActor;
+        if (player) {
+          player.setPos(82.44, 27.5, Math.PI / 2);
+        }
+        setCameraMode('fps', { instant: true });
+      });
+      return true;
+    }
+
+    async function exitMeetingRoom(session) {
+      const activeSession = session || view?.session;
+      await fadeTransition(() => {
+        isIndoors = false;
+        activeIndoorTarget = null;
+        if (indoorRoomModel) indoorRoomModel.visible = false;
+        if (indoorLightGroup) indoorLightGroup.visible = false;
+        if (street) street.visible = true;
+        const weatherGroup = weather?.group || scene.getObjectByName('zunyi-winter-weather');
+        if (weatherGroup) weatherGroup.visible = true;
+        const peds = scene.getObjectByName('zunyi-pedestrians');
+        if (peds) peds.visible = true;
+
+        scene.fog = savedOutdoorFog || scene.fog;
+        scene.background = savedOutdoorBg || scene.background;
+
+        if (activeSession?.grid && savedOutdoorClearance) {
+          activeSession.grid.clearance = savedOutdoorClearance;
+        }
+
+        const player = logicalScene.focusActor;
+        if (player) {
+          player.setPos(81.0, 35.5, Math.PI / 2);
+        }
+        setCameraMode('tps', { instant: true });
+        const fpsTip = container.querySelector('.czmw-fps-tip');
+        if (fpsTip) fpsTip.classList.remove('is-visible');
+      });
+      return true;
+    }
+
+    function handleInteract(anchorId, session) {
+      const activeSession = session || view?.session;
+      if (isIndoors) {
+        if (activeIndoorTarget?.type === 'door') {
+          exitMeetingRoom(activeSession);
+          return true;
+        }
+        if (activeIndoorTarget?.type === 'relic') {
+          openRelicModal(activeIndoorTarget.data);
+          return true;
+        }
+        return false;
+      }
+      if (anchorId === 'indoor-meeting-room') {
+        enterMeetingRoom(activeSession);
+        return true;
+      }
+      return false;
+    }
+
     function cameraPosition(target, distance = boom) {
       if (staging.inspectionOffset) return target.clone().add(new T.Vector3(...staging.inspectionOffset));
       const horizontal = Math.cos(pitch) * distance;
@@ -1694,6 +2113,15 @@
       [-.12, -.12], [.12, -.12], [-.12, .12], [.12, .12]];
 
     function cameraClearance(origin, direction, length, margin, focusHeight) {
+      if (cinematic && isIndoors) {
+        let clear = length;
+        const x = origin.x + world.w / 2, z = origin.z + world.h / 2;
+        if (direction.x < -0.2) clear = Math.min(clear, Math.max(0, (x - 78.7) / -direction.x) - margin);
+        if (direction.x > 0.2) clear = Math.min(clear, Math.max(0, (83.3 - x) / direction.x) - margin);
+        if (direction.z < -0.2) clear = Math.min(clear, Math.max(0, (z - 26.8) / -direction.z) - margin);
+        if (direction.z > 0.2) clear = Math.min(clear, Math.max(0, (33.2 - z) / direction.z) - margin);
+        return Math.max(0, clear);
+      }
       let clear = length;
       cameraRay.set(origin, direction);
       cameraRay.far = length + margin;
@@ -1890,6 +2318,11 @@
       setFreeLook,
       setCameraMode,
       getCameraMode: () => cameraMode,
+      setCameraAngle(targetYaw, targetPitch = 0) {
+        if (Number.isFinite(targetYaw)) yaw = wrapAngle(targetYaw);
+        if (Number.isFinite(targetPitch)) pitch = clampPitch(targetPitch);
+        placeActiveCamera(0);
+      },
       adjustCamera(dx, dy = 0) {
         if (intro || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
         const player = logicalScene.focusActor;
@@ -1904,6 +2337,15 @@
         placeActiveCamera(0);
         player?.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
       },
+      handleInteract,
+      enterMeetingRoom,
+      exitMeetingRoom,
+      isIndoors: () => isIndoors,
+      isStreetVisible: () => street ? street.visible : true,
+      scene,
+      getIndoorTarget: () => activeIndoorTarget,
+      openRelicModal,
+      closeRelicModal,
       cameraRelativeMovement({ x, y }) {
         const heading = isOrbiting() ? lockedBodyYaw : viewYaw;
         const sin = Math.sin(heading), cos = Math.cos(heading);
@@ -1922,6 +2364,12 @@
         resizeObserver.disconnect();
         options.signal?.removeEventListener('abort', abort);
         canvas.removeEventListener('webglcontextlost', contextLost);
+        fadeCurtain.remove();
+        toastEl.remove();
+        relicModal.remove();
+        window.removeEventListener('keydown', modalKeyHandler, true);
+        if (indoorRoomModel) indoorRoomModel.removeFromParent();
+        if (indoorLightGroup) indoorLightGroup.removeFromParent();
         actors?.dispose();
         streetLife?.dispose();
         weather?.dispose();
@@ -1961,7 +2409,7 @@
       if (logicalScene.focusActor) {
         const firstPerson = cameraMode === 'fps' && !intro;
         const fadeDistance = firstPerson || intro || staging.inspectionOffset ? Infinity : (cameraDistance ?? Infinity);
-        actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight, fadeDistance, firstPerson);
+        actors?.update(dt, logicalScene.focusActor, (cinematic && isIndoors) ? [] : (logicalScene.anchorEntities || []), camera, surfaceHeight, fadeDistance, firstPerson);
         if (assets && !cinematic) {
           const p = logicalScene.focusActor;
           sun.target.position.copy(onSurface(p.x, p.y));
@@ -1969,7 +2417,7 @@
           sun.target.updateMatrixWorld();
         }
       }
-      if (streetLife && logicalScene.focusActor)
+      if (streetLife && logicalScene.focusActor && !isIndoors)
         streetLife.update(logicalScene.pausedDim ? 0 : dt, logicalScene.focusActor, camera);
       const time = ts * .001;
       for (const fire of fires) {
@@ -1991,6 +2439,7 @@
         positions.needsUpdate = true;
       }
       for (const [id, marker] of markers) {
+        if (cinematic && isIndoors) { marker.visible = false; continue; }
         const anchor = logicalScene.anchorEntities?.find(item => item.anchorId === id);
         if (anchor?.kind === 'npc') marker.visible = !!anchor.near;
         else marker.visible = anchor ? anchor.enabled && (!street || (logicalScene.focusActor && Math.hypot(anchor.x - logicalScene.focusActor.x, anchor.y - logicalScene.focusActor.y) <= 10)) : true;
@@ -2006,7 +2455,8 @@
         }
         positions.needsUpdate = true;
       }
-      if (weather && logicalScene.focusActor) weather.update(time, logicalScene.focusActor, camera);
+      if (weather && logicalScene.focusActor && !isIndoors) weather.update(time, logicalScene.focusActor, camera);
+      if (cinematic && isIndoors) updateIndoorRelicDetection(camera);
       renderer.info.reset();
       renderer.render(scene, camera);
       const worldDraws = renderer.info.render.calls;

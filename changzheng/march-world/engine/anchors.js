@@ -70,8 +70,14 @@
       return best;
     }
     let hudAnchor = null, wasFirstPerson = false;
-    const actionText = a => navigator.maxTouchPoints > 0 && innerWidth <= 900 ? '点「交互」'
-      : a.actionLabel || (a.kind === 'npc' ? 'E 交谈' : /进入/.test(a.label) ? 'E 进入' : a.kind === 'exit' ? 'E 前往' : 'E 查看');
+    const actionText = a => {
+      if (a.actionLabel) return a.actionLabel;
+      if (a.anchorId === 'chapter-3/anchor-indoor-meeting-room') return '按 E 进入二楼会议室';
+      if (navigator.maxTouchPoints > 0 && innerWidth <= 900) return '点「交互」';
+      if (a.kind === 'npc') return 'E 交谈';
+      if (/进入/.test(a.label)) return 'E 进入';
+      return a.kind === 'exit' ? 'E 前往' : 'E 查看';
+    };
 
     return {
       anchors,
@@ -129,7 +135,7 @@
         if (hudAnchor !== active) {
           hudAnchor = active;
           if (active) {
-            hudText.textContent = active.label;
+            hudText.textContent = active.anchorId === 'chapter-3/anchor-indoor-meeting-room' ? '' : active.label;
             hudAction.textContent = actionText(active);
           }
           hud.classList.toggle('is-visible', Boolean(active));

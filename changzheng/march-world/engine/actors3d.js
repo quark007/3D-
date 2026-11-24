@@ -454,6 +454,9 @@
             if (distance < (logicalScene.streetModel.actorRange ?? 18) && score < (localActors.get(key)?.score ?? Infinity)) localActors.set(key, { anchor, score });
           }
         }
+        if (!anchors.length) {
+          for (const actor of npcActors.values()) actor.root.visible = false;
+        }
         updateRoamers(dt, player, anchors, surfaceHeight);
         for (const anchor of anchors) {
           if (!hasModel(anchor) || isRoaming(anchor)) continue;

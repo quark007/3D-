@@ -233,10 +233,10 @@
         // Base separation: wider in idle and landscape, tucked in during run
         const separation = (Math.min(.28, camera.aspect * .275) + .036 - run * .03) * (.88 + .12 * portrait);
         // Base Y: substantially sunk down, naturally drooping at sides
-        const baseY = -.280 - .025 * portrait + run * .068 + .002 * Math.sin(breath) - tuck * .03;
-        const baseZ = -.165 - run * .02 + tuck * .038;
-        // Base RotX: downward tilt (-0.42 rad = ~-24 deg downward pitch), raising up in run
-        const baseRotX = -.42 + run * .24 + .0025 * Math.sin(breath) + tuck * .12 - pitchSway * .5 * motion;
+        const baseY = -.187 - .023 * portrait + run * .068 + .002 * Math.sin(breath) - tuck * .03;
+        const baseZ = -.215 - run * .02 + tuck * .038;
+        // Hands rest at the lower corners and rise with the running gait.
+        const baseRotX = -.33 + run * .24 + .0025 * Math.sin(breath) + tuck * .12 - pitchSway * .5 * motion;
 
         for (let i = 0; i < arms.length; i++) {
           const side = i * 2 - 1;
@@ -301,14 +301,16 @@
     let winterSky = null, winterGrass = null;
     let renderer = null, worldRoot = null, disposeView = null;
     const materials = new Map();
-    function releaseResources() {
+    function releaseResources(root = worldRoot, fullScene = true) {
       const geometries = new Set(), mats = new Set(), textures = new Set(), images = new Set();
-      reflectionTarget?.dispose();
-      winterSky?.dispose();
-      winterGrass?.dispose();
-      assets?.collect(geometries, mats, textures);
-      for (const mat of materials.values()) mats.add(mat);
-      worldRoot?.traverse(object => {
+      if (fullScene) {
+        reflectionTarget?.dispose();
+        winterSky?.dispose();
+        winterGrass?.dispose();
+        assets?.collect(geometries, mats, textures);
+        for (const mat of materials.values()) mats.add(mat);
+      }
+      root?.traverse(object => {
         if (object.isInstancedMesh) object.dispose();
         if (object.geometry) geometries.add(object.geometry);
         for (const mat of Array.isArray(object.material) ? object.material : [object.material]) {
@@ -1785,39 +1787,38 @@
       Prop_MeetingTable: {
         name: '板栗色长桌与二十人座次复原',
         era: '1935年1月15日至17日 · 柏辉章公馆二楼',
-        desc: '这面长约3.3米、宽约1.1米的板栗色长桌，是遵义会议的核心见证。1935年1月15日至17日，中共中央政治局扩大会议在此举行，毛泽东、周恩来、朱德、张闻天、王稼祥、博古、李德等20人围坐于长桌周围。会议深入讨论了第五次反“围剿”以来的军事路线，确立了毛泽东同志在党中央和红军的领导地位，在极端危急的历史关头挽救了党、挽救了红军、挽救了中国革命。',
-        center: [80.84, 30.0, 5.2]
+        desc: '这面长约3.3米、宽约1.1米的板栗色长桌，是遵义会议的核心见证。1935年1月15日至17日，中共中央政治局扩大会议在此举行，毛泽东、周恩来、朱德、张闻天、王稼祥、博古、李德等20人围坐于长桌周围。会议深入讨论了第五次反“围剿”以来的军事路线，确立了毛泽东同志在党中央和红军的领导地位，在极端危急的历史关头挽救了党、挽救了红军、挽救了中国革命。'
       },
       Prop_HangingLamp: {
         name: '荷叶边盖洋吊灯',
         era: '夜间会议核心光源 · 煤油挂灯',
-        desc: '悬挂于会议室天花中央的荷叶边玻璃盖洋吊灯，为中西合璧式煤油照明灯具。遵义会议的三天会期均在晚间至深夜举行，这盏煤油吊灯散发的柔和暖光，照亮了中央政治局同志激烈讨论的发言记录与决议草案，是长征生死转折时刻的照明见证。',
-        center: [81.0, 30.0, 7.4]
+        desc: '悬挂于会议室天花中央的荷叶边玻璃盖洋吊灯，为中西合璧式煤油照明灯具。遵义会议的三天会期均在晚间至深夜举行，这盏煤油吊灯散发的柔和暖光，照亮了中央政治局同志激烈讨论的发言记录与决议草案，是长征生死转折时刻的照明见证。'
       },
       Prop_CharcoalBrazier: {
         name: '长桌下取暖炭火盆',
         era: '黔北隆冬严寒与会场实况',
-        desc: '1935年1月的贵州遵义正值数九隆冬，阴雨连绵，湿冷刺骨。为保障会议连续数小时的高强度讨论，长桌下方特置带架灰黑生铁炭火盆，盆内燃以木炭取暖。炭火余温伴随会议代表们通宵达旦地总结经验教训，生动再现了艰苦岁月中的真实会场风貌。',
-        center: [80.84, 28.7, 4.95]
+        desc: '1935年1月的贵州遵义正值数九隆冬，阴雨连绵，湿冷刺骨。为保障会议连续数小时的高强度讨论，长桌下方特置带架灰黑生铁炭火盆，盆内燃以木炭取暖。炭火余温伴随会议代表们通宵达旦地总结经验教训，生动再现了艰苦岁月中的真实会场风貌。'
       },
       Prop_WallClock: {
         name: '东壁自鸣木壳机械摆钟',
         era: '历史时刻的精准记录者',
-        desc: '高悬于会议室东壁板墙上的木壳机械摆钟，按历史原貌1:1复原。摆钟发条驱动、自鸣报时，见证了1935年1月15日晚会议开幕至17日深夜原则通过《中央关于反对敌人五次“围剿”的总结决议》的全部历史历程。',
-        center: [83.24, 30.06, 6.64]
+        desc: '高悬于会议室东壁板墙上的木壳机械摆钟，按历史原貌1:1复原。摆钟发条驱动、自鸣报时，见证了1935年1月15日晚会议开幕至17日深夜原则通过《中央关于反对敌人五次“围剿”的总结决议》的全部历史历程。'
       },
       Prop_WardrobeMirror: {
         name: '穿衣镜壁柜与西壁彩玻窗',
         era: '中西合璧黔北民居建筑肌理',
-        desc: '原会址主楼为黔军师长柏辉章公馆，二楼西侧客厅用作会议室。东侧板壁并排立有带全身穿衣镜的木质衣柜与双门暗柜；西侧整面开设有红绿彩绘玻璃方格采光窗，兼具二十世纪三十年代黔北传统木构与西式洋房装饰特色。',
-        center: [83.08, 31.26, 5.94]
+        desc: '原会址主楼为黔军师长柏辉章公馆，二楼西侧客厅用作会议室。东侧板壁并排立有带全身穿衣镜的木质衣柜与双门暗柜；西侧整面开设有红绿彩绘玻璃方格采光窗，兼具二十世纪三十年代黔北传统木构与西式洋房装饰特色。'
       }
     };
     const DOOR_EXIT_DATA = {
-      name: '二楼会议室出口',
-      center: [82.44, 26.86, 5.9]
+      name: '二楼会议室出口'
     };
 
+    for (const data of [...Object.values(RELIC_DATA), DOOR_EXIT_DATA]) {
+      data.enabled = true;
+      data.label = data.name;
+      data.actionLabel = data === DOOR_EXIT_DATA ? '按 E 返回前院' : '按 E 查看考据';
+    }
     let indoorRoomModel = null;
     let indoorLightGroup = null;
     let activeIndoorTarget = null;
@@ -1831,26 +1832,25 @@
       const camPos = camera.position;
       let bestTarget = null, bestScore = -Infinity;
 
-      const doorPos = toWorld(DOOR_EXIT_DATA.center[0], DOOR_EXIT_DATA.center[1], DOOR_EXIT_DATA.center[2]);
+      const doorPos = roomCenters.get('Door_Exit');
       const doorOffset = doorPos.clone().sub(camPos);
       const doorDist = doorOffset.length();
       doorOffset.normalize();
       const doorDot = dir.dot(doorOffset);
-      if (doorDist <= 2.2 && (doorDist < 0.9 || doorDot >= 0.35)) {
+      if (doorDist <= 2.2 && doorDot >= 0.58) {
         bestTarget = { type: 'door', data: DOOR_EXIT_DATA };
-        bestScore = 100;
       }
 
       if (!bestTarget) {
         for (const [key, relic] of Object.entries(RELIC_DATA)) {
-          const relicPos = toWorld(relic.center[0], relic.center[1], relic.center[2]);
+          const relicPos = roomCenters.get(key);
           const offset = relicPos.clone().sub(camPos);
           const dist = offset.length();
           if (dist > 3.4) continue;
           offset.normalize();
           const dot = dir.dot(offset);
           if (dot >= 0.38) {
-            const score = dot / (dist + 0.3);
+            const score = dot ** 8 / (dist + 0.8);
             if (score > bestScore) {
               bestScore = score;
               bestTarget = { type: 'relic', key, data: relic };
@@ -1860,140 +1860,62 @@
       }
 
       activeIndoorTarget = bestTarget;
-      const fpsTip = container.querySelector('.czmw-fps-tip');
-      if (fpsTip) {
-        if (bestTarget) {
-          fpsTip.hidden = false;
-          const span = fpsTip.querySelector('span');
-          const b = fpsTip.querySelector('b');
-          if (bestTarget.type === 'door') {
-            if (span) span.textContent = '二楼会议室出口';
-            if (b) b.textContent = 'E 返回前院';
-          } else {
-            if (span) span.textContent = bestTarget.data.name;
-            if (b) b.textContent = 'E 查看考据';
-          }
-          fpsTip.classList.add('is-visible');
-        } else if (isIndoors) {
-          fpsTip.classList.remove('is-visible');
-        }
-      }
     }
 
-    function createProceduralRoom() {
-      const root = new T.Group();
-      root.name = 'zunyi-meeting-room-proc';
-      const wallMat = new T.MeshStandardMaterial({ color: '#524538', roughness: 0.85 });
-      const woodMat = new T.MeshStandardMaterial({ color: '#3c291e', roughness: 0.65 });
-      const glassMat = new T.MeshStandardMaterial({ color: '#9cb5b5', roughness: 0.2, transparent: true, opacity: 0.75 });
-      const metalMat = new T.MeshStandardMaterial({ color: '#252321', roughness: 0.85 });
-
-      const shell = new T.Group(); shell.name = 'RoomShell';
-      const floor = new T.Mesh(new T.BoxGeometry(4.6, 0.1, 6.4), woodMat);
-      floor.position.set(0, -0.05, 0); floor.receiveShadow = true;
-      const ceiling = new T.Mesh(new T.BoxGeometry(4.6, 0.1, 6.4), wallMat);
-      ceiling.position.set(0, 3.45, 0);
-      const northWall = new T.Mesh(new T.BoxGeometry(4.6, 3.4, 0.1), wallMat);
-      northWall.position.set(0, 1.7, -3.2);
-      const southWall = new T.Mesh(new T.BoxGeometry(4.6, 3.4, 0.1), wallMat);
-      southWall.position.set(0, 1.7, 3.2);
-      const eastWall = new T.Mesh(new T.BoxGeometry(0.1, 3.4, 6.4), wallMat);
-      eastWall.position.set(2.3, 1.7, 0);
-      const westWall = new T.Mesh(new T.BoxGeometry(0.1, 3.4, 6.4), wallMat);
-      westWall.position.set(-2.3, 1.7, 0);
-      shell.add(floor, ceiling, northWall, southWall, eastWall, westWall);
-      root.add(shell);
-
-      const door = new T.Mesh(new T.BoxGeometry(1.0, 2.2, 0.12), woodMat);
-      door.name = 'Door_Exit';
-      door.position.set(1.44, 1.1, -3.14);
-      root.add(door);
-
-      const table = new T.Mesh(new T.BoxGeometry(1.14, 0.82, 3.3), woodMat);
-      table.name = 'Prop_MeetingTable';
-      table.position.set(-0.16, 0.41, 0);
-      table.castShadow = true; table.receiveShadow = true;
-      root.add(table);
-
-      const brazier = new T.Mesh(new T.CylinderGeometry(0.24, 0.28, 0.28, 16), metalMat);
-      brazier.name = 'Prop_CharcoalBrazier';
-      brazier.position.set(-0.16, 0.14, -1.3);
-      root.add(brazier);
-
-      const lamp = new T.Mesh(new T.CylinderGeometry(0.25, 0.35, 0.45, 16), glassMat);
-      lamp.name = 'Prop_HangingLamp';
-      lamp.position.set(0, 2.6, 0);
-      root.add(lamp);
-
-      const wardrobe = new T.Mesh(new T.BoxGeometry(0.42, 2.28, 1.16), woodMat);
-      wardrobe.name = 'Prop_WardrobeMirror';
-      wardrobe.position.set(2.08, 1.14, 1.26);
-      root.add(wardrobe);
-
-      const clock = new T.Mesh(new T.BoxGeometry(0.11, 0.50, 0.22), woodMat);
-      clock.name = 'Prop_WallClock';
-      clock.position.set(2.24, 1.84, 0.06);
-      root.add(clock);
-
-      return root;
-    }
-
-    async function getMeetingRoomModel() {
-      if (indoorRoomModel) return indoorRoomModel;
-      const url = '/assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb';
-      let resOk = false;
+    const roomCenters = new Map();
+    const furnitureBounds = [];
+    let roomLoading = null;
+    async function loadMeetingRoom() {
+      const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
+      const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
       try {
-        const resp = await fetch(url, { method: 'HEAD' });
-        resOk = resp.ok;
-      } catch {}
-
-      const mockAllowed = window.__mockMeetingRoom || location.search.includes('mockRoom=1');
-      if (!resOk && !mockAllowed) {
-        showToast('二楼会议室模型烘焙中（待合并 assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb），已安全留于前院');
-        return null;
-      }
-
-      if (resOk) {
-        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-        const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
-        const loader = new GLTFLoader();
-        const draco = new DRACOLoader();
-        draco.setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/');
-        loader.setDRACOLoader(draco);
-        try {
-          const gltf = await loader.loadAsync(url);
-          indoorRoomModel = gltf.scene;
-        } finally {
-          draco.dispose();
-        }
-      } else {
-        indoorRoomModel = createProceduralRoom();
+        const loader = new GLTFLoader().setDRACOLoader(draco);
+        const gltf = await loader.loadAsync('/assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb');
+        indoorRoomModel = gltf.scene;
+      } finally {
+        draco.dispose();
       }
 
       indoorRoomModel.name = 'zunyi-meeting-room';
       indoorRoomModel.position.copy(toWorld(81, 30, indoorFloorY));
       worldRoot.add(indoorRoomModel);
+      indoorRoomModel.visible = false;
+      if (dead) { indoorRoomModel.removeFromParent(); releaseResources(indoorRoomModel, false); return null; }
+      indoorRoomModel.updateWorldMatrix(true, true);
+      for (const key of [...Object.keys(RELIC_DATA), 'Door_Exit', 'FoldingChairs_20', 'Prop_WardrobePlain']) {
+        const node = indoorRoomModel.getObjectByName(key);
+        if (!node) throw Error('会议室缺少节点 ' + key);
+        const box = new T.Box3().setFromObject(node, true);
+        roomCenters.set(key, box.getCenter(new T.Vector3()));
+        if (['FoldingChairs_20','Prop_MeetingTable','Prop_WardrobeMirror','Prop_WardrobePlain'].includes(key))
+          furnitureBounds.push(box);
+      }
 
       indoorLightGroup = new T.Group();
       indoorLightGroup.name = 'zunyi-indoor-lights';
-      const indoorFill = new T.AmbientLight('#ffe4c4', 0.88);
+      const indoorFill = new T.AmbientLight('#fff6e9', 2.65);
       const lampLight = new T.PointLight('#ffc478', 2.0, 8.0, 1.8);
       lampLight.position.copy(toWorld(81, 30, indoorFloorY + 2.5));
       indoorLightGroup.add(indoorFill, lampLight);
       worldRoot.add(indoorLightGroup);
+      indoorLightGroup.visible = false;
 
       return indoorRoomModel;
     }
 
+    const outdoorVisible = [];
     let inTransition = false;
     function fadeTransition(fn) {
       if (inTransition) return Promise.resolve();
       inTransition = true;
       fadeCurtain.classList.add('is-active');
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         setTimeout(async () => {
           try {
-            await fn();
+            if (!dead) await fn();
+          } catch (error) {
+            reject(error);
           } finally {
             setTimeout(() => {
               fadeCurtain.classList.remove('is-active');
@@ -2009,11 +1931,28 @@
 
     async function enterMeetingRoom(session) {
       const activeSession = session || view?.session;
-      const model = await getMeetingRoomModel();
-      if (!model) return false;
-
+      if (!cinematic || isIndoors || inTransition || roomLoading || dead) return false;
+      try {
+        if (!indoorRoomModel) {
+          roomLoading = loadMeetingRoom();
+          await roomLoading;
+        }
+      } catch (error) {
+        if (indoorRoomModel) { indoorRoomModel.removeFromParent(); releaseResources(indoorRoomModel, false); }
+        indoorRoomModel = null;
+        roomCenters.clear();
+        furnitureBounds.length = 0;
+        if (!dead) showToast('会议室加载失败，请稍后重新进屋');
+        console.warn('Zunyi meeting room', error);
+        return false;
+      } finally { roomLoading = null; }
+      if (dead || !indoorRoomModel) return false;
       await fadeTransition(() => {
+        const model = indoorRoomModel;
         isIndoors = true;
+        for (const obj of [...worldRoot.children, hemi, sun]) {
+          if (obj !== model && obj !== indoorLightGroup && obj.visible) { outdoorVisible.push(obj); obj.visible = false; }
+        }
         model.visible = true;
         if (street) street.visible = false;
         const weatherGroup = weather?.group || scene.getObjectByName('zunyi-winter-weather');
@@ -2024,31 +1963,37 @@
         savedOutdoorFog = scene.fog;
         scene.fog = null;
         savedOutdoorBg = scene.background;
-        scene.background = new T.Color('#0f0d0b');
+        scene.background = new T.Color('#a9b7c4');
         if (indoorLightGroup) indoorLightGroup.visible = true;
 
         if (activeSession?.grid) {
           savedOutdoorClearance = activeSession.grid.clearance;
-          activeSession.grid.clearance = (x, y, r = 0.62) => {
+          activeSession.grid.clearance = (x, y) => {
+            const r = .24;
             if (x - r < 78.7 || x + r > 83.3 || y - r < 26.8 || y + r > 33.2) return false;
-            if (x + r > 80.25 && x - r < 81.45 && y + r > 28.35 && y - r < 31.65) return false;
-            return true;
+            const px = x - world.w / 2, pz = y - world.h / 2;
+            return furnitureBounds.every(box => Math.hypot(px - Math.max(box.min.x, Math.min(px, box.max.x)),
+              pz - Math.max(box.min.z, Math.min(pz, box.max.z))) >= r);
           };
         }
 
         const player = logicalScene.focusActor;
         if (player) {
-          player.setPos(82.44, 27.5, Math.PI / 2);
+          player.setPos(81.1, 27.18, Math.PI / 2);
+          yaw = 1.65; pitch = .17;
+          followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
         }
-        setCameraMode('fps', { instant: true });
+        window.CZMarchWorld.setCameraMode('fps', { instant: true });
       });
       return true;
     }
 
     async function exitMeetingRoom(session) {
       const activeSession = session || view?.session;
+      if (!isIndoors || inTransition || dead) return false;
       await fadeTransition(() => {
         isIndoors = false;
+        for (const obj of outdoorVisible.splice(0)) obj.visible = true;
         activeIndoorTarget = null;
         if (indoorRoomModel) indoorRoomModel.visible = false;
         if (indoorLightGroup) indoorLightGroup.visible = false;
@@ -2058,8 +2003,8 @@
         const peds = scene.getObjectByName('zunyi-pedestrians');
         if (peds) peds.visible = true;
 
-        scene.fog = savedOutdoorFog || scene.fog;
-        scene.background = savedOutdoorBg || scene.background;
+        scene.fog = savedOutdoorFog;
+        scene.background = savedOutdoorBg;
 
         if (activeSession?.grid && savedOutdoorClearance) {
           activeSession.grid.clearance = savedOutdoorClearance;
@@ -2068,8 +2013,10 @@
         const player = logicalScene.focusActor;
         if (player) {
           player.setPos(81.0, 35.5, Math.PI / 2);
+          yaw = Math.PI / 2; pitch = .16;
+          followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
         }
-        setCameraMode('tps', { instant: true });
+        window.CZMarchWorld.setCameraMode('tps', { instant: true });
         const fpsTip = container.querySelector('.czmw-fps-tip');
         if (fpsTip) fpsTip.classList.remove('is-visible');
       });
@@ -2078,6 +2025,7 @@
 
     function handleInteract(anchorId, session) {
       const activeSession = session || view?.session;
+      if (inTransition || roomLoading) return true;
       if (isIndoors) {
         if (activeIndoorTarget?.type === 'door') {
           exitMeetingRoom(activeSession);
@@ -2087,9 +2035,9 @@
           openRelicModal(activeIndoorTarget.data);
           return true;
         }
-        return false;
+        return true;
       }
-      if (anchorId === 'indoor-meeting-room') {
+      if (anchorId === 'chapter-3/anchor-indoor-meeting-room') {
         enterMeetingRoom(activeSession);
         return true;
       }
@@ -2193,7 +2141,7 @@
     }
 
     function setCameraMode(mode, { instant = false } = {}) {
-      if (mode !== 'tps' && mode !== 'fps' || intro || graphicsLost || dead || !logicalScene.focusActor) return false;
+      if (isIndoors && mode !== 'fps' || mode !== 'tps' && mode !== 'fps' || intro || graphicsLost || dead || !logicalScene.focusActor) return false;
       if (mode === cameraMode) return true;
       if (isOrbiting()) yaw = lockedBodyYaw;
       freeLookActive = false;
@@ -2319,6 +2267,7 @@
       setCameraMode,
       getCameraMode: () => cameraMode,
       setCameraAngle(targetYaw, targetPitch = 0) {
+        if (!logicalScene.focusActor?.navigating) followingRoute = false;
         if (Number.isFinite(targetYaw)) yaw = wrapAngle(targetYaw);
         if (Number.isFinite(targetPitch)) pitch = clampPitch(targetPitch);
         placeActiveCamera(0);
@@ -2344,6 +2293,7 @@
       isStreetVisible: () => street ? street.visible : true,
       scene,
       getIndoorTarget: () => activeIndoorTarget,
+      isTransitioning: () => inTransition,
       openRelicModal,
       closeRelicModal,
       cameraRelativeMovement({ x, y }) {
@@ -2368,8 +2318,6 @@
         toastEl.remove();
         relicModal.remove();
         window.removeEventListener('keydown', modalKeyHandler, true);
-        if (indoorRoomModel) indoorRoomModel.removeFromParent();
-        if (indoorLightGroup) indoorLightGroup.removeFromParent();
         actors?.dispose();
         streetLife?.dispose();
         weather?.dispose();
@@ -2469,6 +2417,8 @@
         arms?.hide();
         stats.armsState = null;
       }
+      stats.geometries = renderer.info.memory.geometries;
+      stats.textures = renderer.info.memory.textures;
       stats.frames++;
       stats.drawCalls = renderer.info.render.calls;
       stats.armsDrawCalls = stats.drawCalls - worldDraws;

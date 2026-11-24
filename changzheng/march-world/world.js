@@ -95,6 +95,7 @@
       },
       onTap(sx, sy) {
         if (pauses.size || session.dead) return;
+        if (view.isIndoors?.()) return;
         const w = unproject(sx, sy);
         if (!w) return;
         /* 点按落在锚点附近 → 直接交互；否则寻路移动 */
@@ -124,7 +125,7 @@
     /* 主循环数据流：renderer 帧回调驱动更新 */
     scene.tick = dt => {
       if (session.dead) return;
-      const paused = pauses.size > 0;
+      const paused = pauses.size > 0 || !!view.isTransitioning?.();
       scene.pausedDim = paused;
       input.setEnabled(!paused);
       if (!paused) {
@@ -135,20 +136,24 @@
           cameraRelative ? movement.y : undefined);
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
-      const near = anchorsMod.update(player.x, player.y, paused);
-      if (near !== session.lastNear) {
+      const inside = view.isIndoors?.();
+      const target = inside && !paused && view.getIndoorTarget();
+      const near = anchorsMod.update(player.x, player.y, paused || inside);
+      const touchTarget = target?.data || near;
+      if (touchTarget !== session.lastTouchTarget) {
+        session.lastTouchTarget = touchTarget;
         session.lastNear = near;
-        input.showAction(!!near, near ? (near.kind === 'npc' ? '交谈' : near.kind === 'exit' ? '前往' : '查看') : '交互');
+        input.showAction(!!touchTarget, target ? (target.type === 'door' ? '返回前院' : '查看考据') : near ? (near.kind === 'npc' ? '交谈' : near.kind === 'exit' ? '前往' : '查看') : '交互');
       }
       view.follow(player, dt);
-      anchorsMod.layout(view.cam, project, view.getCameraMode?.() === 'fps', near);
+      anchorsMod.layout(view.cam, project, view.getCameraMode?.() === 'fps' || near?.anchorId === 'chapter-3/anchor-indoor-meeting-room', target?.data || near);
       if (!pin.hidden) {
         const head = view.headPoint ? view.headPoint(player) : player.headPoint(view.cam);
         const px = Math.round(head.x * 2) / 2 + 'px', py = Math.round(head.y * 2) / 2 + 'px';
         if (pin.style.left !== px) pin.style.left = px;
         if (pin.style.top !== py) pin.style.top = py;
       }
-      if(session.guide){
+      if(session.guide && !inside){
         const a=anchorsMod.anchors.find(a=>a.anchorId===session.guide.anchorId&&a.enabled);
         if(a){
           const cell=Math.floor(player.x/3)+':'+Math.floor(player.y/3);if(cell!==session.routeCell&&performance.now()-session.routeAt>400){session.route=guidePath(session,a)||[];session.routeAt=performance.now();session.routeCell=cell;}
@@ -161,7 +166,7 @@
           const gy=Math.round(Math.max(40,Math.min(view.cam.viewH-(navigator.maxTouchPoints>0?135:60),point.y-70)))+'px';if(guidePin.style.top!==gy)guidePin.style.top=gy;
         }else guidePin.hidden=true;
       }else guidePin.hidden=true;
-      view.drawGuide?.(player, session.route, !!session.guide && !paused && !guidePin.hidden);
+      view.drawGuide?.(player, session.route, !!session.guide && !inside && !paused && !guidePin.hidden);
     };
     scene.drawGuide=(ctx,cam)=>{
       if(!session.guide||!session.route.length||pauses.size)return;

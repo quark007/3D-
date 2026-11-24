@@ -1,0 +1,98 @@
+{
+  "bytes": 1637320,
+  "triangles": 18406,
+  "primitives": 16,
+  "verifiedNodes": [
+    "Door_Exit",
+    "Prop_MeetingTable",
+    "Prop_CharcoalBrazier",
+    "Prop_HangingLamp",
+    "Prop_WardrobeMirror",
+    "Prop_WallClock"
+  ],
+  "decoder": "local Draco WASM",
+  "geometry": [
+    {
+      "mesh": "RoomShell.001",
+      "faces": 1008,
+      "vertices": 2016
+    },
+    {
+      "mesh": "RoomShell.001",
+      "faces": 36,
+      "vertices": 72
+    },
+    {
+      "mesh": "RoomShell.001",
+      "faces": 240,
+      "vertices": 480
+    },
+    {
+      "mesh": "RoomShell.001",
+      "faces": 24,
+      "vertices": 48
+    },
+    {
+      "mesh": "Door_Exit.001",
+      "faces": 100,
+      "vertices": 192
+    },
+    {
+      "mesh": "Prop_WardrobeMirror.001",
+      "faces": 900,
+      "vertices": 1632
+    },
+    {
+      "mesh": "Prop_WardrobeMirror.001",
+      "faces": 12,
+      "vertices": 24
+    },
+    {
+      "mesh": "Prop_WardrobePlain.001",
+      "faces": 236,
+      "vertices": 456
+    },
+    {
+      "mesh": "Prop_WallClock.001",
+      "faces": 704,
+      "vertices": 1176
+    },
+    {
+      "mesh": "Prop_MeetingTable.001",
+      "faces": 756,
+      "vertices": 1512
+    },
+    {
+      "mesh": "WritingSet.001",
+      "faces": 196,
+      "vertices": 392
+    },
+    {
+      "mesh": "Prop_CharcoalBrazier.001",
+      "faces": 1394,
+      "vertices": 2788
+    },
+    {
+      "mesh": "Prop_HangingLamp.001",
+      "faces": 936,
+      "vertices": 1852
+    },
+    {
+      "mesh": "Prop_HangingLamp.001",
+      "faces": 144,
+      "vertices": 288
+    },
+    {
+      "mesh": "FoldingChair_01.001",
+      "faces": 11440,
+      "vertices": 19680
+    },
+    {
+      "mesh": "FoldingChair_01.001",
+      "faces": 280,
+      "vertices": 560
+    }
+  ],
+  "uv1_positive_overlap_pairs": 0,
+  "uv1_degenerate_triangles": 0
+}

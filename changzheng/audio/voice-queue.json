@@ -1,0 +1,226 @@
+[
+  {
+    "id": "authored_001",
+    "text": "后勤同志来得正好。出发在即，先把你分内的事认下。\n你管携行和清点。谁背多少、缺什么，报得出实数才算数。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_002",
+    "text": "好，你负责核对缺项、记录和交接，搬运时与同伴分担。这一段是“进入剧情、确认玩家岗位”，先把自己能承担的事说清楚。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_003",
+    "text": "可以，先听清“进入剧情、确认玩家岗位”的安排，再核对岗位。不能让一个人包办整组的事。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_004",
+    "text": "惦记家里，人之常情。可眼下先把该做的做了，才走得稳。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_005",
+    "text": "心里没底，不丢人。把任务拆成一件件，你就不慌了。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_006",
+    "text": "就按这个方向准备：先按类别核对物资。还要记住，再登记缺项，不能用估数顶替清点。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_007",
+    "text": "问清再安排。我们先核对携行清点的现有条件，再登记缺项，不能用估数顶替清点。你可以把拿不准的地方交给负责的同志一起确认。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_008",
+    "text": "就按这个方向准备：按各人的承受能力分组携行。还要记住，重物互相搭手，不把全部物资交给一个人。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_009",
+    "text": "问清再安排。我们先核对负重分配的现有条件，重物互相搭手，不把全部物资交给一个人。你可以把拿不准的地方交给负责的同志一起确认。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_010",
+    "text": "就按这个方向准备：确认前后组的联络方式。还要记住，离队或掉队及时报告，不独自追赶。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_011",
+    "text": "问清再安排。我们先核对队列联络的现有条件，离队或掉队及时报告，不独自追赶。你可以把拿不准的地方交给负责的同志一起确认。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_012",
+    "text": "就按这个方向准备：听从渡口已有的安排。还要记住，不拥挤抢行，不擅自改变渡运顺序。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_013",
+    "text": "问清再安排。我们先核对渡口配合的现有条件，不拥挤抢行，不擅自改变渡运顺序。你可以把拿不准的地方交给负责的同志一起确认。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_014",
+    "text": "就按这个方向准备：留意身边同志的行装和状态。还要记住，需要帮忙就招呼同伴，一起处理。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_015",
+    "text": "问清再安排。我们先核对同伴互助的现有条件，需要帮忙就招呼同伴，一起处理。你可以把拿不准的地方交给负责的同志一起确认。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_016",
+    "text": "刚才你提出“我先确认自己的清点与分担携行职责。”，也逐项商量了配合办法。现在按任务页面核对条件再行动；对话不代表任务已经完成。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_017",
+    "text": "好，准备交谈到这里。行动中仍要按实际情况核对，有变化就沟通；结果等任务执行后再清点。",
+    "nodeId": 1,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_018",
+    "text": "我们这一组，只管接到的这一小块。别去想全军的事，你我都做不了那主。",
+    "nodeId": 2,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_019",
+    "text": "我们不是进会场的，是给会场跑腿、看门的。你的身份，先认清。",
+    "nodeId": 3,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_020",
+    "text": "这个沙盘上，标了字的地名是真的，没标的是咱们假设的行动点。别混。",
+    "nodeId": 4,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_021",
+    "text": "这江水底下有暗流，靠岸的地方窄。船不像桥，上多少、走哪条线，得听我的。",
+    "nodeId": 5,
+    "npcId": "boatman_1",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_022",
+    "text": "记住，这关是安顺场渡河。铁索桥在别处，别搅到一块。",
+    "nodeId": 6,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_023",
+    "text": "看见没？桥面没了，就剩铁索。这是过索，不是划船。",
+    "nodeId": 7,
+    "npcId": "wang_gui",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_024",
+    "text": "抬头就是雪。这里没有船，也没有桥，只有脚和路。",
+    "nodeId": 8,
+    "npcId": "wang_gui",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_025",
+    "text": "看着都是草，踩错一步就陷。得挑着走，看着点。",
+    "nodeId": 9,
+    "npcId": "guide_1",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_026",
+    "text": "这地方是一道缝。人过去了，就是活路。",
+    "nodeId": 10,
+    "npcId": "liaison_1",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_027",
+    "text": "到这儿是落脚，别的队伍还在路上。",
+    "nodeId": 11,
+    "npcId": "he_wen",
+    "speed": 4,
+    "direction": "solemn"
+  },
+  {
+    "id": "authored_028",
+    "text": "从吴起镇落脚，到三大主力会师，中间隔了将近一年。时间转到一九三六年十月。",
+    "nodeId": 12,
+    "npcId": "narrator",
+    "speed": 4,
+    "direction": "solemn"
+  }
+]

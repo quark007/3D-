@@ -1,0 +1,871 @@
+[
+  {
+    "id": "trailer_open",
+    "text": "前路艰难。我们，继续走。",
+    "file": "trailer_open.mp3"
+  },
+  {
+    "id": "trailer_ai",
+    "text": "先掩护，再转移。快！",
+    "file": "trailer_ai.mp3"
+  },
+  {
+    "id": "trailer_end",
+    "text": "一个也别落下。",
+    "file": "trailer_end.mp3"
+  },
+  {
+    "id": "radio_intercept",
+    "text": "同志，收到一段电报。先核对来源，再决定行动。时间不多了。",
+    "file": "radio_intercept.mp3"
+  },
+  {
+    "id": "causal_replay",
+    "text": "每一次取舍，都有代价。看清来路，再作决定。",
+    "file": "causal_replay.mp3"
+  },
+  {
+    "id": "hidden_memory",
+    "text": "路再难，也要拉住身边的人。我们一起，走下去。",
+    "file": "hidden_memory.mp3"
+  },
+  {
+    "id": "npc_tense",
+    "text": "不要掉队。先照应伤员，保持联络。快！",
+    "file": "npc_tense.mp3"
+  },
+  {
+    "id": "npc_calm",
+    "text": "先把情况核实。物资有限，我们一起想办法。",
+    "file": "npc_calm.mp3"
+  },
+  {
+    "id": "npc_tragic",
+    "text": "喘口气。还走得动吗？我扶你。",
+    "file": "npc_tragic.mp3"
+  },
+  {
+    "id": "npc_hopeful",
+    "text": "前面就到了。同志们，再坚持一下。",
+    "file": "npc_hopeful.mp3"
+  },
+  {
+    "id": "authored_001",
+    "text": "后勤同志来得正好。出发在即，先把你分内的事认下。\n你管携行和清点。谁背多少、缺什么，报得出实数才算数。",
+    "file": "authored_001.mp3"
+  },
+  {
+    "id": "authored_002",
+    "text": "好，你负责核对缺项、记录和交接，搬运时与同伴分担。这一段是“进入剧情、确认玩家岗位”，先把自己能承担的事说清楚。",
+    "file": "authored_002.mp3"
+  },
+  {
+    "id": "authored_003",
+    "text": "可以，先听清“进入剧情、确认玩家岗位”的安排，再核对岗位。不能让一个人包办整组的事。",
+    "file": "authored_003.mp3"
+  },
+  {
+    "id": "authored_004",
+    "text": "惦记家里，人之常情。可眼下先把该做的做了，才走得稳。",
+    "file": "authored_004.mp3"
+  },
+  {
+    "id": "authored_005",
+    "text": "心里没底，不丢人。把任务拆成一件件，你就不慌了。",
+    "file": "authored_005.mp3"
+  },
+  {
+    "id": "authored_006",
+    "text": "就按这个方向准备：先按类别核对物资。还要记住，再登记缺项，不能用估数顶替清点。",
+    "file": "authored_006.mp3"
+  },
+  {
+    "id": "authored_007",
+    "text": "问清再安排。我们先核对携行清点的现有条件，再登记缺项，不能用估数顶替清点。你可以把拿不准的地方交给负责的同志一起确认。",
+    "file": "authored_007.mp3"
+  },
+  {
+    "id": "authored_008",
+    "text": "就按这个方向准备：按各人的承受能力分组携行。还要记住，重物互相搭手，不把全部物资交给一个人。",
+    "file": "authored_008.mp3"
+  },
+  {
+    "id": "authored_009",
+    "text": "问清再安排。我们先核对负重分配的现有条件，重物互相搭手，不把全部物资交给一个人。你可以把拿不准的地方交给负责的同志一起确认。",
+    "file": "authored_009.mp3"
+  },
+  {
+    "id": "authored_010",
+    "text": "就按这个方向准备：确认前后组的联络方式。还要记住，离队或掉队及时报告，不独自追赶。",
+    "file": "authored_010.mp3"
+  },
+  {
+    "id": "authored_011",
+    "text": "问清再安排。我们先核对队列联络的现有条件，离队或掉队及时报告，不独自追赶。你可以把拿不准的地方交给负责的同志一起确认。",
+    "file": "authored_011.mp3"
+  },
+  {
+    "id": "authored_012",
+    "text": "就按这个方向准备：听从渡口已有的安排。还要记住，不拥挤抢行，不擅自改变渡运顺序。",
+    "file": "authored_012.mp3"
+  },
+  {
+    "id": "authored_013",
+    "text": "问清再安排。我们先核对渡口配合的现有条件，不拥挤抢行，不擅自改变渡运顺序。你可以把拿不准的地方交给负责的同志一起确认。",
+    "file": "authored_013.mp3"
+  },
+  {
+    "id": "authored_014",
+    "text": "就按这个方向准备：留意身边同志的行装和状态。还要记住，需要帮忙就招呼同伴，一起处理。",
+    "file": "authored_014.mp3"
+  },
+  {
+    "id": "authored_015",
+    "text": "问清再安排。我们先核对同伴互助的现有条件，需要帮忙就招呼同伴，一起处理。你可以把拿不准的地方交给负责的同志一起确认。",
+    "file": "authored_015.mp3"
+  },
+  {
+    "id": "authored_016",
+    "text": "刚才你提出“我先确认自己的清点与分担携行职责。”，也逐项商量了配合办法。现在按任务页面核对条件再行动；对话不代表任务已经完成。",
+    "file": "authored_016.mp3"
+  },
+  {
+    "id": "authored_017",
+    "text": "好，准备交谈到这里。行动中仍要按实际情况核对，有变化就沟通；结果等任务执行后再清点。",
+    "file": "authored_017.mp3"
+  },
+  {
+    "id": "authored_018",
+    "text": "我们这一组，只管接到的这一小块。别去想全军的事，你我都做不了那主。",
+    "file": "authored_018.mp3"
+  },
+  {
+    "id": "authored_019",
+    "text": "我们不是进会场的，是给会场跑腿、看门的。你的身份，先认清。",
+    "file": "authored_019.mp3"
+  },
+  {
+    "id": "authored_020",
+    "text": "这个沙盘上，标了字的地名是真的，没标的是咱们假设的行动点。别混。",
+    "file": "authored_020.mp3"
+  },
+  {
+    "id": "authored_021",
+    "text": "这江水底下有暗流，靠岸的地方窄。船不像桥，上多少、走哪条线，得听我的。",
+    "file": "authored_021.mp3"
+  },
+  {
+    "id": "authored_022",
+    "text": "记住，这关是安顺场渡河。铁索桥在别处，别搅到一块。",
+    "file": "authored_022.mp3"
+  },
+  {
+    "id": "authored_023",
+    "text": "看见没？桥面没了，就剩铁索。这是过索，不是划船。",
+    "file": "authored_023.mp3"
+  },
+  {
+    "id": "authored_024",
+    "text": "抬头就是雪。这里没有船，也没有桥，只有脚和路。",
+    "file": "authored_024.mp3"
+  },
+  {
+    "id": "authored_025",
+    "text": "看着都是草，踩错一步就陷。得挑着走，看着点。",
+    "file": "authored_025.mp3"
+  },
+  {
+    "id": "authored_026",
+    "text": "这地方是一道缝。人过去了，就是活路。",
+    "file": "authored_026.mp3"
+  },
+  {
+    "id": "authored_027",
+    "text": "到这儿是落脚，别的队伍还在路上。",
+    "file": "authored_027.mp3"
+  },
+  {
+    "id": "authored_028",
+    "text": "从吴起镇落脚，到三大主力会师，中间隔了将近一年。时间转到一九三六年十月。",
+    "file": "authored_028.mp3"
+  },
+  {
+    "id": "clear_039",
+    "file": "clear_039.mp3",
+    "text": "同志来得正好。出发在即，先把你分内的事认下。\n你先把个人装备收拾利索，再搭把手照应身边的同志。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_040",
+    "file": "clear_040.mp3",
+    "text": "好，你负责检查行装，听清任务，互相照应。这一段是“进入剧情、确认玩家岗位”，先把自己能承担的事说清楚。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_041",
+    "file": "clear_041.mp3",
+    "text": "你跟我把携行清单再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_042",
+    "file": "clear_042.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认携行清单还有不确定，行动时不能省去报告。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_043",
+    "file": "clear_043.mp3",
+    "text": "分担可以，但要说清谁来接手。为互助负重做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_044",
+    "file": "clear_044.mp3",
+    "text": "先约好怎么求助，也是一种安排。互助负重若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_045",
+    "file": "clear_045.mp3",
+    "text": "好，从手头口粮里留一份，给渡口接应。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_046",
+    "file": "clear_046.mp3",
+    "text": "先照顾本组的承受能力。抵达后把渡口接应的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_047",
+    "file": "clear_047.mp3",
+    "text": "刚才你提出“我先确认自己的个人准备与战友互助职责。”，也逐项商量了配合办法。现在按任务页面核对条件再行动；对话不代表任务已经完成。",
+    "nodeId": 1,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_048",
+    "file": "clear_048.mp3",
+    "text": "连长来得正好。出发在即，先把你分内的事认下。\n你把本连的人分组、联络、协作管起来；有情况往上报，别替上面拿主意。",
+    "nodeId": 1,
+    "role": "commander"
+  },
+  {
+    "id": "clear_049",
+    "file": "clear_049.mp3",
+    "text": "好，你负责核对分工和衔接，不越权指挥全军。这一段是“进入剧情、确认玩家岗位”，先把自己能承担的事说清楚。",
+    "nodeId": 1,
+    "role": "commander"
+  },
+  {
+    "id": "clear_050",
+    "file": "clear_050.mp3",
+    "text": "刚才你提出“我先确认自己的本连组织与联络职责。”，也逐项商量了配合办法。现在按任务页面核对条件再行动；对话不代表任务已经完成。",
+    "nodeId": 1,
+    "role": "commander"
+  },
+  {
+    "id": "clear_051",
+    "file": "clear_051.mp3",
+    "text": "卫生员来得正好。出发在即，先把你分内的事认下。\n你跟着队伍走，留意谁撑不住，药和绷带省着用。",
+    "nodeId": 1,
+    "role": "medic"
+  },
+  {
+    "id": "clear_052",
+    "file": "clear_052.mp3",
+    "text": "好，你负责核对用品与照料安排，有异常先报告。这一段是“进入剧情、确认玩家岗位”，先把自己能承担的事说清楚。",
+    "nodeId": 1,
+    "role": "medic"
+  },
+  {
+    "id": "clear_053",
+    "file": "clear_053.mp3",
+    "text": "刚才你提出“我先确认自己的照料与卫生协作职责。”，也逐项商量了配合办法。现在按任务页面核对条件再行动；对话不代表任务已经完成。",
+    "nodeId": 1,
+    "role": "medic"
+  },
+  {
+    "id": "clear_054",
+    "file": "clear_054.mp3",
+    "text": "好，你负责检查行装，听清任务，互相照应。这一段是“战役背景与当前职责”，先把自己能承担的事说清楚。",
+    "nodeId": 2,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_055",
+    "file": "clear_055.mp3",
+    "text": "可以，先听清“战役背景与当前职责”的安排，再核对岗位。不能让一个人包办整组的事。",
+    "nodeId": 2,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_056",
+    "file": "clear_056.mp3",
+    "text": "好，你负责核对分工和衔接，不越权指挥全军。这一段是“战役背景与当前职责”，先把自己能承担的事说清楚。",
+    "nodeId": 2,
+    "role": "commander"
+  },
+  {
+    "id": "clear_057",
+    "file": "clear_057.mp3",
+    "text": "好，你负责核对用品与照料安排，有异常先报告。这一段是“战役背景与当前职责”，先把自己能承担的事说清楚。",
+    "nodeId": 2,
+    "role": "medic"
+  },
+  {
+    "id": "clear_058",
+    "file": "clear_058.mp3",
+    "text": "好，你负责核对缺项、记录和交接，搬运时与同伴分担。这一段是“战役背景与当前职责”，先把自己能承担的事说清楚。",
+    "nodeId": 2,
+    "role": "logistics"
+  },
+  {
+    "id": "clear_059",
+    "file": "clear_059.mp3",
+    "text": "好，你负责检查行装，听清任务，互相照应。这一段是“抵达桥头、观察铁索”，先把自己能承担的事说清楚。",
+    "nodeId": 7,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_060",
+    "file": "clear_060.mp3",
+    "text": "可以，先听清“抵达桥头、观察铁索”的安排，再核对岗位。不能让一个人包办整组的事。",
+    "nodeId": 7,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_061",
+    "file": "clear_061.mp3",
+    "text": "好，你负责核对分工和衔接，不越权指挥全军。这一段是“抵达桥头、观察铁索”，先把自己能承担的事说清楚。",
+    "nodeId": 7,
+    "role": "commander"
+  },
+  {
+    "id": "clear_062",
+    "file": "clear_062.mp3",
+    "text": "好，你负责核对用品与照料安排，有异常先报告。这一段是“抵达桥头、观察铁索”，先把自己能承担的事说清楚。",
+    "nodeId": 7,
+    "role": "medic"
+  },
+  {
+    "id": "clear_063",
+    "file": "clear_063.mp3",
+    "text": "好，你负责核对缺项、记录和交接，搬运时与同伴分担。这一段是“抵达桥头、观察铁索”，先把自己能承担的事说清楚。",
+    "nodeId": 7,
+    "role": "logistics"
+  },
+  {
+    "id": "clear_064",
+    "file": "clear_064.mp3",
+    "text": "同志，我们先说当前这组任务。你有什么打算？",
+    "nodeId": 9,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_065",
+    "file": "clear_065.mp3",
+    "text": "好，你负责检查行装，听清任务，互相照应。这一段是“抵近峡口”，先把自己能承担的事说清楚。",
+    "nodeId": 10,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_066",
+    "file": "clear_066.mp3",
+    "text": "可以，先听清“抵近峡口”的安排，再核对岗位。不能让一个人包办整组的事。",
+    "nodeId": 10,
+    "role": "soldier"
+  },
+  {
+    "id": "clear_067",
+    "file": "clear_067.mp3",
+    "text": "好，你负责核对分工和衔接，不越权指挥全军。这一段是“抵近峡口”，先把自己能承担的事说清楚。",
+    "nodeId": 10,
+    "role": "commander"
+  },
+  {
+    "id": "clear_068",
+    "file": "clear_068.mp3",
+    "text": "好，你负责核对用品与照料安排，有异常先报告。这一段是“抵近峡口”，先把自己能承担的事说清楚。",
+    "nodeId": 10,
+    "role": "medic"
+  },
+  {
+    "id": "clear_069",
+    "file": "clear_069.mp3",
+    "text": "好，你负责核对缺项、记录和交接，搬运时与同伴分担。这一段是“抵近峡口”，先把自己能承担的事说清楚。",
+    "nodeId": 10,
+    "role": "logistics"
+  },
+  {
+    "id": "clear_070",
+    "file": "clear_070.mp3",
+    "text": "你跟我把转移信号再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 2,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_071",
+    "file": "clear_071.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认转移信号还有不确定，行动时不能省去报告。",
+    "nodeId": 2,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_072",
+    "file": "clear_072.mp3",
+    "text": "分担可以，但要说清谁来接手。为岸上照应做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 2,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_073",
+    "file": "clear_073.mp3",
+    "text": "先约好怎么求助，也是一种安排。岸上照应若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 2,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_074",
+    "file": "clear_074.mp3",
+    "text": "好，从手头口粮里留一份，给后续补给。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 2,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_075",
+    "file": "clear_075.mp3",
+    "text": "先照顾本组的承受能力。抵达后把后续补给的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 2,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_076",
+    "file": "clear_076.mp3",
+    "text": "你跟我把材料出处再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 3,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_077",
+    "file": "clear_077.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认材料出处还有不确定，行动时不能省去报告。",
+    "nodeId": 3,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_078",
+    "file": "clear_078.mp3",
+    "text": "分担可以，但要说清谁来接手。为资料交接做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 3,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_079",
+    "file": "clear_079.mp3",
+    "text": "先约好怎么求助，也是一种安排。资料交接若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 3,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_080",
+    "file": "clear_080.mp3",
+    "text": "好，从手头口粮里留一份，给基层保障。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 3,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_081",
+    "file": "clear_081.mp3",
+    "text": "先照顾本组的承受能力。抵达后把基层保障的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 3,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_082",
+    "file": "clear_082.mp3",
+    "text": "你跟我把观察来源再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 4,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_083",
+    "file": "clear_083.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认观察来源还有不确定，行动时不能省去报告。",
+    "nodeId": 4,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_084",
+    "file": "clear_084.mp3",
+    "text": "分担可以，但要说清谁来接手。为机动联络做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 4,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_085",
+    "file": "clear_085.mp3",
+    "text": "先约好怎么求助，也是一种安排。机动联络若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 4,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_086",
+    "file": "clear_086.mp3",
+    "text": "好，从手头口粮里留一份，给接应准备。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 4,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_087",
+    "file": "clear_087.mp3",
+    "text": "先照顾本组的承受能力。抵达后把接应准备的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 4,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_088",
+    "file": "clear_088.mp3",
+    "text": "你跟我把渡口条件再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 5,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_089",
+    "file": "clear_089.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认渡口条件还有不确定，行动时不能省去报告。",
+    "nodeId": 5,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_090",
+    "file": "clear_090.mp3",
+    "text": "分担可以，但要说清谁来接手。为分批携行做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 5,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_091",
+    "file": "clear_091.mp3",
+    "text": "先约好怎么求助，也是一种安排。分批携行若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 5,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_092",
+    "file": "clear_092.mp3",
+    "text": "好，从手头口粮里留一份，给岸上接应。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 5,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_093",
+    "file": "clear_093.mp3",
+    "text": "先照顾本组的承受能力。抵达后把岸上接应的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 5,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_094",
+    "file": "clear_094.mp3",
+    "text": "你跟我把渡运信号再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 6,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_095",
+    "file": "clear_095.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认渡运信号还有不确定，行动时不能省去报告。",
+    "nodeId": 6,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_096",
+    "file": "clear_096.mp3",
+    "text": "分担可以，但要说清谁来接手。为岸边协作做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 6,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_097",
+    "file": "clear_097.mp3",
+    "text": "先约好怎么求助，也是一种安排。岸边协作若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 6,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_098",
+    "file": "clear_098.mp3",
+    "text": "好，从手头口粮里留一份，给接收清点。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 6,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_099",
+    "file": "clear_099.mp3",
+    "text": "先照顾本组的承受能力。抵达后把接收清点的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 6,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_100",
+    "file": "clear_100.mp3",
+    "text": "你跟我把通行信号再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 7,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_101",
+    "file": "clear_101.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认通行信号还有不确定，行动时不能省去报告。",
+    "nodeId": 7,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_102",
+    "file": "clear_102.mp3",
+    "text": "分担可以，但要说清谁来接手。为桥后照应做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 7,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_103",
+    "file": "clear_103.mp3",
+    "text": "先约好怎么求助，也是一种安排。桥后照应若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 7,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_104",
+    "file": "clear_104.mp3",
+    "text": "好，从手头口粮里留一份，给跟进保障。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 7,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_105",
+    "file": "clear_105.mp3",
+    "text": "先照顾本组的承受能力。抵达后把跟进保障的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 7,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_106",
+    "file": "clear_106.mp3",
+    "text": "你跟我把前后联络再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 8,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_107",
+    "file": "clear_107.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认前后联络还有不确定，行动时不能省去报告。",
+    "nodeId": 8,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_108",
+    "file": "clear_108.mp3",
+    "text": "分担可以，但要说清谁来接手。为结伴行军做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 8,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_109",
+    "file": "clear_109.mp3",
+    "text": "先约好怎么求助，也是一种安排。结伴行军若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 8,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_110",
+    "file": "clear_110.mp3",
+    "text": "好，从手头口粮里留一份，给下山接应。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 8,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_111",
+    "file": "clear_111.mp3",
+    "text": "先照顾本组的承受能力。抵达后把下山接应的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 8,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_112",
+    "file": "clear_112.mp3",
+    "text": "你跟我把可用补给再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 9,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_113",
+    "file": "clear_113.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认可用补给还有不确定，行动时不能省去报告。",
+    "nodeId": 9,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_114",
+    "file": "clear_114.mp3",
+    "text": "分担可以，但要说清谁来接手。为同伴呼应做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 9,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_115",
+    "file": "clear_115.mp3",
+    "text": "先约好怎么求助，也是一种安排。同伴呼应若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 9,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_116",
+    "file": "clear_116.mp3",
+    "text": "好，从手头口粮里留一份，给宿营份额。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 9,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_117",
+    "file": "clear_117.mp3",
+    "text": "先照顾本组的承受能力。抵达后把宿营份额的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 9,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_118",
+    "file": "clear_118.mp3",
+    "text": "你跟我把通道消息再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 10,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_119",
+    "file": "clear_119.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认通道消息还有不确定，行动时不能省去报告。",
+    "nodeId": 10,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_120",
+    "file": "clear_120.mp3",
+    "text": "分担可以，但要说清谁来接手。为任务衔接做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 10,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_121",
+    "file": "clear_121.mp3",
+    "text": "先约好怎么求助，也是一种安排。任务衔接若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 10,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_122",
+    "file": "clear_122.mp3",
+    "text": "好，从手头口粮里留一份，给后续保障。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 10,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_123",
+    "file": "clear_123.mp3",
+    "text": "先照顾本组的承受能力。抵达后把后续保障的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 10,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_124",
+    "file": "clear_124.mp3",
+    "text": "你跟我把到达记录再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 11,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_125",
+    "file": "clear_125.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认到达记录还有不确定，行动时不能省去报告。",
+    "nodeId": 11,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_126",
+    "file": "clear_126.mp3",
+    "text": "分担可以，但要说清谁来接手。为安置照料做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 11,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_127",
+    "file": "clear_127.mp3",
+    "text": "先约好怎么求助，也是一种安排。安置照料若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 11,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_128",
+    "file": "clear_128.mp3",
+    "text": "好，从手头口粮里留一份，给当地交接。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 11,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_129",
+    "file": "clear_129.mp3",
+    "text": "先照顾本组的承受能力。抵达后把当地交接的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 11,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_130",
+    "file": "clear_130.mp3",
+    "text": "你跟我把来向资料再核对一遍。走这一趟要费些力气，可不能带着疑问出发。核实不了的，单独记下。",
+    "nodeId": 12,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_131",
+    "file": "clear_131.mp3",
+    "text": "把已知和待查分开记。省下这点体力，也要承认来向资料还有不确定，行动时不能省去报告。",
+    "nodeId": 12,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_132",
+    "file": "clear_132.mp3",
+    "text": "分担可以，但要说清谁来接手。为保障分工做准备会累一些，也让大家心里更有底。到了地方，咱们再一起点交。",
+    "nodeId": 12,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_133",
+    "file": "clear_133.mp3",
+    "text": "先约好怎么求助，也是一种安排。保障分工若遇到变化，按信号联系；不能把留有体力当成已经帮过忙。",
+    "nodeId": 12,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_134",
+    "file": "clear_134.mp3",
+    "text": "好，从手头口粮里留一份，给会师后整顿。先记在你名下，到了地方，再一起点交。路上若有变化，早点告诉我。",
+    "nodeId": 12,
+    "scope": "all roles, authored preparation branch"
+  },
+  {
+    "id": "clear_135",
+    "file": "clear_135.mp3",
+    "text": "先照顾本组的承受能力。抵达后把会师后整顿的记录再核一遍；没有预留的物资，就不写成已经分给别人。",
+    "nodeId": 12,
+    "scope": "all roles, authored preparation branch"
+  }
+]

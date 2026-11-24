@@ -62,3 +62,8 @@
 
 .czmw-street-line{position:absolute;z-index:11;max-width:min(176px,48%);width:max-content;transform:translate(-50%,-100%);padding:5px 9px;border:1px solid #b6a47a80;border-radius:4px;background:#192720df;color:#efe2c5;pointer-events:none;opacity:0;transition:opacity .24s ease;text-align:center;font:12px/1.5 system-ui,sans-serif}
 .czmw-street-line.is-visible{opacity:1}
+
+.czmw-camera-controls{position:absolute;top:12px;right:12px;z-index:14;display:flex;align-items:flex-start;gap:8px}
+.czmw-camera-controls .czmw-settings90{position:static}
+.czmw-camera-mode{min-height:46px;white-space:nowrap;padding:0 10px;border:1px solid #c5b58a77;border-radius:4px;background:#20392fe8;color:#f1e5c9;font:inherit;font-size:12px;touch-action:manipulation}
+.czmw-camera-mode:disabled{opacity:.55}

@@ -33,6 +33,25 @@
   let joyId=null,tap=null,shiftHeld=false,walkSelected=false,touchRun=false;
   let lookCanvas = hooks.lookCanvas;
   const desktop = () => Boolean(lookCanvas && !touch);
+  const cameraButton = document.createElement('button');
+  cameraButton.type = 'button';
+  cameraButton.className = 'czmw-camera-mode';
+  cameraButton.dataset.czmwUi = 'true';
+  cameraButton.hidden = !touch || !lookCanvas;
+  const cameraControls = document.createElement('div');
+  cameraControls.className = 'czmw-camera-controls';
+  if (touch && lookCanvas) {
+    container.append(cameraControls);
+    cameraControls.append(cameraButton, settings);
+  }
+  function showCameraMode(mode) {
+    cameraButton.hidden = !touch || !lookCanvas || !mode;
+    cameraButton.textContent = mode === 'fps' ? '第一人称' : '第三人称';
+    cameraButton.setAttribute('aria-label', mode === 'fps' ? '切换到第三人称' : '切换到第一人称');
+  }
+  on(cameraButton, 'click', () => {
+    if (state.enabled && lookCanvas) hooks.onCameraMode?.();
+  });
   let wasLocked = false, programmaticUnlock = false;
   const sensitivityKey = 'cz_march_mouse_sensitivity';
   let sensitivity = 1;
@@ -69,6 +88,11 @@
     }
     if(!state.enabled || isEditing(e) || e.ctrlKey || e.metaKey)return;
     shiftHeld=e.shiftKey;
+    if (e.code === 'KeyV' && desktop() && !dialog.open) {
+      e.preventDefault();
+      if (!e.repeat) hooks.onCameraMode?.();
+      return;
+    }
     if (desktop() && (e.code === 'AltLeft' || e.code === 'AltRight')) {
       e.preventDefault();
       if (e.repeat) return;
@@ -138,7 +162,7 @@
     try { localStorage.setItem(sensitivityKey, String(sensitivity)); } catch {}
   });
   const shortcuts = document.createElement('p');
-  shortcuts.textContent = 'WASD 移动 · Shift 冲刺 · C 切换慢走 · 按住 Alt 自由环视 · E 交互 · 左键锁定视角 · Esc 设置 · Ctrl + 点击寻路';
+  shortcuts.textContent = 'WASD 移动 · Shift 冲刺 · C 切换慢走 · V 切换视角 · 按住 Alt 自由环视 · E 交互 · 左键锁定视角 · Esc 设置 · Ctrl + 点击寻路';
   const touchOptions = document.createElement('div');
   touchOptions.className = 'czmw-touch-options';
   dialog.append(title, resume, label, shortcuts, touchOptions);
@@ -237,7 +261,7 @@
   on(container, 'pointercancel', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   on(container, 'lostpointercapture', e => { if (tap?.id === e.pointerId) cancelDrag(); });
   setMode(mode);
-  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,unlock,disableCamera(){unlock();closeSettings();lookCanvas=null;},wantsWalk:()=>walkSelected,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());dialog.remove();panel.remove();settings.remove();action.remove();}};
+  return {vector(){if(!state.enabled)return {x:0,y:0};const dirs=new Set([...Array.from(keys,k=>map[k]),...(keys.size ? [] : held.values())]);let x=Number(dirs.has('e'))-Number(dirs.has('w'))+(keys.size ? 0 : state.joy.x),y=Number(dirs.has('s'))-Number(dirs.has('n'))+(keys.size ? 0 : state.joy.y);const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};},hasKeyboard:()=>keys.size>0,unlock,showCameraMode,disableCamera(){unlock();closeSettings();lookCanvas=null;showCameraMode(null);},wantsWalk:()=>walkSelected,wantsRun:()=>shiftHeld||(!keys.size&&touchRun),showAction(show,label){action.hidden=!show;if(label)action.textContent=label;},setEnabled(v){if(state.enabled===!!v)return;state.enabled=!!v;if(!v){reset();unlock();}panel.setAttribute('aria-disabled',String(!v));for(const b of panel.querySelectorAll('button'))b.disabled=!v;action.disabled=!v;cameraButton.disabled=!v;},isTouch:()=>navigator.maxTouchPoints>0,get mode(){return mode;},setMode,dispose(){unlock();reset();listeners.forEach(f=>f());dialog.remove();panel.remove();settings.remove();action.remove();cameraControls.remove();}};
  }
  M.controls86={create};
 })();

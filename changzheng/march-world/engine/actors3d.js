@@ -403,11 +403,12 @@
       playerState() {
         return playerActor ? { speed: playerActor.stride, weights: [...playerActor.gaitWeights] } : null;
       },
-      update(dt, player, anchors, camera, surfaceHeight, cameraDistance) {
+      update(dt, player, anchors, camera, surfaceHeight, cameraDistance, firstPerson = false) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
         frustum.setFromProjectionMatrix(projection);
         if (player.moving) dialogueAnchorId = null;
         ensurePlayer(player.roleId);
+        playerActor.root.visible = !firstPerson;
         place(playerActor, player.x, player.y, player.facing, surfaceHeight);
         playerActor.root.position.y += player.jumpHeight;
         const fade = cameraDistance >= .55
@@ -482,7 +483,7 @@
           actor.root.rotation.y += Math.atan2(Math.sin(delta), Math.cos(delta)) * (1 - Math.exp(-8 * dt));
           play(actor, engaged ? 'Talk' : actor.idle);
         }
-        for (const actor of actors) if (actor.root.visible) actor.mixer.update(dt);
+        for (const actor of actors) if (actor.root.visible || actor === playerActor) actor.mixer.update(dt);
         for (const actor of npcActors.values()) if (actor.root.visible) updateExpression(actor, dt, actor.current === actor.actions.get('Talk'));
       },
       dispose() {

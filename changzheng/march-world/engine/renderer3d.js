@@ -234,7 +234,7 @@
     worldRoot = new T.Group();
     scene.add(worldRoot);
     const cam = { viewW: 0, viewH: 0, zoom: 12.5 };
-    const stats = { frames: 0, renderMs: 0, dpr: 1, adaptive: false, backend: 'three', propsReady: false, unsupportedProps: [], environment: environment.terrain };
+    const stats = { frames: 0, renderMs: 0, dpr: 1, adaptive: false, backend: 'three', cameraMode: 'tps', propsReady: false, unsupportedProps: [], environment: environment.terrain };
     const world = logicalScene.world;
     const toWorld = (x, y, height = 0) => new T.Vector3(x - world.w / 2, height, y - world.h / 2);
     const props = logicalScene.props.map(alignedProp);
@@ -316,6 +316,10 @@
     let slow = 0;
     let dprCap = mobile ? 1.15 : 1.6;
     const FOCUS_HEIGHT = 1.52, HEAD_POINT_HEIGHT = 1.92, MIN_TPS_DIST = .5, WALL_MARGIN = .27;
+    const EYE_HEIGHT = 1.65;
+    const PITCH_LIMITS = { tps: [-.35, .75], fps: [-1.05, 1.15] };
+    let cameraMode = 'tps', pitchGoal = null;
+    const clampPitch = value => T.MathUtils.clamp(value, ...PITCH_LIMITS[cameraMode]);
     const BASE_DISTANCE = 4.2, SHOULDER = .35, SPRINT_OFFSET = .8;
     let yaw = 0, pitch = .22, boom = BASE_DISTANCE;
     let viewYaw = 0, followingRoute = false;
@@ -323,7 +327,7 @@
     const wrapAngle = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
     const isOrbiting = () => freeLookActive || freeLookYawOffset !== 0;
     function setFreeLook(active) {
-      if (intro || freeLookActive === active) return;
+      if (intro || cameraMode === 'fps' || freeLookActive === active) return;
       freeLookActive = active;
       if (active) {
         if (!freeLookYawOffset) lockedBodyYaw = logicalScene.focusActor?.facing ?? yaw;
@@ -1663,19 +1667,61 @@
       cameraDistance = T.MathUtils.clamp(cameraDistance, Math.min(MIN_TPS_DIST, targetDist), targetDist);
       camera.position.copy(shoulderOrigin).addScaledVector(cameraDirection, cameraDistance);
       camera.lookAt(lookPoint.copy(camera.position).addScaledVector(cameraDirection, -1));
+      updateCameraStats(cameraDistance, targetDist < fullDistance - .01);
+    }
+
+    function updateCameraStats(distance, occluded) {
       camera.updateMatrixWorld();
       camera.getWorldDirection(viewDirection);
       viewYaw = Math.atan2(viewDirection.z, viewDirection.x);
       stats.orbitYaw = +viewYaw.toFixed(3);
       stats.cameraPitch = +Math.asin(-viewDirection.y).toFixed(3);
-      stats.cameraBoom = +boom.toFixed(3);
-      stats.cameraDistance = +cameraDistance.toFixed(3);
-      stats.cameraOccluded = targetDist < fullDistance - .01;
+      stats.cameraBoom = cameraMode === 'fps' ? 0 : +boom.toFixed(3);
+      stats.cameraDistance = +distance.toFixed(3);
+      stats.cameraOccluded = occluded;
+    }
+
+    function placeActiveCamera(dt) {
+      if (cameraMode === 'fps') {
+        // Both views share the same vertically smoothed terrain and stair sample.
+        camera.position.copy(followTarget);
+        camera.position.y += EYE_HEIGHT - FOCUS_HEIGHT;
+        viewDirection.set(Math.cos(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.sin(yaw) * Math.cos(pitch));
+        camera.lookAt(lookPoint.copy(camera.position).add(viewDirection));
+        updateCameraStats(0, false);
+      } else {
+        placeCamera(followTarget, dt);
+      }
+    }
+
+    function setCameraMode(mode, { instant = false } = {}) {
+      if (mode !== 'tps' && mode !== 'fps' || intro || graphicsLost || dead || !logicalScene.focusActor) return false;
+      if (mode === cameraMode) return true;
+      if (isOrbiting()) yaw = lockedBodyYaw;
+      freeLookActive = false;
+      freeLookYawOffset = 0;
+      cameraMode = stats.cameraMode = mode;
+      pitchGoal = null;
+      const safePitch = clampPitch(pitch);
+      if (instant) pitch = safePitch;
+      else if (pitch !== safePitch) pitchGoal = safePitch;
+      // Reopen the TPS boom from the near end, respecting walls on the first frame.
+      cameraDistance = mode === 'tps' && !instant ? 0 : null;
+      placeActiveCamera(0);
+      logicalScene.focusActor.faceCamera(viewYaw);
+      return true;
     }
 
     const portraitScale = () => mobile && innerWidth < innerHeight ? 1.18 : 1;
     function follow(player, dt) {
       if (intro || graphicsLost) return;
+      if (pitchGoal !== null) {
+        pitch = T.MathUtils.lerp(pitch, pitchGoal, 1 - Math.exp(-dt * 18));
+        if (Math.abs(pitch - pitchGoal) < .001) {
+          pitch = pitchGoal;
+          pitchGoal = null;
+        }
+      }
       if (!freeLookActive && freeLookYawOffset) {
         freeLookYawOffset *= Math.exp(-dt * 22);
         if (Math.abs(freeLookYawOffset) < .012) freeLookYawOffset = 0;
@@ -1693,7 +1739,7 @@
       const target = onSurface(player.x, player.y, FOCUS_HEIGHT + player.jumpHeight * .45);
       const blend = 1 - Math.pow(.003, Math.min(dt, .1));
       followTarget.set(target.x, T.MathUtils.lerp(followTarget.y, target.y, blend), target.z);
-      placeCamera(followTarget, dt);
+      placeActiveCamera(dt);
       player.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
     }
 
@@ -1772,6 +1818,8 @@
       playIntro,
       initializeCamera,
       setFreeLook,
+      setCameraMode,
+      getCameraMode: () => cameraMode,
       adjustCamera(dx, dy = 0) {
         if (intro || !Number.isFinite(dx) || !Number.isFinite(dy)) return;
         const player = logicalScene.focusActor;
@@ -1781,8 +1829,9 @@
           yaw = wrapAngle(yaw + dx * .004);
           if (freeLookYawOffset) lockedBodyYaw = yaw;
         }
-        pitch = T.MathUtils.clamp(pitch + dy * .004, -.35, .75);
-        placeCamera(followTarget, 0);
+        if (pitchGoal === null) pitch = clampPitch(pitch + dy * .004);
+        else pitchGoal = clampPitch(pitchGoal + dy * .004);
+        placeActiveCamera(0);
         player?.faceCamera(isOrbiting() ? lockedBodyYaw : viewYaw);
       },
       cameraRelativeMovement({ x, y }) {
@@ -1840,7 +1889,9 @@
       camera.updateMatrixWorld();
       logicalScene.tick?.(dt);
       if (logicalScene.focusActor) {
-        actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight, intro || staging.inspectionOffset ? Infinity : (cameraDistance ?? Infinity));
+        const firstPerson = cameraMode === 'fps' && !intro;
+        const fadeDistance = firstPerson || intro || staging.inspectionOffset ? Infinity : (cameraDistance ?? Infinity);
+        actors?.update(dt, logicalScene.focusActor, logicalScene.anchorEntities || [], camera, surfaceHeight, fadeDistance, firstPerson);
         if (assets && !cinematic) {
           const p = logicalScene.focusActor;
           sun.target.position.copy(onSurface(p.x, p.y));

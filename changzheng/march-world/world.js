@@ -2,6 +2,8 @@
    协议（与 B 方 march-story 约定，不得静默改字段）：
    - async mount(container, {chapterId, sceneId, spawn, anchors})
    - snapshot() → {chapterId, sceneId, x, y, facing}
+   - getCameraMode() → 'tps' / 'fps'；Canvas 或未挂载时返回 null
+   - setCameraMode(mode, {instant = false}) → 是否接受切换；instant 跳过 TPS 镜头拉出和俯仰缓动
    - pause(reason) / resume(reason)：按原因集合暂停；仍有其他原因时不恢复移动
    - applyState({enabledAnchorIds, completedAnchorIds, openPassageIds})
    - destroy()：幂等，可重复调用
@@ -106,9 +108,13 @@
       lookCanvas: view.adjustCamera ? view.canvas : null,
       onSettings(open) { if (open) pause(settingsPause); else resume(settingsPause); },
       onFreeLook(active) { view.setFreeLook?.(active); },
+      onCameraMode() {
+        if (!pauses.size && !session.dead) setCameraMode(view.getCameraMode?.() === 'fps' ? 'tps' : 'fps');
+      },
       onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;
+    input.showCameraMode?.(view.getCameraMode?.());
 
     const playerEntity={y:player.y,draw:()=>player.draw(view.canvas.getContext('2d'),view.cam)};
     scene.drawWater=ambient.drawWater;scene.drawSmoke=ambient.drawSmoke;scene.drawOverlay=ambient.drawOverlay;
@@ -134,7 +140,12 @@
       }
       view.follow(player, dt);
       anchorsMod.layout(view.cam, scene.world.h, project);
-      const head=view.headPoint?view.headPoint(player):player.headPoint(view.cam);const px=Math.round(head.x*2)/2+'px',py=Math.round(head.y*2)/2+'px';if(pin.style.left!==px)pin.style.left=px;if(pin.style.top!==py)pin.style.top=py;
+      if (!pin.hidden) {
+        const head = view.headPoint ? view.headPoint(player) : player.headPoint(view.cam);
+        const px = Math.round(head.x * 2) / 2 + 'px', py = Math.round(head.y * 2) / 2 + 'px';
+        if (pin.style.left !== px) pin.style.left = px;
+        if (pin.style.top !== py) pin.style.top = py;
+      }
       if(session.guide){
         const a=anchorsMod.anchors.find(a=>a.anchorId===session.guide.anchorId&&a.enabled);
         if(a){
@@ -163,6 +174,7 @@
       view = M.view.wrapCanvas(M.renderer.create(container, scene));
       session.view = view;
       input.disableCamera?.();
+      pin.hidden = false;
       previous.dispose();
     };
     live = session;
@@ -183,6 +195,16 @@
     window.dispatchEvent(new CustomEvent('czmarch:interact', {
       detail: { chapterId: session.chapterId, sceneId: session.sceneId, anchorId }
     }));
+  }
+
+  // The mounted 3D scene owns the mode. Canvas or an unmounted scene returns null.
+  function getCameraMode() { return live?.view.getCameraMode?.() ?? null; }
+  function setCameraMode(mode, options) {
+    const session = live;
+    if (!session?.view.setCameraMode?.(mode, options)) return false;
+    session.pin.hidden = mode === 'fps';
+    session.input.showCameraMode?.(mode);
+    return true;
   }
 
   function snapshot() {
@@ -252,6 +274,7 @@
   /* ========== 导出 ========== */
   NS.mount = mount; NS.snapshot = snapshot; NS.pause = pause; NS.resume = resume;
   NS.applyState = applyState; NS.destroy = destroy;
+  NS.setCameraMode = setCameraMode; NS.getCameraMode = getCameraMode;
   NS.setGuide=setGuide;NS.walkToGuide=walkToGuide;
   Object.defineProperty(NS,'performance',{get:()=>live?{...live.view.stats,cacheEntries:M.painter.cacheSize}:null});
   NS.manifest = buildManifest();

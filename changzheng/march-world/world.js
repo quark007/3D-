@@ -82,12 +82,14 @@
 
     const guidePin=document.createElement('div');guidePin.className='czmw-guide87';guidePin.hidden=true;container.append(guidePin);
     const session = { container, scene, grid, view, player,pin,guidePin, guide:null, route:[],routeAt:0, routeCell:'', anchorsMod, ambient, chapterId, sceneId, dead: false, lastNear: null };
+    if (view) view.session = session;
 
     /* 输入 */
     const settingsPause = Symbol('movement settings');
     const input = M.input.create(container, {
       onInteract() {
         if (pauses.size || session.dead) return;
+        if (session.view?.handleInteract?.()) return;
         const near = session.lastNear;
         if (near) dispatchInteract(session, near.anchorId);
       },
@@ -192,6 +194,7 @@
 
   function dispatchInteract(session, anchorId) {
     session.input.unlock?.();
+    if (session.view?.handleInteract?.(anchorId)) return;
     window.dispatchEvent(new CustomEvent('czmarch:interact', {
       detail: { chapterId: session.chapterId, sceneId: session.sceneId, anchorId }
     }));

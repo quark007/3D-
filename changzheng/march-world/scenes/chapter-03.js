@@ -123,6 +123,8 @@
 
       a('history', 'task', '本章史实与来源', 80, 57),
 
+      a('indoor-meeting-room', 'exit', '进入二楼会议室', 81, 35.2),
+
       a('scene3d', 'task', '3D剧情地点模拟体验', 57, 27),
 
       a('exit', 'exit', '继续下一站', 57, 60)

@@ -71,7 +71,7 @@
     }
     let hudAnchor = null, wasFirstPerson = false;
     const actionText = a => navigator.maxTouchPoints > 0 && innerWidth <= 900 ? '点「交互」'
-      : a.kind === 'npc' ? 'E 交谈' : a.kind === 'exit' ? 'E 前往' : 'E 查看';
+      : a.actionLabel || (a.kind === 'npc' ? 'E 交谈' : /进入/.test(a.label) ? 'E 进入' : a.kind === 'exit' ? 'E 前往' : 'E 查看');
 
     return {
       anchors,

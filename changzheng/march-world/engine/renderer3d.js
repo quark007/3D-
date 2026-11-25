@@ -213,9 +213,45 @@
     scene.environment = worldScene.environment;
     scene.environmentIntensity = worldScene.environmentIntensity;
     const arms = [left, right];
+    // The GLB points along -Z. Its proximal sleeve continues behind the elbow
+    // (z=0); the wrist is at z=-.19. Pose those regions in mesh space so the
+    // sprint bend also affects the shadow and the cuff stays joined to the hand.
+    const posedMeshes = arms.map(arm => {
+      const meshes = [];
+      arm.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        const geometry = mesh.geometry;
+        const source = geometry.attributes.position;
+        const positions = [], normals = [];
+        for (const kind of ['flex', 'wrist']) {
+          const dp = [], dn = [];
+          for (let i = 0; i < source.count; i++) {
+            const y = source.getY(i), z = source.getZ(i);
+            const pivot = kind === 'wrist' ? -.19 : z > 0 ? 0 : -.29;
+            const angle = kind === 'wrist' ? .20*T.MathUtils.smoothstep(-z,.17,.24)
+              : -1.86*T.MathUtils.smoothstep(z,0,.13) - .56*T.MathUtils.smoothstep(-z,.29,.36);
+            const c = Math.cos(angle), sn = Math.sin(angle), dz = z-pivot;
+            dp.push(0, (c-1)*y-sn*dz, sn*y+(c-1)*dz);
+            const n = geometry.attributes.normal, ny=n.getY(i), nz=n.getZ(i);
+            dn.push(0,(c-1)*ny-sn*nz,sn*ny+(c-1)*nz);
+          }
+          positions.push(new T.Float32BufferAttribute(dp,3));
+          normals.push(new T.Float32BufferAttribute(dn,3));
+        }
+        geometry.morphTargetsRelative = true;
+        geometry.morphAttributes.position = positions;
+        geometry.morphAttributes.normal = normals;
+        mesh.updateMorphTargets();
+        mesh.frustumCulled = false;
+        meshes.push(mesh);
+      });
+      return meshes;
+    });
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    let breath = 0, walk = 0, run = 0, tuck = 0;
-    let yawSway = 0, pitchSway = 0, yawVelocity = 0, pitchVelocity = 0, lastYaw, lastPitch, lastSpeed = 0;
+    let breath=0, walk=0, run=0, tuck=0, flight=0, airborne=false;
+    let landing=0, landingVelocity=0, reachTime=1;
+    let yawSway=0, pitchSway=0, yawVelocity=0, pitchVelocity=0, lastYaw, lastPitch;
+    const wrists=[0,0];
     const aim = new T.Vector3(), ember = new T.PointLight(0xff5922, 0, 3);
     scene.add(ember,key.target);
     key.castShadow = true;
@@ -227,86 +263,73 @@
     const cold=new T.Color(0xc6d8ec), warm=new T.Color(0xffd09e);
     const damp = (value, target, rate, dt) => T.MathUtils.lerp(value, target, 1 - Math.exp(-rate * dt));
     return {
-      hide() { lastYaw = lastPitch = undefined; lastSpeed=yawVelocity=pitchVelocity=yawSway=pitchSway=0; },
+      touch() { reachTime=0; },
+      get reaching() { return reachTime < .35; },
+      hide() {
+        lastYaw=lastPitch=undefined;
+        walk=run=flight=landing=landingVelocity=yawSway=pitchSway=yawVelocity=pitchVelocity=0;
+        wrists.fill(0); airborne=false; reachTime=1;
+      },
       dispose() { key.shadow.dispose(); },
       draw(renderer, camera, player, yaw, pitch, clearance, dt, phase, roomLights) {
-        if (eye.aspect !== camera.aspect || eye.fov !== camera.fov) {
+        // Stable viewmodel lens on both aspect ratios, independent of world FOV.
+        if (eye.aspect !== camera.aspect) {
           eye.aspect = camera.aspect;
-          eye.fov = camera.fov;
           eye.updateProjectionMatrix();
         }
-        const pace = T.MathUtils.clamp(player.speed / 6.5, 0, 1);
-        const slowWalk = player.speed <= 2.2;
-        const targetRun = player.reversing ? 0 : T.MathUtils.smoothstep(player.speed, 4.1, 6.4);
-        const targetWalk = T.MathUtils.smoothstep(player.speed, .15, 1.8) * (1 - targetRun);
-        walk = damp(walk, targetWalk, 11, dt);
-        run = damp(run, targetRun, 11, dt);
-        tuck = damp(tuck, 1 - T.MathUtils.smoothstep(clearance, .38, .74), 16, dt);
-        breath += dt * 1.35;
-        // Slow walk has noticeably slower/softer frequency; normal walk is brisk; sprint is high frequency
-        const turn = lastYaw == null ? 0 : T.MathUtils.euclideanModulo(yaw-lastYaw+Math.PI, 2*Math.PI)-Math.PI;
-        yawVelocity -= T.MathUtils.clamp(turn,-.6,.6)*3.1;
-        pitchVelocity -= T.MathUtils.clamp(pitch-(lastPitch ?? pitch),-.4,.4)*2.5;
-        pitchVelocity += (player.speed-lastSpeed)*.028;
-        lastSpeed=player.speed;
+        const motion = reducedMotion.matches ? .35 : 1;
+        const fast = player.reversing ? 0 : T.MathUtils.smoothstep(player.speed,4.1,6.4);
+        const moving = T.MathUtils.smoothstep(player.speed,.1,1.7);
+        run = damp(run, player.airborne ? 0 : fast, 12, dt);
+        walk = damp(walk, player.airborne ? 0 : moving*(1-fast), 12, dt);
+        tuck = damp(tuck, 1-T.MathUtils.smoothstep(clearance,.30,.65), 13, dt);
+        breath += dt*1.35;
+        if (airborne && !player.airborne) landingVelocity = -2.4;
+        airborne = player.airborne;
+        flight = damp(flight, airborne ? 1 : 0, 16, dt);
+        const turn = Math.atan2(Math.sin(yaw-(lastYaw ?? yaw)),Math.cos(yaw-(lastYaw ?? yaw)));
+        yawVelocity -= T.MathUtils.clamp(turn,-.6,.6)*3.2;
+        pitchVelocity += T.MathUtils.clamp(pitch-(lastPitch ?? pitch),-.5,.5)*2.8;
         for (let time=dt; time>0; time-=1/120) {
           const h=Math.min(time,1/120);
-          yawVelocity+=(-125*yawSway-16*yawVelocity)*h;
-          pitchVelocity+=(-115*pitchSway-15*pitchVelocity)*h;
-          yawSway+=yawVelocity*h; pitchSway+=pitchVelocity*h;
+          yawVelocity+=(-115*yawSway-14*yawVelocity)*h;
+          pitchVelocity+=(-115*pitchSway-14*pitchVelocity)*h;
+          landingVelocity+=(-180*landing-13*landingVelocity)*h;
+          yawSway+=yawVelocity*h; pitchSway+=pitchVelocity*h; landing+=landingVelocity*h;
         }
-        lastYaw = yaw;
-        lastPitch = pitch;
-        const motion = reducedMotion.matches ? .27 : 1;
-        // Swing factors: slow walk gentler, S reverse walk significantly reduced amplitude
-        const speedScale = slowWalk ? .62 : 1;
-        const reverseScale = player.reversing ? .35 : 1;
-        const walkSwing = walk * speedScale * reverseScale * motion;
-        const runSwing = run * motion;
-
-        const portrait = Math.min(1, camera.aspect / .78);
-        // Base separation: wider in idle and landscape, tucked in during run
-        const separation = (Math.min(.28, camera.aspect * .275) + .036 - run * .03) * (.88 + .12 * portrait);
-        // Base Y: substantially sunk down, naturally drooping at sides
-        const baseY = -.187 - .023 * portrait + run * .025 + .002 * Math.sin(breath) - tuck * .03;
-        const baseZ = -.215 - run * .02 + tuck * .038;
-        // Hands rest at the lower corners and rise with the running gait.
-        const baseRotX = -.33 + run * .24 + .0025 * Math.sin(breath) + tuck * .12 - pitchSway * .5 * motion;
-
-        for (let i = 0; i < arms.length; i++) {
-          const side = i * 2 - 1;
-          // Exact 180° phase difference between left and right hands:
-          // Left hand: step = sin(phase)
-          // Right hand: step = sin(phase + PI) = -sin(phase)
-          const step = Math.sin(phase + (i === 0 ? 0 : Math.PI));
-          const arm = arms[i];
-          arm.scale.setScalar(.73 + .27 * portrait);
-
-          // Asymmetric natural forward-up vs backward-down swing:
-          // Forward swing (step > 0): swings forward & up into lower FOV, slight inward arc
-          const fwd = Math.max(0, step);
-          const fwdY = fwd * (walkSwing * .075 + runSwing * .042);
-          const fwdRotX = fwd * (walkSwing * .30 + runSwing * .26);
-          const fwdZ = -fwd * (walkSwing * .08 + runSwing * .08);
-          const fwdInX = -side * fwd * (walkSwing * .015 + runSwing * .025);
-
-          // Backward swing (step < 0): sinks deep below bottom edge of screen
-          const back = Math.min(0, step); // negative
-          const backY = back * (walkSwing * .045 + runSwing * .06);
-          const backRotX = back * (walkSwing * .14 + runSwing * .18);
-          const backZ = -back * (walkSwing * .04 + runSwing * .05);
-          const backOutX = side * (-back) * (walkSwing * .01 + runSwing * .015);
-
-          arm.position.set(
-            side * (separation - (i===0?.047:.012)) + fwdInX + backOutX,
-            baseY + (i===0?.095:-.017) + fwdY + backY + side * .003,
-            baseZ + (i===0?-.065:.015) + fwdZ + backZ + side * .006
-          );
-          arm.rotation.set(
-            baseRotX + fwdRotX + backRotX,
-            side * .24 - yawSway * .54 * motion,
-            side * (.32 + run * .065) + yawSway * .22 * motion
-          );
+        lastYaw=yaw; lastPitch=pitch;
+        reachTime=Math.min(.35,reachTime+dt);
+        const reach=Math.sin(Math.PI*reachTime/.35)**2;
+        const narrow=Math.min(1,eye.aspect/.85);
+        const stride=player.reversing ? .65 : .95+.05*T.MathUtils.smoothstep(player.speed,1.8,4);
+        const wave=Math.sin(phase);
+        for (let i=0;i<2;i++) {
+          const side=i*2-1, step=-side*wave;
+          const crest=T.MathUtils.smoothstep(step,-.20,1)*walk*stride;
+          const contact=i===1 ? reach : 0;
+          const lift=flight*(.77+.43*Math.cos(Math.PI*player.jumpProgress)+.64*player.jumpProgress**4);
+          // Idle hangs from the elbow. At a forward step only the cuff and
+          // knuckles clear the bottom edge. Sprint rotates about the elbow.
+          let angle=-1.27+1.09*crest;
+          let y=-.425+.275*crest, z=-.09-.14*crest;
+          angle=T.MathUtils.lerp(angle,-.08+.32*step*motion,run);
+          y=T.MathUtils.lerp(y,-.245+.052*step*motion,run);
+          z=T.MathUtils.lerp(z,-.16-.055*step*motion,run);
+          const spread=(.27+.035*flight-.042*crest-run*(.045+.036*step))*narrow;
+          angle=T.MathUtils.lerp(angle,.04,contact);
+          y=T.MathUtils.lerp(y,-.20,contact); z=T.MathUtils.lerp(z,-.255,contact);
+          const arm=arms[i];
+          arm.position.set(side*(spread-.07*narrow*contact)+yawSway*.10*motion,
+            y+motion*(lift*.27+landing+.0015*Math.sin(breath)+pitchSway*.13)+.018*pitch-tuck*.045,
+            z-.14*lift+tuck*.035);
+          arm.rotation.set(angle+1.04*lift+landing*1.3+.08*pitch,
+            side*(.065+.17*run*step+.23*contact)-yawSway*.55*motion,
+            side*(.06+.19*run*step+.12*flight)+yawSway*.3*motion);
+          wrists[i]=damp(wrists[i],-step*run+pitchSway,9,dt);
+          for (const mesh of posedMeshes[i]) {
+            mesh.morphTargetInfluences[0]=run;
+            mesh.morphTargetInfluences[1]=wrists[i];
+          }
         }
         // Keep the stage's fill and sunlight direction in camera-local space.
         fill.position.copy(hemi.position).transformDirection(camera.matrixWorldInverse);
@@ -337,7 +360,11 @@
           renderer.autoClear = autoClear;
           renderer.shadowMap.needsUpdate=updateShadows;
         }
-        return run > .5 ? 'run' : walk > .28 ? 'walk' : 'idle';
+        if (reachTime < .35) return 'interact';
+        if (airborne) return 'jump';
+        if (Math.abs(landingVelocity)>.12 || Math.abs(landing)>.012) return 'land';
+        if (run>.5) return 'run';
+        return walk>.28 ? 'walk' : 'idle';
       }
     };
   }
@@ -1830,6 +1857,7 @@
       relicModal.querySelector('.czmw-relic-meta').textContent = data.era;
       relicModal.querySelector('.czmw-relic-desc').textContent = data.desc;
       relicModal.hidden = false;
+      relicModal.animate([{opacity:0},{opacity:0,offset:.48},{opacity:1}],{duration:310});
       relicModal.classList.add('is-open');
       if (window.CZMarchWorld) CZMarchWorld.pause('relic-modal');
     }
@@ -1998,9 +2026,13 @@
 
     const outdoorVisible = [];
     let inTransition = false;
-    function fadeTransition(fn) {
+    async function fadeTransition(fn) {
       if (inTransition) return Promise.resolve();
       inTransition = true;
+      if (cameraMode === 'fps' && arms?.reaching) {
+        await new Promise(resolve => setTimeout(resolve,140));
+        if (dead) return;
+      }
       fadeCurtain.classList.add('is-active');
       return new Promise((resolve, reject) => {
         setTimeout(async () => {
@@ -2039,6 +2071,8 @@
         return false;
       } finally { roomLoading = null; }
       if (dead || !indoorRoomModel) return false;
+      const enteringFromFps = cameraMode === 'fps';
+      if (enteringFromFps) arms?.touch();
       await fadeTransition(() => {
         const model = indoorRoomModel;
         isIndoors = true;
@@ -2079,6 +2113,7 @@
           followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
         }
         window.CZMarchWorld.setCameraMode('fps', { instant: true });
+        if (!enteringFromFps) arms?.touch();
       });
       return true;
     }
@@ -2123,10 +2158,12 @@
       if (inTransition || roomLoading) return true;
       if (isIndoors) {
         if (activeIndoorTarget?.type === 'door') {
+          arms?.touch();
           exitMeetingRoom(activeSession);
           return true;
         }
         if (activeIndoorTarget?.type === 'relic') {
+          arms?.touch();
           openRelicModal(activeIndoorTarget.data);
           return true;
         }
@@ -2229,12 +2266,19 @@
         // Both views share the same vertically smoothed terrain and stair sample.
         camera.position.copy(followTarget);
         const speed=logicalScene.focusActor?.speed || 0;
-        stepAmplitude=T.MathUtils.damp(stepAmplitude,quietMotion.matches?0:Math.min(speed/4,1.35),12,dt);
-        stepPhase+=dt*(1.8+speed*1.55);
-        camera.position.y += EYE_HEIGHT - FOCUS_HEIGHT - .013*stepAmplitude*Math.cos(2*stepPhase);
+        stepAmplitude=T.MathUtils.damp(stepAmplitude,quietMotion.matches || logicalScene.focusActor?.airborne ? 0 : Math.min(speed/4,1.35),12,dt);
+        if (!logicalScene.focusActor?.airborne) {
+          const cycle = actors?.strideCycle();
+          stepPhase += dt*(cycle?.rate ?? speed*1.85);
+          if (cycle && speed>.1) {
+            const error = cycle.phase-stepPhase;
+            stepPhase += Math.atan2(Math.sin(error),Math.cos(error))*(1-Math.exp(-8*dt));
+          }
+        }
+        camera.position.y += EYE_HEIGHT - FOCUS_HEIGHT + .013*stepAmplitude*Math.cos(2*stepPhase);
         viewDirection.set(Math.cos(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.sin(yaw) * Math.cos(pitch));
         camera.lookAt(lookPoint.copy(camera.position).add(viewDirection));
-        camera.rotateZ(.005*stepAmplitude*Math.sin(stepPhase));
+        camera.rotateZ(-.005*stepAmplitude*Math.sin(stepPhase));
         updateCameraStats(0, false);
       } else {
         placeCamera(followTarget, dt);
@@ -2511,7 +2555,7 @@
       renderer.render(scene, camera);
       const worldDraws = renderer.info.render.calls;
       const player = logicalScene.focusActor;
-      const showArms = arms && player && cameraMode === 'fps' && !intro && !logicalScene.pausedDim;
+      const showArms = arms && player && cameraMode === 'fps' && !intro && (!logicalScene.pausedDim || arms.reaching);
       if (showArms) {
         const clearance = cameraClearance(camera.position, viewDirection, .78, .025, camera.position.y);
         stats.armsState = arms.draw(renderer, camera, player, viewYaw, pitch, clearance, dt, stepPhase, indoorLightGroup);

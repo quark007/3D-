@@ -55,6 +55,7 @@
       faceCamera(yaw) { p.facing = yaw; },
       get speed() { return p.speed; },
       get airborne() { return p.jumpTime < JUMP_DURATION; },
+      get jumpProgress() { return p.jumpTime / JUMP_DURATION; },
       get jumpHeight() {
         const progress = p.jumpTime / JUMP_DURATION;
         return 4 * JUMP_HEIGHT * progress * (1 - progress);

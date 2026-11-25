@@ -411,6 +411,14 @@
 
     return {
       ensurePlayer,
+      strideCycle() {
+        if (!playerActor) return null;
+        const {walk,run}=playerActor.gait;
+        if (!walk) return null;
+        const action = run && playerActor.gaitWeights[2]>.5 ? run : walk;
+        const radiansPerSecond = 2*Math.PI/action.getClip().duration;
+        return {rate:action.getEffectiveTimeScale()*radiansPerSecond,phase:action.time*radiansPerSecond};
+      },
       playerState() {
         return playerActor ? { speed: playerActor.stride, weights: [...playerActor.gaitWeights] } : null;
       },

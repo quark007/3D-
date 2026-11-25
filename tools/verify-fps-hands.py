@@ -4,7 +4,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 root = Path(__file__).resolve().parents[1]
-out = root / 'evidence/fps-hands-v2'
+out = root / 'evidence/fps-hands-v3'
 out.mkdir(parents=True, exist_ok=True)
 url = 'http://127.0.0.1:8080/march-world/preview.html?chapter=chapter-3%2Fscene-zunyi'
 
@@ -35,14 +35,21 @@ def verify(browser, mobile):
     E("""()=>{window.samples=[];window.peak={calls:0,triangles:0};const vec=new T.Vector3();
       function tops(arm){let top=1;
         arm.traverse(o=>{if(!o.isMesh)return;const pos=o.geometry.attributes.position;
-          for(let i=0;i<pos.count;i+=3){o.getVertexPosition(i,vec);vec.applyMatrix4(o.matrixWorld);
+          const used=o.userData.testIndices??=Array.from(new Set(o.geometry.index.array));
+          for(const i of used){o.getVertexPosition(i,vec);vec.applyMatrix4(o.matrixWorld);
             vec.project(hands.parent);
+            if (Math.abs(vec.x)>.92 && Math.abs(vec.x)<=1 && Math.abs(vec.z)<=1 && Math.abs(vec.y)<=1)
+              window.edgeTop=Math.min(window.edgeTop,(1-vec.y)/2);
             if(Math.abs(vec.x)<=1 && Math.abs(vec.z)<=1 && Math.abs(vec.y)<=1)top=Math.min(top,(1-vec.y)/2);
           }});return top}
       const arms=['FPS_Arm_Left','FPS_Arm_Right'].map(k=>hands.getObjectByName(k));
-      function monitor(){const s=v.stats,state=s.armsState,top=arms.map(tops);
+      function monitor(){window.edgeTop=1;const s=v.stats,state=s.armsState,top=arms.map(tops);
         peak.calls=Math.max(peak.calls,s.drawCalls);peak.triangles=Math.max(peak.triangles,s.triangles);
-        samples.push({state,top,t:performance.now(),speed:pl.speed,angle:arms[0].rotation.x,y:arms[0].position.y,flex:arms[0].children[0]?.morphTargetInfluences?.[0]});
+        const orientation=arms.map((a,i)=>{
+          const inward=i===0?1:-1;
+          return {palm:inward*new T.Vector3(0,-1,0).applyQuaternion(a.quaternion).x,
+            thumb:new T.Vector3(inward,0,0).applyQuaternion(a.quaternion).y}});
+        samples.push({state,top,orientation,edgeTop,t:performance.now(),speed:pl.speed,angle:arms[0].rotation.x,y:arms[0].position.y,flex:arms[0].children[0]?.morphTargetInfluences?.[0]});
         if(window.captureWhen?.(samples.at(-1))) {holdFrame=true;window.captureWhen=null}
         requestAnimationFrame(monitor)} monitor()}""")
     def wait(test):
@@ -54,7 +61,7 @@ def verify(browser, mobile):
     def capture(name,condition):
         E('()=>{window.captureWhen='+condition+'}')
         wait('window.holdFrame===true')
-        page.screenshot(path=out/(('portrait-' if mobile else '')+name+'.png'))
+        if name=='03-sprint':page.screenshot(path=out/(('02-portrait' if mobile else '01-desktop')+'-sprint.png'))
         E('resumeGame()')
     page.wait_for_timeout(480)
     capture('01-idle',"(s)=>s.state==='idle' && Math.min(...s.top)===1")
@@ -79,24 +86,29 @@ def verify(browser, mobile):
         if mobile:cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
         else:
             page.keyboard.up('w');page.keyboard.up('Shift')
+    orientation={}
+    def check_orientation(mode):
+        orientation[mode]=E("""()=>{const both=samples.flatMap(s=>s.orientation);return {
+          minInward:Math.min(...both.map(a=>a.palm)),minThumbUp:Math.min(...both.map(a=>a.thumb))}}""")
+        assert orientation[mode]['minInward']>.90 and orientation[mode]['minThumbUp']>0,orientation
     def gait(mode):
         E('samples.length=0')
         move(mode)
         cutoff=(.92 if mobile else .88) if mode=='walk' else (.85 if mobile else .76)
-        condition=f"(s)=>s.state==='{mode}' && Math.min(...s.top)<{cutoff} && Math.max(...s.top)>.98"
+        condition=f"(s)=>s.state==='{mode}' && (s.state!=='run' || s.flex>.97) && Math.min(...s.top)<{cutoff} && Math.max(...s.top)>.98"
+        if mode=='run':condition+=f" && s.top[{int(mobile)}]<{cutoff}"
         capture('02-walk' if mode=='walk' else '03-sprint',condition)
         wait(f"samples.some(s=>s.state==='{mode}'&&s.top[0]<{cutoff})&&samples.some(s=>s.state==='{mode}'&&s.top[1]<{cutoff})")
+        check_orientation(mode)
         stop()
         return E('samples.reduce((v,s)=>v.map((n,i)=>Math.min(n,s.top[i])),[1,1])')
     data={'idleTop':E('samples.at(-1).top'),'walkTop':gait('walk'),'runTop':gait('run')}
-    data['sprintElbowsDeg']=E("""()=>['FPS_Arm_Left','FPS_Arm_Right'].map(name=>{
-      let cloth;hands.getObjectByName(name).traverse(o=>{if(o.material?.name.includes('twill'))cloth=o});
-      const g=cloth.geometry,pos=g.attributes.position,delta=g.morphAttributes.position[0];
-      function ring(test){const sum=new T.Vector3();let count=0;
-        for(let i=0;i<pos.count;i++)if(test(pos.getZ(i))){sum.add(new T.Vector3().fromBufferAttribute(pos,i)).add(new T.Vector3().fromBufferAttribute(delta,i));count++}
-        return sum.divideScalar(count)}
-      return T.MathUtils.radToDeg(ring(z=>z>.47).angleTo(ring(z=>z<-.217)))})""")
-    assert all(85<=a<=95 for a in data['sprintElbowsDeg']),data['sprintElbowsDeg']
+    data['runEdgeTop']=E("Math.min(...samples.filter(s=>s.state==='run').map(s=>s.edgeTop))")
+    assert data['runEdgeTop']>.85,data['runEdgeTop']
+    data['proximalSleeveRemoved']=E("""()=>['FPS_Arm_Left','FPS_Arm_Right'].every(k=>{
+      let cloth;hands.getObjectByName(k).traverse(o=>{if(o.material?.name.includes('twill'))cloth=o});
+      const g=cloth.geometry;return g.index.array.every(i=>g.attributes.position.getZ(i)<0)})""")
+    assert data['proximalSleeveRemoved']
     page.wait_for_timeout(450)
     page.keyboard.press('c');page.keyboard.down('w')
     wait("samples.at(-1).state==='walk' && pl.speed>1 && pl.speed<2.1")
@@ -104,6 +116,8 @@ def verify(browser, mobile):
     data['slowSpeed']=E('pl.speed')
     E('samples.length=0')
     wait("samples.some(s=>s.top[0]<.995)&&samples.some(s=>s.top[1]<.995)")
+    check_orientation('slow')
+    data['orientation']=orientation
     data['slowTop']=E('samples.reduce((v,s)=>v.map((n,i)=>Math.min(n,s.top[i])),[1,1])')
     page.keyboard.up('w');page.keyboard.press('c');page.wait_for_timeout(650)
     E('samples.length=0');page.keyboard.press('Space')

@@ -213,23 +213,34 @@
     scene.environment = worldScene.environment;
     scene.environmentIntensity = worldScene.environmentIntensity;
     const arms = [left, right];
-    // The GLB points along -Z. Its proximal sleeve continues behind the elbow
-    // (z=0); the wrist is at z=-.19. Pose those regions in mesh space so the
-    // sprint bend also affects the shadow and the cuff stays joined to the hand.
+    // The viewmodel looks down -Z. The last complete forearm ring is
+    // just forward of z=0. Omit the two long upper-sleeve rings behind it
+    // from both the colour and shadow passes. The opening stays below frame.
     const posedMeshes = arms.map(arm => {
       const meshes = [];
       arm.traverse(mesh => {
         if (!mesh.isMesh) return;
         const geometry = mesh.geometry;
         const source = geometry.attributes.position;
+        if (geometry.boundingBox?.max.z > 0 && geometry.index) {
+          const indices = geometry.index.array;
+          const forearm = [];
+          for (let j = 0; j < indices.length; j += 3) {
+            const a = indices[j], b = indices[j + 1], c = indices[j + 2];
+            if (Math.max(source.getZ(a), source.getZ(b), source.getZ(c)) < 0) {
+              forearm.push(a, b, c);
+            }
+          }
+          geometry.setIndex(forearm);
+        }
         const positions = [], normals = [];
         for (const kind of ['flex', 'wrist']) {
           const dp = [], dn = [];
           for (let i = 0; i < source.count; i++) {
             const y = source.getY(i), z = source.getZ(i);
-            const pivot = kind === 'wrist' ? -.19 : z > 0 ? 0 : -.29;
+            const pivot = kind === 'wrist' ? -.19 : -.29;
             const angle = kind === 'wrist' ? .20*T.MathUtils.smoothstep(-z,.17,.24)
-              : -1.86*T.MathUtils.smoothstep(z,0,.13) - .56*T.MathUtils.smoothstep(-z,.29,.36);
+              : -.84*T.MathUtils.smoothstep(-z,.29,.36);
             const c = Math.cos(angle), sn = Math.sin(angle), dz = z-pivot;
             dp.push(0, (c-1)*y-sn*dz, sn*y+(c-1)*dz);
             const n = geometry.attributes.normal, ny=n.getY(i), nz=n.getZ(i);
@@ -312,10 +323,10 @@
           // knuckles clear the bottom edge. Sprint rotates about the elbow.
           let angle=-1.27+1.09*crest;
           let y=-.425+.275*crest, z=-.09-.14*crest;
-          angle=T.MathUtils.lerp(angle,-.08+.32*step*motion,run);
-          y=T.MathUtils.lerp(y,-.245+.052*step*motion,run);
-          z=T.MathUtils.lerp(z,-.16-.055*step*motion,run);
-          const spread=(.27+.035*flight-.042*crest-run*(.045+.036*step))*narrow;
+          angle=T.MathUtils.lerp(angle,-.11+.48*step*motion,run);
+          y=T.MathUtils.lerp(y,-.279+.064*step*motion-.13*(1-narrow),run);
+          z=T.MathUtils.lerp(z,-.17-.090*step*motion-.29*(1-narrow),run);
+          const spread=(.27+.035*flight-.042*crest-run*(.045+.036*step+.095*(1-narrow)))*narrow;
           angle=T.MathUtils.lerp(angle,.04,contact);
           y=T.MathUtils.lerp(y,-.20,contact); z=T.MathUtils.lerp(z,-.255,contact);
           const arm=arms[i];
@@ -324,7 +335,7 @@
             z-.14*lift+tuck*.035);
           arm.rotation.set(angle+1.04*lift+landing*1.3+.08*pitch,
             side*(.065+.17*run*step+.23*contact)-yawSway*.55*motion,
-            side*(.06+.19*run*step+.12*flight)+yawSway*.3*motion);
+            -side*(1.52+.045*run*step-.06*flight)+yawSway*.3*motion);
           wrists[i]=damp(wrists[i],-step*run+pitchSway,9,dt);
           for (const mesh of posedMeshes[i]) {
             mesh.morphTargetInfluences[0]=run;

@@ -6,6 +6,22 @@
     const stone = mat.name.startsWith('ZY_stone');
     const wall = /^(ZY_brick|ZY_plaster|ZY_bark)/.test(mat.name);
     if (mat.aoMap) mat.aoMapIntensity = .64;
+    if (mat.name.startsWith('ZY_trim')) {
+      // The archivolt is dark brick with lime joints. Keep the adjacent capitals pale.
+      mat.onBeforeCompile = shader => {
+        shader.vertexShader = 'varying vec3 vArcade;\n' + shader.vertexShader.replace('#include <begin_vertex>',
+          '#include <begin_vertex>\nvArcade = position;');
+        shader.fragmentShader = 'varying vec3 vArcade;\n' + shader.fragmentShader.replace('#include <color_fragment>', `
+          #include <color_fragment>
+          vec2 rel = vec2(mod(vArcade.x+1.8,3.6)-1.8, mod(vArcade.y-.46,3.57)-1.95);
+          float ring = length(rel);
+          if (vArcade.z>5.82 && vArcade.z<6.10 && rel.y>0.0 && ring>1.54 && ring<1.74) {
+            float joint = smoothstep(.40,.49,abs(fract(atan(rel.y,rel.x)*14.0/3.141593)-.5));
+            diffuseColor.rgb *= mix(vec3(.18,.20,.21),vec3(.69),joint);
+          }`);
+      };
+      return;
+    }
     if (!stone && !wall && !mat.name.startsWith('ZY_glass')) return;
     mat.onBeforeCompile = shader => {
       shader.uniforms.floorHeight = { value: floorHeight };
@@ -31,15 +47,18 @@
           vec2 p = vCourtyardPos.xz;
           float paving = 1.0 - smoothstep(.045, .10, abs(vCourtyardPos.y-floorHeight));
           float stainNoise = wetNoise(p*1.65 + vCourtyardPos.yy*.8);
+          float grain = wetNoise(p*48.0);
+          diffuseColor.rgb *= ${stone ? 'mix(.77,1.14,grain)*mix(.87,1.08,stainNoise)' : 'mix(.92,1.04,wetNoise(vCourtyardPos.xz*15.+vCourtyardPos.yy*1.3))'};
+
           float baseDamp = 1.0 - smoothstep(.04, .75, max(0.,vCourtyardPos.y-floorHeight));
           float damp = baseDamp * smoothstep(.20, .67, stainNoise) * ${stone ? '(1.0 - paving)' : '1.0'};
           float moss = damp * smoothstep(.61, .84, stainNoise);
           diffuseColor.rgb *= mix(vec3(1.), vec3(.57,.61,.55), damp*.8);
           diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb*vec3(.69,.91,.54), moss*.56);
-          roughnessFactor *= 1.0 - damp * .075;
+          roughnessFactor = ${wall ? 'mix(.85, .95, clamp(roughnessFactor, 0., 1.))' : 'roughnessFactor'};
           diffuseColor.rgb *= 1.0 + .20 * baseDamp * smoothstep(.68, .80, stainNoise);
           float wet = ${stone ? 'paving' : '0.0'} * smoothstep(.43, .71, .72*wetNoise(p*.42)+.28*wetNoise(p*1.37));
-          roughnessFactor = mix(roughnessFactor, mix(.79, .19, wet), ${stone ? "paving" : "0.0"});
+          roughnessFactor = mix(roughnessFactor, mix(.42, .25, wet), ${stone ? "paving" : "0.0"});
           diffuseColor.rgb *= mix(vec3(1.), vec3(.63,.68,.73), wet);
         `).replace('#include <lights_fragment_end>', '#include <lights_fragment_end>\nreflectedLight.indirectSpecular *= mix(1.0, 1.65, wet);');
       } else {
@@ -149,7 +168,8 @@
     grass.instanceMatrix.needsUpdate=true;
     return {
       group,
-      update(t,player,camera){
+      rain,
+      update(t,player,camera,westOnly=false){
         wind.value=t;
         for(let i=0;i<seeds.length;i++){
           const [a,b,c,len]=seeds[i];
@@ -158,7 +178,7 @@
           const inside=settings.shelter.some(([sx,sz,w,d])=>x>=sx&&x<=sx+w&&z>=sz&&z<=sz+d);
           const k=i*6, y=height+1, wx=x-world.w/2, wz=z-world.h/2;
           rainData[k]=wx; rainData[k+1]=y; rainData[k+2]=wz;
-          const streak=inside&&height<4?0:len;
+          const streak=(inside&&height<4)||(westOnly&&x>84.5)?0:len;
           rainData[k+3]=wx-streak*.176; rainData[k+4]=y+streak; rainData[k+5]=wz;
         }
         rainGeo.attributes.position.needsUpdate=true;
@@ -433,8 +453,14 @@
         if (!node.isMesh) return;
         node.receiveShadow = true;
         if (cinematic) {
+          if (node.material.name.startsWith('ZY_amber')) {
+            node.material.emissiveIntensity = .035;
+            node.material.color.set('#647172');
+            node.material.roughness = .26;
+          }
           const foliage = /^(ZY_twig|ZY_crown)/.test(node.material.name);
-          node.castShadow = !foliage;
+          node.castShadow = !foliage && !node.material.vertexColors && !node.material.name.startsWith('WestPane_');
+          if (node.material.name.startsWith('WestPane_')) node.material.depthWrite = false;
           if (foliage) {
             node.material.alphaTest = .45;
             node.material.side = T.DoubleSide;
@@ -1710,6 +1736,11 @@
       smoke.position.copy(onSurface(source.x, source.y, .8)); worldRoot.add(smoke); smokeColumns.push(smoke);
     }
 
+    function updateFieldOfView() {
+      const portraitFov = T.MathUtils.radToDeg(2 * Math.atan(Math.tan(T.MathUtils.degToRad(23)) / camera.aspect));
+      camera.fov = isIndoors ? T.MathUtils.clamp(portraitFov, 59, 88) : 52;
+      camera.updateProjectionMatrix();
+    }
     function resize() {
       const rect = container.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) return;
@@ -1720,7 +1751,7 @@
       renderer.setPixelRatio(dpr);
       renderer.setSize(rect.width, rect.height, false);
       camera.aspect = rect.width / rect.height;
-      camera.updateProjectionMatrix();
+      updateFieldOfView();
     }
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
@@ -1840,7 +1871,7 @@
       Prop_WardrobeMirror: {
         name: '穿衣镜壁柜与西壁彩玻窗',
         era: '中西合璧黔北民居建筑肌理',
-        desc: '原会址主楼为黔军师长柏辉章公馆，二楼西侧客厅用作会议室。东侧板壁并排立有带全身穿衣镜的木质衣柜与双门暗柜；西侧整面开设有红绿彩绘玻璃方格采光窗，兼具二十世纪三十年代黔北传统木构与西式洋房装饰特色。'
+        desc: '原会址主楼为黔军师长柏辉章公馆，二楼的小客厅用作会议室。东侧板壁并排立有带全身穿衣镜的木质衣柜与双门暗柜；西壁开有木格玻璃窗，底排为浅色彩玻，兼具二十世纪三十年代黔北传统木构与西式洋房装饰特色。'
       }
     };
     const DOOR_EXIT_DATA = {
@@ -1856,8 +1887,35 @@
     let indoorLightGroup = null;
     let activeIndoorTarget = null;
     let savedOutdoorClearance = null;
-    let savedOutdoorFog = null;
-    let savedOutdoorBg = null;
+    let windowView = null;
+    // The playable room uses its own navigation origin. Copy the west-facing
+    // subset of the street at the matching sash plane and second-floor height.
+    function createWestWindowView() {
+      const view = new T.Group();
+      view.name = 'WestWindowCourtyard';
+      view.position.copy(toWorld(81 - 4.85 - 2.476, 30 + 8.35, indoorFloorY - 4.03));
+      street.traverse(node => {
+        if (!node.isMesh || node.material.name.startsWith('WestPane_')) return;
+        const geometry = node.geometry, position = geometry.attributes.position, index = geometry.index;
+        const indices = [];
+        for (let i = 0; i < (index?.count ?? position.count); i += 3) {
+          const a = index ? index.getX(i) : i, b = index ? index.getX(i+1) : i+1, c = index ? index.getX(i+2) : i+2;
+          if (Math.max(position.getX(a), position.getX(b), position.getX(c)) < 4.80) indices.push(a,b,c);
+        }
+        if (!indices.length) return;
+        const subset = new T.BufferGeometry();
+        for (const [name, attribute] of Object.entries(geometry.attributes)) subset.setAttribute(name, attribute);
+        subset.setIndex(indices);
+        view.add(new T.Mesh(subset, node.material));
+      });
+      if (weather) {
+        const showers = weather.rain.clone();
+        showers.position.copy(street.position).multiplyScalar(-1);
+        view.add(showers);
+      }
+      worldRoot.add(view);
+      return view;
+    }
 
     function updateIndoorRelicDetection(camera) {
       if (!isIndoors) return;
@@ -1912,6 +1970,9 @@
 
       indoorRoomModel.name = 'zunyi-meeting-room';
       indoorRoomModel.position.copy(toWorld(81, 30, indoorFloorY));
+      indoorRoomModel.traverse(node => {
+        if (node.isMesh && /ZY (winter|rose|straw) glass/.test(node.material.name)) node.material.depthWrite = false;
+      });
       worldRoot.add(indoorRoomModel);
       indoorRoomModel.visible = false;
       if (dead) { indoorRoomModel.removeFromParent(); releaseResources(indoorRoomModel, false); return null; }
@@ -1995,11 +2056,9 @@
         const peds = scene.getObjectByName('zunyi-pedestrians');
         if (peds) peds.visible = false;
 
-        savedOutdoorFog = scene.fog;
-        scene.fog = null;
-        savedOutdoorBg = scene.background;
-        scene.background = new T.Color('#a9b7c4');
-        camera.fov=59; camera.updateProjectionMatrix();
+        windowView ??= createWestWindowView();
+        windowView.visible = true;
+        updateFieldOfView();
         indoorLightGroup.visible=true;
         if (!roomReflection) {
           const generator=new T.PMREMGenerator(renderer);
@@ -2047,11 +2106,10 @@
         const peds = scene.getObjectByName('zunyi-pedestrians');
         if (peds) peds.visible = true;
 
-        scene.fog = savedOutdoorFog;
-        scene.background = savedOutdoorBg;
+        if (windowView) windowView.visible = false;
         scene.environment=reflectionTarget?.texture ?? null;
         scene.environmentIntensity=.98;
-        camera.fov=52; camera.updateProjectionMatrix();
+        updateFieldOfView();
         renderer.toneMappingExposure=staging.exposure;
 
         if (activeSession?.grid && savedOutdoorClearance) {
@@ -2458,7 +2516,7 @@
         }
         positions.needsUpdate = true;
       }
-      if (weather && logicalScene.focusActor && !isIndoors) weather.update(time, logicalScene.focusActor, camera);
+      if (weather && logicalScene.focusActor) weather.update(time, isIndoors ? {x:85.85,y:21.65} : logicalScene.focusActor, camera, isIndoors);
       if (cinematic && isIndoors) updateIndoorRelicDetection(camera);
       renderer.info.reset();
       renderer.render(scene, camera);

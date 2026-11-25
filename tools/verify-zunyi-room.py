@@ -3,10 +3,12 @@ import json, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parents[1]
-lookdev="--lookdev" in sys.argv
-out=root/"evidence"/("realism-upgrade" if lookdev else "zunyi-full-integration")
+photos="--photos" in sys.argv
+lookdev="--lookdev" in sys.argv or photos
+out=root/"evidence"/("zunyi-1to1-real" if photos else "realism-upgrade" if lookdev else "zunyi-full-integration")
 url="http://127.0.0.1:8080/march-world/preview.html?chapter=chapter-3%2Fscene-zunyi"
 report={}
+out.mkdir(parents=True,exist_ok=True)
 def verify(browser,mobile):
     width,height=(390,844) if mobile else (1280,800)
     ctx=browser.new_context(viewport=dict(width=width,height=height),has_touch=mobile,is_mobile=mobile)
@@ -41,7 +43,14 @@ def verify(browser,mobile):
     def action():
         if mobile:page.locator('.czmw-act').tap()
         else:page.keyboard.press("e")
-    def snap(name):page.screenshot(path=out/name)
+    def snap(name):
+        if photos:
+            bare=name.removeprefix("mobile-").removeprefix("portrait-")
+            retain={"01-main-arcade.png":"01-main-arcade.png","02-courtyard-steps.png":"02-courtyard-steps.png",
+                    "05-window-table-brazier.png":"03-window-table-brazier.png","02-east-wall-clock-wardrobe.png":"04-east-wall-clock-wardrobe.png"}
+            if bare not in retain:return
+            name=("portrait-" if mobile else "")+retain[bare]
+        page.screenshot(path=out/name)
     def metrics():
         return E("""()=>new Promise(done=>{const read=()=>CZMarchWorld.performance,t=performance.now(),start=read().frames;
           let calls=0,tris=0;function sample(now){const r=read();calls=Math.max(calls,r.drawCalls);tris=Math.max(tris,r.triangles);
@@ -64,16 +73,29 @@ def verify(browser,mobile):
         aim("Door_Exit");action()
         wait("!v.isIndoors() && CZMarchWorld.getCameraMode()==='tps'");page.wait_for_timeout(500)
         assert E("v.isStreetVisible() && v.scene.getObjectByName('march-actor-soldier').visible && !!v.scene.fog")
+    if photos:
+        prefix="portrait-" if mobile else ""
+        for x,y,yaw,pitch,name in [(91,49.5,-2.04,-.14,"01-main-arcade"),(74,40,-.62,-.06,"02-courtyard-steps")]:
+            E("([x,y,a,p])=>{pl.setPos(x,y,a);v.setCameraAngle(a,p)}",[x,y,yaw,pitch])
+            page.wait_for_timeout(900);snap(prefix+name+".png")
+        E("pl.setPos(81,39.4,-Math.PI/2)")
     go(81,36.8);E("v.setCameraAngle(-Math.PI/2,.09)")
     data={"outside":metrics(),"outsideHUDDriftPx":hud_turn()}
     step_in()
     data["inside"]=metrics()
+    if photos:
+        data["westWindow"]=E("""()=>{const view=v.scene.getObjectByName('WestWindowCourtyard'), panes=[];
+          v.scene.getObjectByName('RoomShell').traverse(o=>{if(o.isMesh&&/ZY (winter|rose|straw) glass/.test(o.material.name))
+          panes.push([o.material.name,o.material.transparent,o.material.opacity])});
+          return {sky:v.scene.background.isTexture===true,vistaMeshes:view.children.length,panes}}""")
+        assert data["westWindow"]["sky"] and data["westWindow"]["vistaMeshes"]>=3
+        panes=data["westWindow"]["panes"];assert len(panes)==3 and all(t and 0<a<1 for _,t,a in panes)
     data["uv1"]=E("""()=>{let ok=true;v.scene.getObjectByName('zunyi-meeting-room').traverse(o=>{if(o.isMesh){ok&&=!!o.geometry.attributes.uv1;for(const m of [].concat(o.material))if(m.aoMap)ok&&=m.aoMap.channel===1&&m.map.channel===1}});return ok}""")
     if not mobile:snap("01-enter-room-fps.png")
     else:snap("04-mobile-390-interior.png")
     if lookdev:
-        go(82.46,27.18);go(82.46,28.18)
-        E("v.setCameraAngle(2.77,.43)");page.wait_for_timeout(350)
+        go(82.46,27.18);go(82.46,27.38 if photos else 28.18)
+        E("v.setCameraAngle(2.20,.26)" if photos else "v.setCameraAngle(2.77,.43)");page.wait_for_timeout(350)
         snap(("mobile-" if mobile else "")+"05-window-table-brazier.png")
         go(82.46,27.18);go(81.1,27.18)
     data["insideHUDDriftPx"]=hud_turn()
@@ -133,13 +155,27 @@ def verify(browser,mobile):
     assert all((x["geometries"],x["textures"])==(samples[0]["geometries"],samples[0]["textures"]) for x in samples)
     assert not errors and all(status<400 for _,status in requests)
     for k in ["outside","inside","card"]:assert data[k]["calls"]<=120 and data[k]["triangles"]<=120000
+    if photos:
+        data["anchorSweep"]=E("""async()=>{const anchors=CZMarchWorld.manifest.scenes.find(s=>s.chapterId==3).anchors;
+          let calls=0,triangles=0;
+          const settle=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+          for(const a of anchors){
+            pl.setPos(a.x,a.y,0);await settle(180);
+            for(const yaw of [0,Math.PI/2,Math.PI,-Math.PI/2]){
+              v.setCameraAngle(yaw,.12);await settle(120);
+              calls=Math.max(calls,v.stats.drawCalls);triangles=Math.max(triangles,v.stats.triangles);
+            }
+          }
+          return {anchors:anchors.length,headings:4,calls,triangles}}""")
+        assert data["anchorSweep"]["anchors"]==23
     data["wholeRoutePeak"]=E("peak")
     data["resources"]=E("""()=>{let r={};for(const e of performance.getEntriesByType('resource'))if(e.name.startsWith(location.origin+'/')){
       const name=new URL(e.name).pathname;r[name]=Math.max(r[name]||0,e.encodedBodySize)}return r}""")
-    data["totalBytes"]=sum(data["resources"].values())
+    data["documentBytes"]=E("performance.getEntriesByType('navigation')[0].encodedBodySize")
+    data["totalBytes"]=sum(data["resources"].values())+data["documentBytes"]
     print("route",data["wholeRoutePeak"],"page bytes",data["totalBytes"],flush=True)
     if lookdev:
-        assert data["uv1"] and data["totalBytes"]+len(page.content().encode())<=15000000
+        assert data["uv1"] and data["totalBytes"]<=15000000
         assert data["wholeRoutePeak"]["calls"]<=120 and data["wholeRoutePeak"]["triangles"]<=120000
     ctx.close()
     return data

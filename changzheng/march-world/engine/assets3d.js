@@ -54,6 +54,7 @@
       playerArms: '/assets/characters/player/fps-arms-web.glb'
     };
     if (compoundOnly) for (const key of ['tree','rock','crate','fern']) delete sources[key];
+    if (streetModel?.gallery) sources.gallery = streetModel.gallery;
     if (streetModel) sources.street = streetModel.url;
     for (const [key, url] of Object.entries(sources)) jobs.push((async () => {
       const response = await fetch(url, { signal });
@@ -66,7 +67,7 @@
       models[key] = source.scene;
       source.scene.traverse(object => {
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
-          if (material?.transparent) {
+          if (material?.transparent && !material.name.startsWith('WestPane_')) {
             material.transparent = false;
             material.alphaTest = .45;
             material.depthWrite = true;
@@ -86,6 +87,7 @@
       if (failed) throw failed.reason;
       signal.throwIfAborted();
     }
+    if (models.gallery) models.street.add(models.gallery);
     if (compoundOnly) {
       // The terrain mesh is used only for picking. The porch reuses the manor timber.
       textures.earth = {};

@@ -21,6 +21,10 @@
       ["北侧警戒线", 54, 22, 7, 0.52, 1.25],
       ["南侧警戒线", 54, 63.48, 7, 0.52, 1.25],
       ["会址主楼内墙", 68.125, 24, 25.75, 9, 7.62],
+      ["西侧回廊柱一", 68.14, 35.36, 0.52, 0.52, 7.45],
+      ["西侧回廊柱二", 68.14, 31.58, 0.52, 0.52, 7.45],
+      ["西侧回廊柱三", 68.14, 27.80, 0.52, 0.52, 7.45],
+      ["西侧回廊柱四", 68.14, 24.02, 0.52, 0.52, 7.45],
       ["会址主楼北翼", 85.875, 19.05, 7.65, 5.7, 9.54],
       ["旧宅东房", 94, 51, 5.3, 13, 4.9],
       ["旧宅西房", 72, 51, 5, 13, 4.8],
@@ -45,7 +49,7 @@
   K.define({
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
-    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb?v=winter-foliage', origin: [81, 30], actorRange: 13 },
+    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb?v=winter-foliage', origin: [81, 30], gallery: '/assets/scenes/zunyi-realscan/zunyi-gallery-web.glb', actorRange: 13 },
     // Stone mesh dimensions in the Blender assembly, converted to logical X east / Y south.
     stepSurfaces: [
       [59, 41.485, 10, 3.03, .014],

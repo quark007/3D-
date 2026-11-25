@@ -1,0 +1,391 @@
+{
+  "desktop": {
+    "outside": {
+      "fps": 105.6,
+      "calls": 77,
+      "triangles": 92360
+    },
+    "outsideHUDDriftPx": 0,
+    "inside": {
+      "fps": 85.7,
+      "calls": 53,
+      "triangles": 77980
+    },
+    "westWindow": {
+      "sky": true,
+      "vistaMeshes": 14,
+      "panes": [
+        [
+          "ZY rose glass.002",
+          true,
+          0.38
+        ],
+        [
+          "ZY winter glass.002",
+          true,
+          0.12
+        ],
+        [
+          "ZY straw glass.002",
+          true,
+          0.32
+        ]
+      ]
+    },
+    "uv1": true,
+    "insideHUDDriftPx": 0,
+    "gaits": [
+      {
+        "arms": "walk",
+        "speed": 3.999999999999986,
+        "draws": 12
+      },
+      {
+        "arms": "walk",
+        "speed": 1.8000000000000682,
+        "draws": 12
+      },
+      {
+        "arms": "run",
+        "speed": 6.500000000000057,
+        "draws": 12
+      }
+    ],
+    "westWallStopX": 78.98333333333332,
+    "lap": true,
+    "card": {
+      "fps": 18.6,
+      "calls": 37,
+      "triangles": 62156
+    },
+    "cards": [
+      [
+        "Prop_MeetingTable",
+        "板栗色长桌与二十人座次复原"
+      ],
+      [
+        "Prop_CharcoalBrazier",
+        "长桌下取暖炭火盆"
+      ],
+      [
+        "Prop_HangingLamp",
+        "荷叶边盖洋吊灯"
+      ],
+      [
+        "Prop_WallClock",
+        "东壁自鸣木壳机械摆钟"
+      ],
+      [
+        "Prop_WardrobeMirror",
+        "穿衣镜壁柜与西壁彩玻窗"
+      ]
+    ],
+    "memory": [
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45383272
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45391356
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45399240
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45395988
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45408052
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45027206
+      }
+    ],
+    "errors": [],
+    "requests": [
+      [
+        "fps-arms-web.glb",
+        200
+      ],
+      [
+        "fps-arms-web.glb",
+        200
+      ],
+      [
+        "zunyi-meeting-room-web.glb",
+        200
+      ]
+    ],
+    "anchorSweep": {
+      "anchors": 23,
+      "headings": 4,
+      "calls": 89,
+      "triangles": 115774
+    },
+    "wholeRoutePeak": {
+      "calls": 89,
+      "triangles": 115774
+    },
+    "resources": {
+      "/march-world/world.css": 13620,
+      "/march-world/engine/projection.js": 2701,
+      "/march-world/engine/pathfind.js": 6405,
+      "/march-world/engine/painter.js": 37842,
+      "/march-world/engine/input.js": 5143,
+      "/march-world/engine/controls86.js": 16680,
+      "/march-world/engine/anchors.js": 9690,
+      "/march-world/engine/player.js": 7258,
+      "/march-world/engine/ambient.js": 4000,
+      "/march-world/engine/renderer.js": 7159,
+      "/march-world/engine/assets3d.js": 5135,
+      "/march-world/engine/actors3d.js": 29205,
+      "/march-world/engine/view3d.js": 2552,
+      "/march-world/engine/street-life.js": 12309,
+      "/march-world/engine/renderer3d.js": 141780,
+      "/march-world/scenes/kit.js": 2601,
+      "/march-world/scenes/visual3d.js": 17982,
+      "/march-world/scenes/chapter-03.js": 8128,
+      "/march-world/scenes/chapter-02.js": 9138,
+      "/march-world/scenes/chapter-01.js": 8616,
+      "/march-world/scenes/chapter-04.js": 7024,
+      "/march-world/scenes/chapter-05.js": 6293,
+      "/march-world/scenes/chapter-06.js": 7187,
+      "/march-world/scenes/chapter-07.js": 7280,
+      "/march-world/scenes/chapter-08.js": 8122,
+      "/march-world/scenes/chapter-09.js": 8258,
+      "/march-world/scenes/chapter-10.js": 6895,
+      "/march-world/scenes/chapter-11.js": 6503,
+      "/march-world/scenes/chapter-12.js": 7072,
+      "/march-world/world.js": 16363,
+      "/assets/webgpu40/vendor/three/build/three.module.js": 662880,
+      "/assets/webgpu40/vendor/three/build/three.core.js": 1518699,
+      "/assets/pbr/manifest.json": 5791,
+      "/assets/webgpu40/vendor/three/jsm/loaders/GLTFLoader.js": 122495,
+      "/assets/webgpu40/vendor/three/jsm/loaders/DRACOLoader.js": 19802,
+      "/assets/webgpu40/vendor/three/jsm/utils/BufferGeometryUtils.js": 39213,
+      "/assets/webgpu40/vendor/three/jsm/utils/SkeletonUtils.js": 12031,
+      "/assets/characters/player/fps-arms-web.glb": 302172,
+      "/assets/scenes/zunyi-realscan/zunyi-gallery-web.glb": 156612,
+      "/assets/scenes/zunyi-realscan/zunyi_street.glb": 2956436,
+      "/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/draco_wasm_wrapper.js": 58572,
+      "/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/draco_decoder.wasm": 192420,
+      "/assets/scenes/zunyi-realscan/zunyi-overcast-sky.webp": 32532,
+      "/assets/scenes/zunyi-realscan/zunyi-winter-grass.webp": 45974,
+      "/march-world/engine/character-weathering.js": 18449,
+      "/assets/models-v03/char_soldier.glb": 2583640,
+      "/assets/characters/wang-gui/wang-gui-zunyi.glb": 1517680,
+      "/assets/characters/he-wen/he-wen-zunyi.glb": 1637904,
+      "/assets/characters/chen-xiaoman/chen-xiaoman-web.glb": 767972,
+      "/assets/characters/logistics/logistics-field-web.glb": 700968,
+      "/assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb": 1155568
+    },
+    "documentBytes": 6608,
+    "totalBytes": 14943359
+  },
+  "portrait": {
+    "outside": {
+      "fps": 138.9,
+      "calls": 80,
+      "triangles": 100876
+    },
+    "outsideHUDDriftPx": 0,
+    "inside": {
+      "fps": 162.6,
+      "calls": 47,
+      "triangles": 76968
+    },
+    "westWindow": {
+      "sky": true,
+      "vistaMeshes": 14,
+      "panes": [
+        [
+          "ZY rose glass.002",
+          true,
+          0.38
+        ],
+        [
+          "ZY winter glass.002",
+          true,
+          0.12
+        ],
+        [
+          "ZY straw glass.002",
+          true,
+          0.32
+        ]
+      ]
+    },
+    "uv1": true,
+    "insideHUDDriftPx": 0,
+    "gaits": [
+      {
+        "arms": "walk",
+        "speed": 3.999999999999986,
+        "draws": 12
+      },
+      {
+        "arms": "walk",
+        "speed": 1.8000000000000682,
+        "draws": 12
+      },
+      {
+        "arms": "run",
+        "speed": 6.500000000000057,
+        "draws": 12
+      }
+    ],
+    "westWallStopX": 78.98333333333332,
+    "lap": true,
+    "card": {
+      "fps": 18.6,
+      "calls": 35,
+      "triangles": 62236
+    },
+    "cards": [
+      [
+        "Prop_MeetingTable",
+        "板栗色长桌与二十人座次复原"
+      ],
+      [
+        "Prop_CharcoalBrazier",
+        "长桌下取暖炭火盆"
+      ],
+      [
+        "Prop_HangingLamp",
+        "荷叶边盖洋吊灯"
+      ],
+      [
+        "Prop_WallClock",
+        "东壁自鸣木壳机械摆钟"
+      ],
+      [
+        "Prop_WardrobeMirror",
+        "穿衣镜壁柜与西壁彩玻窗"
+      ]
+    ],
+    "memory": [
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45128558
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45141602
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45160294
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45186750
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45184246
+      },
+      {
+        "geometries": 125,
+        "textures": 173,
+        "heap": 45185286
+      }
+    ],
+    "errors": [],
+    "requests": [
+      [
+        "fps-arms-web.glb",
+        200
+      ],
+      [
+        "fps-arms-web.glb",
+        200
+      ],
+      [
+        "zunyi-meeting-room-web.glb",
+        200
+      ]
+    ],
+    "anchorSweep": {
+      "anchors": 23,
+      "headings": 4,
+      "calls": 85,
+      "triangles": 115576
+    },
+    "wholeRoutePeak": {
+      "calls": 85,
+      "triangles": 115576
+    },
+    "resources": {
+      "/march-world/world.css": 13620,
+      "/march-world/engine/pathfind.js": 6405,
+      "/march-world/engine/projection.js": 2701,
+      "/march-world/engine/painter.js": 37842,
+      "/march-world/engine/input.js": 5143,
+      "/march-world/engine/controls86.js": 16680,
+      "/march-world/engine/player.js": 7258,
+      "/march-world/engine/ambient.js": 4000,
+      "/march-world/engine/anchors.js": 9690,
+      "/march-world/engine/renderer.js": 7159,
+      "/march-world/engine/assets3d.js": 5135,
+      "/march-world/engine/street-life.js": 12309,
+      "/march-world/engine/actors3d.js": 29205,
+      "/march-world/engine/renderer3d.js": 141780,
+      "/march-world/engine/view3d.js": 2552,
+      "/march-world/scenes/kit.js": 2601,
+      "/march-world/scenes/visual3d.js": 17982,
+      "/march-world/scenes/chapter-01.js": 8616,
+      "/march-world/scenes/chapter-02.js": 9138,
+      "/march-world/scenes/chapter-03.js": 8128,
+      "/march-world/scenes/chapter-04.js": 7024,
+      "/march-world/scenes/chapter-05.js": 6293,
+      "/march-world/scenes/chapter-06.js": 7187,
+      "/march-world/scenes/chapter-07.js": 7280,
+      "/march-world/scenes/chapter-08.js": 8122,
+      "/march-world/scenes/chapter-09.js": 8258,
+      "/march-world/scenes/chapter-10.js": 6895,
+      "/march-world/scenes/chapter-11.js": 6503,
+      "/march-world/scenes/chapter-12.js": 7072,
+      "/march-world/world.js": 16363,
+      "/assets/webgpu40/vendor/three/build/three.module.js": 662880,
+      "/assets/webgpu40/vendor/three/build/three.core.js": 1518699,
+      "/assets/pbr/manifest.json": 5791,
+      "/assets/webgpu40/vendor/three/jsm/loaders/DRACOLoader.js": 19802,
+      "/assets/webgpu40/vendor/three/jsm/loaders/GLTFLoader.js": 122495,
+      "/assets/webgpu40/vendor/three/jsm/utils/BufferGeometryUtils.js": 39213,
+      "/assets/webgpu40/vendor/three/jsm/utils/SkeletonUtils.js": 12031,
+      "/assets/characters/player/fps-arms-web.glb": 302172,
+      "/assets/scenes/zunyi-realscan/zunyi-gallery-web.glb": 156612,
+      "/assets/scenes/zunyi-realscan/zunyi_street.glb": 2956436,
+      "/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/draco_wasm_wrapper.js": 58572,
+      "/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/draco_decoder.wasm": 192420,
+      "/assets/scenes/zunyi-realscan/zunyi-overcast-sky.webp": 32532,
+      "/assets/scenes/zunyi-realscan/zunyi-winter-grass.webp": 45974,
+      "/march-world/engine/character-weathering.js": 18449,
+      "/assets/models-v03/char_soldier.glb": 2583640,
+      "/assets/characters/he-wen/he-wen-zunyi.glb": 1637904,
+      "/assets/characters/wang-gui/wang-gui-zunyi.glb": 1517680,
+      "/assets/characters/chen-xiaoman/chen-xiaoman-web.glb": 767972,
+      "/assets/characters/logistics/logistics-field-web.glb": 700968,
+      "/assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb": 1155568
+    },
+    "documentBytes": 6608,
+    "totalBytes": 14943359
+  },
+  "fallback": "canvas"
+}

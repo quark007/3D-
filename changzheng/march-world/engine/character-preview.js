@@ -10,11 +10,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 let canvas = document.getElementById('portrait');
 const characters = new Map([
+  ['commander', { name: '红军连长', detail: '核心连长 · 1.78 m', height: 1.78, path: '/assets/characters/commander/commander-web.glb' }],
+  ['soldier', { name: '普通红军战士', detail: '核心战士 · 1.67 m', height: 1.67, path: '/assets/characters/soldier/soldier-web.glb' }],
+  ['logistics', { name: '后勤补给员', detail: '后勤协作员 · 32 岁 · 1.73 m', height: 1.73, path: '/assets/characters/logistics/logistics-web.glb' }],
+  ['medic', { name: '红军女医护', detail: '随队救护 · 1.61 m', height: 1.61, path: '/assets/characters/medic/medic-web.glb' }],
   ['he-wen', { name: '何文', detail: '指导员 · 1.78 m', path: '/assets/characters/he-wen/he-wen-web.glb' }],
   ['wang-gui', { name: '王贵', detail: '老班长 · 41 岁 · 1.70 m', path: '/assets/characters/wang-gui/wang-gui-web.glb' }],
-  ['logistics', { name: '后勤', detail: '后勤协作员 · 32 岁 · 1.73 m', height: 1.73, path: '/assets/characters/logistics/logistics-field-web.glb' }],
-  ['chen-xiaoman', { name: '陈小满', detail: '青年战士 · 1.67 m', height: 1.67, path: '/assets/characters/chen-xiaoman/chen-xiaoman-web.glb' }],
-  ['medic', { name: '卫生员', detail: '随队救护 · 1.61 m', height: 1.61, path: '/assets/characters/medic/medic-web.glb' }],
+  ['chen-xiaoman', { name: '陈小满', detail: '青年战士 · 1.67 m', height: 1.67, path: '/assets/characters/soldier/soldier-web.glb' }],
   ['boatman', { name: '船工', detail: '渡口船工 · 1.74 m', height: 1.74, path: '/assets/characters/boatman/boatman-web.glb' }],
   ['guide', { name: '向导', detail: '沿途领路人 · 1.68 m', height: 1.68, path: '/assets/characters/guide/guide-web.glb' }],
   ['civilian-farmer', { name: '老乡（男）', detail: '第 1 章群众 · 1.63 m', height: 1.63, path: '/assets/characters/civilian-farmer/civilian-farmer-web.glb' }],
@@ -614,18 +616,58 @@ document.getElementById('clay').addEventListener('click', event => {
   event.currentTarget.setAttribute('aria-pressed', String(enabled));
   for (const [mesh, material] of materials) mesh.material = enabled ? clay : material;
 });
+let jumpSeqTimer = null;
+function clearJumpSeq() {
+  if (jumpSeqTimer) { clearTimeout(jumpSeqTimer); jumpSeqTimer = null; }
+}
+function updateAnimButtons(activeKey) {
+  for (const btn of document.querySelectorAll('[data-anim]')) {
+    btn.setAttribute('aria-pressed', String(btn.dataset.anim === activeKey));
+  }
+}
+function playJumpSequence() {
+  clearJumpSeq();
+  const s = actions.get('Jump_Start'), a = actions.get('Jump_Air'), l = actions.get('Jump_Land');
+  if (!s && !a && !l) { selectAnimation('Idle'); return; }
+  mixer.stopAllAction();
+  headSway?.reset().play();
+  breath?.reset().play();
+  updateAnimButtons('Jump');
+  document.getElementById('animation').value = s ? 'Jump_Start' : (a ? 'Jump_Air' : 'Jump_Land');
+  const runStage = (act, once, nextFn, delayMs) => {
+    if (!act) { nextFn?.(); return; }
+    act.reset().setLoop(once ? T.LoopOnce : T.LoopRepeat, once ? 1 : Infinity);
+    act.clampWhenFinished = once;
+    act.fadeIn(0.12).play();
+    active = act;
+    document.getElementById('animation').value = act.getClip().name;
+    if (nextFn) jumpSeqTimer = setTimeout(() => { act.fadeOut(0.14); nextFn(); }, delayMs);
+  };
+  runStage(s, true, () => runStage(a, false, () => runStage(l, true, () => {
+    jumpSeqTimer = setTimeout(() => playJumpSequence(), 420);
+  }, 420), 560), 200);
+}
 function selectAnimation(name) {
+  clearJumpSeq();
+  if (name === 'Jump') { playJumpSequence(); return; }
   mixer.stopAllAction();
   active = actions.get(name || 'Idle');
   if (active) {
+    active.setLoop(T.LoopRepeat, Infinity);
+    active.clampWhenFinished = false;
     active.reset().play();
     active.paused = !name;
   }
   headSway?.reset().play();
   breath?.reset().play();
   mixer.update(0);
+  document.getElementById('animation').value = name || '';
+  updateAnimButtons(name || 'Idle');
 }
 document.getElementById('animation').addEventListener('change', event => selectAnimation(event.target.value));
+for (const btn of document.querySelectorAll('[data-anim]')) {
+  btn.addEventListener('click', () => selectAnimation(btn.dataset.anim));
+}
 
 const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
 try {

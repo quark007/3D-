@@ -3,20 +3,35 @@
   const M = window.CZMarchWorld._;
   const SCRIPT_BASE = document.currentScript?.src || location.href;
   const paths = {
+    commander: '/assets/characters/commander/commander-web.glb',
+    logistics: '/assets/characters/logistics/logistics-web.glb',
+    soldier: '/assets/characters/soldier/soldier-web.glb',
+    medic: '/assets/characters/medic/medic-web.glb'
+  };
+  const fallbackPaths = {
     commander: '/assets/models-v03/char_commander.glb',
     logistics: '/assets/models-v03/char_logistics.glb',
     soldier: '/assets/models-v03/char_soldier.glb',
     medic: '/assets/models-v03/char_medic.glb'
   };
+  const ROLE_HEIGHTS = { commander: 1.78, logistics: 1.73, soldier: 1.72, medic: 1.61 };
+  const AUTHORED_HEIGHTS = {
+    '/assets/characters/commander/commander-web.glb': 1.78,
+    '/assets/characters/logistics/logistics-web.glb': 1.73,
+    '/assets/characters/soldier/soldier-web.glb': 1.67,
+    '/assets/characters/medic/medic-web.glb': 1.61
+  };
   const DEFAULT_HEIGHT = 1.76;
+  const WALK_REF_SPEED = 1.263;
+  const RUN_REF_SPEED = 4.30;
   const CHARACTER_PROFILES = {
     he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-web.glb', zunyiUrl: '/assets/characters/he-wen/he-wen-zunyi.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
     wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', zunyiUrl: '/assets/characters/wang-gui/wang-gui-zunyi.glb', height: 1.70, scaleBias: 1, idle: 'Idle', weathering: 'wang_gui',
       roam: { speed: 1.35, hurrySpeed: 2.5, pace: 2.4, paceAway: 9 } },
-    chen_xiaoman: { height: 1.67, glbUrl: '/assets/characters/chen-xiaoman/chen-xiaoman-web.glb', grounded: true },
+    chen_xiaoman: { height: 1.67, glbUrl: '/assets/characters/soldier/soldier-web.glb', grounded: true },
     medic_1: { height: 1.61, glbUrl: '/assets/characters/medic/medic-web.glb', grounded: true },
-    logistics_1: { glbUrl: '/assets/characters/logistics/logistics-field-web.glb', height: 1.73, grounded: true },
-    liaison_1: { height: 1.65 },
+    logistics_1: { height: 1.73, glbUrl: '/assets/characters/logistics/logistics-web.glb', grounded: true },
+    liaison_1: { height: 1.65, glbUrl: '/assets/characters/soldier/soldier-web.glb', grounded: true },
     boatman_1: { height: 1.74, glbUrl: '/assets/characters/boatman/boatman-web.glb', grounded: true },
     guide_1: { height: 1.68, glbUrl: '/assets/characters/guide/guide-web.glb', grounded: true },
     civilian_1: { height: 1.63, glbUrl: '/assets/characters/civilian-farmer/civilian-farmer-web.glb', grounded: true }
@@ -82,12 +97,28 @@
       ...logicalScene.anchors.filter(a=>hasModel(a)&&!npcProfile(a)?.glbUrl).map(fallbackFor)] : Object.values(paths);
     const urls = new Set([...baseUrls, ...independentUrls.keys()]);
     const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
+    const pathRoles = new Map(Object.entries(paths).map(([r, u]) => [u, r]));
     const results = await Promise.allSettled([...urls].map(async url => {
       try {
         const source = await loadModel(T, GLTFLoader, draco, url, signal);
         loaded.set(url, source);
       } catch (error) {
-        if (signal?.aborted || !independentUrls.has(url)) throw error;
+        if (signal?.aborted) throw error;
+        const pathRole = pathRoles.get(url);
+        if (pathRole && fallbackPaths[pathRole]) {
+          try {
+            const fbUrl = fallbackPaths[pathRole];
+            console.warn(`核心人物模型回退通用模型 (${url} -> ${fbUrl})`, error);
+            const fbSource = await loadModel(T, GLTFLoader, draco, fbUrl, signal);
+            fbSource.userData = { fallback: true };
+            loaded.set(url, fbSource);
+            return;
+          } catch (fbError) {
+            if (signal?.aborted) throw fbError;
+            error = fbError;
+          }
+        }
+        if (!independentUrls.has(url)) throw error;
         const full = independentUrls.get(url).glbUrl;
         if (full !== url) {
           try {
@@ -157,15 +188,22 @@
         return materials.get(material);
       }
       const model = skeleton.clone(source.scene);
+      const modelUrl = independent ? url : paths[role];
+      const authoredHeight = source.userData?.fallback ? null : AUTHORED_HEIGHTS[modelUrl];
       // Use posed vertices for independent rigs whose armature bounds include their bind pose.
       if (independent) model.updateMatrixWorld(true);
-      const bounds = independent && profile.grounded ? null : new T.Box3().setFromObject(model, Boolean(independent));
-      if (bounds) {
-        const size = bounds.getSize(new T.Vector3());
-        const center = bounds.getCenter(new T.Vector3());
-        const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);
-        model.scale.setScalar(scale);
-        model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+      if (authoredHeight) {
+        const targetHeight = height * (profile.scaleBias ?? 1);
+        if (Math.abs(targetHeight - authoredHeight) > .005) model.scale.setScalar(targetHeight / authoredHeight);
+      } else {
+        const bounds = independent && profile.grounded ? null : new T.Box3().setFromObject(model, Boolean(independent));
+        if (bounds) {
+          const size = bounds.getSize(new T.Vector3());
+          const center = bounds.getCenter(new T.Vector3());
+          const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);
+          model.scale.setScalar(scale);
+          model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+        }
       }
       model.traverse(node => {
         if (!node.isMesh) return;
@@ -241,7 +279,7 @@
         disposeActor(playerActor);
         actors.splice(actors.indexOf(playerActor), 1);
       }
-      playerActor = makeActor(role, 1.8);
+      playerActor = makeActor(role, ROLE_HEIGHTS[role] ?? DEFAULT_HEIGHT);
       const variants = new Map();
       const cloneForFade = material => {
         if (!variants.has(material)) variants.set(material, material.clone());
@@ -255,7 +293,19 @@
       for (const [original, variant] of variants) playerActor.materials.set(original, variant);
       playerActor.fade = 1;
       playerActor.gait = { idle: playerActor.actions.get('Idle'), walk: playerActor.actions.get('Walk'), run: playerActor.actions.get('Run') };
+      playerActor.jump = {
+        start: playerActor.actions.get('Jump_Start'),
+        air: playerActor.actions.get('Jump_Air'),
+        land: playerActor.actions.get('Jump_Land')
+      };
+      for (const [k, act] of Object.entries(playerActor.jump)) {
+        if (!act) continue;
+        if (k === 'start' || k === 'land') { act.setLoop(T.LoopOnce, 1); act.clampWhenFinished = true; }
+      }
       playerActor.gaitWeights = [1, 0, 0];
+      playerActor.jumpBlend = 1;
+      playerActor.jumpStage = null;
+      playerActor.jumpAction = null;
       playerActor.stride = 0;
       for (const action of Object.values(playerActor.gait)) action?.play();
     }
@@ -394,7 +444,7 @@
         const yaw = moving ? r.heading : toMe > .01 && (engaged || toMe < 6) ? Math.atan2(dx, dz) : r.mode === 'linger' ? r.heading : r.actor.initialYaw;
         r.actor.root.rotation.y += wrapYaw(yaw - r.actor.root.rotation.y) * (1 - Math.exp(-(moving ? 7 : 5) * dt));
         play(r.actor, moving ? 'Walk' : engaged ? 'Talk' : r.actor.idle);
-        if (r.actor.current) r.actor.current.timeScale = moving ? Math.min(1.7, Math.max(.7, speed / 1.35)) : 1;
+        if (r.actor.current) r.actor.current.timeScale = moving ? Math.min(1.7, Math.max(.65, speed / WALK_REF_SPEED)) : 1;
       }
       M.actors3d.roamers = [...roamers.values()].map(r => ({ key: r.key, station: r.station?.anchorId, x: +r.x.toFixed(2), y: +r.y.toFixed(2), mode: r.mode, remaining: +(r.remaining || 0).toFixed(1), visible: r.actor.root.visible }));
     }
@@ -420,7 +470,12 @@
         return {rate:action.getEffectiveTimeScale()*radiansPerSecond,phase:action.time*radiansPerSecond};
       },
       playerState() {
-        return playerActor ? { speed: playerActor.stride, weights: [...playerActor.gaitWeights] } : null;
+        return playerActor ? {
+          role: playerActor.role,
+          speed: playerActor.stride,
+          weights: [...playerActor.gaitWeights],
+          jumpStage: playerActor.jumpStage
+        } : null;
       },
       update(dt, player, anchors, camera, surfaceHeight, cameraDistance, firstPerson = false) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
@@ -446,18 +501,33 @@
           }
         }
         const gait = playerActor.gait;
+        const nextJump = player.jumpPhase ?? null;
+        const hasJumpClip = nextJump && playerActor.jump?.[nextJump];
+        if (nextJump !== playerActor.jumpStage) {
+          playerActor.jumpStage = nextJump;
+          if (hasJumpClip) {
+            playerActor.jumpAction?.fadeOut(0.14);
+            const nextAction = playerActor.jump[nextJump];
+            nextAction.reset().setEffectiveWeight(1).fadeIn(nextJump === 'start' ? 0.10 : 0.14).play();
+            playerActor.jumpAction = nextAction;
+          } else {
+            playerActor.jumpAction?.fadeOut(0.18);
+            playerActor.jumpAction = null;
+          }
+        }
+        const blend = 1 - Math.exp(-dt * 16);
+        playerActor.jumpBlend = T.MathUtils.lerp(playerActor.jumpBlend, hasJumpClip ? 0 : 1, blend);
         const move = T.MathUtils.smoothstep(player.speed, .04, .85);
         const run = gait.run && !player.reversing ? T.MathUtils.smoothstep(player.speed, 2.2, 3.8) : 0;
-        const targets = [1 - move, move * (1 - run), move * run];
-        const blend = 1 - Math.exp(-dt * 18);
+        const targets = [(1 - move) * playerActor.jumpBlend, move * (1 - run) * playerActor.jumpBlend, move * run * playerActor.jumpBlend];
         for (const [i, action] of [gait.idle, gait.walk, gait.run].entries()) {
           playerActor.gaitWeights[i] = T.MathUtils.lerp(playerActor.gaitWeights[i], targets[i], blend);
           action?.setEffectiveWeight(playerActor.gaitWeights[i]);
         }
         const stride = player.speed * (player.reversing ? -1 : 1);
         playerActor.stride = T.MathUtils.lerp(playerActor.stride, stride, blend);
-        gait.walk?.setEffectiveTimeScale(playerActor.stride / 1.8);
-        gait.run?.setEffectiveTimeScale(Math.abs(playerActor.stride) / 4);
+        gait.walk?.setEffectiveTimeScale(playerActor.stride / WALK_REF_SPEED);
+        gait.run?.setEffectiveTimeScale(Math.abs(playerActor.stride) / RUN_REF_SPEED);
         const lean = !gait.run && !player.reversing
           ? .085 * T.MathUtils.smoothstep(player.speed, 1.8, 6.5) : 0;
         playerActor.model.rotation.x = T.MathUtils.lerp(playerActor.model.rotation.x, lean, blend);

@@ -5,7 +5,7 @@
   const M = NS._ = NS._ || {};
   const WALK_SPEED = 1.8, SPEED = 4, RUN_SPEED = 6.5;
   const RAMP_TIME = .15, TURN_SPEED = 11, REVERSE_SCALE = .75;
-  const JUMP_DURATION = .64;
+  const JUMP_DURATION = .64, LAND_DURATION = .36;
   const JUMP_HEIGHT = .76;
   const RADIUS = 0.62;       /* 碰撞半径 */
   const ROLES={
@@ -23,7 +23,7 @@
       x: spawn && Number.isFinite(spawn.x) ? spawn.x : scene.spawn.x,
       y: spawn && Number.isFinite(spawn.y) ? spawn.y : scene.spawn.y,
       facing: normFacing(spawn && spawn.facing != null ? spawn.facing : scene.spawn.facing),
-      moving: false, running: false, speed: 0, reversing: false, routeHeading: null, momentum: 0, releaseSpeed: 0, dx: 0, dy: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION
+      moving: false, running: false, speed: 0, reversing: false, routeHeading: null, momentum: 0, releaseSpeed: 0, dx: 0, dy: 0, t: 0, path: null, pathI: 0, accumulator: 0, jumpTime: JUMP_DURATION, landTime: LAND_DURATION
     };
     if (!M.path.walkableAt(grid, p.x, p.y, RADIUS)) { const s = scene.spawn; p.x = s.x; p.y = s.y; }
 
@@ -56,6 +56,11 @@
       get speed() { return p.speed; },
       get airborne() { return p.jumpTime < JUMP_DURATION; },
       get jumpProgress() { return p.jumpTime / JUMP_DURATION; },
+      get jumpPhase() {
+        if (p.jumpTime < JUMP_DURATION) return p.jumpTime / JUMP_DURATION < .24 ? 'start' : 'air';
+        if (p.landTime < LAND_DURATION) return 'land';
+        return null;
+      },
       get jumpHeight() {
         const progress = p.jumpTime / JUMP_DURATION;
         return 4 * JUMP_HEIGHT * progress * (1 - progress);
@@ -63,9 +68,10 @@
       jump() {
         if (this.airborne) return;
         p.jumpTime = 0;
+        p.landTime = LAND_DURATION;
         p.path = null;
       },
-      setPos(x, y, facing) { p.x = x; p.y = y; if (facing != null) p.facing = normFacing(facing); this.stop(); p.jumpTime = JUMP_DURATION; },
+      setPos(x, y, facing) { p.x = x; p.y = y; if (facing != null) p.facing = normFacing(facing); this.stop(); p.jumpTime = JUMP_DURATION; p.landTime = LAND_DURATION; },
       moveTo(path) { p.path = path; p.pathI = 0; p.routeHeading = null; },
       stopPath() { p.path = null; },
       stop() { p.path = null; p.releaseSpeed = p.momentum = p.speed = 0; p.moving = p.running = p.reversing = false; },
@@ -77,7 +83,10 @@
         }
       },
       update(dt, vec, run = false, walk = false, cameraInput) {
+        const wasAirborne = p.jumpTime < JUMP_DURATION;
         p.jumpTime = Math.min(JUMP_DURATION, p.jumpTime + dt);
+        if (wasAirborne && p.jumpTime >= JUMP_DURATION) p.landTime = 0;
+        p.landTime = Math.min(LAND_DURATION, p.landTime + dt);
         let x = vec?.x || 0, y = vec?.y || 0;
         let amount = Math.min(1, Math.hypot(x, y));
         let waypointDistance = Infinity;

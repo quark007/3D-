@@ -100,7 +100,8 @@
     const pathRoles = new Map(Object.entries(paths).map(([r, u]) => [u, r]));
     const results = await Promise.allSettled([...urls].map(async url => {
       try {
-        const source = await loadModel(T, GLTFLoader, draco, url, signal);
+        const assetUrl = compact && pathRoles.has(url) ? url.replace('-web.glb', '-field-lod.glb') : url;
+        const source = await loadModel(T, GLTFLoader, draco, assetUrl, signal);
         loaded.set(url, source);
       } catch (error) {
         if (signal?.aborted) throw error;
@@ -272,6 +273,81 @@
       parent.remove(actor.root);
     }
 
+    // Keep the stance ankle at its actual ground contact. The authored in-place
+    // clips supply upper-body motion and knee direction; solve each leg against
+    // the same world displacement used by collision and camera movement.
+    function createFootPlacement(actor) {
+      const legs = ['l','r'].map(side => ({
+        hip:actor.model.getObjectByName('thigh_'+side),
+        knee:actor.model.getObjectByName('calf_'+side),
+        ankle:actor.model.getObjectByName('foot_'+side),
+        plant:new T.Vector3(), stance:null
+      }));
+      if (legs.some(leg=>!leg.hip || !leg.knee || !leg.ankle)) return null;
+      const previous = new T.Vector3(), forward = new T.Vector3(), lateral = new T.Vector3();
+      const facing = new T.Vector3(), restY = actor.model.position.y;
+      const hip = new T.Vector3(), knee = new T.Vector3(), ankle = new T.Vector3();
+      const goal = new T.Vector3(), bend = new T.Vector3(), axis = new T.Vector3(), midpoint = new T.Vector3();
+      const d1 = new T.Vector3(), d2 = new T.Vector3(), rotation = new T.Quaternion(), parent = new T.Quaternion(), inverseParent = new T.Quaternion();
+      let phase = 0, active = false;
+      function aimBone(bone, from, to, destination) {
+        d1.subVectors(to,from).normalize(); d2.subVectors(destination,from).normalize();
+        rotation.setFromUnitVectors(d1,d2);
+        bone.parent.getWorldQuaternion(parent);
+        rotation.premultiply(inverseParent.copy(parent).invert()).multiply(parent);
+        bone.quaternion.premultiply(rotation);
+      }
+      return (player,surfaceHeight) => {
+        const pos=actor.root.position;
+        const distance=active ? previous.distanceTo(pos) : 0;
+        const moving=player.speed>.15 && !player.jumpPhase && distance<1;
+        if (!moving) {
+          active=false; legs.forEach(leg=>leg.stance=null); actor.model.position.y=restY; actor.groundCycle=null;
+          previous.copy(pos); return;
+        }
+        const fast=T.MathUtils.smoothstep(player.speed,4.05,6.5);
+        // Distance per complete left/right stride. Both feet share this clock.
+        const stride=1.05+.70*fast;
+        if (distance>.00001) forward.subVectors(pos,previous).setY(0).normalize();
+        else if (!active) forward.set(Math.cos(player.facing),0,Math.sin(player.facing));
+        facing.set(Math.cos(player.facing),0,Math.sin(player.facing));
+        lateral.set(facing.z,0,-facing.x);
+        phase=(phase+distance/stride)%1;
+        previous.copy(pos);active=true;
+        actor.model.position.y=restY-.055-.045*fast;
+        actor.groundCycle={phase:2*Math.PI*phase,rate:2*Math.PI*player.speed/stride};
+        actor.root.updateWorldMatrix(true,true);
+        for (let i=0;i<2;i++) {
+          const leg=legs[i], t=(phase+.5*i)%1, stance=t<.5;
+          leg.hip.getWorldPosition(hip);leg.knee.getWorldPosition(knee);leg.ankle.getWorldPosition(ankle);
+          goal.copy(pos).addScaledVector(lateral,(i===0?.095:-.095)).addScaledVector(forward,stride*.25);
+          goal.y=surfaceHeight(goal.x+logicalScene.world.w/2,goal.z+logicalScene.world.h/2)+.095;
+          if (leg.stance===null || (stance && !leg.stance)) {
+            leg.plant.copy(goal);
+            if (leg.stance===null) leg.plant.addScaledVector(forward,-stride*t);
+          }
+          if (stance) goal.copy(leg.plant);
+          else {
+            const swing=(t-.5)*2;
+            goal.addScaledVector(forward,(1-swing)*stride*.5);
+            goal.lerp(leg.plant,1-swing*swing*(3-2*swing));
+            goal.y+=Math.sin(Math.PI*swing)*(.115+.10*fast);
+          }
+          leg.stance=stance;
+          const upper=hip.distanceTo(knee),lower=knee.distanceTo(ankle);
+          axis.subVectors(goal,hip);
+          const reach=T.MathUtils.clamp(axis.length(),Math.abs(upper-lower)+.00001,upper+lower-.00001);
+          axis.normalize();
+          const along=(upper*upper-lower*lower+reach*reach)/(2*reach);
+          bend.copy(facing).addScaledVector(axis,-facing.dot(axis)).normalize();
+          midpoint.copy(hip).addScaledVector(axis,along).addScaledVector(bend,Math.sqrt(Math.max(0,upper*upper-along*along)));
+          aimBone(leg.hip,hip,knee,midpoint);
+          leg.knee.getWorldPosition(knee);leg.ankle.getWorldPosition(ankle);
+          aimBone(leg.knee,knee,ankle,goal);
+        }
+      };
+    }
+
     function ensurePlayer(role) {
       role = paths[role] ? role : 'soldier';
       if (playerActor?.role === role) return;
@@ -302,6 +378,7 @@
         if (!act) continue;
         if (k === 'start' || k === 'land') { act.setLoop(T.LoopOnce, 1); act.clampWhenFinished = true; }
       }
+      playerActor.placeFeet = createFootPlacement(playerActor);
       playerActor.gaitWeights = [1, 0, 0];
       playerActor.jumpBlend = 1;
       playerActor.jumpStage = null;
@@ -462,6 +539,7 @@
     return {
       ensurePlayer,
       strideCycle() {
+        if (playerActor?.groundCycle) return playerActor.groundCycle;
         if (!playerActor) return null;
         const {walk,run}=playerActor.gait;
         if (!walk) return null;
@@ -518,7 +596,7 @@
         const blend = 1 - Math.exp(-dt * 16);
         playerActor.jumpBlend = T.MathUtils.lerp(playerActor.jumpBlend, hasJumpClip ? 0 : 1, blend);
         const move = T.MathUtils.smoothstep(player.speed, .04, .85);
-        const run = gait.run && !player.reversing ? T.MathUtils.smoothstep(player.speed, 2.2, 3.8) : 0;
+        const run = gait.run && !player.reversing ? T.MathUtils.smoothstep(player.speed, 4.05, 6.4) : 0;
         const targets = [(1 - move) * playerActor.jumpBlend, move * (1 - run) * playerActor.jumpBlend, move * run * playerActor.jumpBlend];
         for (const [i, action] of [gait.idle, gait.walk, gait.run].entries()) {
           playerActor.gaitWeights[i] = T.MathUtils.lerp(playerActor.gaitWeights[i], targets[i], blend);
@@ -576,6 +654,7 @@
           play(actor, engaged ? 'Talk' : actor.idle);
         }
         for (const actor of actors) if (actor.root.visible || actor === playerActor) actor.mixer.update(dt);
+        playerActor.placeFeet?.(player,surfaceHeight);
         for (const actor of npcActors.values()) if (actor.root.visible) updateExpression(actor, dt, actor.current === actor.actions.get('Talk'));
       },
       dispose() {

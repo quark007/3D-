@@ -7,6 +7,8 @@ spatial="--spatial" in sys.argv
 photos="--photos" in sys.argv or spatial
 lookdev="--lookdev" in sys.argv or photos
 out=root/"evidence"/("ch3-spatial-fix" if spatial else "zunyi-1to1-real" if photos else "realism-upgrade" if lookdev else "zunyi-full-integration")
+from os import environ
+out = Path(environ.get('ZUNYI_EVIDENCE_DIR',out))
 url="http://127.0.0.1:8080/march-world/preview.html?chapter=chapter-3%2Fscene-zunyi"
 report={}
 out.mkdir(parents=True,exist_ok=True)

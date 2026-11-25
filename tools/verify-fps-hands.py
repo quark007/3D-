@@ -5,6 +5,8 @@ from playwright.sync_api import sync_playwright
 
 root = Path(__file__).resolve().parents[1]
 out = root / 'evidence/fps-hands-v3'
+from os import environ
+out = Path(environ.get('ZUNYI_EVIDENCE_DIR',out))
 out.mkdir(parents=True, exist_ok=True)
 url = 'http://127.0.0.1:8080/march-world/preview.html?chapter=chapter-3%2Fscene-zunyi'
 

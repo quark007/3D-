@@ -14,7 +14,9 @@ async function main() {
     'draco3d.encoder': await draco3d.createEncoderModule(),
     'draco3d.decoder': await draco3d.createDecoderModule()
   });
-  for (const name of ['he-wen', 'wang-gui', 'logistics']) {
+  const coreRoles = process.argv.includes('--core-roles');
+  const names = coreRoles ? ['commander', 'soldier', 'logistics', 'medic'] : ['he-wen', 'wang-gui', 'logistics'];
+  for (const name of names) {
     const base = path.join(__dirname, '..', 'changzheng', 'assets', 'characters', name, name);
     const doc = await io.read(base + '-web.glb');
     const root = doc.getRoot();
@@ -46,7 +48,7 @@ async function main() {
     await doc.transform(prune({ keepLeaves: true }), draco({ quantizePosition: 16, quantizeNormal: 12, quantizeTexcoord: 14, quantizeGeneric: 16 }));
     const draws = root.listMeshes().flatMap(mesh => mesh.listPrimitives());
     console.log(name, draws.length, draws.reduce((n, prim) => n + prim.getIndices().getCount() / 3, 0));
-    await io.write(base + '-zunyi.glb', doc);
+    await io.write(base + (coreRoles ? '-field-lod.glb' : '-zunyi.glb'), doc);
   }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,5 +1,6 @@
 """Run in a background Blender opened on the meeting room master. Bake its existing UV1."""
 import ctypes as C
+import sys
 from pathlib import Path
 import bpy
 import numpy as np
@@ -34,6 +35,11 @@ for n in plaster.node_tree.nodes:
         n.inputs["Strength"].default_value = .012
     if n.type == "BSDF_PRINCIPLED":
         n.inputs["Roughness"].default_value = .96
+# Keep the editable matte master separate from the original reference master.
+editable = root/"assets/clean-kit/zunyi/zunyi_meeting_room_master.blend"
+bpy.ops.wm.save_as_mainfile(filepath=str(editable),compress=True,copy=True)
+if "--master-only" in sys.argv:
+    sys.exit(0)
 img = bpy.data.images.new("Room shell lightmap",1024,1024,alpha=True,float_buffer=True)
 for mat in shell.data.materials:
     node = mat.node_tree.nodes.new("ShaderNodeTexImage")

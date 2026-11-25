@@ -326,7 +326,7 @@
           angle=T.MathUtils.lerp(angle,-.11+.48*step*motion,run);
           y=T.MathUtils.lerp(y,-.279+.064*step*motion-.13*(1-narrow),run);
           z=T.MathUtils.lerp(z,-.17-.090*step*motion-.29*(1-narrow),run);
-          const spread=(.27+.035*flight-.042*crest-run*(.045+.036*step+.095*(1-narrow)))*narrow;
+          const spread=(.27+.035*flight-.042*crest-run*(.045+.036*step+.095*(1-narrow)))*narrow+.045*run*narrow;
           angle=T.MathUtils.lerp(angle,.04,contact);
           y=T.MathUtils.lerp(y,-.20,contact); z=T.MathUtils.lerp(z,-.255,contact);
           const arm=arms[i];
@@ -334,7 +334,7 @@
             y+motion*(lift*.27+landing+.0015*Math.sin(breath)+pitchSway*.13)+.018*pitch-tuck*.045,
             z-.14*lift+tuck*.035);
           arm.rotation.set(angle+1.04*lift+landing*1.3+.08*pitch,
-            side*(.065+.17*run*step+.23*contact)-yawSway*.55*motion,
+            side*(.065+.145*run*step+.23*contact)-yawSway*.55*motion,
             -side*(1.52+.045*run*step-.06*flight)+yawSway*.3*motion);
           wrists[i]=damp(wrists[i],-step*run+pitchSway,9,dt);
           for (const mesh of posedMeshes[i]) {

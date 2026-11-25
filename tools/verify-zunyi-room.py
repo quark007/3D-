@@ -3,9 +3,10 @@ import json, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parents[1]
-photos="--photos" in sys.argv
+spatial="--spatial" in sys.argv
+photos="--photos" in sys.argv or spatial
 lookdev="--lookdev" in sys.argv or photos
-out=root/"evidence"/("zunyi-1to1-real" if photos else "realism-upgrade" if lookdev else "zunyi-full-integration")
+out=root/"evidence"/("ch3-spatial-fix" if spatial else "zunyi-1to1-real" if photos else "realism-upgrade" if lookdev else "zunyi-full-integration")
 url="http://127.0.0.1:8080/march-world/preview.html?chapter=chapter-3%2Fscene-zunyi"
 report={}
 out.mkdir(parents=True,exist_ok=True)
@@ -33,18 +34,22 @@ def verify(browser,mobile):
       peak.calls=Math.max(peak.calls,s.drawCalls||0);peak.triangles=Math.max(peak.triangles,s.triangles||0);requestAnimationFrame(sample);}sample()}""")
     wait=lambda expr:page.wait_for_function(expr,timeout=12000)
     def go(x,y):
+        if E("v.isIndoors()"):
+            x+=7.326; y-=8.35
         E("([x,y])=>pl.moveTo([{x,y}])",[x,y])
         page.wait_for_function("([x,y])=>Math.hypot(pl.x-x,pl.y-y)<.04",arg=[x,y],timeout=12000)
         E("pl.stop()")
     def aim(key):
         E("""k=>{const obj=v.scene.getObjectByName(k),pt=new T.Box3().setFromObject(obj,true).getCenter(new T.Vector3());
-          const dx=pt.x-(pl.x-80),dz=pt.z-(pl.y-55);v.setCameraAngle(Math.atan2(dz,dx),Math.atan2(6.45-pt.y,Math.hypot(dx,dz)));}""",key)
+          const dx=pt.x-(pl.x-80),dz=pt.z-(pl.y-55);v.setCameraAngle(Math.atan2(dz,dx),Math.atan2(v.surfaceHeight(pl.x,pl.y)+1.65-pt.y,Math.hypot(dx,dz)));}""",key)
         page.wait_for_function("k=>{const t=v.getIndoorTarget();return k==='Door_Exit'?t?.type==='door':t?.key===k}",arg=key,timeout=3500)
     def action():
         if mobile:page.locator('.czmw-act').tap()
         else:page.keyboard.press("e")
     def snap(name):
-        if photos:
+        if spatial:
+            if mobile or name not in ("01-exterior-wall-clean.png","02-window-view-aligned.png","03-left-arcade-clear.png"):return
+        elif photos:
             bare=name.removeprefix("mobile-").removeprefix("portrait-")
             retain={"01-main-arcade.png":"01-main-arcade.png","02-courtyard-steps.png":"02-courtyard-steps.png",
                     "05-window-table-brazier.png":"03-window-table-brazier.png","02-east-wall-clock-wardrobe.png":"04-east-wall-clock-wardrobe.png"}
@@ -68,7 +73,7 @@ def verify(browser,mobile):
     def step_in():
         wait("v.session.lastNear?.anchorId==='chapter-3/anchor-indoor-meeting-room'");action()
         wait("v.isIndoors() && CZMarchWorld.getCameraMode()==='fps'");page.wait_for_timeout(500)
-        assert not E("v.isStreetVisible()")
+        assert E("v.isStreetVisible()")
     def step_out():
         aim("Door_Exit");action()
         wait("!v.isIndoors() && CZMarchWorld.getCameraMode()==='tps'");page.wait_for_timeout(500)
@@ -78,17 +83,28 @@ def verify(browser,mobile):
         for x,y,yaw,pitch,name in [(91,49.5,-2.04,-.14,"01-main-arcade"),(74,40,-.62,-.06,"02-courtyard-steps")]:
             E("([x,y,a,p])=>{pl.setPos(x,y,a);v.setCameraAngle(a,p)}",[x,y,yaw,pitch])
             page.wait_for_timeout(900);snap(prefix+name+".png")
+        if spatial:
+            E("pl.setPos(97,40,-2.36);v.setCameraAngle(-2.36,-.11)")
+            page.wait_for_timeout(1000);snap("01-exterior-wall-clean.png")
+            E("pl.setPos(69.45,36.5,-Math.PI/2);CZMarchWorld.setCameraMode('fps',{instant:true});v.setCameraAngle(-Math.PI/2,.04)")
+            go(69.45,33.55)
+            snap("03-left-arcade-clear.png")
+            go(69.45,25.10)
+            go(69.45,36.5)
+            E("CZMarchWorld.setCameraMode('tps',{instant:true})")
         E("pl.setPos(81,39.4,-Math.PI/2)")
     go(81,36.8);E("v.setCameraAngle(-Math.PI/2,.09)")
     data={"outside":metrics(),"outsideHUDDriftPx":hud_turn()}
     step_in()
     data["inside"]=metrics()
     if photos:
-        data["westWindow"]=E("""()=>{const view=v.scene.getObjectByName('WestWindowCourtyard'), panes=[];
+        data["westWindow"]=E("""()=>{const street=v.scene.getObjectByName('zunyi-realscan'), room=v.scene.getObjectByName('zunyi-meeting-room'), panes=[];
+          const roomWorld=room.getWorldPosition(new T.Vector3()), facade=street.localToWorld(new T.Vector3(4.85,4.88,-8.125));
+          const windowPoint=room.localToWorld(new T.Vector3(-2.476,.85,.225));
           v.scene.getObjectByName('RoomShell').traverse(o=>{if(o.isMesh&&/ZY (winter|rose|straw) glass/.test(o.material.name))
           panes.push([o.material.name,o.material.transparent,o.material.opacity])});
-          return {sky:v.scene.background.isTexture===true,vistaMeshes:view.children.length,panes}}""")
-        assert data["westWindow"]["sky"] and data["westWindow"]["vistaMeshes"]>=3
+          return {sky:v.scene.background.isTexture===true,sharedWorld:street.visible&&room.parent===street,windowError:windowPoint.distanceTo(facade),floor:roomWorld.y,panes}}""")
+        assert data["westWindow"]["sky"] and data["westWindow"]["sharedWorld"] and data["westWindow"]["windowError"]<.001
         panes=data["westWindow"]["panes"];assert len(panes)==3 and all(t and 0<a<1 for _,t,a in panes)
     data["uv1"]=E("""()=>{let ok=true;v.scene.getObjectByName('zunyi-meeting-room').traverse(o=>{if(o.isMesh){ok&&=!!o.geometry.attributes.uv1;for(const m of [].concat(o.material))if(m.aoMap)ok&&=m.aoMap.channel===1&&m.map.channel===1}});return ok}""")
     if not mobile:snap("01-enter-room-fps.png")
@@ -115,17 +131,22 @@ def verify(browser,mobile):
     assert [s["arms"] for s in states]==["walk","walk","run"] and states[1]["speed"]<states[0]["speed"]<states[2]["speed"]
     data["gaits"]=states
     E("v.setCameraAngle(Math.PI,0)");page.keyboard.down("w");page.wait_for_timeout(600);page.keyboard.up("w")
-    assert 78.93<E("pl.x")<79.03
+    assert 78.93<E("pl.x-7.326")<79.03
     data["westWallStopX"]=E("pl.x")
     for x,y in [(79.25,27.18),(79.25,32.65),(82.46,32.65),(82.46,27.18),(81.1,27.18)]:go(x,y)
     data["lap"]=True
     if not mobile or lookdev:
         go(79.25,27.18);go(79.25,30)
+        if spatial:
+            go(79.25,32.65);go(80.25,32.65)
+            E("v.setCameraAngle(-2.56,.29)");page.wait_for_timeout(350)
+            snap("02-window-view-aligned.png")
+            go(79.25,32.65);go(79.25,30)
         E("v.setCameraAngle(.03,.04)");page.wait_for_timeout(180);snap(("mobile-" if mobile else "")+"02-east-wall-clock-wardrobe.png")
         go(79.25,27.18);go(81.1,27.18)
     cards=[]
     for key,x,y in [("Prop_MeetingTable",81.1,27.18),("Prop_CharcoalBrazier",81.1,27.18),("Prop_HangingLamp",81.1,27.18),("Prop_WallClock",82.46,30),("Prop_WardrobeMirror",82.46,31.04)]:
-        if x>82 and E("pl.x")<82:go(x,27.18)
+        if x>82 and E("pl.x-7.326")<82:go(x,27.18)
         go(x,y);aim(key)
         action();wait("!document.querySelector('.czmw-relic-modal').hidden")
         title=page.locator(".czmw-relic-title").inner_text()

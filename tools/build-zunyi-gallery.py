@@ -61,17 +61,6 @@ for base in [.46,4.03]:
 for i in range(6):
     box(4.85,6.00+i*.85,5.915,.07,.048,2.11,timber)
     box(4.85,8.125,4.88+i*.414,.07,4.29,.048,timber)
-# Mirrored return flights behind the two end bays. The centre entrance remains clear.
-for side in [-1,1]:
-    for i in range(20):
-        x=side*11.68
-        yy=-2.96+i*.206
-        h=.46+(i+1)*3.57/20
-        box(x,yy,h-.057,1.10,.228,.114,timber)
-        if i%3==0:box(x+side*.53,yy,h+.36,.048,.048,.72,timber)
-    for xx in [side*11.13,side*12.23]:
-        for rise in [-.14,.79]:
-            poly([(xx,-3.07,.46+rise),(xx,1.12,4.03+rise),(xx,1.12,4.12+rise),(xx,-3.07,.55+rise)],timber)
 # Return landing on the west face of the projecting east wing, beside the sash.
 box(4.27,8.13,3.95,1.24,5.68,.16,brick)
 for yy in [5.42,8.12,10.82]:

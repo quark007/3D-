@@ -1,5 +1,5 @@
 """Cut the measured sash aperture into the imported west wall, retaining both UV sets."""
-import bpy,bmesh
+import bpy,bmesh,math
 from pathlib import Path
 from mathutils import Vector
 root=Path(ROOT)
@@ -15,6 +15,17 @@ for v in bm.verts:
     x,y,z=v.co
     if 12.56<abs(x)<12.69 and -3.08<y<6.00 and .39<z<7.68:
         v.co.x += 1.82 if x<0 else -1.82
+# The recessed end walls terminate at +/-10.83 m. Their outermost window
+# reveals and sashes must terminate inside that line as well.
+def on_front(co):
+    return -3.20 < co.y < -2.55 and .40 < co.z < 7.68
+
+shift_bays = any(on_front(v.co) and 11.58 < abs(v.co.x) < 11.68 for v in bm.verts)
+if shift_bays:
+    for v in bm.verts:
+        x=abs(v.co.x)
+        if on_front(v.co) and (9.92 < x < 10.01 or 11.58 < x < 11.68):
+            v.co.x -= math.copysign(1.10,v.co.x)
 bm.normal_update()
 def outer_face(f):
     return all(abs(v.co.x-4.875)<.035 for v in f.verts) and abs(f.normal.x)>.98
@@ -35,6 +46,19 @@ def hits_west_wall(z):
     return point is not None
 assert hits_west_wall(4.7) and not hits_west_wall(5.9), 'West sill or opening missing'
 bm.to_mesh(wall.data);bm.free()
-bpy.ops.object.select_all(action='DESELECT');wall.select_set(True);bpy.context.view_layer.objects.active=wall
-bpy.ops.export_scene.gltf(filepath=str(root/'evidence/.zunyi-photo-build/west-wall.glb'),use_selection=True,use_active_scene=True,export_animations=False,export_materials='PLACEHOLDER',export_draco_mesh_compression_enable=True,export_draco_mesh_compression_level=6)
-print('removed faces',len(inside))
+def export_component(obj,filename):
+    bpy.ops.object.select_all(action='DESELECT')
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active=obj
+    bpy.ops.export_scene.gltf(filepath=str(root/'evidence/.zunyi-photo-build'/filename),
+        use_selection=True,use_active_scene=True,export_animations=False,export_materials='PLACEHOLDER',
+        export_draco_mesh_compression_enable=True,export_draco_mesh_compression_level=6)
+
+export_component(wall,'west-wall.glb')
+for key in ['wood','amber']:
+    obj=next(o for o in review.objects if o.type=='MESH' and '建筑群_'+key in o.name)
+    if shift_bays:
+        for v in obj.data.vertices:
+            if on_front(v.co) and 9.90 < abs(v.co.x) < 11.60:
+                v.co.x -= math.copysign(1.10,v.co.x)
+    export_component(obj,'end-bay-'+key+'.glb')

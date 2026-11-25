@@ -20,7 +20,7 @@
       ["子尹路对街连续立面", 53.55, 22, 0.45, 42, 5.3],
       ["北侧警戒线", 54, 22, 7, 0.52, 1.25],
       ["南侧警戒线", 54, 63.48, 7, 0.52, 1.25],
-      ["会址主楼内墙", 68.125, 24, 25.75, 9, 7.62],
+      ["会址主楼内墙", 70.17, 24, 21.66, 9, 7.62],
       ["西侧回廊柱一", 68.14, 35.36, 0.52, 0.52, 7.45],
       ["西侧回廊柱二", 68.14, 31.58, 0.52, 0.52, 7.45],
       ["西侧回廊柱三", 68.14, 27.80, 0.52, 0.52, 7.45],
@@ -49,7 +49,7 @@
   K.define({
     chapterId: 3, sceneId: 'chapter-3/scene-zunyi', title: '遵义会议', seed: 303,
     world: { w: 160, h: 110 },
-    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb?v=winter-foliage', origin: [81, 30], gallery: '/assets/scenes/zunyi-realscan/zunyi-gallery-web.glb', actorRange: 13 },
+    streetModel: { url: '/assets/scenes/zunyi-realscan/zunyi_street.glb?v=spatial-fix', origin: [81, 30], roomOffset: [7.326, 4.03, -8.35], gallery: '/assets/scenes/zunyi-realscan/zunyi-gallery-web.glb?v=spatial-fix', actorRange: 13 },
     // Stone mesh dimensions in the Blender assembly, converted to logical X east / Y south.
     stepSurfaces: [
       [59, 41.485, 10, 3.03, .014],
@@ -137,7 +137,7 @@
       count: 768,
       sky: '/assets/scenes/zunyi-realscan/zunyi-overcast-sky.webp',
       grass: '/assets/scenes/zunyi-realscan/zunyi-winter-grass.webp',
-      shelter: [[61.02, 41.48, 2.26, 3.04], [68.1, 32.9, 25.8, 3.25]],
+      shelter: [[84.55,18.30,6.26,6.72,8], [61.02, 41.48, 2.26, 3.04], [68.1, 32.9, 25.8, 3.25]],
       mist: [[93,47,1.25,12,1.6], [96,49,.8,11,1.3], [78,36.5,1.6,13,1.1], [88,37,1.2,14,1.3],
         [72,19,2.8,20,2.5], [98,19,3.3,17,2.2], [65,56,2,13,1.8], [100,53,2.3,14,2.5]],
       lights: [[81,35.5,2.37,19,6.4], [85,34.25,6.03,17,5.4]]

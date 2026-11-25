@@ -14,15 +14,17 @@ def write(p,g,chunks):
         v.update(byteOffset=len(blob),byteLength=len(c));blob.extend(c);blob.extend(bytes(-len(blob)%4))
     g['buffers'][0]['byteLength']=len(blob);j=json.dumps(g,separators=(',',':')).encode();j+=b' '*(-len(j)%4)
     p.write_bytes(struct.pack('<4sIII4s',b'glTF',2,28+len(j)+len(blob),len(j),b'JSON')+j+struct.pack('<I4s',len(blob),b'BIN\0')+blob)
-p=assets/'zunyi_street.glb';g,chunks=read(p);patch,patchchunks=read(stage/'west-wall.glb')
-old=next(m for m in g['meshes'] if 'plaster' in m['name'])['primitives'][0]
-new=patch['meshes'][0]['primitives'][0];draco='KHR_draco_mesh_compression'
-assert old['attributes'].keys()==new['attributes'].keys(),(old,new)
-for attr,idx in {**old['attributes'],'indices':old['indices']}.items():
-    other=new['indices'] if attr=='indices' else new['attributes'][attr]
-    g['accessors'][idx]=patch['accessors'][other]
-a=old['extensions'][draco];b=new['extensions'][draco]
-chunks[a['bufferView']]=patchchunks[b['bufferView']];a['attributes']=b['attributes']
+p=assets/'zunyi_street.glb';g,chunks=read(p)
+for key,filename in [('plaster','west-wall.glb'),('wood','end-bay-wood.glb'),('amber','end-bay-amber.glb')]:
+    patch,patchchunks=read(stage/filename)
+    old=next(m for m in g['meshes'] if '建筑群_'+key in m['name'])['primitives'][0]
+    new=patch['meshes'][0]['primitives'][0];draco='KHR_draco_mesh_compression'
+    assert old['attributes'].keys()==new['attributes'].keys(),(old,new)
+    for attr,idx in {**old['attributes'],'indices':old['indices']}.items():
+        other=new['indices'] if attr=='indices' else new['attributes'][attr]
+        g['accessors'][idx]=patch['accessors'][other]
+    a=old['extensions'][draco];b=new['extensions'][draco]
+    chunks[a['bufferView']]=patchchunks[b['bufferView']];a['attributes']=b['attributes']
 # Crown and trunk use the same transform about the root seat. In the aerial
 # reference the upper branches clear the eaves of the two-storey manor.
 for node in g['nodes']:

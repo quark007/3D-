@@ -169,16 +169,16 @@
     return {
       group,
       rain,
-      update(t,player,camera,westOnly=false){
+      update(t,player,camera){
         wind.value=t;
         for(let i=0;i<seeds.length;i++){
           const [a,b,c,len]=seeds[i];
           const x=player.x+((a+t*.64+22)%44+44)%44-22;
           const z=player.y+c, height=((b-t*6.8)%14+14)%14;
-          const inside=settings.shelter.some(([sx,sz,w,d])=>x>=sx&&x<=sx+w&&z>=sz&&z<=sz+d);
+          const inside=settings.shelter.some(([sx,sz,w,d,roof=4])=>height<roof&&x>=sx&&x<=sx+w&&z>=sz&&z<=sz+d);
           const k=i*6, y=height+1, wx=x-world.w/2, wz=z-world.h/2;
           rainData[k]=wx; rainData[k+1]=y; rainData[k+2]=wz;
-          const streak=(inside&&height<4)||(westOnly&&x>84.5)?0:len;
+          const streak=inside?0:len;
           rainData[k+3]=wx-streak*.176; rainData[k+4]=y+streak; rainData[k+5]=wz;
         }
         rainGeo.attributes.position.needsUpdate=true;
@@ -406,9 +406,12 @@
     const terrain = M.visual3d.terrain(logicalScene, props);
     const steps = logicalScene.stepSurfaces;
     let isIndoors = false;
-    const indoorFloorY = 4.8;
+    const roomOffset = cinematic ? new T.Vector3(...logicalScene.streetModel.roomOffset) : null;
+    const roomX = cinematic ? logicalScene.streetModel.origin[0] + roomOffset.x : 0;
+    const roomZ = cinematic ? logicalScene.streetModel.origin[1] + roomOffset.z : 0;
+    const roomFloor = () => street.position.y + roomOffset.y;
     const surfaceHeight = (x, y) => {
-      if (cinematic && isIndoors) return indoorFloorY;
+      if (cinematic && isIndoors) return roomFloor();
       const base = terrain.support(x, y);
       if (!steps || !assets.models.street) return base;
       // A narrow approach band lets the stance rise before the leading foot reaches each nosing.
@@ -1887,34 +1890,16 @@
     let indoorLightGroup = null;
     let activeIndoorTarget = null;
     let savedOutdoorClearance = null;
-    let windowView = null;
-    // The playable room uses its own navigation origin. Copy the west-facing
-    // subset of the street at the matching sash plane and second-floor height.
-    function createWestWindowView() {
-      const view = new T.Group();
-      view.name = 'WestWindowCourtyard';
-      view.position.copy(toWorld(81 - 4.85 - 2.476, 30 + 8.35, indoorFloorY - 4.03));
-      street.traverse(node => {
-        if (!node.isMesh || node.material.name.startsWith('WestPane_')) return;
-        const geometry = node.geometry, position = geometry.attributes.position, index = geometry.index;
-        const indices = [];
-        for (let i = 0; i < (index?.count ?? position.count); i += 3) {
-          const a = index ? index.getX(i) : i, b = index ? index.getX(i+1) : i+1, c = index ? index.getX(i+2) : i+2;
-          if (Math.max(position.getX(a), position.getX(b), position.getX(c)) < 4.80) indices.push(a,b,c);
-        }
-        if (!indices.length) return;
-        const subset = new T.BufferGeometry();
-        for (const [name, attribute] of Object.entries(geometry.attributes)) subset.setAttribute(name, attribute);
-        subset.setIndex(indices);
-        view.add(new T.Mesh(subset, node.material));
-      });
-      if (weather) {
-        const showers = weather.rain.clone();
-        showers.position.copy(street.position).multiplyScalar(-1);
-        view.add(showers);
+    // Clip only the volume occupied by the room out of the exterior shell.
+    // The paving, walls, trees and sky remain the same objects on both sides.
+    const shellMaterials = new Set();
+    let roomClipPlanes;
+    function setRoomCutaway(inside) {
+      for (const material of shellMaterials) {
+        material.clippingPlanes = inside ? roomClipPlanes : null;
+        material.clipIntersection = inside;
       }
-      worldRoot.add(view);
-      return view;
+      renderer.localClippingEnabled = inside;
     }
 
     function updateIndoorRelicDetection(camera) {
@@ -1969,11 +1954,22 @@
       }
 
       indoorRoomModel.name = 'zunyi-meeting-room';
-      indoorRoomModel.position.copy(toWorld(81, 30, indoorFloorY));
+      indoorRoomModel.position.copy(roomOffset);
       indoorRoomModel.traverse(node => {
         if (node.isMesh && /ZY (winter|rose|straw) glass/.test(node.material.name)) node.material.depthWrite = false;
       });
-      worldRoot.add(indoorRoomModel);
+      street.traverse(node => {
+        if (node.isMesh && /^(ZY_(plaster|brick|roof|wood|trim|amber)|WestPane_|West gallery)/.test(node.material.name)) {
+          shellMaterials.add(node.material);
+        }
+      });
+      street.add(indoorRoomModel);
+      const center = indoorRoomModel.getWorldPosition(new T.Vector3());
+      roomClipPlanes = [
+        new T.Plane(new T.Vector3(-1,0,0), center.x-2.54), new T.Plane(new T.Vector3(1,0,0), -center.x-2.45),
+        new T.Plane(new T.Vector3(0,-1,0), center.y-.06), new T.Plane(new T.Vector3(0,1,0), -center.y-3.51),
+        new T.Plane(new T.Vector3(0,0,-1), center.z-3.34), new T.Plane(new T.Vector3(0,0,1), -center.z-3.34)
+      ];
       indoorRoomModel.visible = false;
       if (dead) { indoorRoomModel.removeFromParent(); releaseResources(indoorRoomModel, false); return null; }
       indoorRoomModel.updateWorldMatrix(true, true);
@@ -1990,7 +1986,7 @@
       indoorLightGroup.name = 'zunyi-indoor-lights';
       const indoorFill = new T.AmbientLight('#e4e8f0', 2.48);
       const lampLight = new T.PointLight('#ffb375', 1.3, 6, 2);
-      lampLight.position.copy(toWorld(81, 30, indoorFloorY + 2.5));
+      lampLight.position.copy(toWorld(roomX, roomZ, roomFloor() + 2.5));
       const coal=new T.PointLight(0xff622e,.42,1.75,2);
       coal.position.copy(roomCenters.get('Prop_CharcoalBrazier'));coal.position.y+=.14;
       indoorLightGroup.add(indoorFill, lampLight,coal);
@@ -2047,22 +2043,18 @@
         const model = indoorRoomModel;
         isIndoors = true;
         for (const obj of [...worldRoot.children, hemi, sun]) {
-          if (obj !== model && obj !== indoorLightGroup && obj.visible) { outdoorVisible.push(obj); obj.visible = false; }
+          if (obj !== street && obj !== indoorLightGroup && obj.visible) { outdoorVisible.push(obj); obj.visible = false; }
         }
         model.visible = true;
-        if (street) street.visible = false;
-        const weatherGroup = weather?.group || scene.getObjectByName('zunyi-winter-weather');
-        if (weatherGroup) weatherGroup.visible = false;
+        setRoomCutaway(true);
         const peds = scene.getObjectByName('zunyi-pedestrians');
         if (peds) peds.visible = false;
 
-        windowView ??= createWestWindowView();
-        windowView.visible = true;
         updateFieldOfView();
         indoorLightGroup.visible=true;
         if (!roomReflection) {
           const generator=new T.PMREMGenerator(renderer);
-          try { roomReflection=generator.fromScene(scene,.025,.06,12,{size:64,position:toWorld(80.0,28.9,indoorFloorY+.56)}); }
+          try { roomReflection=generator.fromScene(scene,.025,.06,12,{size:64,position:toWorld(roomX-1,roomZ-1.1,roomFloor()+.56)}); }
           finally { generator.dispose(); }
         }
         scene.environment=roomReflection.texture;
@@ -2073,7 +2065,7 @@
           savedOutdoorClearance = activeSession.grid.clearance;
           activeSession.grid.clearance = (x, y) => {
             const r = .24;
-            if (x - r < 78.7 || x + r > 83.3 || y - r < 26.8 || y + r > 33.2) return false;
+            if (x - r < (roomX - 2.3) || x + r > (roomX + 2.3) || y - r < (roomZ - 3.2) || y + r > (roomZ + 3.2)) return false;
             const px = x - world.w / 2, pz = y - world.h / 2;
             return furnitureBounds.every(box => Math.hypot(px - Math.max(box.min.x, Math.min(px, box.max.x)),
               pz - Math.max(box.min.z, Math.min(pz, box.max.z))) >= r);
@@ -2082,7 +2074,7 @@
 
         const player = logicalScene.focusActor;
         if (player) {
-          player.setPos(81.1, 27.18, Math.PI / 2);
+          player.setPos(roomX + .1, roomZ - 2.82, Math.PI / 2);
           yaw = 1.65; pitch = .17;
           followTarget.copy(onSurface(player.x, player.y, FOCUS_HEIGHT));
         }
@@ -2100,13 +2092,10 @@
         activeIndoorTarget = null;
         if (indoorRoomModel) indoorRoomModel.visible = false;
         if (indoorLightGroup) indoorLightGroup.visible = false;
-        if (street) street.visible = true;
-        const weatherGroup = weather?.group || scene.getObjectByName('zunyi-winter-weather');
-        if (weatherGroup) weatherGroup.visible = true;
+        setRoomCutaway(false);
         const peds = scene.getObjectByName('zunyi-pedestrians');
         if (peds) peds.visible = true;
 
-        if (windowView) windowView.visible = false;
         scene.environment=reflectionTarget?.texture ?? null;
         scene.environmentIntensity=.98;
         updateFieldOfView();
@@ -2170,10 +2159,10 @@
       if (cinematic && isIndoors) {
         let clear = length;
         const x = origin.x + world.w / 2, z = origin.z + world.h / 2;
-        if (direction.x < -0.2) clear = Math.min(clear, Math.max(0, (x - 78.7) / -direction.x) - margin);
-        if (direction.x > 0.2) clear = Math.min(clear, Math.max(0, (83.3 - x) / direction.x) - margin);
-        if (direction.z < -0.2) clear = Math.min(clear, Math.max(0, (z - 26.8) / -direction.z) - margin);
-        if (direction.z > 0.2) clear = Math.min(clear, Math.max(0, (33.2 - z) / direction.z) - margin);
+        if (direction.x < -0.2) clear = Math.min(clear, Math.max(0, (x - (roomX - 2.3)) / -direction.x) - margin);
+        if (direction.x > 0.2) clear = Math.min(clear, Math.max(0, ((roomX + 2.3) - x) / direction.x) - margin);
+        if (direction.z < -0.2) clear = Math.min(clear, Math.max(0, (z - (roomZ - 3.2)) / -direction.z) - margin);
+        if (direction.z > 0.2) clear = Math.min(clear, Math.max(0, ((roomZ + 3.2) - z) / direction.z) - margin);
         return Math.max(0, clear);
       }
       let clear = length;
@@ -2516,7 +2505,7 @@
         }
         positions.needsUpdate = true;
       }
-      if (weather && logicalScene.focusActor) weather.update(time, isIndoors ? {x:85.85,y:21.65} : logicalScene.focusActor, camera, isIndoors);
+      if (weather && logicalScene.focusActor) weather.update(time, logicalScene.focusActor, camera);
       if (cinematic && isIndoors) updateIndoorRelicDetection(camera);
       renderer.info.reset();
       renderer.render(scene, camera);

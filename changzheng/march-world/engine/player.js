@@ -3,7 +3,7 @@
   'use strict';
   const NS = window.CZMarchWorld = window.CZMarchWorld || {};
   const M = NS._ = NS._ || {};
-  const WALK_SPEED = 1.8, SPEED = 4, RUN_SPEED = 6.5;
+  const WALK_SPEED = .55, SPEED = .74, RUN_SPEED = 2.55;
   const RAMP_TIME = .15, TURN_SPEED = 11, REVERSE_SCALE = .75;
   const JUMP_DURATION = .64, LAND_DURATION = .36;
   const JUMP_HEIGHT = .76;

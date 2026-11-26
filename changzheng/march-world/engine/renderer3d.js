@@ -289,8 +289,8 @@
           eye.updateProjectionMatrix();
         }
         const motion = reducedMotion.matches ? .35 : 1;
-        const fast = player.reversing ? 0 : T.MathUtils.smoothstep(player.speed,4.1,6.4);
-        const moving = T.MathUtils.smoothstep(player.speed,.1,1.7);
+        const fast = player.reversing ? 0 : T.MathUtils.smoothstep(player.speed,M.player.SPEED+.05,M.player.RUN_SPEED-.1);
+        const moving = T.MathUtils.smoothstep(player.speed,.04,M.player.WALK_SPEED*.95);
         run = damp(run, player.airborne ? 0 : fast, 12, dt);
         walk = damp(walk, player.airborne ? 0 : moving*(1-fast), 12, dt);
         tuck = damp(tuck, 1-T.MathUtils.smoothstep(clearance,.30,.65), 13, dt);
@@ -312,7 +312,7 @@
         reachTime=Math.min(.35,reachTime+dt);
         const reach=Math.sin(Math.PI*reachTime/.35)**2;
         const narrow=Math.min(1,eye.aspect/.85);
-        const stride=player.reversing ? .65 : .95+.05*T.MathUtils.smoothstep(player.speed,1.8,4);
+        const stride=player.reversing ? .65 : .95+.05*T.MathUtils.smoothstep(player.speed,M.player.WALK_SPEED,M.player.SPEED);
         const wave=Math.sin(phase);
         for (let i=0;i<2;i++) {
           const side=i*2-1, step=-side*wave;

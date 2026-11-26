@@ -37,14 +37,14 @@ function verifyCompoundBounds(scene, grid) {
     if (!route?.length) throw Error(label + '的越界点击没有钳制');
     const end = route.at(-1);
     player.moveTo(route);
-    for (let frame = 0; frame < 1800; frame++) {
+    for (let frame = 0; frame < 60 * 120 / M.player.SPEED; frame++) {
       player.advance(1 / 60);
       if (!inside()) throw Error(label + '的点击路径穿过边界');
     }
     if (Math.hypot(player.x - end.x, player.y - end.y) > .55) throw Error(`${label}的点击路径未抵达合法点 (${player.x},${player.y}) → (${end.x},${end.y})`);
   }
   const alongWall = M.player.create(scene, grid, { x: 57, y: 23.2 });
-  for (let frame = 0; frame < 55; frame++) {
+  for (let frame = 0; frame < 60 * 3.7 / M.player.SPEED; frame++) {
     alongWall.advance(1 / 60, { x: 1, y: -1 });
     if (!M.path.walkableAt(grid, alongWall.x, alongWall.y, M.player.RADIUS)) throw Error('沿北侧哨卡滑动时越界');
   }
@@ -54,7 +54,7 @@ function verifyCompoundBounds(scene, grid) {
   for (let frame = 0; frame < 14; frame++) alongWall.advance(1 / 60);
   if (alongWall.x < 58.8 || alongWall.speed !== 0) throw Error('即时移动未中断寻路或松开后未停止');
   const throughGate = M.player.create(scene, grid, { x: 57, y: 43 });
-  for (let frame = 0; frame < 150; frame++) throughGate.advance(1 / 60, { x: 1, y: 0 });
+  for (let frame = 0; frame < 60 * 10 / M.player.SPEED; frame++) throughGate.advance(1 / 60, { x: 1, y: 0 });
   if (throughGate.x < 66) throw Error('角色未能从子尹路通过西门');
   console.log('   西门实走通过。6 处边界均拦截持续移动并钳制越界点击。');
 }

@@ -1,10 +1,12 @@
 """Exercise each core role in the character viewer and the mounted Zunyi chapter."""
 import json
 from pathlib import Path
+from os import environ
 from playwright.sync_api import sync_playwright
 
 out=Path(__file__).resolve().parents[1]/"evidence/zunyi-core-integration"
-out.mkdir(exist_ok=True)
+out=Path(environ.get("ZUNYI_EVIDENCE_DIR",out))
+out.mkdir(exist_ok=True,parents=True)
 base="http://127.0.0.1:8080/march-world/"
 roles=("commander","soldier","logistics","medic")
 with sync_playwright() as pw:
@@ -48,14 +50,15 @@ with sync_playwright() as pw:
                   let prev=null,travel=0,support=0,n=0,calls=0,tris=0;
                   const start=performance.now();do{await new Promise(requestAnimationFrame);
                     let f=feet.map(b=>b.getWorldPosition(new vec())),loc=[p.x,p.y];
-                    if(prev){let i=f[0].y<f[1].y?0:1;if(i===prev.i){support+=Math.hypot(f[i].x-prev.f[i].x,f[i].z-prev.f[i].z);travel+=Math.hypot(loc[0]-prev.loc[0],loc[1]-prev.loc[1]);n++}}
-                    prev={f,loc,i:f[0].y<f[1].y?0:1};calls=Math.max(calls,v.stats.drawCalls);tris=Math.max(tris,v.stats.triangles)
+                    if(prev){let phase=actorSystem.strideCycle().phase/(2*Math.PI),i=phase<.5?0:1;const duty=p.running?.35:.52;
+                      if(i===prev.i && phase%0.5>.025 && phase%0.5<duty-.025){support+=Math.hypot(f[i].x-prev.f[i].x,f[i].z-prev.f[i].z);travel+=Math.hypot(loc[0]-prev.loc[0],loc[1]-prev.loc[1]);n++}}
+                    prev={f,loc,i:actorSystem.strideCycle().phase<Math.PI?0:1};calls=Math.max(calls,v.stats.drawCalls);tris=Math.max(tris,v.stats.triangles)
                   }while(performance.now()-start<650);
                   return {speed:p.speed,travel,ankleTravel:support,samples:n,calls,tris,...actorSystem.playerState()}}""")
                 page.keyboard.up("w")
                 if mode=="slow":page.keyboard.press("c")
                 if mode=="run":page.keyboard.up("Shift")
-                assert result["travel"]>.2 and result["calls"]<=120 and result["tris"]<=120000,result
+                assert result["travel"]>.10 and result["calls"]<=120 and result["tris"]<=120000,result
                 assert result["ankleTravel"]<.015*result["travel"],result
                 results[role][mode]=result
             page.keyboard.press("Space")

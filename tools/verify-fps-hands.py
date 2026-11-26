@@ -113,8 +113,8 @@ def verify(browser, mobile):
     assert data['proximalSleeveRemoved']
     page.wait_for_timeout(450)
     page.keyboard.press('c');page.keyboard.down('w')
-    wait("samples.at(-1).state==='walk' && pl.speed>1 && pl.speed<2.1")
-    wait("pl.speed>1.76 && pl.speed<1.84")
+    wait("samples.at(-1).state==='walk' && pl.speed>.45 && pl.speed<.6")
+    wait("Math.abs(pl.speed-W._.player.WALK_SPEED)<.015")
     data['slowSpeed']=E('pl.speed')
     E('samples.length=0')
     wait("samples.some(s=>s.top[0]<.995)&&samples.some(s=>s.top[1]<.995)")

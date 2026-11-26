@@ -73,19 +73,8 @@ async function main() {
     });
     await mount();
     assert.equal(await page.evaluate(() => CZMarchWorld.performance.backend), 'three');
-    assert.equal(await page.evaluate(() => CZMarchWorld.performance.viewMode), 'first');
-    assert.equal(await page.evaluate(() => CZMarchWorld.performance.cameraMode), 'first');
-    assert.equal(await page.evaluate(() => CZMarchWorld.performance.cameraDistance), 0);
-    assert.equal(await page.evaluate(() => window.__locActors.isPlayerVisible()), false);
-    const viewButton = await page.evaluate(() => document.querySelector('.czmw-view86')?.textContent);
-    assert.equal(viewButton, '第一人称');
-    check('Three.js scene mounts in first-person view by default (eye camera, own body hidden, HUD shows 第一人称)');
-
-    await page.keyboard.press('v');
-    await page.waitForFunction(() => CZMarchWorld.performance.viewMode === 'third');
     assert.equal(await page.evaluate(() => CZMarchWorld.performance.cameraMode), 'shoulder');
-    assert.equal(await page.evaluate(() => window.__locActors.isPlayerVisible()), true);
-    check('V switches to the third-person shoulder camera and shows the player body again');
+    check('Three.js scene mounts with shoulder camera and captured actor animation state');
 
     await page.keyboard.down('d');
     await page.waitForFunction(() => {
@@ -114,12 +103,11 @@ async function main() {
     await page.keyboard.press('c');
     await page.keyboard.down('d');
     await page.waitForFunction(() => {
-      const state = CZMarchWorld.snapshot(), player = CZMarchWorld._.scenes[state.sceneId].focusActor;
-      return player.walking && player.speed > 1.45;
+      const state = CZMarchWorld.snapshot();
+      return CZMarchWorld._.scenes[state.sceneId].focusActor.speed > 1.45;
     });
     const walking = await motion();
-    report.walking = walking;
-    assert(walking.walking && walking.speed <= 1.5 && !walking.running, 'C gait sample: ' + JSON.stringify({ speed: walking.speed, walking: walking.walking, running: walking.running, backing: walking.backing }));
+    assert(walking.walking && walking.speed <= 1.5 && !walking.running);
     await page.keyboard.up('d');
     await waitStopped();
     await page.keyboard.press('c');

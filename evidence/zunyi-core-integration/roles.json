@@ -1,0 +1,460 @@
+{
+  "1280": {
+    "roles": {
+      "commander": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.9999996192373626,
+          "travel": 2.2666666666666586,
+          "ankleTravel": 1.9797310401051158e-06,
+          "samples": 102,
+          "calls": 54,
+          "tris": 80734,
+          "role": "commander",
+          "weights": [
+            3.092997322582948e-08,
+            0.9999999690700269,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999999081788607,
+          "travel": 1.110000000000042,
+          "ankleTravel": 1.1374843343789503e-06,
+          "samples": 104,
+          "calls": 54,
+          "tris": 80734,
+          "role": "commander",
+          "weights": [
+            2.3381254028733615e-08,
+            0.999999976618746,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.4999992251672465,
+          "travel": 3.683333333333362,
+          "ankleTravel": 3.2623464668865965e-06,
+          "samples": 102,
+          "calls": 56,
+          "tris": 80862,
+          "role": "commander",
+          "weights": [
+            7.070082647378336e-09,
+            2.0564397835732666e-07,
+            0.9999997872859391
+          ],
+          "jumpStage": null
+        }
+      },
+      "soldier": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.999999538958864,
+          "travel": 2.2666666666666586,
+          "ankleTravel": 8.60398141217562e-06,
+          "samples": 102,
+          "calls": 54,
+          "tris": 80732,
+          "role": "soldier",
+          "weights": [
+            3.7476936648251644e-08,
+            0.9999999625230633,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999999119771681,
+          "travel": 1.080000000000041,
+          "ankleTravel": 5.2204397239353686e-06,
+          "samples": 104,
+          "calls": 54,
+          "tris": 80732,
+          "role": "soldier",
+          "weights": [
+            2.1035150131723673e-08,
+            0.9999999789648499,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999209925184,
+          "travel": 3.683333333333362,
+          "ankleTravel": 1.3491372896385806e-05,
+          "samples": 102,
+          "calls": 56,
+          "tris": 80860,
+          "role": "soldier",
+          "weights": [
+            7.006062956434597e-09,
+            2.1143772072363203e-07,
+            0.9999997815562163
+          ],
+          "jumpStage": null
+        }
+      },
+      "logistics": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.999999491604429,
+          "travel": 2.2666666666666586,
+          "ankleTravel": 1.0154259413666292e-05,
+          "samples": 102,
+          "calls": 54,
+          "tris": 80830,
+          "role": "logistics",
+          "weights": [
+            4.1253077706291124e-08,
+            0.9999999587469222,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999999010844736,
+          "travel": 1.080000000000041,
+          "ankleTravel": 6.155405705538883e-06,
+          "samples": 104,
+          "calls": 54,
+          "tris": 80830,
+          "role": "logistics",
+          "weights": [
+            2.3707239572912385e-08,
+            0.9999999762927604,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999209967114,
+          "travel": 3.683333333333362,
+          "ankleTravel": 1.6588216606093343e-05,
+          "samples": 102,
+          "calls": 56,
+          "tris": 80958,
+          "role": "logistics",
+          "weights": [
+            7.006063025997388e-09,
+            2.112830265973466e-07,
+            0.9999997817109103
+          ],
+          "jumpStage": null
+        }
+      },
+      "medic": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.9999995389046776,
+          "travel": 2.2666666666666586,
+          "ankleTravel": 1.817704303878605e-06,
+          "samples": 101,
+          "calls": 54,
+          "tris": 80696,
+          "role": "medic",
+          "weights": [
+            3.7442587477053976e-08,
+            0.9999999625574125,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999999273781777,
+          "travel": 1.110000000000042,
+          "ankleTravel": 1.0391729744462334e-06,
+          "samples": 103,
+          "calls": 54,
+          "tris": 80696,
+          "role": "medic",
+          "weights": [
+            1.7319797031176782e-08,
+            0.999999982680203,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999358115145,
+          "travel": 3.683333333333362,
+          "ankleTravel": 0.00034141945979942773,
+          "samples": 102,
+          "calls": 56,
+          "tris": 80824,
+          "role": "medic",
+          "weights": [
+            6.595362594861151e-10,
+            1.7948868715436686e-07,
+            0.9999998198517767
+          ],
+          "jumpStage": null
+        }
+      }
+    },
+    "errors": []
+  },
+  "390": {
+    "roles": {
+      "commander": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.999999581448498,
+          "travel": 2.199999999999992,
+          "ankleTravel": 1.9458366952471416e-06,
+          "samples": 102,
+          "calls": 53,
+          "tris": 80408,
+          "role": "commander",
+          "weights": [
+            3.3992017616239656e-08,
+            0.9999999660079822,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.799999888280151,
+          "travel": 1.080000000000041,
+          "ankleTravel": 1.0994758212563402e-06,
+          "samples": 104,
+          "calls": 52,
+          "tris": 80408,
+          "role": "commander",
+          "weights": [
+            2.840647190541777e-08,
+            0.999999971593528,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999141617493,
+          "travel": 3.7916666666666963,
+          "ankleTravel": 3.454971248401622e-06,
+          "samples": 103,
+          "calls": 53,
+          "tris": 77026,
+          "role": "commander",
+          "weights": [
+            1.0716093952339749e-08,
+            2.2369241426598945e-07,
+            0.9999997655914918
+          ],
+          "jumpStage": null
+        }
+      },
+      "soldier": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.9999994920277175,
+          "travel": 2.2666666666666586,
+          "ankleTravel": 8.564062148613673e-06,
+          "samples": 102,
+          "calls": 53,
+          "tris": 80406,
+          "role": "soldier",
+          "weights": [
+            4.125307770629114e-08,
+            0.9999999587469223,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999999011881958,
+          "travel": 1.080000000000041,
+          "ankleTravel": 5.1717675813246036e-06,
+          "samples": 104,
+          "calls": 52,
+          "tris": 80406,
+          "role": "soldier",
+          "weights": [
+            2.361575475642341e-08,
+            0.9999999763842452,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999281141977,
+          "travel": 3.683333333333362,
+          "ankleTravel": 1.359907360548849e-05,
+          "samples": 102,
+          "calls": 53,
+          "tris": 77024,
+          "role": "soldier",
+          "weights": [
+            6.374947913221324e-09,
+            1.9225038153221113e-07,
+            0.9999998013746705
+          ],
+          "jumpStage": null
+        }
+      },
+      "logistics": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.9999995810821742,
+          "travel": 2.199999999999992,
+          "ankleTravel": 1.0182720148277103e-05,
+          "samples": 102,
+          "calls": 53,
+          "tris": 80504,
+          "role": "logistics",
+          "weights": [
+            3.404644837742256e-08,
+            0.9999999659535516,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999998768815382,
+          "travel": 1.080000000000041,
+          "ankleTravel": 6.235084155421698e-06,
+          "samples": 104,
+          "calls": 52,
+          "tris": 80504,
+          "role": "logistics",
+          "weights": [
+            3.130762459069872e-08,
+            0.9999999686923754,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999353561819,
+          "travel": 3.7916666666666963,
+          "ankleTravel": 1.7995522585758886e-05,
+          "samples": 103,
+          "calls": 53,
+          "tris": 77122,
+          "role": "logistics",
+          "weights": [
+            3.317274248969047e-09,
+            1.767629209228623e-07,
+            0.9999998199198048
+          ],
+          "jumpStage": null
+        }
+      },
+      "medic": {
+        "preview": [
+          "Idle",
+          "Talk",
+          "Walk",
+          "Run",
+          "Jump_Start",
+          "Jump_Air",
+          "Jump_Land"
+        ],
+        "walk": {
+          "speed": 3.999999581359415,
+          "travel": 2.199999999999992,
+          "ankleTravel": 1.8022075764588554e-06,
+          "samples": 102,
+          "calls": 53,
+          "tris": 80370,
+          "role": "medic",
+          "weights": [
+            3.4023222602254584e-08,
+            0.9999999659767775,
+            0
+          ],
+          "jumpStage": null
+        },
+        "slow": {
+          "speed": 1.7999998883983117,
+          "travel": 1.080000000000041,
+          "ankleTravel": 1.0017564832830876e-06,
+          "samples": 104,
+          "calls": 52,
+          "tris": 80370,
+          "role": "medic",
+          "weights": [
+            2.8351496671750652e-08,
+            0.9999999716485033,
+            0
+          ],
+          "jumpStage": null
+        },
+        "run": {
+          "speed": 6.499999297824145,
+          "travel": 3.683333333333362,
+          "ankleTravel": 0.00023187710093109556,
+          "samples": 102,
+          "calls": 53,
+          "tris": 76988,
+          "role": "medic",
+          "weights": [
+            6.3545807351286186e-09,
+            1.8647831147946821e-07,
+            0.9999998071671078
+          ],
+          "jumpStage": null
+        }
+      }
+    },
+    "errors": []
+  }
+}

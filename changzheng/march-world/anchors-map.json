@@ -1,7 +1,7 @@
 {
   "version": 1,
   "coordinateSystem": "scene ground coordinates (x east, y south, unit≈1m); anchors are ground points",
-  "generatedAt": "2026-10-31T10:22:03.088Z",
+  "generatedAt": "2026-11-22T16:11:20.101Z",
   "chapters": [
     {
       "chapterId": 1,
@@ -450,45 +450,45 @@
         "h": 110
       },
       "spawn": {
-        "x": 16,
-        "y": 58,
-        "facing": "e"
+        "x": 57,
+        "y": 30,
+        "facing": "s"
       },
       "anchors": [
         {
           "anchorId": "chapter-3/anchor-dialogue-03-01-narrator",
           "kind": "npc",
           "label": "到达遵义、说明身份 · 解说旁白",
-          "x": 18,
-          "y": 60
+          "x": 57,
+          "y": 33
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-01-he_wen",
           "kind": "npc",
           "label": "到达遵义、说明身份 · 指导员何文",
-          "x": 22,
-          "y": 58
+          "x": 57,
+          "y": 37
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-05-wang_gui",
           "kind": "npc",
           "label": "等候与战友交谈 · 老班长王贵",
-          "x": 56,
-          "y": 60
+          "x": 82,
+          "y": 43
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-05-chen_xiaoman",
           "kind": "npc",
           "label": "等候与战友交谈 · 青年战士陈小满",
-          "x": 60,
-          "y": 62
+          "x": 57,
+          "y": 52
         },
         {
           "anchorId": "chapter-3/anchor-legacy-drag-1",
           "kind": "task",
           "label": "情报梳理",
-          "x": 50,
-          "y": 58
+          "x": 57,
+          "y": 56
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-02-liaison_1",
@@ -508,8 +508,8 @@
           "anchorId": "chapter-3/anchor-dialogue-03-03-liaison_1",
           "kind": "npc",
           "label": "情报互相矛盾 · 交通联络员",
-          "x": 88,
-          "y": 42
+          "x": 89,
+          "y": 40
         },
         {
           "anchorId": "chapter-3/anchor-main-task",
@@ -565,49 +565,49 @@
           "kind": "task",
           "label": "半条被子 · 红军坟",
           "x": 72,
-          "y": 44
+          "y": 46
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-04-logistics_1",
           "kind": "npc",
           "label": "自定义基层保障方案 · 后勤协作员",
-          "x": 122,
-          "y": 48
+          "x": 87.5,
+          "y": 43
         },
         {
           "anchorId": "chapter-3/anchor-dialogue-03-04-he_wen",
           "kind": "npc",
           "label": "自定义基层保障方案 · 指导员何文",
-          "x": 126,
-          "y": 46
+          "x": 90,
+          "y": 56
         },
         {
           "anchorId": "chapter-3/anchor-workshop-circuit",
           "kind": "task",
           "label": "战地电台 · 断线重连",
-          "x": 124,
-          "y": 40
+          "x": 85,
+          "y": 56
         },
         {
           "anchorId": "chapter-3/anchor-history",
           "kind": "task",
           "label": "本章史实与来源",
-          "x": 34,
-          "y": 76
+          "x": 80,
+          "y": 57
         },
         {
           "anchorId": "chapter-3/anchor-scene3d",
           "kind": "task",
           "label": "3D剧情地点模拟体验",
-          "x": 11,
-          "y": 63
+          "x": 57,
+          "y": 27
         },
         {
           "anchorId": "chapter-3/anchor-exit",
           "kind": "exit",
           "label": "继续下一站",
-          "x": 152,
-          "y": 54
+          "x": 57,
+          "y": 60
         }
       ]
     },
@@ -680,6 +680,13 @@
           "label": "战术调度",
           "x": 102,
           "y": 54
+        },
+        {
+          "anchorId": "chapter-4/anchor-ai-decision",
+          "kind": "task",
+          "label": "DeepSeek · 行动研判与影像",
+          "x": 115,
+          "y": 50
         },
         {
           "anchorId": "chapter-4/anchor-game-cipher",

@@ -1,0 +1,98 @@
+{
+  "run": 13,
+  "calibration": {
+    "yaw": -0.198,
+    "target": -0.972,
+    "keyHeldMs": 2600,
+    "requestedFps": "native",
+    "virtualTime": false,
+    "manualFrames": 65,
+    "manualStepMs": 40
+  },
+  "first": {
+    "button": {
+      "text": "第一人称",
+      "mode": "first",
+      "hidden": false
+    },
+    "backend": "three",
+    "viewMode": "first",
+    "cameraMode": "first",
+    "cameraDistance": 0,
+    "orbitYaw": 0,
+    "frames": 119,
+    "renderMs": 7.3,
+    "pinHidden": true
+  },
+  "third": {
+    "button": {
+      "text": "第三人称",
+      "mode": "third",
+      "hidden": false
+    },
+    "backend": "three",
+    "viewMode": "third",
+    "cameraMode": "shoulder",
+    "cameraDistance": 7.941,
+    "orbitYaw": 0,
+    "frames": 199,
+    "renderMs": 6.9,
+    "pinHidden": false
+  },
+  "back": {
+    "button": {
+      "text": "第一人称",
+      "mode": "first",
+      "hidden": false
+    },
+    "backend": "three",
+    "viewMode": "first",
+    "cameraMode": "first",
+    "cameraDistance": 0,
+    "orbitYaw": 0,
+    "frames": 308,
+    "renderMs": 5.7,
+    "pinHidden": true
+  },
+  "look": {
+    "yawBefore": 0,
+    "yawAfter": -0.831,
+    "delta": -0.831
+  },
+  "moved": {
+    "before": {
+      "chapterId": 2,
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "x": 24,
+      "y": 16,
+      "facing": -0.025
+    },
+    "after": {
+      "chapterId": 2,
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "x": 33.57,
+      "y": 15.78,
+      "facing": -0.011
+    },
+    "distance": 9.57,
+    "frames": 65
+  },
+  "walked": {
+    "button": {
+      "text": "第一人称",
+      "mode": "first",
+      "hidden": false
+    },
+    "backend": "three",
+    "viewMode": "first",
+    "cameraMode": "first",
+    "cameraDistance": 0,
+    "orbitYaw": -0.972,
+    "frames": 378,
+    "renderMs": 22.7,
+    "pinHidden": true
+  },
+  "errors": [],
+  "failedRequests": [],
+  "passed": true
+}

@@ -2,6 +2,8 @@
    协议（与 B 方 march-story 约定，不得静默改字段）：
    - async mount(container, {chapterId, sceneId, spawn, anchors})
    - snapshot() → {chapterId, sceneId, x, y, facing}
+   - getCameraMode() → 'tps' / 'fps'；Canvas 或未挂载时返回 null
+   - setCameraMode(mode, {instant = false}) → 是否接受切换；instant 跳过 TPS 镜头拉出和俯仰缓动
    - pause(reason) / resume(reason)：按原因集合暂停；仍有其他原因时不恢复移动
    - applyState({enabledAnchorIds, completedAnchorIds, openPassageIds})
    - destroy()：幂等，可重复调用
@@ -70,46 +72,30 @@
     if (token !== mountSeq || !view) { view?.dispose(); return false; }
     const project = (x, y, height) => view.project ? view.project(x, y, height) : M.proj.project(view.cam, x, y, height);
     const unproject = (sx, sy) => view.unproject ? view.unproject(sx, sy) : M.proj.unproject(view.cam, sx, sy);
-    const grid = M.path.buildGrid(view.streetActive ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
+    const grid = M.path.buildGrid(view.streetActive && !scene.strictPlayable ? { ...scene, blocked: [...scene.blocked, ...scene.streetBlocked] } : scene);
     const player = M.player.create(scene, grid, opts.spawn,roleId);
-    /* 主楼内部：墙厚 0.3m 的墙线在 1m 栅格里表达不出来，进楼后改用精确碰撞；
-       楼外仍然走栅格，两者在建筑外轮廓处切换。 */
-    const zone = scene.zunyiInterior;
-    if (zone) {
-      /* 室内走道和楼梯只有 1.1~1.7m 宽，玩家半径按 0.34 算（室外仍是 0.62） */
-      const R = 0.34 ** 2;
-      player.setCollider((x, y) => {
-        if (x > zone.x1 && x < zone.x2 && y > zone.y1 && y < zone.y2) {
-          const level = player.height > 1.7 ? 2 : 1;
-          for (const w of zone.walls) {
-            if (w.level && w.level !== level) continue;
-            const nx = Math.max(w.x1, Math.min(x, w.x2)), ny = Math.max(w.y1, Math.min(y, w.y2));
-            const dx = x - nx, dy = y - ny;
-            if (dx * dx + dy * dy < R) return false;
-          }
-          return true;
-        }
-        return M.path.walkableAt(grid, x, y, M.player.RADIUS);
-      });
-    }
     const pin=document.createElement('div');pin.className='czmw-player-pin86';pin.dataset.role=player.roleId;pin.setAttribute('role','img');pin.setAttribute('aria-label','你的位置 · '+player.roleName);const roleLabel=document.createElement('span');roleLabel.textContent='你 · '+player.roleShort;pin.append(roleLabel,document.createElement('i'));container.append(pin);
+    view.initializeCamera?.(player);
     scene.focusActor=player;const anchorsMod = M.anchors.create(scene, container);
     scene.anchorEntities=anchorsMod.anchors;
     const ambient = M.ambient.create(scene, view);
 
     const guidePin=document.createElement('div');guidePin.className='czmw-guide87';guidePin.hidden=true;container.append(guidePin);
     const session = { container, scene, grid, view, player,pin,guidePin, guide:null, route:[],routeAt:0, routeCell:'', anchorsMod, ambient, chapterId, sceneId, dead: false, lastNear: null };
-    scene.view3d = view;   /* 调试/验收取景用，与 session.view 同步 */
+    if (view) view.session = session;
 
     /* 输入 */
+    const settingsPause = Symbol('movement settings');
     const input = M.input.create(container, {
       onInteract() {
         if (pauses.size || session.dead) return;
+        if (session.view?.handleInteract?.()) return;
         const near = session.lastNear;
         if (near) dispatchInteract(session, near.anchorId);
       },
       onTap(sx, sy) {
         if (pauses.size || session.dead) return;
+        if (view.isIndoors?.()) return;
         const w = unproject(sx, sy);
         if (!w) return;
         /* 点按落在锚点附近 → 直接交互；否则寻路移动 */
@@ -122,23 +108,16 @@
       },
       onDir() { player.stopPath(); },
       onJump() { if (!pauses.size) player.jump(); },
-      onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); },
-      onToggleView() { if (!session.dead) { view.toggleViewMode?.(); syncViewMode(); } },
-      isFirstPerson: () => view.isFirstPerson?.() === true,
-      supportsViewMode: () => typeof view.setViewMode === 'function'
+      lookCanvas: view.adjustCamera ? view.canvas : null,
+      onSettings(open) { if (open) pause(settingsPause); else resume(settingsPause); },
+      onFreeLook(active) { view.setFreeLook?.(active); },
+      onCameraMode() {
+        if (!pauses.size && !session.dead) setCameraMode(view.getCameraMode?.() === 'fps' ? 'tps' : 'fps');
+      },
+      onLook(dx, dy) { if (!pauses.size) view.adjustCamera?.(dx, dy); }
     });
     session.input = input;
-
-    /* 人称状态同步：第一人称隐藏“你 · 战士”名牌（不然贴在脸上），并刷新左上角按钮 */
-    function syncViewMode() {
-      const first = view.isFirstPerson?.() === true;
-      session.firstPerson = first;
-      pin.hidden = first;
-      input.syncViewMode?.();
-      return first;
-    }
-    session.syncViewMode = syncViewMode;
-    syncViewMode();
+    input.showCameraMode?.(view.getCameraMode?.());
 
     const playerEntity={y:player.y,draw:()=>player.draw(view.canvas.getContext('2d'),view.cam)};
     scene.drawWater=ambient.drawWater;scene.drawSmoke=ambient.drawSmoke;scene.drawOverlay=ambient.drawOverlay;
@@ -146,35 +125,35 @@
     /* 主循环数据流：renderer 帧回调驱动更新 */
     scene.tick = dt => {
       if (session.dead) return;
-      const paused = pauses.size > 0;
+      const paused = pauses.size > 0 || !!view.isTransitioning?.();
       scene.pausedDim = paused;
       input.setEnabled(!paused);
       if (!paused) {
-        const firstPerson = view.isFirstPerson?.() === true;
-        if (firstPerson !== session.firstPerson) syncViewMode();
         const movement = input.vector();
-        /* 第一人称按视角前后走（FPS 手感），不再用“身体朝向的反方向”当后退 */
-        const backward = !firstPerson && input.wantsBack?.(movement);
-        const direction = view.cameraRelativeMovement?.(movement) ?? movement;
-        player.advance(dt, backward ? movement : direction, input.wantsRun?.(), backward, input.wantsWalk?.());
-        if (firstPerson) player.faceTo?.(view.lookFacing?.());
-        /* 落地采样：进主楼后踩着台基 / 楼梯 / 二层楼板走，楼外回到地面 */
-        const floorAt = M.zunyiInterior?.floorHeightAt;
-        if (floorAt && scene.zunyiInterior) {
-          const fh = floorAt(player.x - scene.world.w / 2, player.y - scene.world.h / 2, player.height);
-          player.setFloor(fh == null ? 0 : fh, fh != null);
-        }
+        const cameraRelative = Boolean(view.cameraRelativeMovement);
+        const direction = cameraRelative ? view.cameraRelativeMovement(movement) : movement;
+        player.advance(dt, direction, input.wantsRun?.(), input.wantsWalk?.(),
+          cameraRelative ? movement.y : undefined);
       }
       ambient.update(paused ? 0 : dt); /* 暂停时环境动画减速但不冻结（对话框背景仍活着） */
-      const near = anchorsMod.update(player.x, player.y, paused);
-      if (near !== session.lastNear) {
+      const inside = view.isIndoors?.();
+      const target = inside && !paused && view.getIndoorTarget();
+      const near = anchorsMod.update(player.x, player.y, paused || inside);
+      const touchTarget = target?.data || near;
+      if (touchTarget !== session.lastTouchTarget) {
+        session.lastTouchTarget = touchTarget;
         session.lastNear = near;
-        input.showAction(!!near, near ? (near.kind === 'npc' ? '交谈' : near.kind === 'exit' ? '前往' : '查看') : '交互');
+        input.showAction(!!touchTarget, target ? (target.type === 'door' ? '返回前院' : '查看考据') : near ? (near.kind === 'npc' ? '交谈' : near.kind === 'exit' ? '前往' : '查看') : '交互');
       }
       view.follow(player, dt);
-      anchorsMod.layout(view.cam, scene.world.h, project);
-      const head=view.headPoint?view.headPoint(player):player.headPoint(view.cam);const px=Math.round(head.x*2)/2+'px',py=Math.round(head.y*2)/2+'px';if(!session.firstPerson){if(pin.style.left!==px)pin.style.left=px;if(pin.style.top!==py)pin.style.top=py;}
-      if(session.guide){
+      anchorsMod.layout(view.cam, project, view.getCameraMode?.() === 'fps' || near?.anchorId === 'chapter-3/anchor-indoor-meeting-room', target?.data || near);
+      if (!pin.hidden) {
+        const head = view.headPoint ? view.headPoint(player) : player.headPoint(view.cam);
+        const px = Math.round(head.x * 2) / 2 + 'px', py = Math.round(head.y * 2) / 2 + 'px';
+        if (pin.style.left !== px) pin.style.left = px;
+        if (pin.style.top !== py) pin.style.top = py;
+      }
+      if(session.guide && !inside){
         const a=anchorsMod.anchors.find(a=>a.anchorId===session.guide.anchorId&&a.enabled);
         if(a){
           const cell=Math.floor(player.x/3)+':'+Math.floor(player.y/3);if(cell!==session.routeCell&&performance.now()-session.routeAt>400){session.route=guidePath(session,a)||[];session.routeAt=performance.now();session.routeCell=cell;}
@@ -187,7 +166,7 @@
           const gy=Math.round(Math.max(40,Math.min(view.cam.viewH-(navigator.maxTouchPoints>0?135:60),point.y-70)))+'px';if(guidePin.style.top!==gy)guidePin.style.top=gy;
         }else guidePin.hidden=true;
       }else guidePin.hidden=true;
-      view.drawGuide?.(player, session.route, !!session.guide && !paused && !guidePin.hidden);
+      view.drawGuide?.(player, session.route, !!session.guide && !inside && !paused && !guidePin.hidden);
     };
     scene.drawGuide=(ctx,cam)=>{
       if(!session.guide||!session.route.length||pauses.size)return;
@@ -201,9 +180,9 @@
       previous.onGraphicsLost = null;
       view = M.view.wrapCanvas(M.renderer.create(container, scene));
       session.view = view;
-      scene.view3d = view;
+      input.disableCamera?.();
+      pin.hidden = false;
       previous.dispose();
-      syncViewMode();
     };
     live = session;
     if (view.playIntro && opts.playIntro !== false) {
@@ -219,9 +198,21 @@
   }
 
   function dispatchInteract(session, anchorId) {
+    session.input.unlock?.();
+    if (session.view?.handleInteract?.(anchorId)) return;
     window.dispatchEvent(new CustomEvent('czmarch:interact', {
       detail: { chapterId: session.chapterId, sceneId: session.sceneId, anchorId }
     }));
+  }
+
+  // The mounted 3D scene owns the mode. Canvas or an unmounted scene returns null.
+  function getCameraMode() { return live?.view.getCameraMode?.() ?? null; }
+  function setCameraMode(mode, options) {
+    const session = live;
+    if (!session?.view.setCameraMode?.(mode, options)) return false;
+    session.pin.hidden = mode === 'fps';
+    session.input.showCameraMode?.(mode);
+    return true;
   }
 
   function snapshot() {
@@ -234,13 +225,13 @@
   }
 
   function pause(reason) {
-    const r = String(reason || 'default');
+    const r = typeof reason === 'symbol' ? reason : String(reason || 'default');
     if (!live || live.dead) return; /* 未挂载时暂停是安全空操作 */
     pauses.add(r);
-    live.input.setEnabled(false);live.player.stopPath();live.player.halt?.();
+    live.input.setEnabled(false);live.player.stop();
   }
   function resume(reason) {
-    pauses.delete(String(reason || 'default'));
+    pauses.delete(typeof reason === 'symbol' ? reason : String(reason || 'default'));
     if(live&&!live.dead&&!pauses.size)live.input.setEnabled(true);
   }
   function applyState(viewState) {
@@ -284,13 +275,14 @@
     s.guidePin?.remove();
     try { s.anchorsMod && s.anchorsMod.dispose(); } catch { /* 释放继续 */ }
     try { s.view && s.view.dispose(); } catch { /* 释放继续 */ }
-    if (scene) { scene.focusActor=null;scene.anchorEntities=null;scene.view3d=null;scene.tick = null; scene.collectEntities = null; scene.drawWater = null; scene.drawSmoke = null; scene.drawOverlay = null; scene.drawGuide=null;scene.pausedDim = false; }
+    if (scene) { scene.focusActor=null;scene.anchorEntities=null;scene.tick = null; scene.collectEntities = null; scene.drawWater = null; scene.drawSmoke = null; scene.drawOverlay = null; scene.drawGuide=null;scene.pausedDim = false; }
     s.container.classList.remove('czmw-host');
   }
 
   /* ========== 导出 ========== */
   NS.mount = mount; NS.snapshot = snapshot; NS.pause = pause; NS.resume = resume;
   NS.applyState = applyState; NS.destroy = destroy;
+  NS.setCameraMode = setCameraMode; NS.getCameraMode = getCameraMode;
   NS.setGuide=setGuide;NS.walkToGuide=walkToGuide;
   Object.defineProperty(NS,'performance',{get:()=>live?{...live.view.stats,cacheEntries:M.painter.cacheSize}:null});
   NS.manifest = buildManifest();

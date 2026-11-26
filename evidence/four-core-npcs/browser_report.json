@@ -1,0 +1,369 @@
+{
+  "characterPreview": {
+    "commander": {
+      "detail": "核心连长 · 1.78 m",
+      "status": "独立三维模型 · 21,600 三角面 · 53 骨骼 · 0 表情形态 · WebGL2",
+      "anims": [
+        "Idle",
+        "Talk",
+        "Walk",
+        "Run",
+        "Jump_Start",
+        "Jump_Air",
+        "Jump_Land"
+      ],
+      "jumpCycle": [
+        "Jump_Air",
+        "Jump_Air"
+      ]
+    },
+    "soldier": {
+      "detail": "核心战士 · 1.67 m",
+      "status": "独立三维模型 · 21,600 三角面 · 53 骨骼 · 0 表情形态 · WebGL2",
+      "anims": [
+        "Idle",
+        "Talk",
+        "Walk",
+        "Run",
+        "Jump_Start",
+        "Jump_Air",
+        "Jump_Land"
+      ],
+      "jumpCycle": [
+        "Jump_Air",
+        "Jump_Air"
+      ]
+    },
+    "logistics": {
+      "detail": "后勤协作员 · 32 岁 · 1.73 m",
+      "status": "独立三维模型 · 22,050 三角面 · 53 骨骼 · 0 表情形态 · WebGL2",
+      "anims": [
+        "Idle",
+        "Talk",
+        "Walk",
+        "Run",
+        "Jump_Start",
+        "Jump_Air",
+        "Jump_Land"
+      ],
+      "jumpCycle": [
+        "Jump_Air",
+        "Jump_Air"
+      ]
+    },
+    "medic": {
+      "detail": "随队救护 · 1.61 m",
+      "status": "独立三维模型 · 21,446 三角面 · 53 骨骼 · 0 表情形态 · WebGL2",
+      "anims": [
+        "Idle",
+        "Talk",
+        "Walk",
+        "Run",
+        "Jump_Start",
+        "Jump_Air",
+        "Jump_Land"
+      ],
+      "jumpCycle": [
+        "Jump_Air",
+        "Jump_Air"
+      ]
+    },
+    "chen-xiaoman": {
+      "detail": "青年战士 · 1.67 m",
+      "status": "独立三维模型 · 21,600 三角面 · 53 骨骼 · 0 表情形态 · WebGL2",
+      "anims": [
+        "Idle",
+        "Talk",
+        "Walk",
+        "Run",
+        "Jump_Start",
+        "Jump_Air",
+        "Jump_Land"
+      ],
+      "jumpCycle": [
+        "Jump_Air",
+        "Jump_Air"
+      ]
+    },
+    "errors": [],
+    "badResponses": []
+  },
+  "inGame": {
+    "ch3_initial": {
+      "frames": 9,
+      "renderMs": 2,
+      "dpr": 1,
+      "adaptive": false,
+      "backend": "three",
+      "cameraMode": "tps",
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "town",
+      "landform": "柏辉章公馆与子尹路",
+      "terrainVertices": 1189,
+      "terrainMin": 1,
+      "terrainMax": 1,
+      "orbitYaw": 1.571,
+      "cameraPitch": 0.22,
+      "cameraBoom": 4.2,
+      "cameraDistance": 4.2,
+      "cameraOccluded": false,
+      "armsState": null,
+      "geometries": 47,
+      "textures": 76,
+      "drawCalls": 52,
+      "armsDrawCalls": 0,
+      "triangles": 84226,
+      "cacheEntries": 10
+    },
+    "ch3_after_locomotion": {
+      "frames": 40,
+      "renderMs": 3.2,
+      "dpr": 1,
+      "adaptive": false,
+      "backend": "three",
+      "cameraMode": "tps",
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "town",
+      "landform": "柏辉章公馆与子尹路",
+      "terrainVertices": 1189,
+      "terrainMin": 1,
+      "terrainMax": 1,
+      "orbitYaw": 1.571,
+      "cameraPitch": 0.22,
+      "cameraBoom": 4.461,
+      "cameraDistance": 4.461,
+      "cameraOccluded": false,
+      "armsState": null,
+      "geometries": 47,
+      "textures": 76,
+      "drawCalls": 51,
+      "armsDrawCalls": 0,
+      "triangles": 84224,
+      "cacheEntries": 10
+    },
+    "snapshotAfterMove": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 57,
+      "y": 38.21,
+      "facing": 1.571
+    },
+    "roles": {
+      "chapter-1/scene-ruijin:commander": {
+        "frames": 8,
+        "renderMs": 44.8,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "village",
+        "landform": "于都河阶·蓝调夜渡",
+        "terrainVertices": 42840,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 6.09227180480957,
+        "orbitYaw": -0.0,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.2,
+        "cameraDistance": 4.2,
+        "cameraOccluded": false,
+        "armsState": null,
+        "geometries": 299,
+        "textures": 260,
+        "drawCalls": 697,
+        "armsDrawCalls": 0,
+        "triangles": 1210056,
+        "cacheEntries": 17
+      },
+      "chapter-1/scene-ruijin:soldier": {
+        "frames": 8,
+        "renderMs": 43.2,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "village",
+        "landform": "于都河阶·蓝调夜渡",
+        "terrainVertices": 42840,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 6.09227180480957,
+        "orbitYaw": -0.0,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.2,
+        "cameraDistance": 4.2,
+        "cameraOccluded": false,
+        "armsState": null,
+        "geometries": 298,
+        "textures": 257,
+        "drawCalls": 697,
+        "armsDrawCalls": 0,
+        "triangles": 1210056,
+        "cacheEntries": 17
+      },
+      "chapter-2/scene-xiangjiang:medic": {
+        "frames": 7,
+        "renderMs": 7.1,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "river",
+        "landform": "湘江坡地·转运清点",
+        "terrainVertices": 36708,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 12.132535934448242,
+        "orbitYaw": 1.571,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.2,
+        "cameraDistance": 4.2,
+        "cameraOccluded": false,
+        "armsState": null,
+        "geometries": 139,
+        "textures": 142,
+        "drawCalls": 339,
+        "armsDrawCalls": 0,
+        "triangles": 670045,
+        "cacheEntries": 21
+      },
+      "chapter-2/scene-xiangjiang:logistics": {
+        "frames": 8,
+        "renderMs": 5.5,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "river",
+        "landform": "湘江坡地·转运清点",
+        "terrainVertices": 36708,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 12.132535934448242,
+        "orbitYaw": 1.571,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.2,
+        "cameraDistance": 4.2,
+        "cameraOccluded": false,
+        "armsState": null,
+        "geometries": 139,
+        "textures": 142,
+        "drawCalls": 339,
+        "armsDrawCalls": 0,
+        "triangles": 671253,
+        "cacheEntries": 22
+      }
+    },
+    "glbResponses": [
+      [
+        200,
+        "civilian-farmer-web.glb"
+      ],
+      [
+        200,
+        "commander-web.glb"
+      ],
+      [
+        200,
+        "fps-arms-web.glb"
+      ],
+      [
+        200,
+        "he-wen-web.glb"
+      ],
+      [
+        200,
+        "he-wen-zunyi.glb"
+      ],
+      [
+        200,
+        "logistics-web.glb"
+      ],
+      [
+        200,
+        "medic-web.glb"
+      ],
+      [
+        200,
+        "soldier-web.glb"
+      ],
+      [
+        200,
+        "tree-cinema.glb"
+      ],
+      [
+        200,
+        "wang-gui-web.glb"
+      ],
+      [
+        200,
+        "wang-gui-zunyi.glb"
+      ],
+      [
+        200,
+        "zunyi_street.glb?v=winter-foliage"
+      ]
+    ],
+    "fallbackHits": [],
+    "errors": []
+  },
+  "mobile": {
+    "perf": {
+      "frames": 18,
+      "renderMs": 2.6,
+      "dpr": 1,
+      "adaptive": false,
+      "backend": "three",
+      "cameraMode": "tps",
+      "propsReady": true,
+      "unsupportedProps": [],
+      "environment": "town",
+      "landform": "柏辉章公馆与子尹路",
+      "terrainVertices": 1189,
+      "terrainMin": 1,
+      "terrainMax": 1,
+      "orbitYaw": 1.571,
+      "cameraPitch": 0.22,
+      "cameraBoom": 4.956,
+      "cameraDistance": 4.956,
+      "cameraOccluded": false,
+      "armsState": null,
+      "geometries": 46,
+      "textures": 75,
+      "drawCalls": 50,
+      "armsDrawCalls": 0,
+      "triangles": 83900,
+      "cacheEntries": 10
+    },
+    "errors": []
+  },
+  "fallback2D": {
+    "perf": {
+      "frames": 31,
+      "renderMs": 0.3,
+      "drawn": 5,
+      "culled": 0,
+      "dpr": 1,
+      "adaptive": false,
+      "artReady": false,
+      "propsReady": false,
+      "backend": "canvas",
+      "cacheEntries": 17
+    },
+    "snap": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 59.4,
+      "y": 30,
+      "facing": 0
+    },
+    "errors": []
+  },
+  "errors": []
+}

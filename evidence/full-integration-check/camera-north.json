@@ -1,0 +1,40 @@
+{
+  "sceneId": "chapter-3/scene-zunyi",
+  "anchor": {
+    "anchorId": "chapter-3/anchor-dialogue-03-03-he_wen",
+    "x": 85,
+    "y": 44,
+    "label": "情报互相矛盾 · 指导员何文"
+  },
+  "snapshot": {
+    "chapterId": 3,
+    "sceneId": "chapter-3/scene-zunyi",
+    "x": 84,
+    "y": 40,
+    "facing": -1.571
+  },
+  "performance": {
+    "frames": 433,
+    "renderMs": 2.8,
+    "dpr": 1,
+    "adaptive": false,
+    "backend": "three",
+    "propsReady": true,
+    "unsupportedProps": [],
+    "environment": "town",
+    "landform": "柏辉章公馆与子尹路",
+    "terrainVertices": 1189,
+    "terrainMin": 1,
+    "terrainMax": 1,
+    "orbitYaw": -1.571,
+    "cameraPitch": 0.22,
+    "cameraBoom": 4.2,
+    "cameraDistance": 4.2,
+    "cameraOccluded": false,
+    "drawCalls": 91,
+    "triangles": 93689,
+    "cacheEntries": 10
+  },
+  "errors": [],
+  "httpErrors": []
+}

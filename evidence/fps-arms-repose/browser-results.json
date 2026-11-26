@@ -1,0 +1,116 @@
+{
+  "testDate": "2026-11-24T10:24:46.241Z",
+  "port": 8082,
+  "desktop": {
+    "slowWalkPass": true,
+    "reverseWalkPass": true,
+    "sprintAndReturnPass": true,
+    "hudDrift": 0,
+    "benchmarks": [
+      {
+        "viewpoint": {
+          "x": 83,
+          "y": 47,
+          "facing": "n"
+        },
+        "fps": 161,
+        "draws": 70,
+        "triangles": 92868,
+        "armsDraws": 2
+      },
+      {
+        "viewpoint": {
+          "x": 91,
+          "y": 47,
+          "facing": "w"
+        },
+        "fps": 164.6,
+        "draws": 80,
+        "triangles": 96110,
+        "armsDraws": 2
+      },
+      {
+        "viewpoint": {
+          "x": 57,
+          "y": 43,
+          "facing": "n"
+        },
+        "fps": 165.4,
+        "draws": 42,
+        "triangles": 64464,
+        "armsDraws": 2
+      },
+      {
+        "viewpoint": {
+          "x": 81,
+          "y": 37.5,
+          "facing": "n"
+        },
+        "fps": 165.3,
+        "draws": 22,
+        "triangles": 57672,
+        "armsDraws": 2
+      },
+      {
+        "viewpoint": {
+          "x": 102.69,
+          "y": 44,
+          "facing": "e"
+        },
+        "fps": 165.4,
+        "draws": 19,
+        "triangles": 53856,
+        "armsDraws": 2
+      }
+    ]
+  },
+  "portrait": {
+    "mobileStickClear": true
+  },
+  "transitionTest": {
+    "toastText": "二楼会议室模型烘焙中（待合并 assets/scenes/zunyi-realscan/zunyi-meeting-room-web.glb），已安全留于前院",
+    "fiveCyclesPass": true
+  },
+  "relicsTest": {
+    "detected": [
+      {
+        "relic": "Prop_MeetingTable",
+        "target": "板栗色长桌与二十人座次复原"
+      },
+      {
+        "relic": "Prop_CharcoalBrazier",
+        "target": "长桌下取暖炭火盆"
+      },
+      {
+        "relic": "Prop_HangingLamp",
+        "target": "荷叶边盖洋吊灯"
+      },
+      {
+        "relic": "Prop_WallClock",
+        "target": "东壁自鸣木壳机械摆钟"
+      },
+      {
+        "relic": "Prop_WardrobeMirror",
+        "target": "穿衣镜壁柜与西壁彩玻窗"
+      }
+    ],
+    "cardDetails": {
+      "visible": true,
+      "title": "板栗色长桌与二十人座次复原",
+      "hasDate": true
+    }
+  },
+  "canvasFallback": {
+    "backend": "canvas",
+    "mode": null,
+    "viewmodelRequests": 0
+  },
+  "walkableVerification": {
+    "all12ChaptersWalkable": true,
+    "totalAnchors": 294,
+    "chapter3Anchors": "23/23 reachable",
+    "summary": "12 scenes verified"
+  },
+  "errors": [],
+  "pass": true
+}

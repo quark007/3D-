@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "scope": "第1–5章，桌面1280×800与移动390×844；共享道路顶点与水面材质，视觉等价",
+  "geometry": {
+    "desktopMobilePairs": 10,
+    "terrainHashEqual": true,
+    "roadExpandedTriangleHashEqual": true,
+    "waterGeometryAndParametersEqual": true,
+    "roadUnusedVerticesAfter": 0,
+    "roadTrianglesBeforeAndAfter": 21142
+  },
+  "roadVertices": {
+    "before": 631433,
+    "after": 12322,
+    "saved": 619111,
+    "reductionPercent": 98.05,
+    "estimatedAttributeBytesPerVertex": 40,
+    "estimatedSingleChapterSavingsMiB": { "min": 0.17, "max": 6.88, "note": "position+normal+uv+uv1 的理论属性数组估算，不是显存实测，也不是五章同时常驻" }
+  },
+  "waterPerFiveChapterRun": {
+    "meshesBeforeAndAfter": 14,
+    "materialsBefore": 14,
+    "materialsAfter": 5,
+    "flowUniformsBefore": 14,
+    "flowUniformsAfter": 5
+  },
+  "performance": {
+    "conclusion": "inconclusive-resource-improvement-only",
+    "sampleFramesPerChapterDevice": 45,
+    "note": "两轮A/B有正有负，不宣称稳定帧提速；原始median/p95/mean见四份JSON。"
+  },
+  "chapter2Regression": { "distance": 9.57, "frames": 65, "passed": true },
+  "errors": [],
+  "failedRequests": []
+}

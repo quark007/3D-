@@ -1,0 +1,2988 @@
+{
+  "phase": "after-repeat",
+  "generatedAt": "2026-11-24T08:50:54.414Z",
+  "sampleFrames": 45,
+  "visualApproval": false,
+  "rendererRevision": null,
+  "renderer": "Chrome WebGL; mobile viewport emulation is not phone hardware acceptance",
+  "scripts": [
+    {
+      "file": "changzheng/march-world/engine/renderer3d.js",
+      "sha256": "df8978093ec50070e2c2b752a5cda9fd7df748627dfc7d243d1409888d6751bb"
+    },
+    {
+      "file": "changzheng/march-world/scenes/visual3d.js",
+      "sha256": "869becd22d9ee9a25d5f4700f28b59a7a5642f4270b18e23d098b0e21fb43c57"
+    },
+    {
+      "file": "changzheng/march-world/engine/actors3d.js",
+      "sha256": "f8b08d66f3dfa2057679e7a56c0ceae695a09c6a12e8764f446db8f7099c7754"
+    }
+  ],
+  "chapters": [
+    {
+      "chapterId": 1,
+      "device": "desktop",
+      "sceneId": "chapter-1/scene-ruijin",
+      "terrain": {
+        "vertices": 42840,
+        "geometry": {
+          "hash": "d812d72b",
+          "vertices": 42840,
+          "indices": 254508,
+          "triangles": 84836,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "3cccd3a9"
+      },
+      "environment": {
+        "terrain": "village",
+        "groundTint": "#d8ded0",
+        "rockTint": "#979789",
+        "mountainTint": "#707d70",
+        "relief": 18,
+        "vegetation": true,
+        "fogNear": 70,
+        "fogFar": 245
+      },
+      "staging": {
+        "name": "于都河阶·蓝调夜渡",
+        "sky": "#34465e",
+        "fog": "#7a8997",
+        "fill": "#b3c5e1",
+        "key": "#bdcfee",
+        "power": 1.6,
+        "ambient": 1.3,
+        "exposure": 1.25,
+        "offset": [
+          6,
+          4.1,
+          9
+        ],
+        "sun": [
+          -24,
+          32,
+          -18
+        ],
+        "shots": [
+          [
+            118,
+            111,
+            18,
+            94,
+            92,
+            1
+          ],
+          [
+            75,
+            78,
+            11,
+            52,
+            54,
+            2
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "d21c232e",
+          "vertices": 2211,
+          "indices": 11826,
+          "triangles": 3942,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "5516d2e6",
+          "vertices": 628,
+          "indices": 3177,
+          "triangles": 1059,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "4d7cfbf1",
+          "vertices": 488,
+          "indices": 2502,
+          "triangles": 834,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "d43e1476",
+          "vertices": 284,
+          "indices": 1386,
+          "triangles": 462,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "f2e90ead",
+            "vertices": 7,
+            "indices": 15,
+            "triangles": 5,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "62807a",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "853fde65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "62807a",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "fdce5f15",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "62807a",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 52,
+        "renderMs": 6.3,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "village",
+        "landform": "于都河阶·蓝调夜渡",
+        "terrainVertices": 42840,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 6.09227180480957,
+        "cameraMode": "first",
+        "baseHeading": 0.588,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 98,
+        "triangles": 391073,
+        "cacheEntries": 12
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 6.2,
+        "p95": 7.3,
+        "mean": 6.129
+      }
+    },
+    {
+      "chapterId": 2,
+      "device": "desktop",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "terrain": {
+        "vertices": 36708,
+        "geometry": {
+          "hash": "80f098e8",
+          "vertices": 36708,
+          "indices": 217920,
+          "triangles": 72640,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "08000015"
+      },
+      "environment": {
+        "terrain": "river",
+        "groundTint": "#c8c3a4",
+        "rockTint": "#76736a",
+        "mountainTint": "#69766e",
+        "relief": 25,
+        "vegetation": true,
+        "fogNear": 75,
+        "fogFar": 260
+      },
+      "staging": {
+        "name": "湘江坡地·转运清点",
+        "sky": "#86969f",
+        "fog": "#b4bdba",
+        "fill": "#cfdae2",
+        "key": "#dce0d5",
+        "power": 2.1,
+        "ambient": 1.4,
+        "exposure": 1.12,
+        "offset": [
+          -6,
+          4.4,
+          9
+        ],
+        "sun": [
+          -32,
+          36,
+          16
+        ],
+        "shots": [
+          [
+            35,
+            18,
+            22,
+            85,
+            77,
+            0
+          ],
+          [
+            107,
+            70,
+            14,
+            110,
+            47,
+            1
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "4236a7fe",
+          "vertices": 709,
+          "indices": 3582,
+          "triangles": 1194,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "19923e5b",
+          "vertices": 1558,
+          "indices": 8199,
+          "triangles": 2733,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "a06a0065",
+          "vertices": 283,
+          "indices": 1440,
+          "triangles": 480,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "59c0d131",
+          "vertices": 526,
+          "indices": 2637,
+          "triangles": 879,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "06417273",
+          "vertices": 183,
+          "indices": 912,
+          "triangles": 304,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "b7189e35",
+            "vertices": 8,
+            "indices": 18,
+            "triangles": 6,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5b7a70",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "bd290ead",
+            "vertices": 7,
+            "indices": 15,
+            "triangles": 5,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5b7a70",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "dcb23bd8",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5b7a70",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 52,
+        "renderMs": 4.3,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "river",
+        "landform": "湘江坡地·转运清点",
+        "terrainVertices": 36708,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 12.132535934448242,
+        "cameraMode": "first",
+        "baseHeading": -0.588,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 50,
+        "triangles": 353493,
+        "cacheEntries": 16
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 6,
+        "p95": 8.2,
+        "mean": 6.164
+      }
+    },
+    {
+      "chapterId": 3,
+      "device": "desktop",
+      "sceneId": "chapter-3/scene-zunyi",
+      "terrain": {
+        "vertices": 1189,
+        "geometry": {
+          "hash": "5ac66542",
+          "vertices": 1189,
+          "indices": 6720,
+          "triangles": 2240,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "d7a49324"
+      },
+      "environment": {
+        "terrain": "town",
+        "groundTint": "#d1c5ad",
+        "rockTint": "#aaa293",
+        "mountainTint": "#6b776e",
+        "relief": 22,
+        "vegetation": true,
+        "fogNear": 70,
+        "fogFar": 245
+      },
+      "staging": {
+        "name": "遵义坡街·层院木廊",
+        "sky": "#9faeb0",
+        "fog": "#c1c9c3",
+        "fill": "#d4dfe0",
+        "key": "#f4e9d0",
+        "power": 2.2,
+        "ambient": 1.3,
+        "exposure": 1.12,
+        "offset": [
+          7,
+          4.1,
+          8
+        ],
+        "sun": [
+          -28,
+          42,
+          18
+        ],
+        "shots": [
+          [
+            64,
+            76,
+            19,
+            85,
+            42,
+            3
+          ],
+          [
+            110,
+            62,
+            12,
+            85,
+            42,
+            3
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "703fdb9f",
+          "vertices": 149,
+          "indices": 642,
+          "triangles": 214,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "f767c7f3",
+          "vertices": 23,
+          "indices": 84,
+          "triangles": 28,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "853706ac",
+          "vertices": 18,
+          "indices": 63,
+          "triangles": 21,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "8e012127",
+          "vertices": 16,
+          "indices": 54,
+          "triangles": 18,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "cad7de65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5d7a72",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 50,
+        "renderMs": 3.2,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "town",
+        "stoneNoTile": true,
+        "noTile": [
+          "stone",
+          "plaster",
+          "roof",
+          "wood",
+          "brick",
+          "wood",
+          "stone"
+        ],
+        "streetShadows": false,
+        "streetLife": {
+          "stalls": 12,
+          "signs": 16,
+          "triangles": 16582
+        },
+        "landform": "遵义坡街·层院木廊",
+        "terrainVertices": 1189,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 1,
+        "cameraMode": "first",
+        "baseHeading": 0.719,
+        "streetCamera": true,
+        "viewMode": "first",
+        "zunyiInterior": {
+          "walls": 10,
+          "floor": 3.08,
+          "room": {
+            "x": 2.8499999999999996,
+            "z": 0.6099999999999999,
+            "w": 5.4,
+            "d": 4.880000000000001,
+            "y": 3.17
+          }
+        },
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 35,
+        "triangles": 129932,
+        "cacheEntries": 19
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 3.6,
+        "p95": 4.4,
+        "mean": 3.684
+      }
+    },
+    {
+      "chapterId": 4,
+      "device": "desktop",
+      "sceneId": "chapter-4/scene-chishui",
+      "terrain": {
+        "vertices": 39928,
+        "geometry": {
+          "hash": "e2d1dfc8",
+          "vertices": 39928,
+          "indices": 237120,
+          "triangles": 79040,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "ae019b1b"
+      },
+      "environment": {
+        "terrain": "redrock",
+        "groundTint": "#c59478",
+        "rockTint": "#8a6f5c",
+        "mountainTint": "#7a7264",
+        "relief": 42,
+        "vegetation": true,
+        "fogNear": 85,
+        "fogFar": 280
+      },
+      "staging": {
+        "name": "赤水曲谷·双渡机动",
+        "sky": "#a2b3b6",
+        "fog": "#c5c8b6",
+        "fill": "#c7d9db",
+        "key": "#f9d7ab",
+        "power": 2.7,
+        "ambient": 1.25,
+        "exposure": 1.13,
+        "offset": [
+          -6,
+          4.8,
+          9
+        ],
+        "sun": [
+          -32,
+          40,
+          -18
+        ],
+        "shots": [
+          [
+            19,
+            75,
+            26,
+            55,
+            55,
+            1
+          ],
+          [
+            152,
+            112,
+            23,
+            135,
+            86,
+            1
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "f8d6bd67",
+          "vertices": 1008,
+          "indices": 5163,
+          "triangles": 1721,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "814021ae",
+          "vertices": 1319,
+          "indices": 6906,
+          "triangles": 2302,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "8c47392b",
+          "vertices": 504,
+          "indices": 2520,
+          "triangles": 840,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "1036510c",
+          "vertices": 207,
+          "indices": 975,
+          "triangles": 325,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "eddfde65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "af57de65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "4623db5d",
+            "vertices": 5,
+            "indices": 9,
+            "triangles": 3,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "f26583bd",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "e7f85f15",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 51,
+        "renderMs": 8.4,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "redrock",
+        "landform": "赤水曲谷·双渡机动",
+        "terrainVertices": 39928,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 14.300922393798828,
+        "cameraMode": "first",
+        "baseHeading": -0.588,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 79,
+        "triangles": 403705,
+        "cacheEntries": 23
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 8.6,
+        "p95": 10,
+        "mean": 8.482
+      }
+    },
+    {
+      "chapterId": 5,
+      "device": "desktop",
+      "sceneId": "chapter-5/scene-jinsha",
+      "terrain": {
+        "vertices": 37355,
+        "geometry": {
+          "hash": "122a80d8",
+          "vertices": 37355,
+          "indices": 221760,
+          "triangles": 73920,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "90d7f3d0"
+      },
+      "environment": {
+        "terrain": "dryvalley",
+        "groundTint": "#d3b981",
+        "rockTint": "#8f7a62",
+        "mountainTint": "#827662",
+        "relief": 50,
+        "vegetation": false,
+        "fogNear": 95,
+        "fogFar": 300
+      },
+      "staging": {
+        "name": "皎平渡·干热阶崖",
+        "sky": "#b8c0be",
+        "fog": "#d4c7aa",
+        "fill": "#d4dad6",
+        "key": "#ffe3b4",
+        "power": 3.3,
+        "ambient": 1.1,
+        "exposure": 1.08,
+        "offset": [
+          7,
+          4.4,
+          8
+        ],
+        "sun": [
+          -22,
+          53,
+          12
+        ],
+        "shots": [
+          [
+            52,
+            41,
+            26,
+            100,
+            84,
+            0
+          ],
+          [
+            162,
+            55,
+            15,
+            144,
+            32,
+            3
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "63d1813f",
+          "vertices": 1158,
+          "indices": 5952,
+          "triangles": 1984,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "2db520f0",
+          "vertices": 774,
+          "indices": 4071,
+          "triangles": 1357,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "b3ef5a45",
+          "vertices": 276,
+          "indices": 1335,
+          "triangles": 445,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "34fddb5d",
+            "vertices": 5,
+            "indices": 9,
+            "triangles": 3,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "7a7248",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "800fdb5d",
+            "vertices": 5,
+            "indices": 9,
+            "triangles": 3,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "7a7248",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 50,
+        "renderMs": 4.2,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "dryvalley",
+        "landform": "皎平渡·干热阶崖",
+        "terrainVertices": 37355,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 18.805604934692383,
+        "cameraMode": "first",
+        "baseHeading": 0.719,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 37,
+        "triangles": 291910,
+        "cacheEntries": 26
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 3.6,
+        "p95": 4.3,
+        "mean": 3.587
+      }
+    },
+    {
+      "chapterId": 1,
+      "device": "mobile",
+      "sceneId": "chapter-1/scene-ruijin",
+      "terrain": {
+        "vertices": 42840,
+        "geometry": {
+          "hash": "d812d72b",
+          "vertices": 42840,
+          "indices": 254508,
+          "triangles": 84836,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "3cccd3a9"
+      },
+      "environment": {
+        "terrain": "village",
+        "groundTint": "#d8ded0",
+        "rockTint": "#979789",
+        "mountainTint": "#707d70",
+        "relief": 18,
+        "vegetation": true,
+        "fogNear": 70,
+        "fogFar": 245
+      },
+      "staging": {
+        "name": "于都河阶·蓝调夜渡",
+        "sky": "#34465e",
+        "fog": "#7a8997",
+        "fill": "#b3c5e1",
+        "key": "#bdcfee",
+        "power": 1.6,
+        "ambient": 1.3,
+        "exposure": 1.25,
+        "offset": [
+          6,
+          4.1,
+          9
+        ],
+        "sun": [
+          -24,
+          32,
+          -18
+        ],
+        "shots": [
+          [
+            118,
+            111,
+            18,
+            94,
+            92,
+            1
+          ],
+          [
+            75,
+            78,
+            11,
+            52,
+            54,
+            2
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "d21c232e",
+          "vertices": 2211,
+          "indices": 11826,
+          "triangles": 3942,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "5516d2e6",
+          "vertices": 628,
+          "indices": 3177,
+          "triangles": 1059,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "4d7cfbf1",
+          "vertices": 488,
+          "indices": 2502,
+          "triangles": 834,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "d43e1476",
+          "vertices": 284,
+          "indices": 1386,
+          "triangles": 462,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "f2e90ead",
+            "vertices": 7,
+            "indices": 15,
+            "triangles": 5,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "62807a",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "853fde65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "62807a",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "fdce5f15",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "62807a",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 50,
+        "renderMs": 3.6,
+        "dpr": 1.15,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "village",
+        "landform": "于都河阶·蓝调夜渡",
+        "terrainVertices": 42840,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 6.09227180480957,
+        "cameraMode": "first",
+        "baseHeading": 0.588,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 89,
+        "triangles": 375545,
+        "cacheEntries": 12
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 4.8,
+        "p95": 6.4,
+        "mean": 4.989
+      }
+    },
+    {
+      "chapterId": 2,
+      "device": "mobile",
+      "sceneId": "chapter-2/scene-xiangjiang",
+      "terrain": {
+        "vertices": 36708,
+        "geometry": {
+          "hash": "80f098e8",
+          "vertices": 36708,
+          "indices": 217920,
+          "triangles": 72640,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "08000015"
+      },
+      "environment": {
+        "terrain": "river",
+        "groundTint": "#c8c3a4",
+        "rockTint": "#76736a",
+        "mountainTint": "#69766e",
+        "relief": 25,
+        "vegetation": true,
+        "fogNear": 75,
+        "fogFar": 260
+      },
+      "staging": {
+        "name": "湘江坡地·转运清点",
+        "sky": "#86969f",
+        "fog": "#b4bdba",
+        "fill": "#cfdae2",
+        "key": "#dce0d5",
+        "power": 2.1,
+        "ambient": 1.4,
+        "exposure": 1.12,
+        "offset": [
+          -6,
+          4.4,
+          9
+        ],
+        "sun": [
+          -32,
+          36,
+          16
+        ],
+        "shots": [
+          [
+            35,
+            18,
+            22,
+            85,
+            77,
+            0
+          ],
+          [
+            107,
+            70,
+            14,
+            110,
+            47,
+            1
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "4236a7fe",
+          "vertices": 709,
+          "indices": 3582,
+          "triangles": 1194,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "19923e5b",
+          "vertices": 1558,
+          "indices": 8199,
+          "triangles": 2733,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "a06a0065",
+          "vertices": 283,
+          "indices": 1440,
+          "triangles": 480,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "59c0d131",
+          "vertices": 526,
+          "indices": 2637,
+          "triangles": 879,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "06417273",
+          "vertices": 183,
+          "indices": 912,
+          "triangles": 304,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "b7189e35",
+            "vertices": 8,
+            "indices": 18,
+            "triangles": 6,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5b7a70",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "bd290ead",
+            "vertices": 7,
+            "indices": 15,
+            "triangles": 5,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5b7a70",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "dcb23bd8",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5b7a70",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 50,
+        "renderMs": 2.7,
+        "dpr": 1.15,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "river",
+        "landform": "湘江坡地·转运清点",
+        "terrainVertices": 36708,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 12.132535934448242,
+        "cameraMode": "first",
+        "baseHeading": -0.588,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 39,
+        "triangles": 317087,
+        "cacheEntries": 16
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 5.1,
+        "p95": 6.1,
+        "mean": 4.909
+      }
+    },
+    {
+      "chapterId": 3,
+      "device": "mobile",
+      "sceneId": "chapter-3/scene-zunyi",
+      "terrain": {
+        "vertices": 1189,
+        "geometry": {
+          "hash": "5ac66542",
+          "vertices": 1189,
+          "indices": 6720,
+          "triangles": 2240,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "d7a49324"
+      },
+      "environment": {
+        "terrain": "town",
+        "groundTint": "#d1c5ad",
+        "rockTint": "#aaa293",
+        "mountainTint": "#6b776e",
+        "relief": 22,
+        "vegetation": true,
+        "fogNear": 70,
+        "fogFar": 245
+      },
+      "staging": {
+        "name": "遵义坡街·层院木廊",
+        "sky": "#9faeb0",
+        "fog": "#c1c9c3",
+        "fill": "#d4dfe0",
+        "key": "#f4e9d0",
+        "power": 2.2,
+        "ambient": 1.3,
+        "exposure": 1.12,
+        "offset": [
+          7,
+          4.1,
+          8
+        ],
+        "sun": [
+          -28,
+          42,
+          18
+        ],
+        "shots": [
+          [
+            64,
+            76,
+            19,
+            85,
+            42,
+            3
+          ],
+          [
+            110,
+            62,
+            12,
+            85,
+            42,
+            3
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "703fdb9f",
+          "vertices": 149,
+          "indices": 642,
+          "triangles": 214,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "f767c7f3",
+          "vertices": 23,
+          "indices": 84,
+          "triangles": 28,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "853706ac",
+          "vertices": 18,
+          "indices": 63,
+          "triangles": 21,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "8e012127",
+          "vertices": 16,
+          "indices": 54,
+          "triangles": 18,
+          "unusedVertices": 0,
+          "attributes": [
+            "color",
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "cad7de65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5d7a72",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 51,
+        "renderMs": 4.7,
+        "dpr": 1.15,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "town",
+        "stoneNoTile": true,
+        "noTile": [
+          "stone",
+          "plaster",
+          "roof",
+          "wood",
+          "brick",
+          "wood",
+          "stone"
+        ],
+        "streetShadows": false,
+        "streetLife": {
+          "stalls": 12,
+          "signs": 16,
+          "triangles": 16582
+        },
+        "landform": "遵义坡街·层院木廊",
+        "terrainVertices": 1189,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 1,
+        "cameraMode": "first",
+        "baseHeading": 0.719,
+        "streetCamera": true,
+        "viewMode": "first",
+        "zunyiInterior": {
+          "walls": 10,
+          "floor": 3.08,
+          "room": {
+            "x": 2.8499999999999996,
+            "z": 0.6099999999999999,
+            "w": 5.4,
+            "d": 4.880000000000001,
+            "y": 3.17
+          }
+        },
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 27,
+        "triangles": 121198,
+        "cacheEntries": 19
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 3.5,
+        "p95": 4.7,
+        "mean": 3.573
+      }
+    },
+    {
+      "chapterId": 4,
+      "device": "mobile",
+      "sceneId": "chapter-4/scene-chishui",
+      "terrain": {
+        "vertices": 39928,
+        "geometry": {
+          "hash": "e2d1dfc8",
+          "vertices": 39928,
+          "indices": 237120,
+          "triangles": 79040,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "ae019b1b"
+      },
+      "environment": {
+        "terrain": "redrock",
+        "groundTint": "#c59478",
+        "rockTint": "#8a6f5c",
+        "mountainTint": "#7a7264",
+        "relief": 42,
+        "vegetation": true,
+        "fogNear": 85,
+        "fogFar": 280
+      },
+      "staging": {
+        "name": "赤水曲谷·双渡机动",
+        "sky": "#a2b3b6",
+        "fog": "#c5c8b6",
+        "fill": "#c7d9db",
+        "key": "#f9d7ab",
+        "power": 2.7,
+        "ambient": 1.25,
+        "exposure": 1.13,
+        "offset": [
+          -6,
+          4.8,
+          9
+        ],
+        "sun": [
+          -32,
+          40,
+          -18
+        ],
+        "shots": [
+          [
+            19,
+            75,
+            26,
+            55,
+            55,
+            1
+          ],
+          [
+            152,
+            112,
+            23,
+            135,
+            86,
+            1
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "f8d6bd67",
+          "vertices": 1008,
+          "indices": 5163,
+          "triangles": 1721,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "814021ae",
+          "vertices": 1319,
+          "indices": 6906,
+          "triangles": 2302,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "8c47392b",
+          "vertices": 504,
+          "indices": 2520,
+          "triangles": 840,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "1036510c",
+          "vertices": 207,
+          "indices": 975,
+          "triangles": 325,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "eddfde65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "af57de65",
+            "vertices": 6,
+            "indices": 12,
+            "triangles": 4,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "4623db5d",
+            "vertices": 5,
+            "indices": 9,
+            "triangles": 3,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "f26583bd",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "e7f85f15",
+            "vertices": 4,
+            "indices": 6,
+            "triangles": 2,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "5e7d6e",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 50,
+        "renderMs": 5.1,
+        "dpr": 1.15,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "redrock",
+        "landform": "赤水曲谷·双渡机动",
+        "terrainVertices": 39928,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 14.300922393798828,
+        "cameraMode": "first",
+        "baseHeading": -0.588,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 52,
+        "triangles": 322379,
+        "cacheEntries": 23
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 5.8,
+        "p95": 7.3,
+        "mean": 5.789
+      }
+    },
+    {
+      "chapterId": 5,
+      "device": "mobile",
+      "sceneId": "chapter-5/scene-jinsha",
+      "terrain": {
+        "vertices": 37355,
+        "geometry": {
+          "hash": "122a80d8",
+          "vertices": 37355,
+          "indices": 221760,
+          "triangles": 73920,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv"
+          ]
+        },
+        "heightsHash": "90d7f3d0"
+      },
+      "environment": {
+        "terrain": "dryvalley",
+        "groundTint": "#d3b981",
+        "rockTint": "#8f7a62",
+        "mountainTint": "#827662",
+        "relief": 50,
+        "vegetation": false,
+        "fogNear": 95,
+        "fogFar": 300
+      },
+      "staging": {
+        "name": "皎平渡·干热阶崖",
+        "sky": "#b8c0be",
+        "fog": "#d4c7aa",
+        "fill": "#d4dad6",
+        "key": "#ffe3b4",
+        "power": 3.3,
+        "ambient": 1.1,
+        "exposure": 1.08,
+        "offset": [
+          7,
+          4.4,
+          8
+        ],
+        "sun": [
+          -22,
+          53,
+          12
+        ],
+        "shots": [
+          [
+            52,
+            41,
+            26,
+            100,
+            84,
+            0
+          ],
+          [
+            162,
+            55,
+            15,
+            144,
+            32,
+            3
+          ]
+        ]
+      },
+      "roads": [
+        {
+          "hash": "63d1813f",
+          "vertices": 1158,
+          "indices": 5952,
+          "triangles": 1984,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "2db520f0",
+          "vertices": 774,
+          "indices": 4071,
+          "triangles": 1357,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        },
+        {
+          "hash": "b3ef5a45",
+          "vertices": 276,
+          "indices": 1335,
+          "triangles": 445,
+          "unusedVertices": 0,
+          "attributes": [
+            "normal",
+            "position",
+            "uv",
+            "uv1"
+          ],
+          "material": {
+            "color": "c1b49a",
+            "roughness": 1,
+            "metalness": 0,
+            "opacity": 1,
+            "transparent": true,
+            "side": 2
+          }
+        }
+      ],
+      "waters": [
+        {
+          "geometry": {
+            "hash": "34fddb5d",
+            "vertices": 5,
+            "indices": 9,
+            "triangles": 3,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "7a7248",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        },
+        {
+          "geometry": {
+            "hash": "800fdb5d",
+            "vertices": 5,
+            "indices": 9,
+            "triangles": 3,
+            "unusedVertices": 0,
+            "attributes": [
+              "normal",
+              "position"
+            ]
+          },
+          "materialId": 1,
+          "flowId": 1,
+          "parameters": {
+            "color": "7a7248",
+            "roughness": 0.2,
+            "metalness": 0.05,
+            "clearcoat": 0.8,
+            "clearcoatRoughness": 0.16,
+            "transparent": true,
+            "opacity": 0.92,
+            "side": 2
+          }
+        }
+      ],
+      "waterMaterialCount": 1,
+      "waterFlowCount": 1,
+      "stats": {
+        "frames": 50,
+        "renderMs": 4.3,
+        "dpr": 1.15,
+        "adaptive": false,
+        "backend": "three",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "dryvalley",
+        "landform": "皎平渡·干热阶崖",
+        "terrainVertices": 37355,
+        "terrainMin": -2.4000000953674316,
+        "terrainMax": 18.805604934692383,
+        "cameraMode": "first",
+        "baseHeading": 0.719,
+        "viewMode": "first",
+        "cameraDistance": 0,
+        "cameraOccluded": false,
+        "orbitYaw": 0,
+        "orbitPitch": 0.03,
+        "cameraSpeed": 0,
+        "cameraSpeedScale": 1,
+        "drawCalls": 37,
+        "triangles": 291910,
+        "cacheEntries": 26
+      },
+      "noOverflow": true,
+      "renderMs": {
+        "count": 45,
+        "median": 4.1,
+        "p95": 5.3,
+        "mean": 3.98
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    "THREE.WebGLProgram: Program Info Log: (210,91-147): warning X4122: sum of 0.996094 and -2.98545e-017 cannot be represented accurately in double precision\n(209,41-69): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(210,92-120): warning X4122: sum of 1 and -1.49272e-017 cannot be represented accurately in double precision\n(209,41-69): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision\n(210,92-120): warning X4122: sum of 1 and -1.66644e-018 cannot be represented accurately in double precision"
+  ],
+  "failedRequests": [],
+  "passed": true,
+  "comparisons": [
+    {
+      "chapterId": 1,
+      "device": "desktop",
+      "geometryEqual": true,
+      "roadVerticesBefore": 171360,
+      "roadVerticesAfter": 3611,
+      "roadVerticesSaved": 167749,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 3,
+      "waterMeshesAfter": 3,
+      "waterMaterialsBefore": 3,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 3,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 6.3,
+        "p95": 8.1,
+        "mean": 6.418
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 6.2,
+        "p95": 7.3,
+        "mean": 6.129
+      }
+    },
+    {
+      "chapterId": 2,
+      "device": "desktop",
+      "geometryEqual": true,
+      "roadVerticesBefore": 183540,
+      "roadVerticesAfter": 3259,
+      "roadVerticesSaved": 180281,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 3,
+      "waterMeshesAfter": 3,
+      "waterMaterialsBefore": 3,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 3,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 7.2,
+        "p95": 8.5,
+        "mean": 7.016
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 6,
+        "p95": 8.2,
+        "mean": 6.164
+      }
+    },
+    {
+      "chapterId": 3,
+      "device": "desktop",
+      "geometryEqual": true,
+      "roadVerticesBefore": 4756,
+      "roadVerticesAfter": 206,
+      "roadVerticesSaved": 4550,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 1,
+      "waterMeshesAfter": 1,
+      "waterMaterialsBefore": 1,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 1,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 3.8,
+        "p95": 5.1,
+        "mean": 4.018
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 3.6,
+        "p95": 4.4,
+        "mean": 3.684
+      }
+    },
+    {
+      "chapterId": 4,
+      "device": "desktop",
+      "geometryEqual": true,
+      "roadVerticesBefore": 159712,
+      "roadVerticesAfter": 3038,
+      "roadVerticesSaved": 156674,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 5,
+      "waterMeshesAfter": 5,
+      "waterMaterialsBefore": 5,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 5,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 8.5,
+        "p95": 10,
+        "mean": 8.211
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 8.6,
+        "p95": 10,
+        "mean": 8.482
+      }
+    },
+    {
+      "chapterId": 5,
+      "device": "desktop",
+      "geometryEqual": true,
+      "roadVerticesBefore": 112065,
+      "roadVerticesAfter": 2208,
+      "roadVerticesSaved": 109857,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 2,
+      "waterMeshesAfter": 2,
+      "waterMaterialsBefore": 2,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 2,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 4.2,
+        "p95": 5.3,
+        "mean": 4.229
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 3.6,
+        "p95": 4.3,
+        "mean": 3.587
+      }
+    },
+    {
+      "chapterId": 1,
+      "device": "mobile",
+      "geometryEqual": true,
+      "roadVerticesBefore": 171360,
+      "roadVerticesAfter": 3611,
+      "roadVerticesSaved": 167749,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 3,
+      "waterMeshesAfter": 3,
+      "waterMaterialsBefore": 3,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 3,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 5.3,
+        "p95": 6.8,
+        "mean": 5.413
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 4.8,
+        "p95": 6.4,
+        "mean": 4.989
+      }
+    },
+    {
+      "chapterId": 2,
+      "device": "mobile",
+      "geometryEqual": true,
+      "roadVerticesBefore": 183540,
+      "roadVerticesAfter": 3259,
+      "roadVerticesSaved": 180281,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 3,
+      "waterMeshesAfter": 3,
+      "waterMaterialsBefore": 3,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 3,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 5,
+        "p95": 6.8,
+        "mean": 4.891
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 5.1,
+        "p95": 6.1,
+        "mean": 4.909
+      }
+    },
+    {
+      "chapterId": 3,
+      "device": "mobile",
+      "geometryEqual": true,
+      "roadVerticesBefore": 4756,
+      "roadVerticesAfter": 206,
+      "roadVerticesSaved": 4550,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 1,
+      "waterMeshesAfter": 1,
+      "waterMaterialsBefore": 1,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 1,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 3.8,
+        "p95": 4.6,
+        "mean": 3.767
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 3.5,
+        "p95": 4.7,
+        "mean": 3.573
+      }
+    },
+    {
+      "chapterId": 4,
+      "device": "mobile",
+      "geometryEqual": true,
+      "roadVerticesBefore": 159712,
+      "roadVerticesAfter": 3038,
+      "roadVerticesSaved": 156674,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 5,
+      "waterMeshesAfter": 5,
+      "waterMaterialsBefore": 5,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 5,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 4.3,
+        "p95": 6.3,
+        "mean": 4.464
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 5.8,
+        "p95": 7.3,
+        "mean": 5.789
+      }
+    },
+    {
+      "chapterId": 5,
+      "device": "mobile",
+      "geometryEqual": true,
+      "roadVerticesBefore": 112065,
+      "roadVerticesAfter": 2208,
+      "roadVerticesSaved": 109857,
+      "unusedAfter": 0,
+      "waterMeshesBefore": 2,
+      "waterMeshesAfter": 2,
+      "waterMaterialsBefore": 2,
+      "waterMaterialsAfter": 1,
+      "waterFlowsBefore": 2,
+      "waterFlowsAfter": 1,
+      "renderMsBefore": {
+        "count": 45,
+        "median": 3.4,
+        "p95": 4.6,
+        "mean": 3.491
+      },
+      "renderMsAfter": {
+        "count": 45,
+        "median": 4.1,
+        "p95": 5.3,
+        "mean": 3.98
+      }
+    }
+  ]
+}

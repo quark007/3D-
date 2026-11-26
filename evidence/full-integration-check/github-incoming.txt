@@ -1,0 +1,258 @@
+commit 6840d40357af09e832783a7db1f7e194ff973594
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 21:35:43 2026 +0800
+
+    docs: 09 下一步提示词（第3章第一人称移动失效、交互回归、X4008 收尾）
+
+A	09_下一步提示词.md
+
+commit cf72851014b63f63edc0f91e80428f5474ca5b91
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 21:13:02 2026 +0800
+
+    feat(tools): 新增 GitHub API 备用推送脚本（git CONNECT 502 时使用）
+
+A	tools/github-api-push.py
+
+commit c13d7494337f8d7e2a84d1ed7d112e7e38422441
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 21:12:36 2026 +0800
+
+    docs: 08 增加本地新提交保护，避免 reset 抹掉并行工作；新增 API 推送备用脚本
+
+M	08_下一步提示词.md
+
+commit d10347bc835c85f9e5da567b96a9b5873ee2a5c5
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 20:50:46 2026 +0800
+
+    docs: 08 下一步提示词（X4008 除零、稳定性能复测、三层眼球）
+
+    注：07 之后的 4 个渲染提交因 git 端点不可达改由 API 补推，远端 SHA 已重写。
+
+A	08_下一步提示词.md
+
+commit b36132d8884fef4fef447dd05ab83038806a60fa
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 20:50:13 2026 +0800
+
+    test(render): 归档何文材质双后端证据与未达项
+
+A	changzheng/tools/verify_render_cleanup.cjs
+A	evidence/he-wen-material-2026-11-24/after-final.json
+A	evidence/he-wen-material-2026-11-24/after-materials-draft.json
+A	evidence/he-wen-material-2026-11-24/after-webgpu.json
+A	evidence/he-wen-material-2026-11-24/cleanup-mobile.json
+A	evidence/he-wen-material-2026-11-24/front-closeup.jpg
+A	evidence/he-wen-material-2026-11-24/report.md
+
+commit 121bebf1ff3413c4f2d653f1197a38dbd2c28e50
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 20:49:54 2026 +0800
+
+    fix(render): 移除失效王贵 LOD 与常驻假 artReady
+
+M	changzheng/march-world/engine/actors3d.js
+M	changzheng/march-world/engine/renderer3d.js
+
+commit 6ea8b68b76fdab367838b18444237cd21f3dbb30
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 20:49:46 2026 +0800
+
+    feat(render): 何文皮肤预积分/毛发各向异性/布料 sheen，收敛双面与混合
+
+M	changzheng/march-world/engine/character-preview.js
+
+commit 59f797da4388f689a1c43bf546077274fdf351ec
+Author: quark007 <2322079022@qq.com>
+Date:   Mon Nov 23 20:49:40 2026 +0800
+
+    test(render): 记录何文材质审计与渲染基线
+
+A	changzheng/tools/audit_he_wen_materials.mjs
+A	changzheng/tools/measure_he_wen_materials.cjs
+A	evidence/he-wen-material-2026-11-24/baseline.json
+
+commit b6b46dc1a3459c29489bae941275f2c4264fd9c2
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Mon Nov 23 15:37:10 2026 +0800
+
+    docs: 07 下一轮优化提示词（何文材质与光照，几何冻结）
+
+A	07_下一轮优化提示词.md
+
+commit d8e47891d36be4950659af2470ddf3f3c61ebbf1
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Mon Nov 23 15:24:07 2026 +0800
+
+    docs: 06 防超限作业规范 + 何文贴图缩略图与说明
+
+    - 定位反复失败根因：he-wen-skin-base.png 等 4 张 4.5–19.5MB 贴图一旦被当图片读入即触发 6MB 上限
+    - 新增 preview/ 8 张缩略图（10–220KB）与 README-textures.md
+    - 06 规范：禁附图、截图 1280x800 JPEG ≤300KB、会话 ≤45 分钟、每步提交、超限后抢救流程
+    - 05 接手指令把 06 提到第一必读
+
+M	05_CodeArts接手指令.md
+A	06_防超限作业规范.md
+A	changzheng/assets/characters/he-wen/README-textures.md
+A	changzheng/assets/characters/he-wen/preview/belt-leather-normal.jpg
+A	changzheng/assets/characters/he-wen/preview/he-wen-dark-brown-eyes.jpg
+A	changzheng/assets/characters/he-wen/preview/he-wen-short-hair.jpg
+A	changzheng/assets/characters/he-wen/preview/he-wen-skin-base.jpg
+A	changzheng/assets/characters/he-wen/preview/skin-authored-micro-normal.jpg
+A	changzheng/assets/characters/he-wen/preview/skin-authored-roughness.jpg
+A	changzheng/assets/characters/he-wen/preview/tunic-cotton-base.jpg
+A	changzheng/assets/characters/he-wen/preview/tunic-cotton-normal.jpg
+
+commit 9d00a3d335a22944ab2bd79f42a67de6f1245c65
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Mon Nov 23 15:21:42 2026 +0800
+
+    feat(locomotion): 步行/慢跑/冲刺三档、后退与自由视角
+
+    C 步行 1.5m/s、默认慢跑 4m/s、Shift 冲刺 7m/s、后退 1.6m/s；
+    player.js 增加 moving/running/walking/backing 状态与跳跃计时，
+    controls86/renderer3d 同步相机与朝向，新增 verify_player_locomotion.cjs。
+    （CodeArts 于 11-22 23:27–23:35 完成，会话因请求超限中断，未及自检提交）
+
+A	changzheng/_shots/march-locomotion-failure.png
+A	changzheng/_shots/march-locomotion-free-look.png
+A	changzheng/_shots/march-locomotion-sprint.png
+A	changzheng/_shots/player-locomotion-browser.json
+M	changzheng/march-world/engine/actors3d.js
+M	changzheng/march-world/engine/controls86.js
+M	changzheng/march-world/engine/player.js
+M	changzheng/march-world/engine/renderer3d.js
+M	changzheng/march-world/preview.html
+M	changzheng/march-world/world.js
+M	changzheng/tools/verify_march_world_3d.cjs
+A	changzheng/tools/verify_player_locomotion.cjs
+
+commit d4cade094b667c427ce2a3ab62577f4e632129aa
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Sun Nov 22 22:30:50 2026 +0800
+
+    fix(wang-gui): 闭眼分层与唇线过渡，修正眼睑穿插与上唇联动
+
+M	changzheng/assets/characters/wang-gui/wang-gui-v1.glb
+M	changzheng/assets/characters/wang-gui/wang-gui-v1.json
+M	changzheng/tools/build_wang_gui.py
+A	evidence/wang-gui-final-1122/wang-gui-final-body-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-blink-profile-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-blink-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-brow-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-jaw-profile-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-jaw-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-smile-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-front-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-profile-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-quarter-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme-A-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme-E-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme-I-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme-M-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme-O-v2.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme-U-v2.png
+
+commit 9f3d84e02a51c1cc6c1d45061ba69f4fb0c1bc6d
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Sun Nov 22 22:02:02 2026 +0800
+
+    docs: 05 新账号接手指令（可直接粘贴给 CodeArts）
+
+A	05_CodeArts接手指令.md
+
+commit b9cacf131c9e48c69108afa2119415e32e3f335b
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Sun Nov 22 21:36:51 2026 +0800
+
+    docs: 04 补新账号可直接粘贴的开场指令
+
+M	04_CodeArts移交.md
+
+commit ee766c4a0d4cd2bedf4861fc6d7cff49919849f9
+Author: quark838-debug <quark838-debug@users.noreply.github.com>
+Date:   Sun Nov 22 21:33:40 2026 +0800
+
+    feat: 保存 CodeArts 现场 —— 人物生成脚本、王贵 v1 模型与验收页、quick-patch 街市改动
+
+    - 新增 changzheng/tools/: build_he_wen.py、build_wang_gui.py、optimize_he_wen_glb.py 及三个 verify 脚本
+    - 新增王贵 wang-gui-v1.glb(10.8MB) + 元数据，wang-gui-preview 验收页与 HDRI
+    - 应用 quick-patch: 遵义街市、平民模型、王贵走路、贴图去重复
+    - 新增 04_CodeArts移交.md 与 tools/README-codearts.md，记录 21:17 形态修正断点
+    - experiments/render-upgrade: 保留未合并的皮肤/眼球/毛发着色器
+
+A	.gitignore
+A	04_CodeArts移交.md
+A	changzheng/assets/characters/civilians/civ-elder.glb
+A	changzheng/assets/characters/civilians/civ-farmer.glb
+A	changzheng/assets/characters/civilians/civ-woman.glb
+A	changzheng/assets/characters/he-wen/studio_small_09_1k.hdr
+A	changzheng/assets/characters/wang-gui/wang-gui-v1.glb
+A	changzheng/assets/characters/wang-gui/wang-gui-v1.json
+M	changzheng/assets/characters/wang-gui/wang-gui-web.glb
+M	changzheng/assets/scenes/zunyi-realscan/zunyi_street.glb
+A	changzheng/experiments/render-upgrade/engine/materials/eyeMaterial.js
+A	changzheng/experiments/render-upgrade/engine/materials/hairMaterial.js
+A	changzheng/experiments/render-upgrade/engine/materials/skinMaterial.js
+A	changzheng/experiments/render-upgrade/engine/materials/wardrobeMaterial.js
+A	changzheng/experiments/render-upgrade/engine/shaders/grade.js
+A	changzheng/experiments/render-upgrade/engine/shaders/skin-preintegrated.js
+A	changzheng/experiments/render-upgrade/engine/shaders/temporalPass.js
+M	changzheng/march-world/engine/actors3d.js
+M	changzheng/march-world/engine/character-preview.js
+A	changzheng/march-world/engine/character-weathering.js
+M	changzheng/march-world/engine/renderer3d.js
+A	changzheng/march-world/engine/wang-gui-preview.js
+M	changzheng/march-world/scenes/chapter-03.js
+A	changzheng/march-world/wang-gui-preview.html
+A	changzheng/tools/README-codearts.md
+A	changzheng/tools/build_he_wen.py
+A	changzheng/tools/build_wang_gui.py
+A	changzheng/tools/optimize_he_wen_glb.py
+A	changzheng/tools/quick/.gitignore
+A	changzheng/tools/quick/CODEARTS_TASK.md
+A	changzheng/tools/quick/run-wang-gui-refine.bat
+A	changzheng/tools/quick/test-ch3.js
+A	changzheng/tools/quick/test-wanggui-walk.js
+A	changzheng/tools/quick/wang-gui-refine.py
+A	changzheng/tools/verify_he_wen.cjs
+A	changzheng/tools/verify_he_wen_webgpu.cjs
+A	changzheng/tools/verify_march_world_3d.cjs
+A	evidence/quick/ch7-wanggui-route.png
+A	evidence/quick/civilians-preview.png
+A	evidence/quick/face-aging-map.png
+A	evidence/quick/material-regrade.png
+A	evidence/quick/normal-maps.png
+A	evidence/quick/stone-tiling-compare.png
+A	evidence/quick/street-life-layout.png
+A	evidence/quick/texture-compare.png
+A	evidence/quick/walk-retarget-check.png
+A	evidence/quick/wall-roof-tiling-compare.png
+A	evidence/quick/wood-tiling-compare.png
+A	evidence/wang-gui-final-1122/wang-gui-final-anim-CarryWalk.png
+A	evidence/wang-gui-final-1122/wang-gui-final-anim-Idle.png
+A	evidence/wang-gui-final-1122/wang-gui-final-anim-Row.png
+A	evidence/wang-gui-final-1122/wang-gui-final-anim-Talk.png
+A	evidence/wang-gui-final-1122/wang-gui-final-anim-Walk.png
+A	evidence/wang-gui-final-1122/wang-gui-final-back.png
+A	evidence/wang-gui-final-1122/wang-gui-final-body.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-blink.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-brow.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-jaw.png
+A	evidence/wang-gui-final-1122/wang-gui-final-expression-smile.png
+A	evidence/wang-gui-final-1122/wang-gui-final-front.png
+A	evidence/wang-gui-final-1122/wang-gui-final-profile.png
+A	evidence/wang-gui-final-1122/wang-gui-final-quarter.png
+A	evidence/wang-gui-final-1122/wang-gui-final-viseme.png
+A	evidence/wang-gui-final-1122/wang-gui-final-webgpu-front.png
+
+commit ac9279b69687a84a67bc976cb3a130d73f4bf51c
+Author: quark007 <2322079022@qq.com>
+Date:   Sun Nov 22 20:59:06 2026 +0800
+
+    地图路的面板纹路更新
+
+    地图
+
+A	quick-patch.zip

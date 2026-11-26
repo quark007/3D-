@@ -1,41 +1,50 @@
 (() => {
   'use strict';
   const M = window.CZMarchWorld._;
-  // 本脚本的地址，用来按相对路径加载做旧模块（index.html 与 preview.html 都能用）
   const SCRIPT_BASE = document.currentScript?.src || location.href;
   const paths = {
+    commander: '/assets/characters/commander/commander-web.glb',
+    logistics: '/assets/characters/logistics/logistics-web.glb',
+    soldier: '/assets/characters/soldier/soldier-web.glb',
+    medic: '/assets/characters/medic/medic-web.glb'
+  };
+  const fallbackPaths = {
     commander: '/assets/models-v03/char_commander.glb',
     logistics: '/assets/models-v03/char_logistics.glb',
     soldier: '/assets/models-v03/char_soldier.glb',
     medic: '/assets/models-v03/char_medic.glb'
   };
-  // 街市平民（挑夫 / 妇女 / 老掌柜）：沿用通用模型的骨骼和走路、待机、交谈动画，衣物重做。
-  // 只在配置了 streetLife 的街景章节加载；加载失败时退回通用模型换色（FALLBACK_ROLE）
-  const CIVILIAN_PATHS = {
-    farmer: '/assets/characters/civilians/civ-farmer.glb',
-    woman: '/assets/characters/civilians/civ-woman.glb',
-    elder: '/assets/characters/civilians/civ-elder.glb'
+  const ROLE_HEIGHTS = { commander: 1.78, logistics: 1.73, soldier: 1.72, medic: 1.61 };
+  const AUTHORED_HEIGHTS = {
+    '/assets/characters/commander/commander-web.glb': 1.78,
+    '/assets/characters/logistics/logistics-web.glb': 1.73,
+    '/assets/characters/soldier/soldier-web.glb': 1.67,
+    '/assets/characters/medic/medic-web.glb': 1.61
   };
-  const FALLBACK_ROLE = { farmer: 'logistics', woman: 'medic', elder: 'commander' };
-  const CIVILIAN_HEIGHT = { farmer: [1.6, 1.72], woman: [1.5, 1.6], elder: [1.58, 1.66] };
   const DEFAULT_HEIGHT = 1.76;
+  const WALK_REF_SPEED = 1.263;
+  const RUN_REF_SPEED = 4.30;
   const CHARACTER_PROFILES = {
-    he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-web.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
-    // lodUrl：手机端优先加载约 8000 面的远景版本，不存在时自动用完整版；weathering：做旧与面部年龄感（character-weathering.js）
-    // roam：同一章只出现一个王贵，剧情推进时自己走到下一个站位，等人时在站位附近踱步（见下方「走动的剧情人物」）
-    //   speed 平时步速 m/s，hurrySpeed 离下个站位还远时的步速，pace 踱步半径 m（0 关闭），paceAway 玩家离站位多远时才踱步
-    wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', height: 1.70, scaleBias: 1, idle: 'Idle', weathering: 'wang_gui',
+    he_wen: { glbUrl: '/assets/characters/he-wen/he-wen-web.glb', zunyiUrl: '/assets/characters/he-wen/he-wen-zunyi.glb', height: 1.78, scaleBias: 1, idle: 'Idle' },
+    wang_gui: { glbUrl: '/assets/characters/wang-gui/wang-gui-web.glb', zunyiUrl: '/assets/characters/wang-gui/wang-gui-zunyi.glb', height: 1.70, scaleBias: 1, idle: 'Idle', weathering: 'wang_gui',
       roam: { speed: 1.35, hurrySpeed: 2.5, pace: 2.4, paceAway: 9 } },
-    chen_xiaoman: { height: 1.67 },
-    medic_1: { height: 1.61 },
-    logistics_1: { height: 1.73 },
-    liaison_1: { height: 1.65 },
-    boatman_1: { height: 1.74 },
-    guide_1: { height: 1.68 },
-    civilian_1: { height: 1.63 }
+    chen_xiaoman: { height: 1.67, glbUrl: '/assets/characters/soldier/soldier-web.glb', grounded: true },
+    medic_1: { height: 1.61, glbUrl: '/assets/characters/medic/medic-web.glb', grounded: true },
+    logistics_1: { height: 1.73, glbUrl: '/assets/characters/logistics/logistics-web.glb', grounded: true },
+    liaison_1: { height: 1.65, glbUrl: '/assets/characters/soldier/soldier-web.glb', grounded: true },
+    boatman_1: { height: 1.74, glbUrl: '/assets/characters/boatman/boatman-web.glb', grounded: true },
+    guide_1: { height: 1.68, glbUrl: '/assets/characters/guide/guide-web.glb', grounded: true },
+    civilian_1: { height: 1.63, glbUrl: '/assets/characters/civilian-farmer/civilian-farmer-web.glb', grounded: true }
+  };
+  const civilianWoman = {
+    ...CHARACTER_PROFILES.civilian_1,
+    glbUrl: '/assets/characters/civilian-woman/civilian-woman-web.glb'
   };
   const headings = { e: 0, s: Math.PI / 2, w: Math.PI, n: -Math.PI / 2 };
   const npcKey = anchor => M.anchors.npcKey(anchor.anchorId, anchor.label);
+
+  const npcProfile = anchor => anchor.anchorId === 'chapter-11/anchor-dialogue-11-02-civilian_1'
+    ? civilianWoman : CHARACTER_PROFILES[npcKey(anchor)];
 
   async function loadModel(T, GLTFLoader, draco, url, signal) {
     const response = await fetch(url, { signal });
@@ -68,61 +77,95 @@
 
   const hasModel = anchor => anchor.kind === 'npc' && npcKey(anchor) !== 'narrator';
 
-  async function create(T, logicalScene, parent, signal) {
+  async function create(T, logicalScene, parent, signal, roleId='soldier') {
     const [{ GLTFLoader }, { DRACOLoader }, skeleton] = await Promise.all([
       import('three/addons/loaders/GLTFLoader.js'),
       import('three/addons/loaders/DRACOLoader.js'),
       import('three/addons/utils/SkeletonUtils.js')
     ]);
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-    const lite = navigator.maxTouchPoints > 0 || innerWidth < 760;
-    const usedProfiles = [...new Set(logicalScene.anchors.filter(hasModel).map(anchor => CHARACTER_PROFILES[npcKey(anchor)]).filter(profile => profile?.glbUrl))];
-    // 手机端先试远景版本；加载失败时下面会回退到完整版
-    const preferredUrl = profile => lite && profile.lodUrl ? profile.lodUrl : profile.glbUrl;
-    const independentUrls = new Set(usedProfiles.map(preferredUrl));
-    const weatheringReady = usedProfiles.some(profile => profile.weathering) && !M.characterWeathering
-      ? import(new URL('character-weathering.js', SCRIPT_BASE).href).catch(error => console.warn('[人物做旧] 模块加载失败，跳过', error))
+    const usedProfiles = new Set(logicalScene.anchors.filter(hasModel).map(npcProfile).filter(profile => profile?.glbUrl));
+    const npcUrl = profile => logicalScene.streetLife && profile?.zunyiUrl ? profile.zunyiUrl : profile?.glbUrl;
+    const independentUrls = new Map([...usedProfiles].map(profile => [npcUrl(profile), profile]));
+    const weatheringReady = [...usedProfiles].some(profile => profile.weathering) && !M.characterWeathering
+      ? import(new URL('character-weathering.js', SCRIPT_BASE).href).catch(error => console.warn('人物做旧模块不可用', error))
       : Promise.resolve();
     const loaded = new Map();
-    const civilianUrls = new Set(logicalScene.streetModel && logicalScene.streetLife ? Object.values(CIVILIAN_PATHS) : []);
-    const urls = new Set([...Object.values(paths), ...independentUrls, ...civilianUrls]);
+    const compact = logicalScene.sceneId === 'chapter-3/scene-zunyi';
+    const fallbackFor = anchor => paths[M.anchors.NPC_STYLES[npcKey(anchor)]?.role] || paths.soldier;
+    const baseUrls = compact ? [paths[roleId] || paths.soldier,
+      ...logicalScene.anchors.filter(a=>hasModel(a)&&!npcProfile(a)?.glbUrl).map(fallbackFor)] : Object.values(paths);
+    const urls = new Set([...baseUrls, ...independentUrls.keys()]);
     const draco = new DRACOLoader().setDecoderPath('/assets/webgpu40/vendor/three/jsm/libs/draco/gltf/');
+    const pathRoles = new Map(Object.entries(paths).map(([r, u]) => [u, r]));
     const results = await Promise.allSettled([...urls].map(async url => {
       try {
-        const source = await loadModel(T, GLTFLoader, draco, url, signal);
+        const assetUrl = compact && pathRoles.has(url) ? url.replace('-web.glb', '-field-lod.glb') : url;
+        const source = await loadModel(T, GLTFLoader, draco, assetUrl, signal);
         loaded.set(url, source);
       } catch (error) {
-        if (signal?.aborted || !(independentUrls.has(url) || civilianUrls.has(url))) throw error;
-        const full = usedProfiles.find(profile => profile.lodUrl === url && profile.glbUrl !== url)?.glbUrl;
-        if (full) {
-          console.info(`远景模型不可用，改用完整版：${full}`);
-          try { loaded.set(full, await loadModel(T, GLTFLoader, draco, full, signal)); return; }
-          catch (fullError) { if (signal?.aborted) throw fullError; console.warn(`独立人物模型回退：${full}`, fullError); return; }
+        if (signal?.aborted) throw error;
+        const pathRole = pathRoles.get(url);
+        if (pathRole && fallbackPaths[pathRole]) {
+          try {
+            const fbUrl = fallbackPaths[pathRole];
+            console.warn(`核心人物模型回退通用模型 (${url} -> ${fbUrl})`, error);
+            const fbSource = await loadModel(T, GLTFLoader, draco, fbUrl, signal);
+            fbSource.userData = { fallback: true };
+            loaded.set(url, fbSource);
+            return;
+          } catch (fbError) {
+            if (signal?.aborted) throw fbError;
+            error = fbError;
+          }
         }
-        console.warn(`独立人物模型回退：${url}`, error);
+        if (!independentUrls.has(url)) throw error;
+        const full = independentUrls.get(url).glbUrl;
+        if (full !== url) {
+          try {
+            loaded.set(url, await loadModel(T, GLTFLoader, draco, full, signal));
+            return;
+          } catch (fullError) {
+            if (signal?.aborted) throw fullError;
+            error = fullError;
+          }
+        }
+        console.warn(`独立人物模型回退：${full}`, error);
       }
     }));
-    // 远景版本加载成功时，让 profile.glbUrl 的查找也能命中它
-    for (const profile of usedProfiles) if (profile.lodUrl && loaded.has(profile.lodUrl) && !loaded.has(profile.glbUrl)) loaded.set(profile.glbUrl, loaded.get(profile.lodUrl));
-    await weatheringReady;
-    if (M.characterWeathering) for (const profile of usedProfiles) {
-      const source = profile.weathering && loaded.get(profile.glbUrl);
-      if (!source || source.userData?.czWeathered) continue;
-      try { M.characterWeathering.apply(T, source.scene, profile.weathering); (source.userData ||= {}).czWeathered = true; }
-      catch (error) { console.warn('[人物做旧] 应用失败，保持原样', error); }
+    if (compact && !signal?.aborted) {
+      const missing=new Set(logicalScene.anchors.filter(a=>hasModel(a)&&!loaded.has(npcUrl(npcProfile(a)||{}))).map(fallbackFor));
+      for (const url of missing) if(!loaded.has(url)) {
+        try { loaded.set(url,await loadModel(T,GLTFLoader,draco,url,signal)); }
+        catch(reason) { results.push({status:'rejected',reason}); }
+      }
     }
     draco.dispose();
     const failure = results.find(result => result.status === 'rejected');
     if (failure || signal?.aborted) {
-      disposeModels(new Set(loaded.values()));
+      disposeModels(loaded.values());
       throw failure?.reason ?? new DOMException('Aborted', 'AbortError');
+    }
+
+    try {
+      await weatheringReady;
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      for (const profile of usedProfiles) {
+        const source = loaded.get(npcUrl(profile));
+        if (profile.weathering && source) M.characterWeathering?.apply(T, source.scene, profile.weathering);
+      }
+    } catch (error) {
+      if (signal?.aborted) {
+        disposeModels(loaded.values());
+        throw error;
+      }
+      console.warn('人物做旧模块不可用', error);
     }
 
     const actors = [];
     const npcActors = new Map();
     const frustum = new T.Frustum(), projection = new T.Matrix4(), bounds = new T.Sphere(new T.Vector3(), 3);
     let playerActor = null;
-    let playerVisible = true;   /* 第一人称时隐藏玩家本体，避免相机卡在自己脑袋里 */
     let dialogueAnchorId = null;
     function focusDialogue(event) {
       const { sceneId, anchorId } = event.detail || {};
@@ -131,30 +174,38 @@
     window.addEventListener('czmarch:interact', focusDialogue);
 
     function makeActor(role, height, profile = {}, style = {}, anchor) {
-      const independent = loaded.get(profile.glbUrl);
-      const civilian = !independent && CIVILIAN_PATHS[role] && loaded.has(CIVILIAN_PATHS[role]);
-      const source = independent || loaded.get(civilian ? CIVILIAN_PATHS[role] : paths[role]);
+      const url = npcUrl(profile);
+      const independent = loaded.get(url);
+      const source = independent || loaded.get(paths[role]);
       const materials = new Map();
       function tint(material) {
         const color = material.name === 'skin' ? style.skin : style.coat;
         if (independent || !color || !material.color) return material;
-        if (civilian && material.name !== 'CIV coat') return material;   // 平民模型只换外衣颜色，头巾、头发、鞋不动
         if (!materials.has(material)) {
           const variant = material.clone();
-          variant.color.lerp(new T.Color(color), material.name === 'skin' ? .25 : style.mix ?? .25);
+          variant.color.lerp(new T.Color(color), .25);
           materials.set(material, variant);
         }
         return materials.get(material);
       }
       const model = skeleton.clone(source.scene);
+      const modelUrl = independent ? url : paths[role];
+      const authoredHeight = source.userData?.fallback ? null : AUTHORED_HEIGHTS[modelUrl];
       // Use posed vertices for independent rigs whose armature bounds include their bind pose.
       if (independent) model.updateMatrixWorld(true);
-      const bounds = new T.Box3().setFromObject(model, Boolean(independent));
-      const size = bounds.getSize(new T.Vector3());
-      const center = bounds.getCenter(new T.Vector3());
-      const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);
-      model.scale.setScalar(scale);
-      model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+      if (authoredHeight) {
+        const targetHeight = height * (profile.scaleBias ?? 1);
+        if (Math.abs(targetHeight - authoredHeight) > .005) model.scale.setScalar(targetHeight / authoredHeight);
+      } else {
+        const bounds = independent && profile.grounded ? null : new T.Box3().setFromObject(model, Boolean(independent));
+        if (bounds) {
+          const size = bounds.getSize(new T.Vector3());
+          const center = bounds.getCenter(new T.Vector3());
+          const scale = height * (profile.scaleBias ?? 1) / Math.max(size.y, 0.01);
+          model.scale.setScalar(scale);
+          model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+        }
+      }
       model.traverse(node => {
         if (!node.isMesh) return;
         if (node.material) node.material = Array.isArray(node.material) ? node.material.map(tint) : tint(node.material);
@@ -166,14 +217,13 @@
       root.name = 'march-actor-' + role;
       if (anchor) {
         root.userData.anchorId = anchor.anchorId;
-        root.userData.modelUrl = independent ? profile.glbUrl : civilian ? CIVILIAN_PATHS[role] : paths[role];
+        root.userData.modelUrl = independent ? url : paths[role];
       }
       root.add(model);
       parent.add(root);
       const mixer = new T.AnimationMixer(model);
       const actions = new Map();
       for (const clip of source.animations || []) actions.set(clip.name, mixer.clipAction(clip));
-      // 有表情形态（browDown / smile 等）的网格：头、眉毛、胡茬。交谈时由 updateExpression 驱动
       const faces = [];
       model.traverse(node => { if (node.morphTargetDictionary && ['browDownLeft', 'browUpLeft', 'smile'].some(name => name in node.morphTargetDictionary)) faces.push(node); });
       const actor = { root, model, mixer, actions, current: null, role, materials, idle: profile.idle || 'Idle', faces, exprTime: Math.random() * 10 };
@@ -208,28 +258,8 @@
       actor.current = next;
     }
 
-    function updatePlayerAnimation(actor, player) {
-      if (player.airborne && actor.actions.has('Jump')) { play(actor, 'Jump'); return; }
-      const idle = actor.actions.get(actor.idle), walk = actor.actions.get('Walk');
-      if (!idle || !walk) {
-        play(actor, player.moving ? 'Walk' : actor.idle);
-        if (actor.current) actor.current.timeScale = player.backing ? -.8 : 1;
-        return;
-      }
-      // 当前四套主角只有 Idle/Walk。用实际速度混合权重并匹配步频，避免输入一开一关就跳动作。
-      const speed = Math.max(0, player.speed || 0), linear = Math.max(0, Math.min(1, speed / 1.15));
-      const moveWeight = linear * linear * (3 - 2 * linear);
-      const referenceSpeed = player.backing ? 1.6 : 2.2;
-      const timeScale = Math.max(.45, Math.min(3.4, speed / referenceSpeed)) * (player.backing ? -1 : 1);
-      idle.play(); walk.play();
-      idle.setEffectiveWeight(1 - moveWeight); walk.setEffectiveWeight(moveWeight);
-      idle.setEffectiveTimeScale(1); walk.setEffectiveTimeScale(timeScale);
-      actor.current = moveWeight >= .5 ? walk : idle;
-      actor.motion = { action: actor.current.getClip().name, speed, moveWeight, idleWeight: 1 - moveWeight, walkWeight: moveWeight, timeScale };
-    }
-
-    function place(actor, x, y, facing, surfaceHeight, lift = 0) {
-      actor.root.position.set(x - logicalScene.world.w / 2, surfaceHeight(x, y) + lift, y - logicalScene.world.h / 2);
+    function place(actor, x, y, facing, surfaceHeight) {
+      actor.root.position.set(x - logicalScene.world.w / 2, surfaceHeight(x, y), y - logicalScene.world.h / 2);
       if (Number.isFinite(facing)) actor.root.rotation.y = Math.atan2(Math.cos(facing), Math.sin(facing));
     }
 
@@ -250,118 +280,46 @@
         disposeActor(playerActor);
         actors.splice(actors.indexOf(playerActor), 1);
       }
-      playerActor = makeActor(role, 1.8);
-      playerActor.root.visible = playerVisible;
-    }
-
-    // ---- 街市行人与摊主：只在街景章节、配置了 streetLife 时出现；不是剧情 NPC，不能交互 ----
-    const life = logicalScene.streetModel && logicalScene.streetLife;
-    // lite：见上方加载段落（手机端或窄屏）
-    // 外衣换成百姓常见的靛蓝、褐、灰、本白粗布色；mix 越大换色越明显（平民模型只换外衣，通用模型整套换）
-    const TINTS = { indigo: { coat: '#2f3f58', mix: .62 }, brown: { coat: '#6a4c34', mix: .58 }, grey: { coat: '#6d6e69', mix: .55 }, undyed: { coat: '#a89a7c', mix: .5 } };
-    const STALL_DIRS = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
-    const walkers = [], vendors = [];
-    let lifeReady = false;
-    const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
-    function routeAt(w, s) {
-      let i = 0;
-      while (i < w.lengths.length - 1 && s > w.lengths[i]) { s -= w.lengths[i]; i++; }
-      const [ax, ay] = w.route[i], [bx, by] = w.route[(i + 1) % w.route.length], length = w.lengths[i] || 1, t = Math.min(1, Math.max(0, s / length));
-      return { x: ax + (bx - ax) * t, y: ay + (by - ay) * t, tx: (bx - ax) / length, ty: (by - ay) / length };
-    }
-    // 平民模型没加载成功时退回通用模型；未知角色返回 null
-    const streetRole = role => CIVILIAN_PATHS[role] ? (loaded.has(CIVILIAN_PATHS[role]) ? role : FALLBACK_ROLE[role]) : paths[role] ? role : null;
-    const streetHeight = (role, r) => { const [lo, hi] = CIVILIAN_HEIGHT[role] || [1.62, 1.74]; return lo + (hi - lo) * r; };
-    function spawnStreetLife() {
-      lifeReady = true;
-      if (!life) return;
-      let seed = 3035;
-      const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-      const list = (life.walkers || []).slice(0, lite ? 4 : 8);
-      list.forEach((config, index) => {
-        const role = streetRole(config.role);
-        if (!config.route || config.route.length < 2 || !role) return;
-        const route = config.route;
-        const lengths = [];
-        const count = config.loop ? route.length : route.length - 1;
-        for (let i = 0; i < count; i++) { const [ax, ay] = route[i], [bx, by] = route[(i + 1) % route.length]; lengths.push(Math.hypot(bx - ax, by - ay)); }
-        const total = lengths.reduce((sum, value) => sum + value, 0);
-        const actor = makeActor(role, streetHeight(role, rnd()), {}, TINTS[config.tint] || {});
-        actor.root.name = 'march-street-walker-' + index;
-        const w = { index, actor, route, lengths, total, loop: !!config.loop, speed: config.speed || 1.2, s: (config.phase || 0) * total, dir: 1, wait: rnd() * 1.5, facing: 0 };
-        const start = routeAt(w, w.s);
-        w.facing = Math.atan2(start.ty, start.tx);
-        walkers.push(w);
+      playerActor = makeActor(role, ROLE_HEIGHTS[role] ?? DEFAULT_HEIGHT);
+      const variants = new Map();
+      const cloneForFade = material => {
+        if (!variants.has(material)) variants.set(material, material.clone());
+        return variants.get(material);
+      };
+      playerActor.model.traverse(node => {
+        if (!node.isMesh || !node.material) return;
+        node.material = Array.isArray(node.material) ? node.material.map(cloneForFade) : cloneForFade(node.material);
       });
-      for (const stall of (life.stalls || []).slice(0, lite ? 4 : 12)) {
-        const look = life.vendors?.[stall.kind];
-        const role = look && streetRole(look.role);
-        if (!role) continue;
-        const f = STALL_DIRS[stall.face] || STALL_DIRS.s, r = [f[1], -f[0]], lx = (stall.vendor || 1) * (stall.w / 2 + .42);
-        const actor = makeActor(role, streetHeight(role, rnd()), {}, TINTS[look.tint] || {});
-        actor.root.name = 'march-street-vendor-' + stall.kind;
-        vendors.push({ actor, x: stall.x + r[0] * lx - f[0] * .05, y: stall.y + r[1] * lx - f[1] * .05, home: Math.atan2(f[1], f[0]), facing: Math.atan2(f[1], f[0]) });
+      playerActor.fadeMaterials = [...variants.entries()];
+      for (const [original, variant] of variants) playerActor.materials.set(original, variant);
+      playerActor.fade = 1;
+      playerActor.gait = { idle: playerActor.actions.get('Idle'), walk: playerActor.actions.get('Walk'), run: playerActor.actions.get('Run') };
+      playerActor.jump = {
+        start: playerActor.actions.get('Jump_Start'),
+        air: playerActor.actions.get('Jump_Air'),
+        land: playerActor.actions.get('Jump_Land')
+      };
+      for (const [k, act] of Object.entries(playerActor.jump)) {
+        if (!act) continue;
+        if (k === 'start' || k === 'land') { act.setLoop(T.LoopOnce, 1); act.clampWhenFinished = true; }
       }
-    }
-    function visibleNear(actor, x, y, player, surfaceHeight) {
-      bounds.center.set(x - logicalScene.world.w / 2, surfaceHeight(x, y) + 1, y - logicalScene.world.h / 2);
-      return Math.hypot(x - player.x, y - player.y) < (lite ? 38 : 55) && frustum.intersectsSphere(bounds);
-    }
-    function updateStreetLife(dt, player, surfaceHeight) {
-      for (const w of walkers) {
-        const here = routeAt(w, w.s);
-        const hx = here.tx * w.dir, hy = here.ty * w.dir;
-        const ahead = (ox, oy, radius) => { const dx = ox - here.x, dy = oy - here.y, d = Math.hypot(dx, dy); return d < radius && dx * hx + dy * hy > d * .3; };
-        // 玩家挡在前面就停下看着玩家；两人迎面时编号大的让路
-        const yieldPlayer = ahead(player.x, player.y, 1.9);
-        const yieldWalker = !yieldPlayer && walkers.some(other => {
-          if (other.index >= w.index) return false;
-          const o = routeAt(other, other.s);
-          return ahead(o.x, o.y, 1.15);
-        });
-        if (w.wait > 0) w.wait -= dt;
-        else if (!yieldPlayer && !yieldWalker) {
-          w.s += w.dir * w.speed * dt;
-          if (w.loop) w.s = ((w.s % w.total) + w.total) % w.total;
-          else if (w.s >= w.total || w.s <= 0) { w.s = Math.min(w.total, Math.max(0, w.s)); w.dir *= -1; w.wait = 1.4 + ((w.index * 7919) % 17) / 10; }
-        }
-        const moving = w.wait <= 0 && !yieldPlayer && !yieldWalker;
-        const p = routeAt(w, w.s);
-        const goal = yieldPlayer ? Math.atan2(player.y - p.y, player.x - p.x) : Math.atan2(p.ty * w.dir, p.tx * w.dir);
-        w.facing += wrap(goal - w.facing) * (1 - Math.exp(-6 * dt));
-        const visible = visibleNear(w.actor, p.x, p.y, player, surfaceHeight);
-        w.actor.root.visible = visible;
-        if (!visible) continue;
-        place(w.actor, p.x, p.y, w.facing, surfaceHeight);
-        play(w.actor, moving ? 'Walk' : w.actor.idle);
-        if (w.actor.current) w.actor.current.timeScale = moving ? Math.min(1.25, Math.max(.75, w.speed / 1.3)) : 1;
-      }
-      for (const v of vendors) {
-        const visible = visibleNear(v.actor, v.x, v.y, player, surfaceHeight);
-        v.actor.root.visible = visible;
-        if (!visible) continue;
-        const near = Math.hypot(player.x - v.x, player.y - v.y) < 4.5;
-        const goal = near ? Math.atan2(player.y - v.y, player.x - v.x) : v.home;
-        v.facing += wrap(goal - v.facing) * (1 - Math.exp(-4 * dt));
-        place(v.actor, v.x, v.y, v.facing, surfaceHeight);
-      }
+      playerActor.previousGround = null;
+      playerActor.gaitWeights = [1, 0, 0];
+      playerActor.jumpBlend = 1;
+      playerActor.jumpStage = null;
+      playerActor.jumpAction = null;
+      playerActor.stride = 0;
+      for (const action of Object.values(playerActor.gait)) action?.play();
     }
 
-    // ---- 走动的剧情人物（profile.roam）----
-    // 以前每个站位各摆一个模型：同一章王贵有几个站位，场上就同时站着几个王贵。改为每个角色只有一个模型，
-    // 站在「当前站位」：正在对话的站位 > 序号最小的未完成站位 > 最后完成的站位。剧情推进、当前站位换了，
-    // 他就沿行走网格自己走过去；玩家跑远时，在玩家看不到的地方赶到离终点约 10m 处，再走进画面。
-    // 没有 Walk 动画（旧版模型）时不走路，直接换到新站位，不会出现滑步。
-    // 站位的交互范围、提示标签仍按锚点坐标算，与 B 方协议无关；人在站位时位置与原来完全一致。
-    // 调试：控制台 CZMarchWorld._.actors3d.roamers 查看当前站位、模式、剩余路程
     const roamGrid = (() => {
       try {
         if (!M.path?.buildGrid) return null;
-        return M.path.buildGrid(logicalScene.streetModel ? { ...logicalScene, blocked: [...(logicalScene.blocked || []), ...(logicalScene.streetBlocked || [])] } : logicalScene);
+        return M.path.buildGrid(logicalScene.streetModel && !logicalScene.strictPlayable ? { ...logicalScene, blocked: [...(logicalScene.blocked || []), ...(logicalScene.streetBlocked || [])] } : logicalScene);
       } catch (error) { console.warn('[剧情人物走动] 行走网格生成失败，改为直接换位', error); return null; }
     })();
     const roamers = new Map();   // npcKey -> 状态
-    const isRoaming = anchor => hasModel(anchor) && !!CHARACTER_PROFILES[npcKey(anchor)]?.roam;
+    const isRoaming = anchor => !logicalScene.strictPlayable && hasModel(anchor) && !!CHARACTER_PROFILES[npcKey(anchor)]?.roam;
     const storyOrder = anchor => { const m = /dialogue-\d+-(\d+)-/.exec(anchor.anchorId); return m ? Number(m[1]) : 99; };
     const wrapYaw = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
     function currentStation(list) {
@@ -372,9 +330,16 @@
     }
     function planRoute(r, x, y) {
       const raw = roamGrid ? M.path.findPath(roamGrid, r.x, r.y, x, y) : null;
+      r.path = null;
+      if (!raw?.length) return;
       const points = [{ x: r.x, y: r.y }, ...(raw || []).slice(1).map(point => ({ x: point.x, y: point.y }))];
       const last = points.at(-1);
-      if (Math.hypot(last.x - x, last.y - y) > .05) points.push({ x, y });   // 网格格心到锚点精确坐标的最后一段
+      const tail = Math.hypot(last.x - x, last.y - y);
+      const samples = Math.ceil(tail / .15);
+      for (let i = 1; i <= samples; i++) {
+        if (!M.path.walkableAt(roamGrid, last.x + (x - last.x) * i / samples, last.y + (y - last.y) * i / samples, .35)) return;
+      }
+      if (tail > .05) points.push({ x, y });
       r.path = points; r.seg = 0; r.segT = 0;
       r.remaining = points.slice(1).reduce((sum, point, i) => sum + Math.hypot(point.x - points[i].x, point.y - points[i].y), 0);
     }
@@ -435,7 +400,7 @@
         if (station !== r.station) {
           r.station = station;
           if (!r.canWalk) { r.x = station.x; r.y = station.y; r.path = null; r.mode = 'idle'; }
-          else { planRoute(r, station.x, station.y); r.mode = 'travel'; }
+          else { planRoute(r, station.x, station.y); r.mode = r.path ? 'travel' : 'idle'; }
         }
         // 2) 等人时踱步；玩家走近、或正在对话时回到站位
         const away = Math.hypot(r.x - station.x, r.y - station.y);
@@ -473,7 +438,7 @@
         }
         // 4) 显示、朝向、动画
         bounds.center.set(r.x - logicalScene.world.w / 2, surfaceHeight(r.x, r.y) + 1, r.y - logicalScene.world.h / 2);
-        const range = logicalScene.streetModel ? Math.max(40, logicalScene.streetModel.actorRange ?? 18) : 80;
+        const range = logicalScene.streetModel?.actorRange ?? 80;
         const visible = Math.hypot(player.x - r.x, player.y - r.y) < range && frustum.intersectsSphere(bounds);
         r.actor.root.visible = visible;
         place(r.actor, r.x, r.y, undefined, surfaceHeight);
@@ -481,7 +446,7 @@
         const yaw = moving ? r.heading : toMe > .01 && (engaged || toMe < 6) ? Math.atan2(dx, dz) : r.mode === 'linger' ? r.heading : r.actor.initialYaw;
         r.actor.root.rotation.y += wrapYaw(yaw - r.actor.root.rotation.y) * (1 - Math.exp(-(moving ? 7 : 5) * dt));
         play(r.actor, moving ? 'Walk' : engaged ? 'Talk' : r.actor.idle);
-        if (r.actor.current) r.actor.current.timeScale = moving ? Math.min(1.7, Math.max(.7, speed / 1.35)) : 1;
+        if (r.actor.current) r.actor.current.timeScale = moving ? Math.min(1.7, Math.max(.65, speed / WALK_REF_SPEED)) : 1;
       }
       M.actors3d.roamers = [...roamers.values()].map(r => ({ key: r.key, station: r.station?.anchorId, x: +r.x.toFixed(2), y: +r.y.toFixed(2), mode: r.mode, remaining: +(r.remaining || 0).toFixed(1), visible: r.actor.root.visible }));
     }
@@ -498,29 +463,102 @@
 
     return {
       ensurePlayer,
-      setPlayerVisible(visible) {
-        playerVisible = visible !== false;
-        if (playerActor) playerActor.root.visible = playerVisible;
+      strideCycle() {
+        if (!playerActor) return null;
+        const {walk,run}=playerActor.gait;
+        if (!walk) return null;
+        const action = run && playerActor.gaitWeights[2]>.5 ? run : walk;
+        const radiansPerSecond = 2*Math.PI/action.getClip().duration;
+        return {rate:action.getEffectiveTimeScale()*radiansPerSecond,phase:action.time*radiansPerSecond};
       },
-      isPlayerVisible() { return playerVisible; },
-      playerState() { return playerActor?.motion ? { ...playerActor.motion } : null; },
-      update(dt, player, anchors, camera, surfaceHeight) {
+      playerState() {
+        return playerActor ? {
+          role: playerActor.role,
+          speed: playerActor.stride,
+          weights: [...playerActor.gaitWeights],
+          jumpStage: playerActor.jumpStage
+        } : null;
+      },
+      update(dt, player, anchors, camera, surfaceHeight, cameraDistance, firstPerson = false) {
         projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
         frustum.setFromProjectionMatrix(projection);
         if (player.moving) dialogueAnchorId = null;
         ensurePlayer(player.roleId);
-        place(playerActor, player.x, player.y, player.facing, surfaceHeight, player.height || 0);
+        playerActor.root.visible = !firstPerson;
+        place(playerActor, player.x, player.y, player.facing, surfaceHeight);
         playerActor.root.position.y += player.jumpHeight;
-        updatePlayerAnimation(playerActor, player);
+        const fade = cameraDistance >= .55
+          ? T.MathUtils.clamp(1 - (1.05 - cameraDistance) * 1.7, .15, 1)
+          : .15 * T.MathUtils.clamp((cameraDistance - .25) / .30, 0, 1);
+        if (fade !== playerActor.fade) {
+          playerActor.fade = fade;
+          for (const [original, material] of playerActor.fadeMaterials) {
+            const transparent = fade < 1 || original.transparent;
+            if (material.transparent !== transparent) {
+              material.transparent = transparent;
+              material.needsUpdate = true;
+            }
+            material.opacity = original.opacity * fade;
+            material.depthWrite = fade === 1 && original.depthWrite;
+          }
+        }
+        const gait = playerActor.gait;
+        const nextJump = player.jumpPhase ?? null;
+        const hasJumpClip = nextJump && playerActor.jump?.[nextJump];
+        if (nextJump !== playerActor.jumpStage) {
+          playerActor.jumpStage = nextJump;
+          if (hasJumpClip) {
+            playerActor.jumpAction?.fadeOut(0.14);
+            const nextAction = playerActor.jump[nextJump];
+            nextAction.reset().setEffectiveWeight(1).fadeIn(nextJump === 'start' ? 0.10 : 0.14).play();
+            playerActor.jumpAction = nextAction;
+          } else {
+            playerActor.jumpAction?.fadeOut(0.18);
+            playerActor.jumpAction = null;
+          }
+        }
+        const blend = 1 - Math.exp(-dt * 16);
+        playerActor.jumpBlend = T.MathUtils.lerp(playerActor.jumpBlend, hasJumpClip ? 0 : 1, blend);
+        const move = T.MathUtils.smoothstep(player.speed, .015, .23);
+        const run = gait.run && !player.reversing ? T.MathUtils.smoothstep(player.speed, M.player.SPEED + .05, M.player.RUN_SPEED - .15) : 0;
+        const targets = [(1 - move) * playerActor.jumpBlend, move * (1 - run) * playerActor.jumpBlend, move * run * playerActor.jumpBlend];
+        for (const [i, action] of [gait.idle, gait.walk, gait.run].entries()) {
+          playerActor.gaitWeights[i] = T.MathUtils.lerp(playerActor.gaitWeights[i], targets[i], blend);
+          action?.setEffectiveWeight(playerActor.gaitWeights[i]);
+        }
+        const stride = player.speed * (player.reversing ? -1 : 1);
+        playerActor.stride = stride;
+        // The simulation may tick fewer times than the display. Advance both
+        // in-place clips by measured ground travel, sharing one normalized phase.
+        const prev = playerActor.previousGround;
+        const distance = prev ? Math.hypot(player.x-prev.x,player.y-prev.y) : 0;
+        playerActor.previousGround ??= new T.Vector2();
+        playerActor.previousGround.set(player.x,player.y);
+        const groundRate = dt > 0 && distance < .75 ? distance / dt : 0;
+        const walkClip = gait.walk?.getClip(), runClip = gait.run?.getClip();
+        const walkLength = (walkClip?.userData?.groundSpeed ?? WALK_REF_SPEED) * (walkClip?.duration ?? 1);
+        const runLength = (runClip?.userData?.groundSpeed ?? RUN_REF_SPEED) * (runClip?.duration ?? 1);
+        const rigScale = walkClip?.userData?.groundSpeed ? playerActor.model.scale.x : 1;
+        const rate = groundRate / (rigScale * T.MathUtils.lerp(walkLength,runLength,run)) * (player.reversing ? -1 : 1);
+        gait.walk?.setEffectiveTimeScale(rate * walkClip.duration);
+        gait.run?.setEffectiveTimeScale(rate * runClip.duration);
+        const lean = !gait.run && !player.reversing
+          ? .085 * T.MathUtils.smoothstep(player.speed, 1.8, 6.5) : 0;
+        playerActor.model.rotation.x = T.MathUtils.lerp(playerActor.model.rotation.x, lean, blend);
         const localActors = new Map();
         if (logicalScene.streetModel) {
           for (const anchor of anchors) {
             if (!hasModel(anchor) || isRoaming(anchor) || !visibleAnchor(anchor, anchors)) continue;
             const distance = Math.hypot(anchor.x - player.x, anchor.y - player.y);
-            const score = distance - (anchor.anchorId === dialogueAnchorId ? 100 : 0);
+            bounds.center.set(anchor.x - logicalScene.world.w / 2, surfaceHeight(anchor.x, anchor.y) + 1, anchor.y - logicalScene.world.h / 2);
+            const score = distance + (frustum.intersectsSphere(bounds) ? 0 : 30) -
+              (anchor.anchorId === dialogueAnchorId ? 100 : 0);
             const key = npcKey(anchor);
             if (distance < (logicalScene.streetModel.actorRange ?? 18) && score < (localActors.get(key)?.score ?? Infinity)) localActors.set(key, { anchor, score });
           }
+        }
+        if (!anchors.length) {
+          for (const actor of npcActors.values()) actor.root.visible = false;
         }
         updateRoamers(dt, player, anchors, surfaceHeight);
         for (const anchor of anchors) {
@@ -532,7 +570,7 @@
           if (!visible) { if (actor) actor.root.visible = false; continue; }
           if (!actor) {
             const key = npcKey(anchor);
-            const profile = CHARACTER_PROFILES[key] || {};
+            const profile = npcProfile(anchor) || {};
             const style = M.anchors.NPC_STYLES[key] || {};
             actor = makeActor(style.role || 'soldier', profile.height ?? DEFAULT_HEIGHT, profile, style, anchor);
             const facing = anchor.facing ?? logicalScene.npcFacing ?? logicalScene.spawn?.facing;
@@ -551,20 +589,16 @@
           actor.root.rotation.y += Math.atan2(Math.sin(delta), Math.cos(delta)) * (1 - Math.exp(-8 * dt));
           play(actor, engaged ? 'Talk' : actor.idle);
         }
-        if (!lifeReady) spawnStreetLife();
-        updateStreetLife(dt, player, surfaceHeight);
-        for (const actor of actors) if (actor.root.visible) actor.mixer.update(dt);
+        for (const actor of actors) if (actor.root.visible || actor === playerActor) actor.mixer.update(dt);
         for (const actor of npcActors.values()) if (actor.root.visible) updateExpression(actor, dt, actor.current === actor.actions.get('Talk'));
       },
       dispose() {
         window.removeEventListener('czmarch:interact', focusDialogue);
         for (const actor of actors) disposeActor(actor);
         actors.length = 0;
-        walkers.length = 0;
-        vendors.length = 0;
         roamers.clear();
         npcActors.clear();
-        disposeModels(new Set(loaded.values()));
+        disposeModels(loaded.values());
         loaded.clear();
         playerActor = null;
       }

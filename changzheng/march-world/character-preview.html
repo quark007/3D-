@@ -11,12 +11,15 @@
 </style>
 </head>
 <body>
-<header><h1 id="character-title">独立人物预览</h1><span id="character-detail"></span><label>角色<select id="character"><option value="he-wen">何文</option><option value="wang-gui">王贵</option></select></label><a href="preview.html?3d=1&amp;chapter=chapter-1%2Fscene-ruijin">返回第一章场景</a></header>
+<header><h1 id="character-title">独立人物预览</h1><span id="character-detail"></span><label>角色<select id="character"></select></label><a href="preview.html?3d=1&amp;chapter=chapter-1%2Fscene-ruijin">返回第一章场景</a></header>
 <main><canvas id="portrait" aria-label="可拖动旋转的三维人物模型"></canvas><div id="status" role="status">正在加载真实三维模型与贴图……</div></main>
 <footer>
 <div class="controls">
 <button data-view="front" disabled>正面</button><button data-view="quarter" disabled>四分之三</button><button data-view="profile" disabled>侧面</button><button data-view="body" disabled>全身</button>
 <select id="animation" aria-label="人物动作" disabled><option value="">静止检查</option></select>
+<span class="anim-quick" role="group" aria-label="快捷动作切换">
+<button data-anim="Idle" disabled>Idle</button><button data-anim="Talk" disabled>Talk</button><button data-anim="Walk" disabled>Walk</button><button data-anim="Run" disabled>Run</button><button data-anim="Jump" disabled>Jump</button>
+</span>
 <button id="clay" aria-pressed="false" disabled>素模检查</button>
 <label>闭眼<input id="blink" type="range" min="0" max="1" step="0.01" value="0" disabled></label>
 <label>开口<input id="jaw" type="range" min="0" max="0.5" step="0.01" value="0" disabled></label>

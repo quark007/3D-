@@ -1,0 +1,512 @@
+{
+  "errors": [],
+  "desktop": {
+    "blocked": [
+      "intro",
+      "settings",
+      "dialogue"
+    ],
+    "wallBefore": {
+      "mode": "tps",
+      "distance": 0.574,
+      "occluded": true,
+      "pitch": 0.22,
+      "yaw": -3.142,
+      "facing": -3.141592653589793,
+      "speed": 0,
+      "x": 102.69,
+      "y": 44,
+      "worldX": 23.250320133911035,
+      "worldZ": -11.35,
+      "eye": 2.694298464210458,
+      "ground": 1.049,
+      "near": 0.1,
+      "visible": true,
+      "pinHidden": false,
+      "frames": 3
+    },
+    "toggles": [
+      {
+        "mode": "fps",
+        "visible": false,
+        "distance": 0,
+        "frames": 6,
+        "occluded": false
+      },
+      {
+        "mode": "tps",
+        "visible": true,
+        "distance": 0.502,
+        "frames": 8,
+        "occluded": true
+      },
+      {
+        "mode": "fps",
+        "visible": false,
+        "distance": 0,
+        "frames": 9,
+        "occluded": false
+      },
+      {
+        "mode": "tps",
+        "visible": true,
+        "distance": 0.502,
+        "frames": 10,
+        "occluded": true
+      },
+      {
+        "mode": "fps",
+        "visible": false,
+        "distance": 0,
+        "frames": 11,
+        "occluded": false
+      },
+      {
+        "mode": "tps",
+        "visible": true,
+        "distance": 0.502,
+        "frames": 12,
+        "occluded": true
+      },
+      {
+        "mode": "fps",
+        "visible": false,
+        "distance": 0,
+        "frames": 13,
+        "occluded": false
+      },
+      {
+        "mode": "tps",
+        "visible": true,
+        "distance": 0.502,
+        "frames": 14,
+        "occluded": true
+      },
+      {
+        "mode": "fps",
+        "visible": false,
+        "distance": 0,
+        "frames": 15,
+        "occluded": false
+      },
+      {
+        "mode": "tps",
+        "visible": true,
+        "distance": 0.502,
+        "frames": 16,
+        "occluded": true
+      }
+    ],
+    "eyeHeight": 1.65,
+    "pitchUp": -1.05,
+    "pitchDown": 1.15,
+    "pitchReturn": [
+      1.108,
+      0.75
+    ],
+    "noReticle": true,
+    "stairs": {
+      "startY": 38.3,
+      "endY": 34.21999999999986,
+      "rise": 0.45084067523809646,
+      "terrainRise": 0.45100000000000007,
+      "peakFrameRise": 0.006533722446810053,
+      "walkSpeed": 1.8000000000000682,
+      "samples": 397
+    },
+    "npcs": [
+      {
+        "name": "chapter-3/anchor-dialogue-03-03-he_wen",
+        "angle": -2.628059304089841e-20,
+        "url": "/assets/characters/he-wen/he-wen-zunyi.glb",
+        "event": "chapter-3/anchor-dialogue-03-03-he_wen"
+      },
+      {
+        "name": "chapter-3/anchor-dialogue-03-05-wang_gui",
+        "angle": -2.0623490870035766e-20,
+        "url": "/assets/characters/wang-gui/wang-gui-zunyi.glb",
+        "event": "chapter-3/anchor-dialogue-03-05-wang_gui"
+      },
+      {
+        "name": "chapter-3/anchor-dialogue-03-04-logistics_1",
+        "angle": -2.5048921171714236e-20,
+        "url": "/assets/characters/logistics/logistics-field-web.glb",
+        "event": "chapter-3/anchor-dialogue-03-04-logistics_1"
+      }
+    ],
+    "bench": {
+      "fps": [
+        {
+          "fps": 165.655123171706,
+          "draws": 70,
+          "triangles": 89996,
+          "backend": "three",
+          "spot": {
+            "x": 83,
+            "y": 47,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.51330527498442,
+          "draws": 78,
+          "triangles": 93110,
+          "backend": "three",
+          "spot": {
+            "x": 91,
+            "y": 47,
+            "facing": "w"
+          }
+        },
+        {
+          "fps": 164.06305728359146,
+          "draws": 41,
+          "triangles": 61776,
+          "backend": "three",
+          "spot": {
+            "x": 57,
+            "y": 43,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.50149807671966,
+          "draws": 18,
+          "triangles": 54544,
+          "backend": "three",
+          "spot": {
+            "x": 81,
+            "y": 37.5,
+            "facing": "n"
+          }
+        }
+      ],
+      "tps": [
+        {
+          "fps": 165.4542861232152,
+          "draws": 79,
+          "triangles": 101760,
+          "backend": "three",
+          "spot": {
+            "x": 83,
+            "y": 47,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.41889482925384,
+          "draws": 83,
+          "triangles": 101754,
+          "backend": "three",
+          "spot": {
+            "x": 91,
+            "y": 47,
+            "facing": "w"
+          }
+        },
+        {
+          "fps": 165.45428612602862,
+          "draws": 50,
+          "triangles": 70688,
+          "backend": "three",
+          "spot": {
+            "x": 57,
+            "y": 43,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.41889482925384,
+          "draws": 70,
+          "triangles": 86884,
+          "backend": "three",
+          "spot": {
+            "x": 81,
+            "y": 37.5,
+            "facing": "n"
+          }
+        }
+      ]
+    }
+  },
+  "portrait": {
+    "touchAfter": "fps",
+    "touchCycle": true,
+    "bench": {
+      "fps": [
+        {
+          "fps": 165.53692472773443,
+          "draws": 68,
+          "triangles": 89868,
+          "backend": "three",
+          "spot": {
+            "x": 83,
+            "y": 47,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.57236654296352,
+          "draws": 78,
+          "triangles": 93110,
+          "backend": "three",
+          "spot": {
+            "x": 91,
+            "y": 47,
+            "facing": "w"
+          }
+        },
+        {
+          "fps": 165.53692472773443,
+          "draws": 39,
+          "triangles": 57776,
+          "backend": "three",
+          "spot": {
+            "x": 57,
+            "y": 43,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.61964591661874,
+          "draws": 18,
+          "triangles": 54544,
+          "backend": "three",
+          "spot": {
+            "x": 81,
+            "y": 37.5,
+            "facing": "n"
+          }
+        }
+      ],
+      "tps": [
+        {
+          "fps": 165.43069024669992,
+          "draws": 73,
+          "triangles": 98512,
+          "backend": "three",
+          "spot": {
+            "x": 83,
+            "y": 47,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 165.44248734503617,
+          "draws": 82,
+          "triangles": 101678,
+          "backend": "three",
+          "spot": {
+            "x": 91,
+            "y": 47,
+            "facing": "w"
+          }
+        },
+        {
+          "fps": 165.75371701213018,
+          "draws": 44,
+          "triangles": 70012,
+          "backend": "three",
+          "spot": {
+            "x": 57,
+            "y": 43,
+            "facing": "n"
+          }
+        },
+        {
+          "fps": 164.70588235854137,
+          "draws": 70,
+          "triangles": 86884,
+          "backend": "three",
+          "spot": {
+            "x": 81,
+            "y": 37.5,
+            "facing": "n"
+          }
+        }
+      ]
+    }
+  },
+  "canvas": {
+    "mode": null,
+    "ok": false,
+    "backend": "canvas",
+    "hidden": true,
+    "p": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 57,
+      "y": 30,
+      "facing": 1.571
+    },
+    "after": {
+      "chapterId": 3,
+      "sceneId": "chapter-3/scene-zunyi",
+      "x": 57,
+      "y": 28.73,
+      "facing": -1.571
+    }
+  },
+  "input": {
+    "rightMouseDrag": {
+      "before": {
+        "mode": "fps",
+        "yaw": 1.571,
+        "pitch": 0.22,
+        "facing": 1.571
+      },
+      "after": {
+        "mode": "fps",
+        "yaw": 1.971,
+        "pitch": -0.24,
+        "facing": 1.971
+      }
+    },
+    "touchSwipe": {
+      "before": {
+        "mode": "fps",
+        "yaw": 1.571,
+        "pitch": 0.22,
+        "facing": 1.571
+      },
+      "after": {
+        "mode": "fps",
+        "yaw": 1.843,
+        "pitch": -0.028,
+        "facing": 1.843
+      }
+    }
+  },
+  "tpsProbe": {
+    "north": {
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchor": {
+        "anchorId": "chapter-3/anchor-dialogue-03-03-he_wen",
+        "x": 85,
+        "y": 44,
+        "label": "情报互相矛盾 · 指导员何文"
+      },
+      "snapshot": {
+        "chapterId": 3,
+        "sceneId": "chapter-3/scene-zunyi",
+        "x": 84,
+        "y": 40,
+        "facing": -1.571
+      },
+      "performance": {
+        "frames": 433,
+        "renderMs": 2.2,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "town",
+        "landform": "柏辉章公馆与子尹路",
+        "terrainVertices": 1189,
+        "terrainMin": 1,
+        "terrainMax": 1,
+        "orbitYaw": -1.571,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.2,
+        "cameraDistance": 4.2,
+        "cameraOccluded": false,
+        "drawCalls": 72,
+        "triangles": 98384,
+        "cacheEntries": 10
+      },
+      "errors": [],
+      "httpErrors": []
+    },
+    "south": {
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchor": {
+        "anchorId": "chapter-3/anchor-dialogue-03-03-he_wen",
+        "x": 85,
+        "y": 44,
+        "label": "情报互相矛盾 · 指导员何文"
+      },
+      "snapshot": {
+        "chapterId": 3,
+        "sceneId": "chapter-3/scene-zunyi",
+        "x": 86,
+        "y": 48,
+        "facing": -1.571
+      },
+      "performance": {
+        "frames": 428,
+        "renderMs": 3.6,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "town",
+        "landform": "柏辉章公馆与子尹路",
+        "terrainVertices": 1189,
+        "terrainMin": 1,
+        "terrainMax": 1,
+        "orbitYaw": -1.571,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.2,
+        "cameraDistance": 4.2,
+        "cameraOccluded": false,
+        "drawCalls": 80,
+        "triangles": 101760,
+        "cacheEntries": 10
+      },
+      "errors": [],
+      "httpErrors": []
+    },
+    "portrait": {
+      "sceneId": "chapter-3/scene-zunyi",
+      "anchor": {
+        "anchorId": "chapter-3/anchor-dialogue-03-03-he_wen",
+        "x": 85,
+        "y": 44,
+        "label": "情报互相矛盾 · 指导员何文"
+      },
+      "snapshot": {
+        "chapterId": 3,
+        "sceneId": "chapter-3/scene-zunyi",
+        "x": 84,
+        "y": 40,
+        "facing": -1.571
+      },
+      "performance": {
+        "frames": 433,
+        "renderMs": 2.6,
+        "dpr": 1,
+        "adaptive": false,
+        "backend": "three",
+        "cameraMode": "tps",
+        "propsReady": true,
+        "unsupportedProps": [],
+        "environment": "town",
+        "landform": "柏辉章公馆与子尹路",
+        "terrainVertices": 1189,
+        "terrainMin": 1,
+        "terrainMax": 1,
+        "orbitYaw": -1.571,
+        "cameraPitch": 0.22,
+        "cameraBoom": 4.956,
+        "cameraDistance": 4.956,
+        "cameraOccluded": false,
+        "drawCalls": 72,
+        "triangles": 98384,
+        "cacheEntries": 10
+      },
+      "errors": [],
+      "httpErrors": []
+    }
+  },
+  "walkability": {
+    "chapters": 12,
+    "anchors": 294,
+    "zunyiAnchors": 22
+  },
+  "benchmarkMethod": "Edge D3D11 on the same host, four locations per device and mode, 1.4 s per sample. Portrait uses browser touch emulation.",
+  "dialogueScope": "Engine czmarch:interact events verified in the chapter preview."
+}

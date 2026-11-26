@@ -56,8 +56,8 @@ function findEdge() {
 }
 
 (async () => {
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = 'http://127.0.0.1:' + server.address().port;
+  if (!process.env.PROBE_ORIGIN) await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = process.env.PROBE_ORIGIN || 'http://127.0.0.1:' + server.address().port;
   const puppeteer = loadPuppeteer();
   const chapter = Number(process.env.CHAPTER || 3);
   const anchorId = process.env.ANCHOR || 'dialogue-03-03-he_wen';
@@ -66,10 +66,10 @@ function findEdge() {
     Number(process.env.SPAWN_DY ?? -4)
   ];
   const shots = {
-    aerial: { x: 82, y: 55, offset: [27, 48, 35] },
-    street: { x: 72, y: 56, offset: [-22, .58, .8] },
-    courtyard: { x: 85, y: 43, offset: [6.3, 4.7, 6.3] },
-    perimeter: { x: 56, y: 24, offset: [12, 8.5, 13] }
+    aerial: { x: 79, y: 43, offset: [24, 53, 39] },
+    street: { x: 57, y: 43, offset: [-1.6, .65, 12] },
+    courtyard: { x: 85, y: 40, offset: [9, 5, 9] },
+    perimeter: { x: 57, y: 58, offset: [1.5, 2.8, -12] }
   };
   const shot = process.env.SHOT ? shots[process.env.SHOT] : null;
   if (process.env.SHOT && (!shot || chapter !== 3)) throw Error('未知的遵义截图视角');
@@ -100,7 +100,7 @@ function findEdge() {
       /* 实测：站在锚点北侧 4m（桌面与正房之间）必现遮挡收缩；南侧不触发。 */
       const spawn = shot ? { x: shot.x, y: shot.y, facing: 'n' } : anchor ? { x: anchor.x + spawnOffset[0], y: anchor.y + spawnOffset[1], facing: 'n' } : null;
       const staging = W._.visual3d.staging;
-      if (shot) W._.visual3d.staging = scene => ({ ...staging(scene), offset: shot.offset });
+      if (shot) W._.visual3d.staging = scene => ({ ...staging(scene), inspectionOffset: shot.offset });
       try {
         await W.mount(document.getElementById('world'), {
           chapterId: chapter, sceneId: scene.sceneId, spawn, anchors: scene.anchors
@@ -126,7 +126,7 @@ function findEdge() {
     await page.screenshot({ path: out });
     console.log(JSON.stringify({ ...info, screenshot: out, errors, httpErrors }, null, 2));
 
-    if (info.performance?.backend !== 'three') {
+    if (info.performance?.backend !== 'three' && process.env.CANVAS !== '1') {
       console.log('\n[警告] 当前走的是 Canvas 回退而不是 three.js：' + info.performance?.backend +
         '\n       headless 下 WebGL 可能不可用，改用本机调试 Edge（--remote-debugging-port=9222）再跑。');
     }

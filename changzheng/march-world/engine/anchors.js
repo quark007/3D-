@@ -28,6 +28,15 @@
   function create(scene, container) {
     const layer = document.createElement('div');
     layer.className = 'czmw-labels'; container.append(layer);
+    const hud = document.createElement('div');
+    hud.className = 'czmw-tip czmw-fps-tip';
+    hud.hidden = true;
+    hud.setAttribute('role', 'status');
+    hud.setAttribute('aria-hidden', 'true');
+    const hudText = document.createElement('span');
+    const hudAction = document.createElement('b');
+    hud.append(hudText, hudAction);
+    layer.append(hud);
     const anchors = (scene.anchors || []).map(a => {
       const el = document.createElement('div');
       el.className = 'czmw-tip czmw-tip-' + a.kind;
@@ -60,6 +69,16 @@
       }
       return best;
     }
+    let hudAnchor = null, wasFirstPerson = false;
+    const actionText = a => {
+      if (a.actionLabel) return a.actionLabel;
+      if (a.anchorId === 'chapter-3/anchor-indoor-meeting-room') return '按 E 进入二楼会议室';
+      if (navigator.maxTouchPoints > 0 && innerWidth <= 900) return '点「交互」';
+      if (a.kind === 'npc') return 'E 交谈';
+      if (/进入/.test(a.label)) return 'E 进入';
+      return a.kind === 'exit' ? 'E 前往' : 'E 查看';
+    };
+
     return {
       anchors,
       applyState,
@@ -110,16 +129,45 @@
         return out;
       },
       /* 每帧刷新 HTML 标签位置；仅 near 或 常驻exit 显示 */
-      layout(cam, worldH, project) {
+      layout(cam, project, firstPerson, near) {
+        if (firstPerson !== wasFirstPerson) hud.hidden = !firstPerson;
+        const active = firstPerson && near?.enabled ? near : null;
+        if (hudAnchor !== active) {
+          hudAnchor = active;
+          if (active) {
+            hudText.textContent = active.anchorId === 'chapter-3/anchor-indoor-meeting-room' ? '' : active.label;
+            hudAction.textContent = actionText(active);
+          }
+          hud.classList.toggle('is-visible', Boolean(active));
+          hud.setAttribute('aria-hidden', String(!active));
+        }
+        if (firstPerson) {
+          if (!wasFirstPerson) for (const a of anchors) a.el.hidden = true;
+          wasFirstPerson = true;
+          return;
+        }
+        wasFirstPerson = false;
         for (const a of anchors) {
           const show = a.enabled && a.near;
           if(a.el.hidden===show)a.el.hidden = !show;
           if (!show) continue;
-          const pr = project ? project(a.x, a.y, 0) : M.proj.project(cam, a.x, a.y, 0);
-          const icon=a.kind==='npc'?'💬':a.kind==='exit'?'➜':'✦',action=a.near?(navigator.maxTouchPoints>0?'点「交互」':a.kind==='npc'?'E 交谈':a.kind==='exit'?'E 前往':'E 查看'):'';
-          if(a.icon.textContent!==icon)a.icon.textContent=icon;if(a.action.textContent!==action)a.action.textContent=action;
-          const measureKey=cam.viewW+':'+icon+':'+action;if(a.measureKey!==measureKey){a.measureKey=measureKey;a.half=Math.min(cam.viewW/2-8,(a.el.offsetWidth||220)/2);}
-          const half=a.half||110,transform=`translate(${Math.round(Math.max(half+8,Math.min(cam.viewW-half-8,pr.x)))}px,${Math.round(Math.max(80,pr.y-70*cam.zoom/12.5))}px) translate(-50%,-100%)`;
+          const pr = project(a.x, a.y, 0);
+          const icon = a.kind === 'npc' ? '💬' : a.kind === 'exit' ? '➜' : '✦';
+          const action = actionText(a);
+          if (a.icon.textContent !== icon) a.icon.textContent = icon;
+          if (a.action.textContent !== action) a.action.textContent = action;
+          const measureKey = cam.viewW + ':' + action;
+          if (a.measureKey !== measureKey) {
+            a.measureKey = measureKey;
+            a.half = a.el.offsetWidth / 2;
+            a.height = a.el.offsetHeight;
+          }
+          const left = Math.min(a.half + 8, cam.viewW / 2);
+          const bottom = Math.max(0, cam.viewH - 8);
+          const top = Math.min(bottom, Math.max(80, a.height + 8));
+          const x = Math.round(Math.max(left, Math.min(cam.viewW - left, pr.x)));
+          const y = Math.round(Math.max(top, Math.min(bottom, pr.y - 70 * cam.zoom / 12.5)));
+          const transform = `translate(${x}px,${y}px) translate(-50%,-100%)`;
           if(a.transform!==transform){a.el.style.transform=transform;a.transform=transform;}
         }
       },

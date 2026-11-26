@@ -1,6 +1,7 @@
-/* 3D 剧情地图直达入口：?play=3d&chapter=3
+/* 3D 剧情地图直达入口：?play=3d&chapter=1..12&role=commander|logistics|soldier|medic
  * 复用主站<CZMarchEntry / CZMarchStory>完整链路：地图任务点 -> 对话 / 决策 / 小游戏。
  * 只做三件事：预置演示角色、跳过标题屏、启动指定章节的立体剧情场景。
+ * 全 12 章 294 个地面任务点（NPC 对话 / 小游戏 / 工坊 / 史实 / 协作）均已锚点绑定。
  * 不改变任何原有剧情、存档与判定逻辑；不带参数时完全不生效。 */
 (() => {
   'use strict';
@@ -59,7 +60,7 @@
     // 首帧后给出操作说明，随后淡出。
     const tip = document.createElement('aside');
     tip.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:99999;max-width:min(420px,90vw);padding:10px 14px;border-radius:8px;background:#1c2a24e8;color:#f3e6c8;border:1px solid #bca87b80;font:13px/1.6 system-ui,sans-serif';
-    tip.textContent = '走近任务点按 E 交互：与 NPC 交谈、做决策或进入小游戏。WASD 移动，V 切换视角，Esc 打开设置。';
+    tip.textContent = `第 ${chapter} 章 · 走近任务点按 E 交互：与 NPC 交谈、做决策或进入小游戏。WASD 移动，V 切换视角，Esc 打开设置。顶部「玩法目录」可查看本章全部任务点。`;
     document.body.append(tip);
     setTimeout(() => tip.remove(), 12000);
   }

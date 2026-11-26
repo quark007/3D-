@@ -2459,6 +2459,14 @@
       "anchorId": "chapter-9/anchor-main-task",
       "kind": "task",
       "label": "青稞面分配 · 原分粮资料与算法"
+    },
+    {
+      "chapterId": 4,
+      "storyId": "chapter-4/ai-decision",
+      "sceneId": "chapter-4/scene-chishui",
+      "anchorId": "chapter-4/anchor-ai-decision",
+      "kind": "task",
+      "label": "DeepSeek · 行动研判与影像"
     }
   ],
   "scenes": [],

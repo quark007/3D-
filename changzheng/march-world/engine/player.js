@@ -3,8 +3,11 @@
   'use strict';
   const NS = window.CZMarchWorld = window.CZMarchWorld || {};
   const M = NS._ = NS._ || {};
-  const WALK_SPEED = .55, SPEED = .74, RUN_SPEED = 2.55;
-  const RAMP_TIME = .15, TURN_SPEED = 11, REVERSE_SCALE = .75;
+  /* 移动速度（米/秒）：C 慢走 1.5 / 默认慢跑 4 / Shift 冲刺 7。
+     11-22 的三档优化被团队分支的旧 player.js 覆盖，11-26 恢复；
+     后退按默认速度的 0.4 倍（≈1.6m/s），与 verify_player_locomotion.cjs 断言一致。 */
+  const WALK_SPEED = 1.5, SPEED = 4, RUN_SPEED = 7;
+  const RAMP_TIME = .15, TURN_SPEED = 11, REVERSE_SCALE = .4;
   const JUMP_DURATION = .64, LAND_DURATION = .36;
   const JUMP_HEIGHT = .76;
   const RADIUS = 0.62;       /* 碰撞半径 */
